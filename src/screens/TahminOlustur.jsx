@@ -1,0 +1,223 @@
+import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
+
+const CATEGORIES = ['Spor', 'Teknoloji', 'Bilim', 'Kültür', 'Ekonomi', 'Dünya']
+
+export default function TahminOlustur() {
+  const navigate = useNavigate()
+  const [mode, setMode] = useState('Tahmin')
+  const [category, setCategory] = useState('Spor')
+  const [openCondition, setOpenCondition] = useState('event')
+
+  return (
+    <div className="min-h-screen w-full bg-background text-foreground font-body pb-28">
+      <header className="flex items-center gap-3 px-5 pt-12 pb-5">
+        <button
+          aria-label="Geri dön"
+          onClick={() => navigate(-1)}
+          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-theme border border-border bg-card text-foreground shadow-sm"
+        >
+          <iconify-icon icon="lucide:arrow-left" class="text-[20px]"></iconify-icon>
+        </button>
+        <div className="min-w-0">
+          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Yeni kayıt</p>
+          <h1 className="font-heading text-[21px] font-extrabold tracking-tight text-primary">Tahmin oluştur</h1>
+        </div>
+      </header>
+
+      <main className="space-y-7 px-5">
+        <section>
+          <div className="flex rounded-theme bg-secondary p-1">
+            <button
+              onClick={() => setMode('Tahmin')}
+              className={`flex flex-1 items-center justify-center gap-2 rounded-[10px] px-3 py-3 text-sm font-bold ${
+                mode === 'Tahmin' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-secondary-foreground'
+              }`}
+            >
+              <iconify-icon icon="lucide:pen-line" class="text-base"></iconify-icon>
+              Tahmin
+            </button>
+            <button
+              onClick={() => setMode('Zaman kapsülü')}
+              className={`flex flex-1 items-center justify-center gap-2 rounded-[10px] px-3 py-3 text-sm font-bold ${
+                mode === 'Zaman kapsülü' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-secondary-foreground'
+              }`}
+            >
+              <iconify-icon icon="lucide:archive" class="text-base"></iconify-icon>
+              Zaman kapsülü
+            </button>
+          </div>
+          <div className="mt-3 flex gap-3 rounded-theme border border-border bg-card p-3.5">
+            <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-theme bg-secondary text-primary">
+              <iconify-icon icon="lucide:chart-no-axes-combined" class="text-[18px]"></iconify-icon>
+            </div>
+            <p className="text-xs leading-5 text-muted-foreground">
+              Doğrulanan sonuç, <span className="font-semibold text-foreground">{category}</span> kategorisindeki
+              kalıcı başarı istatistiklerine eklenir. Zaman kapsülleri yalnızca sana ait kalır ve istatistikleri
+              etkilemez.
+            </p>
+          </div>
+        </section>
+
+        <section className="space-y-4">
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <label className="text-sm font-bold text-foreground">Görünür başlık</label>
+              <span className="text-[11px] font-medium text-muted-foreground">Zorunlu</span>
+            </div>
+            <input
+              defaultValue="Önümüzdeki derbi tahminimdir"
+              className="w-full rounded-theme border border-border bg-input px-4 py-3 font-heading text-[15px] font-bold leading-5 text-foreground shadow-sm outline-none"
+            />
+            <p className="mt-2 text-[11px] leading-4 text-muted-foreground">
+              Bu başlık mühürlü içerikten önce görünür.
+            </p>
+          </div>
+
+          <div>
+            <div className="mb-2 flex items-center justify-between">
+              <label className="text-sm font-bold text-foreground">Kısa açıklama</label>
+              <span className="text-[11px] font-medium text-muted-foreground">İsteğe bağlı</span>
+            </div>
+            <textarea
+              defaultValue="Bu sezonun formuna güveniyorum."
+              rows={2}
+              className="w-full resize-none rounded-theme border border-border bg-input px-4 py-3 text-sm leading-5 text-foreground shadow-sm outline-none"
+            />
+          </div>
+        </section>
+
+        <section className="rounded-theme border-2 border-primary bg-card p-4 shadow-sm">
+          <div className="flex items-start justify-between gap-4">
+            <div className="flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-theme bg-primary text-primary-foreground">
+                <iconify-icon icon="lucide:lock-keyhole" class="text-base"></iconify-icon>
+              </span>
+              <div>
+                <h2 className="font-heading text-[16px] font-extrabold tracking-tight">Mühürlenecek tahmin</h2>
+                <p className="mt-0.5 text-[11px] text-muted-foreground">Sadece açılış anında görünür</p>
+              </div>
+            </div>
+            <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold text-secondary-foreground">
+              GİZLİ
+            </span>
+          </div>
+          <textarea
+            defaultValue="Fenerbahçe, Galatasaray'ı 3-2 yenecek."
+            rows={2}
+            className="mt-4 w-full resize-none rounded-theme border border-border bg-muted px-4 py-3.5 font-heading text-[16px] font-bold leading-6 text-foreground outline-none"
+          />
+          <div className="mt-3 flex gap-2.5">
+            <iconify-icon icon="lucide:shield-check" class="mt-0.5 shrink-0 text-[17px] text-primary"></iconify-icon>
+            <p className="text-[11px] leading-5 text-muted-foreground">
+              Mühürledikten sonra sen dahil hiç kimse açılış anına kadar göremez veya değiştiremez.
+            </p>
+          </div>
+        </section>
+
+        <section>
+          <div className="mb-3 flex items-center justify-between">
+            <h2 className="font-heading text-[16px] font-extrabold tracking-tight">Kategori</h2>
+            <button className="text-xs font-semibold text-primary">Tümünü gör</button>
+          </div>
+          <div className="flex flex-wrap gap-2">
+            {CATEGORIES.map((cat) => {
+              const isActive = cat === category
+              return (
+                <button
+                  key={cat}
+                  onClick={() => setCategory(cat)}
+                  className={`rounded-full px-4 py-2.5 text-xs font-bold ${
+                    isActive
+                      ? 'bg-primary text-primary-foreground'
+                      : 'border border-border bg-card text-card-foreground'
+                  }`}
+                >
+                  {cat}
+                </button>
+              )
+            })}
+          </div>
+        </section>
+
+        <section>
+          <h2 className="font-heading text-[16px] font-extrabold tracking-tight">Açılış koşulu</h2>
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <button
+              onClick={() => setOpenCondition('date')}
+              className={`rounded-theme px-3 py-3 text-left ${
+                openCondition === 'date' ? 'border-2 border-primary bg-secondary' : 'border border-border bg-card'
+              }`}
+            >
+              <div className={`flex items-center gap-2 ${openCondition === 'date' ? 'text-primary' : 'text-muted-foreground'}`}>
+                <iconify-icon icon="lucide:calendar-days" class="text-[17px]"></iconify-icon>
+                <span className="text-xs font-bold">Tarih seç</span>
+              </div>
+            </button>
+            <button
+              onClick={() => setOpenCondition('event')}
+              className={`rounded-theme px-3 py-3 text-left ${
+                openCondition === 'event' ? 'border-2 border-primary bg-secondary' : 'border border-border bg-card'
+              }`}
+            >
+              <div className={`flex items-center gap-2 ${openCondition === 'event' ? 'text-primary' : 'text-muted-foreground'}`}>
+                <iconify-icon icon="lucide:link-2" class="text-[17px]"></iconify-icon>
+                <span className="text-xs font-bold">Etkinliğe bağla</span>
+              </div>
+            </button>
+          </div>
+
+          {openCondition === 'event' && (
+            <article className="mt-3 rounded-theme border border-border bg-card p-4 shadow-sm">
+              <div className="flex items-start gap-3">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-theme bg-secondary text-primary">
+                  <iconify-icon icon="lucide:trophy" class="text-[19px]"></iconify-icon>
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-heading text-sm font-extrabold leading-5">Galatasaray - Fenerbahçe</p>
+                  <p className="mt-1 text-xs text-muted-foreground">31 Ağustos 2026 · İstanbul</p>
+                </div>
+                <iconify-icon icon="lucide:check-circle-2" class="shrink-0 text-[19px] text-success"></iconify-icon>
+              </div>
+              <div className="mt-3 border-t border-border pt-3">
+                <p className="flex items-start gap-2 text-[11px] leading-5 text-muted-foreground">
+                  <iconify-icon icon="lucide:badge-check" class="mt-0.5 shrink-0 text-[15px] text-primary"></iconify-icon>
+                  Sistem, doğrulanmış resmi sonuç açıklanana kadar bekler.
+                </p>
+              </div>
+            </article>
+          )}
+        </section>
+
+        <section className="flex gap-3 rounded-theme bg-muted p-4">
+          <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-theme bg-card text-accent shadow-sm">
+            <iconify-icon icon="lucide:bot" class="text-[18px]"></iconify-icon>
+          </div>
+          <div>
+            <h2 className="text-sm font-bold text-foreground">Nasıl doğrulanır?</h2>
+            <p className="mt-1 text-xs leading-5 text-muted-foreground">
+              GTF, resmi kaynaklar ve yapay zeka değerlendirmesiyle sonucu doğrular.
+            </p>
+          </div>
+        </section>
+
+        <div className="h-8" />
+      </main>
+
+      <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-border bg-background/95 px-5 pb-5 pt-3 backdrop-blur-md">
+        <div className="mx-auto max-w-[393px]">
+          <button
+            onClick={() => navigate(-1)}
+            className="flex w-full items-center justify-center gap-2 rounded-theme bg-primary px-4 py-4 text-sm font-extrabold text-primary-foreground shadow-sm"
+          >
+            <iconify-icon icon="lucide:lock-keyhole" class="text-[18px]"></iconify-icon>
+            Tahmini mühürle
+          </button>
+          <p className="mt-2 text-center text-[10px] text-muted-foreground">
+            Mühürleme işleminden sonra kayıt değiştirilemez.
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
