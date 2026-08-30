@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { IMG } from '../lib/images.js'
-import { supabase } from '../lib/supabase.js'
+import { supabase, queryWithGroupIdFallback } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import { useUserSettings } from '../hooks/useUserSettings.js'
@@ -117,18 +117,20 @@ function StatsBanner() {
     let cancelled = false
     async function load() {
       const [{ count: sealedCount }, { count: verifiedCount }] = await Promise.all([
-        supabase
-          .from('predictions')
-          .select('*', { count: 'exact', head: true })
-          .eq('is_private', false)
-          .is('group_id', null)
-          .eq('status', 'sealed'),
-        supabase
-          .from('predictions')
-          .select('*', { count: 'exact', head: true })
-          .eq('is_private', false)
-          .is('group_id', null)
-          .in('status', ['verified_correct', 'verified_incorrect']),
+        queryWithGroupIdFallback((filterGroupId) => {
+          let q = supabase.from('predictions').select('*', { count: 'exact', head: true }).eq('is_private', false).eq('status', 'sealed')
+          if (filterGroupId) q = q.is('group_id', null)
+          return q
+        }),
+        queryWithGroupIdFallback((filterGroupId) => {
+          let q = supabase
+            .from('predictions')
+            .select('*', { count: 'exact', head: true })
+            .eq('is_private', false)
+            .in('status', ['verified_correct', 'verified_incorrect'])
+          if (filterGroupId) q = q.is('group_id', null)
+          return q
+        }),
       ])
       if (!cancelled) setStats({ sealed: sealedCount || 0, verified: verifiedCount || 0 })
     }
@@ -328,18 +330,18 @@ function PredictionFeed({ category }) {
     let cancelled = false
     setLoading(true)
     async function load() {
-      let query = supabase
-        .from('predictions')
-        .select('*, profiles:author_id(display_name, username, avatar_url)')
-        .eq('is_private', false)
-        .is('group_id', null)
-        .order('created_at', { ascending: false })
-        .limit(30)
-      if (category !== 'Tümü') {
-        query = query.eq('category', category.toLowerCase())
-      }
       const [{ data, error }, { data: blockedRows }] = await Promise.all([
-        query,
+        queryWithGroupIdFallback((filterGroupId) => {
+          let q = supabase
+            .from('predictions')
+            .select('*, profiles:author_id(display_name, username, avatar_url)')
+            .eq('is_private', false)
+            .order('created_at', { ascending: false })
+            .limit(30)
+          if (filterGroupId) q = q.is('group_id', null)
+          if (category !== 'Tümü') q = q.eq('category', category.toLowerCase())
+          return q
+        }),
         user ? supabase.rpc('blocked_user_ids') : Promise.resolve({ data: [] }),
       ])
       if (cancelled) return

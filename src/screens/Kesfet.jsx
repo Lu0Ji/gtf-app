@@ -1,7 +1,7 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { IMG } from '../lib/images.js'
-import { supabase } from '../lib/supabase.js'
+import { supabase, queryWithGroupIdFallback } from '../lib/supabase.js'
 import { timeAgo } from '../lib/format.js'
 import { CATEGORY_META } from '../lib/categories.js'
 
@@ -22,14 +22,17 @@ function SearchResults({ query, navigate }) {
           .select('id, display_name, username, avatar_url')
           .or(`username.ilike.%${term}%,display_name.ilike.%${term}%`)
           .limit(15),
-        supabase
-          .from('predictions')
-          .select('*, profiles:author_id(display_name, username, avatar_url)')
-          .eq('is_private', false)
-          .is('group_id', null)
-          .ilike('title', `%${term}%`)
-          .order('created_at', { ascending: false })
-          .limit(15),
+        queryWithGroupIdFallback((filterGroupId) => {
+          let q = supabase
+            .from('predictions')
+            .select('*, profiles:author_id(display_name, username, avatar_url)')
+            .eq('is_private', false)
+            .ilike('title', `%${term}%`)
+            .order('created_at', { ascending: false })
+            .limit(15)
+          if (filterGroupId) q = q.is('group_id', null)
+          return q
+        }),
       ])
       if (cancelled) return
       const blockedSet = new Set((blockedRows || []).map((row) => row.blocked_user_ids ?? row))
@@ -148,7 +151,16 @@ export default function Kesfet() {
 
     async function load() {
       const [predictionsRes, profilesRes] = await Promise.all([
-        supabase.from('predictions').select('*, profiles:author_id(display_name, username, avatar_url)').eq('is_private', false).is('group_id', null).order('created_at', { ascending: false }).limit(30),
+        queryWithGroupIdFallback((filterGroupId) => {
+          let q = supabase
+            .from('predictions')
+            .select('*, profiles:author_id(display_name, username, avatar_url)')
+            .eq('is_private', false)
+            .order('created_at', { ascending: false })
+            .limit(30)
+          if (filterGroupId) q = q.is('group_id', null)
+          return q
+        }),
         supabase.from('profiles').select('id, display_name, points, avatar_url').order('points', { ascending: false }).limit(3),
       ])
 
