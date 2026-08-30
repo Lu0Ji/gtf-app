@@ -409,7 +409,7 @@ export default function UygulamaAyarlari() {
     if (reauthError) return { error: 'Mevcut şifre yanlış.' }
     const { error } = await supabase.auth.updateUser({ password: newPassword })
     if (error) return { error: error.message }
-    showToast('Şifren güncellendi.')
+    showToast('Şifren güncellendi.', 'success')
     return {}
   }
 
@@ -475,7 +475,7 @@ export default function UygulamaAyarlari() {
       link.click()
       link.remove()
       URL.revokeObjectURL(url)
-      showToast('Verilerin indirildi.')
+      showToast('Verilerin indirildi.', 'success')
     } catch {
       showToast('İndirme başlatılamadı, tekrar dene.')
     }
@@ -492,7 +492,7 @@ export default function UygulamaAyarlari() {
       }
       toRemove.forEach((key) => localStorage.removeItem(key))
       setCacheBytes(localCacheBytes())
-      showToast('Önbellek temizlendi.')
+      showToast('Önbellek temizlendi.', 'success')
     } catch {
       showToast('Önbellek temizlenemedi.')
     }
