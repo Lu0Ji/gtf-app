@@ -30,8 +30,19 @@ function Header() {
             </p>
           </div>
         </div>
-        <div className="h-10 w-10 overflow-hidden rounded-full border-2 border-card shadow-sm">
-          <img src={profile?.avatar_url || DEFAULT_AVATAR} alt="Profilin" className="h-full w-full object-cover" />
+        <div className="flex items-center gap-2">
+          {profile?.streak_count > 1 && (
+            <span
+              className="flex items-center gap-1 rounded-full bg-accent/10 px-2.5 py-1.5 text-xs font-bold text-accent"
+              title={`${profile.streak_count} gündür üst üste aktifsin`}
+            >
+              <iconify-icon icon="lucide:flame" class="text-sm"></iconify-icon>
+              {profile.streak_count}
+            </span>
+          )}
+          <div className="h-10 w-10 overflow-hidden rounded-full border-2 border-card shadow-sm">
+            <img src={profile?.avatar_url || DEFAULT_AVATAR} alt="Profilin" className="h-full w-full object-cover" />
+          </div>
         </div>
       </div>
     </header>

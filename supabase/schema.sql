@@ -497,3 +497,75 @@ create policy "Predictions respect private accounts, blocks and groups" on publi
       )
     )
   );
+
+-- ENGAGEMENT MECHANICS (5-7 of 7): daily streak, referrals, dispute flags.
+
+-- 5) Daily streak. last_active_date is the last calendar day (UTC) a
+-- session loaded this profile; streak_count is consecutive days including
+-- today. Bumped client-side on every session start — see bumpStreak() in
+-- src/contexts/AuthContext.jsx. Purely motivational, not anti-cheat, so a
+-- client-side update is fine here (unlike the verification mechanic).
+alter table public.profiles add column last_active_date date;
+alter table public.profiles add column streak_count integer not null default 0;
+
+-- 6) Referrals. Invite links pass along a plain username (never a raw id —
+-- see src/screens/Giris.jsx), resolved to a profile id here so the trigger
+-- stays a single lookup. Unknown/empty username just resolves to no
+-- referrer; signup is never blocked by a bad invite code.
+alter table public.profiles add column referred_by uuid references public.profiles(id) on delete set null;
+
+create or replace function public.handle_new_user()
+returns trigger as $$
+declare
+  referrer_id uuid;
+begin
+  select id into referrer_id from public.profiles
+  where username = new.raw_user_meta_data->>'referred_by_username';
+
+  insert into public.profiles (id, username, display_name, referred_by)
+  values (
+    new.id,
+    coalesce(new.raw_user_meta_data->>'username', 'user_' || substr(new.id::text, 1, 8)),
+    coalesce(new.raw_user_meta_data->>'display_name', 'Yeni Kullanıcı'),
+    referrer_id
+  );
+
+  -- +100 to both sides, once, at signup.
+  if referrer_id is not null then
+    update public.profiles set points = points + 100 where id = referrer_id;
+    update public.profiles set points = points + 100 where id = new.id;
+  end if;
+
+  return new;
+end;
+$$ language plpgsql security definer set search_path = public;
+
+-- 7) Disputes: anyone but the author can flag a resolved prediction. No
+-- auto-resolution or moderation queue yet — the count is shown plainly next
+-- to the result (src/screens/TahminKaydi.jsx) so viewers judge for
+-- themselves. This is a reputational signal, not an enforcement mechanism —
+-- see the verification-mechanic plan discussion (Option A, near-term step;
+-- Option B — real independent verification — is separate, larger scope).
+create table public.prediction_disputes (
+  prediction_id uuid not null references public.predictions(id) on delete cascade,
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  created_at timestamptz not null default now(),
+  primary key (prediction_id, user_id)
+);
+
+alter table public.prediction_disputes enable row level security;
+create policy "Disputes are viewable by everyone" on public.prediction_disputes for select using (true);
+create policy "Users can dispute others' resolved predictions" on public.prediction_disputes for insert
+  with check (
+    auth.uid() = user_id
+    and exists (
+      select 1 from public.predictions p
+      where p.id = prediction_id
+        and p.author_id <> auth.uid()
+        and p.status in ('verified_correct', 'verified_incorrect')
+    )
+  );
+create policy "Users can retract their own dispute" on public.prediction_disputes for delete using (auth.uid() = user_id);
+
+grant select on public.prediction_disputes to anon, authenticated;
+grant insert, delete on public.prediction_disputes to authenticated;
