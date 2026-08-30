@@ -4,6 +4,7 @@ import { AuthProvider } from './contexts/AuthContext.jsx'
 import { ToastProvider } from './contexts/ToastContext.jsx'
 import { ThemeProvider } from './contexts/ThemeContext.jsx'
 import { PresenceProvider } from './contexts/PresenceContext.jsx'
+import { UserSettingsProvider } from './contexts/UserSettingsContext.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 import AccentColor from './components/AccentColor.jsx'
 import TabLayout from './layouts/TabLayout.jsx'
@@ -44,39 +45,41 @@ export default function App() {
     <ThemeProvider>
       <ToastProvider>
         <AuthProvider>
-          <PresenceProvider>
-            <AccentColor />
-            <HashRouter>
-              <Suspense fallback={<ScreenFallback />}>
-                <Routes>
-                  <Route path="/giris" element={<Giris />} />
+          <UserSettingsProvider>
+            <PresenceProvider>
+              <AccentColor />
+              <HashRouter>
+                <Suspense fallback={<ScreenFallback />}>
+                  <Routes>
+                    <Route path="/giris" element={<Giris />} />
 
-                  <Route element={<ProtectedRoute />}>
-                    <Route element={<TabLayout />}>
-                      <Route path="/" element={<Anasayfa />} />
-                      <Route path="/gruplar" element={<Gruplar />} />
-                      <Route path="/mesajlar" element={<Mesajlar />} />
-                      <Route path="/kesfet" element={<Kesfet />} />
-                      <Route path="/profil" element={<Profil />} />
+                    <Route element={<ProtectedRoute />}>
+                      <Route element={<TabLayout />}>
+                        <Route path="/" element={<Anasayfa />} />
+                        <Route path="/gruplar" element={<Gruplar />} />
+                        <Route path="/mesajlar" element={<Mesajlar />} />
+                        <Route path="/kesfet" element={<Kesfet />} />
+                        <Route path="/profil" element={<Profil />} />
+                      </Route>
+
+                      <Route path="/tahmin-olustur" element={<TahminOlustur />} />
+                      <Route path="/tahmin-kaydi" element={<TahminKaydi />} />
+                      <Route path="/sohbet" element={<Sohbet />} />
+                      <Route path="/liderlik-tablosu" element={<LiderlikTablosu />} />
+                      <Route path="/rozetler" element={<Rozetler />} />
+                      <Route path="/profil-ayarlari" element={<ProfilAyarlari />} />
+                      <Route path="/uygulama-ayarlari" element={<UygulamaAyarlari />} />
+                      <Route path="/hareketler" element={<Hareketler />} />
+                      <Route path="/kullanici/:userId" element={<KullaniciProfili />} />
+                      <Route path="/grup/:groupId" element={<GrupDetayi />} />
+                      <Route path="/ayarlar/engellenenler" element={<EngellenenHesaplar />} />
+                      <Route path="/ayarlar/takip-istekleri" element={<TakipIstekleri />} />
                     </Route>
-
-                    <Route path="/tahmin-olustur" element={<TahminOlustur />} />
-                    <Route path="/tahmin-kaydi" element={<TahminKaydi />} />
-                    <Route path="/sohbet" element={<Sohbet />} />
-                    <Route path="/liderlik-tablosu" element={<LiderlikTablosu />} />
-                    <Route path="/rozetler" element={<Rozetler />} />
-                    <Route path="/profil-ayarlari" element={<ProfilAyarlari />} />
-                    <Route path="/uygulama-ayarlari" element={<UygulamaAyarlari />} />
-                    <Route path="/hareketler" element={<Hareketler />} />
-                    <Route path="/kullanici/:userId" element={<KullaniciProfili />} />
-                    <Route path="/grup/:groupId" element={<GrupDetayi />} />
-                    <Route path="/ayarlar/engellenenler" element={<EngellenenHesaplar />} />
-                    <Route path="/ayarlar/takip-istekleri" element={<TakipIstekleri />} />
-                  </Route>
-                </Routes>
-              </Suspense>
-            </HashRouter>
-          </PresenceProvider>
+                  </Routes>
+                </Suspense>
+              </HashRouter>
+            </PresenceProvider>
+          </UserSettingsProvider>
         </AuthProvider>
       </ToastProvider>
     </ThemeProvider>
