@@ -144,13 +144,16 @@ export default function Kesfet() {
   const [categoryCounts, setCategoryCounts] = useState([])
   const [topRanked, setTopRanked] = useState([])
   const [recentPredictions, setRecentPredictions] = useState([])
+  const [trending, setTrending] = useState([])
+  const [openingSoon, setOpeningSoon] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
     let cancelled = false
 
     async function load() {
-      const [predictionsRes, profilesRes] = await Promise.all([
+      const in48h = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
+      const [predictionsRes, profilesRes, openingSoonRes] = await Promise.all([
         queryWithGroupIdFallback((filterGroupId) => {
           let q = supabase
             .from('predictions')
@@ -162,6 +165,19 @@ export default function Kesfet() {
           return q
         }),
         supabase.from('profiles').select('id, display_name, points, avatar_url').order('points', { ascending: false }).limit(3),
+        queryWithGroupIdFallback((filterGroupId) => {
+          let q = supabase
+            .from('predictions')
+            .select('id, title, category, event_date')
+            .eq('is_private', false)
+            .eq('status', 'sealed')
+            .gte('event_date', new Date().toISOString())
+            .lte('event_date', in48h)
+            .order('event_date', { ascending: true })
+            .limit(5)
+          if (filterGroupId) q = q.is('group_id', null)
+          return q
+        }),
       ])
 
       if (cancelled) return
@@ -174,9 +190,30 @@ export default function Kesfet() {
         .map(([category, count]) => ({ category, count }))
         .sort((a, b) => b.count - a.count)
 
+      // "Trend": most-liked among recently posted public predictions. No
+      // aggregate query needed — tally the likes for this same batch
+      // client-side, same pattern as the category counts above.
+      const recentIds = (predictionsRes.data || []).map((p) => p.id)
+      const { data: likeRows } =
+        recentIds.length > 0
+          ? await supabase.from('prediction_likes').select('prediction_id').in('prediction_id', recentIds)
+          : { data: [] }
+      if (cancelled) return
+      const likeCounts = new Map()
+      for (const row of likeRows || []) {
+        likeCounts.set(row.prediction_id, (likeCounts.get(row.prediction_id) || 0) + 1)
+      }
+      const trendingList = (predictionsRes.data || [])
+        .map((p) => ({ prediction: p, likeCount: likeCounts.get(p.id) || 0 }))
+        .filter((p) => p.likeCount > 0)
+        .sort((a, b) => b.likeCount - a.likeCount)
+        .slice(0, 5)
+
       setCategoryCounts(countsArr)
       setTopRanked(profilesRes.data || [])
       setRecentPredictions((predictionsRes.data || []).slice(0, 6))
+      setTrending(trendingList)
+      setOpeningSoon(openingSoonRes.data || [])
       setLoading(false)
     }
 
@@ -218,6 +255,71 @@ export default function Kesfet() {
           <p className="px-5 text-xs text-muted-foreground">Yükleniyor…</p>
         ) : (
           <>
+            {openingSoon.length > 0 && (
+              <section className="mb-8">
+                <div className="px-5">
+                  <h2 className="font-heading text-lg font-bold tracking-tight">Yakında açılacaklar</h2>
+                  <p className="mt-0.5 text-xs text-muted-foreground">Önümüzdeki 48 saatte mührü açılacaklar</p>
+                </div>
+                <div className="mt-3 flex gap-3 overflow-x-auto px-5 pb-1">
+                  {openingSoon.map((p) => {
+                    const meta = CATEGORY_META[p.category] || { icon: 'lucide:tag', label: p.category }
+                    const hoursLeft = Math.max(1, Math.round((new Date(p.event_date) - Date.now()) / 3600000))
+                    return (
+                      <div
+                        key={p.id}
+                        className="min-w-[190px] rounded-theme border border-border bg-card p-3.5 shadow-sm"
+                      >
+                        <div className="flex items-center gap-1.5 text-[10px] font-bold text-accent">
+                          <iconify-icon icon="lucide:hourglass" class="text-xs"></iconify-icon>
+                          {hoursLeft < 24 ? `${hoursLeft} saat sonra` : `${Math.round(hoursLeft / 24)} gün sonra`}
+                        </div>
+                        <p className="mt-2 text-sm font-bold leading-5">{p.title}</p>
+                        <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-muted px-2 py-1 text-[10px] font-bold text-primary">
+                          <iconify-icon icon={meta.icon} class="text-xs"></iconify-icon>
+                          {meta.label}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+              </section>
+            )}
+
+            {trending.length > 0 && (
+              <section className="mb-8">
+                <div className="px-5">
+                  <h2 className="flex items-center gap-1.5 font-heading text-lg font-bold tracking-tight">
+                    <iconify-icon icon="lucide:flame" class="text-accent"></iconify-icon>
+                    Trend olanlar
+                  </h2>
+                  <p className="mt-0.5 text-xs text-muted-foreground">Şu an en çok konuşulanlar</p>
+                </div>
+                <div className="mt-3 space-y-2.5 px-5">
+                  {trending.map(({ prediction, likeCount }) => (
+                    <button
+                      key={prediction.id}
+                      onClick={() => navigate('/tahmin-kaydi', { state: { prediction } })}
+                      className="flex w-full items-center gap-3 rounded-theme border border-border bg-card p-3.5 text-left shadow-sm"
+                    >
+                      <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full">
+                        <img
+                          src={prediction.profiles?.avatar_url || DEFAULT_AVATAR}
+                          alt={prediction.profiles?.display_name}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                      <p className="min-w-0 flex-1 truncate text-sm font-bold">{prediction.title}</p>
+                      <span className="flex shrink-0 items-center gap-1 text-xs font-bold text-destructive">
+                        <iconify-icon icon="lucide:heart" class="text-sm"></iconify-icon>
+                        {likeCount}
+                      </span>
+                    </button>
+                  ))}
+                </div>
+              </section>
+            )}
+
             <section className="mb-8">
               <div className="flex items-center justify-between px-5">
                 <div>
