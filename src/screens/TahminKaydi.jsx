@@ -47,6 +47,9 @@ export default function TahminKaydi() {
   const [comments, setComments] = useState([])
   const [commentDraft, setCommentDraft] = useState('')
   const [postingComment, setPostingComment] = useState(false)
+  const [disputeCount, setDisputeCount] = useState(0)
+  const [hasDisputed, setHasDisputed] = useState(false)
+  const [disputing, setDisputing] = useState(false)
 
   useEffect(() => {
     if (!record) {
@@ -59,7 +62,7 @@ export default function TahminKaydi() {
     let cancelled = false
 
     async function loadSocial() {
-      const [{ data: likes }, { data: comments }, saveRes] = await Promise.all([
+      const [{ data: likes }, { data: comments }, saveRes, disputesRes] = await Promise.all([
         supabase.from('prediction_likes').select('user_id').eq('prediction_id', record.id),
         supabase
           .from('prediction_comments')
@@ -73,12 +76,19 @@ export default function TahminKaydi() {
               .eq('user_id', user.id)
               .eq('prediction_id', record.id)
           : Promise.resolve({ count: 0 }),
+        // prediction_disputes may not exist yet (see supabase/schema.sql —
+        // it's the newest migration section); undefined_table (42P01) just
+        // means the dispute feature quietly shows as 0/hidden until it's run.
+        supabase.from('prediction_disputes').select('user_id').eq('prediction_id', record.id),
       ])
       if (cancelled) return
       setLikeCount((likes || []).length)
       setLiked(user ? (likes || []).some((l) => l.user_id === user.id) : false)
       setComments(comments || [])
       setSaved((saveRes.count || 0) > 0)
+      const disputeRows = disputesRes.error ? [] : disputesRes.data || []
+      setDisputeCount(disputeRows.length)
+      setHasDisputed(user ? disputeRows.some((d) => d.user_id === user.id) : false)
     }
 
     loadSocial()
@@ -137,6 +147,25 @@ export default function TahminKaydi() {
       showToast('Sonuç işaretlenemedi, tekrar dene.')
     }
     setVerifying(false)
+  }
+
+  async function handleDispute() {
+    if (!user || disputing) return
+    setDisputing(true)
+    const nextDisputed = !hasDisputed
+    setHasDisputed(nextDisputed)
+    setDisputeCount((c) => c + (nextDisputed ? 1 : -1))
+    const { error } = nextDisputed
+      ? await supabase.from('prediction_disputes').insert({ user_id: user.id, prediction_id: record.id })
+      : await supabase.from('prediction_disputes').delete().eq('user_id', user.id).eq('prediction_id', record.id)
+    if (error) {
+      setHasDisputed(!nextDisputed)
+      setDisputeCount((c) => c + (nextDisputed ? -1 : 1))
+      showToast(
+        error.code === '42P01' ? 'İtiraz özelliği henüz etkin değil.' : 'İtiraz kaydedilemedi, tekrar dene.'
+      )
+    }
+    setDisputing(false)
   }
 
   async function handleToggleLike() {
@@ -294,6 +323,25 @@ export default function TahminKaydi() {
                 &ldquo;{record.sealed_content}&rdquo;
               </p>
             </div>
+            {!isOwner && user && (
+              <div className="flex items-center justify-between border-t border-border px-5 py-3">
+                <p className="text-[11px] text-muted-foreground">
+                  {disputeCount > 0
+                    ? `${disputeCount} kişi bu sonuca itiraz etti`
+                    : 'Bu sonuç beyana dayalı — şüpheliysen itiraz et'}
+                </p>
+                <button
+                  onClick={handleDispute}
+                  disabled={disputing}
+                  className={`flex shrink-0 items-center gap-1.5 rounded-theme px-3 py-1.5 text-[11px] font-bold disabled:opacity-60 ${
+                    hasDisputed ? 'bg-destructive text-destructive-foreground' : 'bg-muted text-muted-foreground'
+                  }`}
+                >
+                  <iconify-icon icon="lucide:flag" class="text-xs"></iconify-icon>
+                  {hasDisputed ? 'İtirazını geri çek' : 'İtiraz et'}
+                </button>
+              </div>
+            )}
           </section>
         ) : (
           <section className="mx-5 mt-5 overflow-hidden rounded-theme bg-primary text-primary-foreground shadow-sm">
