@@ -464,3 +464,36 @@ create policy "Users can comment" on public.prediction_comments for insert
     auth.uid() = author_id
     and not public.is_blocked((select author_id from public.predictions where id = prediction_id))
   );
+
+-- GROUP-SCOPED PREDICTIONS: a "Tahmin" created from inside a group (Grup
+-- Detayı > Tahmin oluştur) is tagged with that group so members see it in
+-- the group's own feed instead of (or in addition to) the public one.
+-- Null = unchanged existing behavior (personal/public prediction, or a
+-- private time-capsule — the client never sets group_id on those, so a
+-- capsule's "stays only mine" guarantee is untouched by the policy below).
+alter table public.predictions add column group_id uuid references public.groups(id) on delete cascade;
+create index predictions_group_id_idx on public.predictions (group_id, created_at);
+
+drop policy "Predictions respect private accounts and blocks" on public.predictions;
+create policy "Predictions respect private accounts, blocks and groups" on public.predictions
+  for select using (
+    (
+      (is_private = false or auth.uid() = author_id)
+      and (
+        auth.uid() = author_id
+        or not exists (select 1 from public.profiles pr where pr.id = predictions.author_id and pr.is_private = true)
+        or exists (
+          select 1 from public.follows f
+          where f.follower_id = auth.uid() and f.following_id = predictions.author_id and f.status = 'accepted'
+        )
+      )
+      and not public.is_blocked(predictions.author_id)
+    )
+    or (
+      predictions.group_id is not null
+      and exists (
+        select 1 from public.group_members gm
+        where gm.group_id = predictions.group_id and gm.user_id = auth.uid()
+      )
+    )
+  );

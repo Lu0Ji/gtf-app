@@ -120,11 +120,13 @@ function StatsBanner() {
           .from('predictions')
           .select('*', { count: 'exact', head: true })
           .eq('is_private', false)
+          .is('group_id', null)
           .eq('status', 'sealed'),
         supabase
           .from('predictions')
           .select('*', { count: 'exact', head: true })
           .eq('is_private', false)
+          .is('group_id', null)
           .in('status', ['verified_correct', 'verified_incorrect']),
       ])
       if (!cancelled) setStats({ sealed: sealedCount || 0, verified: verifiedCount || 0 })
@@ -329,6 +331,7 @@ function PredictionFeed({ category }) {
         .from('predictions')
         .select('*, profiles:author_id(display_name, username, avatar_url)')
         .eq('is_private', false)
+        .is('group_id', null)
         .order('created_at', { ascending: false })
         .limit(30)
       if (category !== 'Tümü') {

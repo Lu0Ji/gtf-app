@@ -4,9 +4,52 @@ import { IMG } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
-import { formatDateLong } from '../lib/format.js'
+import { formatDateLong, timeAgo } from '../lib/format.js'
 
 const DEFAULT_AVATAR = IMG('fc4eb4df-87ce-4cd9-bdd3-80a434cd8ddd')
+
+function GroupPredictionCard({ prediction, onOpen }) {
+  const author = prediction.profiles
+  const isVerified = prediction.status === 'verified_correct' || prediction.status === 'verified_incorrect'
+  const isCorrect = prediction.status === 'verified_correct'
+
+  return (
+    <button
+      onClick={onOpen}
+      className="flex w-full flex-col gap-2.5 rounded-theme border border-border bg-card p-3.5 text-left shadow-sm"
+    >
+      <div className="flex items-center gap-2">
+        <div className="h-7 w-7 shrink-0 overflow-hidden rounded-full">
+          <img src={author?.avatar_url || DEFAULT_AVATAR} alt={author?.display_name} className="h-full w-full object-cover" />
+        </div>
+        <p className="min-w-0 flex-1 truncate text-xs font-semibold text-muted-foreground">
+          {author?.display_name || 'Kullanıcı'} · {timeAgo(prediction.created_at)}
+        </p>
+      </div>
+      <p className="text-sm font-bold leading-5">{prediction.title}</p>
+      {isVerified ? (
+        <div
+          className={`flex items-center justify-between rounded-theme px-3 py-2 text-[11px] font-bold ${
+            isCorrect ? 'bg-success text-success-foreground' : 'bg-destructive text-destructive-foreground'
+          }`}
+        >
+          <span className="flex items-center gap-1.5">
+            <iconify-icon icon={isCorrect ? 'lucide:badge-check' : 'lucide:x-circle'} class="text-sm"></iconify-icon>
+            {isCorrect ? 'Doğrulandı' : 'Gerçekleşmedi'}
+          </span>
+          <span>{formatDateLong(prediction.verified_at)}</span>
+        </div>
+      ) : (
+        <div className="flex items-center justify-between rounded-theme bg-muted px-3 py-2 text-[11px] font-semibold text-muted-foreground">
+          <span className="rounded-full bg-card px-2 py-0.5 text-[10px] font-bold text-primary">
+            {prediction.category?.toUpperCase()}
+          </span>
+          <span>{formatDateLong(prediction.event_date)}'da açılacak</span>
+        </div>
+      )}
+    </button>
+  )
+}
 
 export default function GrupDetayi() {
   const { groupId } = useParams()
@@ -15,20 +58,27 @@ export default function GrupDetayi() {
   const { showToast } = useToast()
   const [group, setGroup] = useState(null)
   const [members, setMembers] = useState([])
+  const [predictions, setPredictions] = useState([])
   const [loading, setLoading] = useState(true)
   const [membershipBusy, setMembershipBusy] = useState(false)
 
   async function load() {
-    const [groupRes, membersRes] = await Promise.all([
+    const [groupRes, membersRes, predictionsRes] = await Promise.all([
       supabase.from('groups').select('*').eq('id', groupId).single(),
       supabase
         .from('group_members')
         .select('user_id, role, joined_at, profiles:user_id(id, display_name, username, avatar_url)')
         .eq('group_id', groupId)
         .order('joined_at', { ascending: true }),
+      supabase
+        .from('predictions')
+        .select('*, profiles:author_id(display_name, username, avatar_url)')
+        .eq('group_id', groupId)
+        .order('created_at', { ascending: false }),
     ])
     setGroup(groupRes.data || null)
     setMembers((membersRes.data || []).filter((m) => m.profiles))
+    setPredictions(predictionsRes.data || [])
     setLoading(false)
   }
 
@@ -119,6 +169,38 @@ export default function GrupDetayi() {
         {group.description && (
           <p className="mt-4 text-sm leading-6 text-foreground">{group.description}</p>
         )}
+
+        <section className="mt-7">
+          <div className="flex items-center justify-between">
+            <h2 className="font-heading text-base font-bold tracking-tight">Tahminler ({predictions.length})</h2>
+            {isMember && (
+              <button
+                onClick={() => navigate('/tahmin-olustur', { state: { groupId: group.id, groupName: group.name } })}
+                className="flex items-center gap-1.5 rounded-theme bg-primary px-3 py-2 text-[11px] font-bold text-primary-foreground"
+              >
+                <iconify-icon icon="lucide:plus" class="text-sm"></iconify-icon>
+                Tahmin oluştur
+              </button>
+            )}
+          </div>
+          {predictions.length === 0 ? (
+            <p className="mt-3 text-xs text-muted-foreground">
+              {isMember
+                ? 'Henüz bir tahmin veya zaman kapsülü yok. İlkini sen oluştur.'
+                : 'Tahminleri görmek ve oluşturmak için gruba katıl.'}
+            </p>
+          ) : (
+            <div className="mt-3 space-y-2.5">
+              {predictions.map((prediction) => (
+                <GroupPredictionCard
+                  key={prediction.id}
+                  prediction={prediction}
+                  onOpen={() => navigate('/tahmin-kaydi', { state: { prediction } })}
+                />
+              ))}
+            </div>
+          )}
+        </section>
 
         <section className="mt-7">
           <h2 className="font-heading text-base font-bold tracking-tight">Üyeler ({members.length})</h2>

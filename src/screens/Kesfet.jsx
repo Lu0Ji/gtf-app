@@ -25,6 +25,7 @@ function SearchResults({ query, navigate }) {
           .from('predictions')
           .select('*, profiles:author_id(display_name, username, avatar_url)')
           .eq('is_private', false)
+          .is('group_id', null)
           .ilike('title', `%${term}%`)
           .order('created_at', { ascending: false })
           .limit(15),
@@ -156,7 +157,7 @@ export default function Kesfet() {
 
     async function load() {
       const [predictionsRes, profilesRes] = await Promise.all([
-        supabase.from('predictions').select('*, profiles:author_id(display_name, username, avatar_url)').eq('is_private', false).order('created_at', { ascending: false }).limit(30),
+        supabase.from('predictions').select('*, profiles:author_id(display_name, username, avatar_url)').eq('is_private', false).is('group_id', null).order('created_at', { ascending: false }).limit(30),
         supabase.from('profiles').select('id, display_name, points, avatar_url').order('points', { ascending: false }).limit(3),
       ])
 

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 
@@ -7,7 +7,14 @@ const CATEGORIES = ['Spor', 'Teknoloji', 'Bilim', 'Kültür', 'Ekonomi', 'Dünya
 
 export default function TahminOlustur() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { user } = useAuth()
+  // Present when launched from Grup Detayı's "Tahmin oluştur" — tags the
+  // prediction to that group so it lands in the group's own feed instead of
+  // the public one. Only applies to "Tahmin" mode: a Zaman kapsülü stays a
+  // private personal record regardless of where it was created from.
+  const groupId = location.state?.groupId || null
+  const groupName = location.state?.groupName || ''
   const [mode, setMode] = useState('Tahmin')
   const [category, setCategory] = useState('Spor')
   const [title, setTitle] = useState('')
@@ -23,18 +30,20 @@ export default function TahminOlustur() {
     setSubmitting(true)
     setError('')
     try {
+      const isCapsule = mode === 'Zaman kapsülü'
       const { error: insertError } = await supabase.from('predictions').insert({
         author_id: user.id,
         category: category.toLowerCase(),
         title: title.trim(),
         sealed_content: sealedContent.trim(),
         status: 'sealed',
-        is_private: mode === 'Zaman kapsülü',
+        is_private: isCapsule,
+        group_id: !isCapsule ? groupId : null,
         event_date: new Date(eventDate).toISOString(),
         sealed_at: new Date().toISOString(),
       })
       if (insertError) throw insertError
-      navigate('/', { replace: true })
+      navigate(groupId ? `/grup/${groupId}` : '/', { replace: true })
     } catch (err) {
       setError(err.message || 'Tahmin kaydedilemedi, tekrar deneyin.')
     } finally {
@@ -53,41 +62,60 @@ export default function TahminOlustur() {
           <iconify-icon icon="lucide:arrow-left" class="text-[20px]"></iconify-icon>
         </button>
         <div className="min-w-0">
-          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">Yeni kayıt</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+            {groupId ? groupName || 'Grup kaydı' : 'Yeni kayıt'}
+          </p>
           <h1 className="font-heading text-[21px] font-extrabold tracking-tight text-primary">Tahmin oluştur</h1>
         </div>
       </header>
 
       <main className="space-y-7 px-5">
         <section>
-          <div className="flex rounded-theme bg-secondary p-1">
-            <button
-              onClick={() => setMode('Tahmin')}
-              className={`flex flex-1 items-center justify-center gap-2 rounded-[10px] px-3 py-3 text-sm font-bold ${
-                mode === 'Tahmin' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-secondary-foreground'
-              }`}
-            >
+          {groupId ? (
+            <div className="flex items-center justify-center gap-2 rounded-theme bg-primary px-3 py-3 text-sm font-bold text-primary-foreground shadow-sm">
               <iconify-icon icon="lucide:pen-line" class="text-base"></iconify-icon>
               Tahmin
-            </button>
-            <button
-              onClick={() => setMode('Zaman kapsülü')}
-              className={`flex flex-1 items-center justify-center gap-2 rounded-[10px] px-3 py-3 text-sm font-bold ${
-                mode === 'Zaman kapsülü' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-secondary-foreground'
-              }`}
-            >
-              <iconify-icon icon="lucide:archive" class="text-base"></iconify-icon>
-              Zaman kapsülü
-            </button>
-          </div>
+            </div>
+          ) : (
+            <div className="flex rounded-theme bg-secondary p-1">
+              <button
+                onClick={() => setMode('Tahmin')}
+                className={`flex flex-1 items-center justify-center gap-2 rounded-[10px] px-3 py-3 text-sm font-bold ${
+                  mode === 'Tahmin' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-secondary-foreground'
+                }`}
+              >
+                <iconify-icon icon="lucide:pen-line" class="text-base"></iconify-icon>
+                Tahmin
+              </button>
+              <button
+                onClick={() => setMode('Zaman kapsülü')}
+                className={`flex flex-1 items-center justify-center gap-2 rounded-[10px] px-3 py-3 text-sm font-bold ${
+                  mode === 'Zaman kapsülü' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-secondary-foreground'
+                }`}
+              >
+                <iconify-icon icon="lucide:archive" class="text-base"></iconify-icon>
+                Zaman kapsülü
+              </button>
+            </div>
+          )}
           <div className="mt-3 flex gap-3 rounded-theme border border-border bg-card p-3.5">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-theme bg-secondary text-primary">
               <iconify-icon icon="lucide:chart-no-axes-combined" class="text-[18px]"></iconify-icon>
             </div>
             <p className="text-xs leading-5 text-muted-foreground">
-              Doğrulanan sonuç, <span className="font-semibold text-foreground">{category}</span> kategorisindeki
-              kalıcı başarı istatistiklerine eklenir. Zaman kapsülleri yalnızca sana ait kalır ve istatistikleri
-              etkilemez.
+              {groupId ? (
+                <>
+                  Bu tahmin yalnızca <span className="font-semibold text-foreground">{groupName || 'grup'}</span>{' '}
+                  üyelerine görünür, herkese açık akışta yer almaz. Zaman kapsülü şu an yalnızca kişisel akıştan
+                  oluşturulabiliyor.
+                </>
+              ) : (
+                <>
+                  Doğrulanan sonuç, <span className="font-semibold text-foreground">{category}</span> kategorisindeki
+                  kalıcı başarı istatistiklerine eklenir. Zaman kapsülleri yalnızca sana ait kalır ve istatistikleri
+                  etkilemez.
+                </>
+              )}
             </p>
           </div>
         </section>
