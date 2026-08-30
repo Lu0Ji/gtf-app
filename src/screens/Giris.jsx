@@ -1,15 +1,21 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext.jsx'
 
 export default function Giris() {
   const navigate = useNavigate()
+  const location = useLocation()
   const { signIn, signUp } = useAuth()
   const [mode, setMode] = useState('signin') // 'signin' | 'signup'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [username, setUsername] = useState('')
   const [displayName, setDisplayName] = useState('')
+  // Prefilled from an invite link's ?ref=<username>, but still a plain
+  // editable field — someone can also type a friend's username by hand.
+  const [referredByUsername, setReferredByUsername] = useState(
+    () => new URLSearchParams(location.search).get('ref') || ''
+  )
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [signupDone, setSignupDone] = useState(false)
@@ -23,7 +29,7 @@ export default function Giris() {
         await signIn({ email, password })
         navigate('/', { replace: true })
       } else {
-        const result = await signUp({ email, password, username, displayName })
+        const result = await signUp({ email, password, username, displayName, referredByUsername })
         if (result.session) {
           // Email confirmation is disabled on the backend — we're already logged in.
           navigate('/', { replace: true })
@@ -120,6 +126,18 @@ export default function Giris() {
                   placeholder="elifdemir"
                   className="w-full rounded-theme border border-border bg-input px-4 py-3 text-sm text-foreground shadow-sm outline-none"
                 />
+              </div>
+              <div>
+                <label className="mb-2 block text-sm font-bold text-foreground">Davet kodu (opsiyonel)</label>
+                <input
+                  value={referredByUsername}
+                  onChange={(e) => setReferredByUsername(e.target.value.replace(/\s+/g, '').toLowerCase())}
+                  placeholder="arkadaşının kullanıcı adı"
+                  className="w-full rounded-theme border border-border bg-input px-4 py-3 text-sm text-foreground shadow-sm outline-none"
+                />
+                <p className="mt-2 text-[11px] leading-4 text-muted-foreground">
+                  Doğru bir kullanıcı adıysa ikiniz de 100 puan kazanırsınız.
+                </p>
               </div>
             </>
           )}

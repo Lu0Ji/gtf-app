@@ -359,6 +359,19 @@ export default function UygulamaAyarlari() {
   const [pendingCount, setPendingCount] = useState(0)
   const [exporting, setExporting] = useState(false)
   const [cacheBytes, setCacheBytes] = useState(0)
+  const [inviteCopied, setInviteCopied] = useState(false)
+
+  async function handleCopyInvite() {
+    const message = `GTF'e katıl, ikimiz de 100 puan kazanalım! Davet kodum: @${profile?.username}`
+    try {
+      await navigator.clipboard.writeText(message)
+      setInviteCopied(true)
+      showToast('Davet mesajı kopyalandı, dilediğin yere yapıştır.', 'success')
+      setTimeout(() => setInviteCopied(false), 2000)
+    } catch {
+      showToast('Kopyalanamadı, tekrar dene.')
+    }
+  }
 
   useEffect(() => {
     setCacheBytes(localCacheBytes())
@@ -517,7 +530,26 @@ export default function UygulamaAyarlari() {
       </header>
 
       <main className="px-5 pb-8 pt-6">
-        <section>
+        <section className="rounded-theme border-2 border-accent bg-accent/10 p-4 shadow-sm">
+          <div className="flex items-center gap-2">
+            <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-theme bg-accent text-accent-foreground">
+              <iconify-icon icon="lucide:gift" class="text-base"></iconify-icon>
+            </span>
+            <div>
+              <h2 className="text-sm font-bold text-foreground">Arkadaşını davet et</h2>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">Katıldığında ikiniz de 100 puan kazanır.</p>
+            </div>
+          </div>
+          <button
+            onClick={handleCopyInvite}
+            className="mt-3 flex w-full items-center justify-center gap-2 rounded-theme bg-accent py-2.5 text-xs font-bold text-accent-foreground"
+          >
+            <iconify-icon icon={inviteCopied ? 'lucide:check' : 'lucide:copy'} class="text-sm"></iconify-icon>
+            {inviteCopied ? 'Kopyalandı' : 'Davet kodunu kopyala'}
+          </button>
+        </section>
+
+        <section className="mt-8">
           <SectionHeader icon="lucide:shield-check" title="Hesap ve güvenlik" subtitle="Giriş bilgilerin ve hesabının güvenliği" />
           <RowList rows={accountRows} />
         </section>
