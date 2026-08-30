@@ -209,12 +209,13 @@ export default function TahminOlustur() {
 
         <section className="flex gap-3 rounded-theme bg-muted p-4">
           <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-theme bg-card text-accent shadow-sm">
-            <iconify-icon icon="lucide:bot" class="text-[18px]"></iconify-icon>
+            <iconify-icon icon="lucide:handshake" class="text-[18px]"></iconify-icon>
           </div>
           <div>
             <h2 className="text-sm font-bold text-foreground">Nasıl doğrulanır?</h2>
             <p className="mt-1 text-xs leading-5 text-muted-foreground">
-              GTF, resmi kaynaklar ve yapay zeka değerlendirmesiyle sonucu doğrular.
+              Sonucu, açılış anında yalnızca sen işaretlersin — şu an bağımsız bir doğrulama yok, bu beyana
+              dayalı bir onur sistemidir.
             </p>
           </div>
         </section>

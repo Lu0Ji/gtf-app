@@ -7,6 +7,13 @@ import { useToast } from '../contexts/ToastContext.jsx'
 import { formatDateLong } from '../lib/format.js'
 
 const CORRECT_POINTS_REWARD = 50
+// Marking a sealed prediction is self-reported (honor system — there's no
+// independent check yet), so a $0 reward for "incorrect" made honesty
+// strictly worse than always claiming "correct": there was nothing to lose
+// by lying and nothing to gain by admitting a miss. This doesn't stop
+// dishonesty (only a dispute/verification system can), but it stops
+// punishing the honest close.
+const HONEST_CLOSE_REWARD = 5
 
 const DEFAULT_AVATAR = IMG('a4692a40-aad2-478a-927f-ac284145b46f')
 
@@ -113,10 +120,11 @@ export default function TahminKaydi() {
       .eq('id', record.id)
 
     if (!error) {
-      if (result === 'correct' && profile) {
+      if (profile) {
+        const reward = result === 'correct' ? CORRECT_POINTS_REWARD : HONEST_CLOSE_REWARD
         const { error: pointsError } = await supabase
           .from('profiles')
-          .update({ points: profile.points + CORRECT_POINTS_REWARD })
+          .update({ points: profile.points + reward })
           .eq('id', user.id)
         if (pointsError) {
           showToast('Sonuç kaydedildi ama puan eklenemedi.')
@@ -352,7 +360,8 @@ export default function TahminKaydi() {
                     </button>
                   </div>
                   <p className="mt-2 text-[10px] text-white/60">
-                    Doğru işaretlersen +{CORRECT_POINTS_REWARD} puan kazanırsın.
+                    Doğru çıktıysa +{CORRECT_POINTS_REWARD}, yanlış çıktıysa dürüstçe kapattığın için +
+                    {HONEST_CLOSE_REWARD} puan kazanırsın.
                   </p>
                 </div>
               )}
