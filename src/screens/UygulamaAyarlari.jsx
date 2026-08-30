@@ -62,7 +62,7 @@ function buildAccountRows(email, onChangePassword) {
   ]
 }
 
-const LEGAL_URL = 'https://claude.ai/code/artifact/b4b1ae8f-56a5-4ae4-83e4-cb330baf5022'
+const LEGAL_URL = 'https://lu0ji.github.io/gtf-app/legal.html'
 
 const SUPPORT_ROWS = [
   { icon: 'lucide:help-circle', title: 'Yardım merkezi', subtitle: 'Henüz kullanılamıyor' },
