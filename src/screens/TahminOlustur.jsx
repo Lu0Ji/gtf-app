@@ -30,19 +30,38 @@ export default function TahminOlustur() {
     setError('')
     try {
       const isCapsule = mode === 'Zaman kapsülü'
-      const { error: insertError } = await supabase.from('predictions').insert({
+      const targetGroupId = !isCapsule ? groupId : null
+      const basePayload = {
         author_id: user.id,
         category: category.toLowerCase(),
         title: title.trim(),
         sealed_content: sealedContent.trim(),
         status: 'sealed',
         is_private: isCapsule,
-        group_id: !isCapsule ? groupId : null,
         event_date: new Date(eventDate).toISOString(),
         sealed_at: new Date().toISOString(),
-      })
+      }
+      // Only add group_id to the payload when actually needed — PostgREST
+      // rejects the whole insert (PGRST204) if a key isn't a real column,
+      // and that column only exists once the group-predictions migration
+      // (see supabase/schema.sql) has run. Omitting the key entirely covers
+      // every ordinary (non-group) prediction regardless of migration
+      // status; only a genuine group-scoped seal needs the fallback retry.
+      let { error: insertError } = targetGroupId
+        ? await supabase.from('predictions').insert({ ...basePayload, group_id: targetGroupId })
+        : await supabase.from('predictions').insert(basePayload)
+
+      if (insertError?.code === 'PGRST204' && targetGroupId) {
+        // Group predictions aren't live yet on this database — fall back to
+        // an ordinary personal seal rather than losing the user's work.
+        ;({ error: insertError } = await supabase.from('predictions').insert(basePayload))
+        if (!insertError) {
+          navigate('/', { replace: true })
+          return
+        }
+      }
       if (insertError) throw insertError
-      navigate(groupId ? `/grup/${groupId}` : '/', { replace: true })
+      navigate(targetGroupId ? `/grup/${targetGroupId}` : '/', { replace: true })
     } catch (err) {
       setError(err.message || 'Tahmin kaydedilemedi, tekrar deneyin.')
     } finally {

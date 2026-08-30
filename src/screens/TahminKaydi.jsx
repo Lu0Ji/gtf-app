@@ -77,8 +77,9 @@ export default function TahminKaydi() {
               .eq('prediction_id', record.id)
           : Promise.resolve({ count: 0 }),
         // prediction_disputes may not exist yet (see supabase/schema.sql —
-        // it's the newest migration section); undefined_table (42P01) just
-        // means the dispute feature quietly shows as 0/hidden until it's run.
+        // it's the newest migration section); PostgREST's "table not found"
+        // (PGRST205) just means the dispute feature quietly shows as
+        // 0/hidden until the migration is run.
         supabase.from('prediction_disputes').select('user_id').eq('prediction_id', record.id),
       ])
       if (cancelled) return
@@ -162,7 +163,9 @@ export default function TahminKaydi() {
       setHasDisputed(!nextDisputed)
       setDisputeCount((c) => c + (nextDisputed ? -1 : 1))
       showToast(
-        error.code === '42P01' ? 'İtiraz özelliği henüz etkin değil.' : 'İtiraz kaydedilemedi, tekrar dene.'
+        error.code === 'PGRST205' || error.code === '42P01'
+          ? 'İtiraz özelliği henüz etkin değil.'
+          : 'İtiraz kaydedilemedi, tekrar dene.'
       )
     }
     setDisputing(false)
