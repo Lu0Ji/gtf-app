@@ -118,6 +118,7 @@ export default function Profil() {
   const [savedPredictions, setSavedPredictions] = useState([])
   const [followerCount, setFollowerCount] = useState(null)
   const [followingCount, setFollowingCount] = useState(null)
+  const [newFollowerCount, setNewFollowerCount] = useState(0)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -125,7 +126,8 @@ export default function Profil() {
     let cancelled = false
 
     async function load() {
-      const [predictionsRes, followersRes, followingRes, savesRes] = await Promise.all([
+      const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+      const [predictionsRes, followersRes, followingRes, savesRes, newFollowersRes] = await Promise.all([
         supabase.from('predictions').select('*').eq('author_id', user.id).order('created_at', { ascending: false }),
         supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', user.id).eq('status', 'accepted'),
         supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', user.id).eq('status', 'accepted'),
@@ -134,12 +136,19 @@ export default function Profil() {
           .select('created_at, predictions(*, profiles:author_id(display_name, username, avatar_url))')
           .eq('user_id', user.id)
           .order('created_at', { ascending: false }),
+        supabase
+          .from('follows')
+          .select('*', { count: 'exact', head: true })
+          .eq('following_id', user.id)
+          .eq('status', 'accepted')
+          .gte('created_at', weekAgo),
       ])
       if (cancelled) return
       setPredictions(predictionsRes.data || [])
       setFollowerCount(followersRes.count ?? 0)
       setFollowingCount(followingRes.count ?? 0)
       setSavedPredictions((savesRes.data || []).map((s) => s.predictions).filter(Boolean))
+      setNewFollowerCount(newFollowersRes.count ?? 0)
       setLoading(false)
     }
 
@@ -148,6 +157,13 @@ export default function Profil() {
       cancelled = true
     }
   }, [user])
+
+  const weekAgoMs = Date.now() - 7 * 24 * 60 * 60 * 1000
+  const sealedThisWeek = predictions.filter((p) => p.sealed_at && new Date(p.sealed_at).getTime() >= weekAgoMs).length
+  const verifiedThisWeek = predictions.filter(
+    (p) => p.verified_at && new Date(p.verified_at).getTime() >= weekAgoMs
+  ).length
+  const hasWeeklyActivity = sealedThisWeek > 0 || verifiedThisWeek > 0 || newFollowerCount > 0
 
   const sealedCount = predictions.filter((p) => p.status === 'sealed').length
   const verifiedCorrect = predictions.filter((p) => p.status === 'verified_correct')
@@ -317,6 +333,37 @@ export default function Profil() {
             </div>
           </div>
         </section>
+
+        {hasWeeklyActivity && (
+          <section className="mx-5 mt-4 rounded-theme border border-border bg-card p-4 shadow-sm">
+            <div className="flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-theme bg-secondary text-primary">
+                <iconify-icon icon="lucide:calendar-clock" class="text-base"></iconify-icon>
+              </span>
+              <h2 className="text-sm font-bold text-foreground">Bu hafta</h2>
+            </div>
+            <div className="mt-3 grid grid-cols-3 gap-2">
+              <div>
+                <p className="font-heading text-lg font-extrabold tracking-[-0.03em] text-primary">
+                  {newFollowerCount}
+                </p>
+                <p className="mt-0.5 text-[10px] text-muted-foreground">Yeni takipçi</p>
+              </div>
+              <div>
+                <p className="font-heading text-lg font-extrabold tracking-[-0.03em] text-primary">
+                  {sealedThisWeek}
+                </p>
+                <p className="mt-0.5 text-[10px] text-muted-foreground">Mühürlenen</p>
+              </div>
+              <div>
+                <p className="font-heading text-lg font-extrabold tracking-[-0.03em] text-primary">
+                  {verifiedThisWeek}
+                </p>
+                <p className="mt-0.5 text-[10px] text-muted-foreground">Açılan</p>
+              </div>
+            </div>
+          </section>
+        )}
 
         {categoryAccuracy.length > 0 && (
           <section className="mt-7">
