@@ -1,13 +1,46 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { supabase } from '../lib/supabase.js'
+import { useAuth } from '../contexts/AuthContext.jsx'
 
 const CATEGORIES = ['Spor', 'Teknoloji', 'Bilim', 'Kültür', 'Ekonomi', 'Dünya']
 
 export default function TahminOlustur() {
   const navigate = useNavigate()
+  const { user } = useAuth()
   const [mode, setMode] = useState('Tahmin')
   const [category, setCategory] = useState('Spor')
-  const [openCondition, setOpenCondition] = useState('event')
+  const [title, setTitle] = useState('')
+  const [sealedContent, setSealedContent] = useState('')
+  const [eventDate, setEventDate] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+  const [error, setError] = useState('')
+
+  const canSubmit = title.trim().length > 0 && sealedContent.trim().length > 0 && eventDate
+
+  async function handleSeal() {
+    if (!canSubmit || submitting) return
+    setSubmitting(true)
+    setError('')
+    try {
+      const { error: insertError } = await supabase.from('predictions').insert({
+        author_id: user.id,
+        category: category.toLowerCase(),
+        title: title.trim(),
+        sealed_content: sealedContent.trim(),
+        status: 'sealed',
+        is_private: mode === 'Zaman kapsülü',
+        event_date: new Date(eventDate).toISOString(),
+        sealed_at: new Date().toISOString(),
+      })
+      if (insertError) throw insertError
+      navigate('/', { replace: true })
+    } catch (err) {
+      setError(err.message || 'Tahmin kaydedilemedi, tekrar deneyin.')
+    } finally {
+      setSubmitting(false)
+    }
+  }
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-body pb-28">
@@ -66,24 +99,14 @@ export default function TahminOlustur() {
               <span className="text-[11px] font-medium text-muted-foreground">Zorunlu</span>
             </div>
             <input
-              defaultValue="Önümüzdeki derbi tahminimdir"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Önümüzdeki derbi tahminimdir"
               className="w-full rounded-theme border border-border bg-input px-4 py-3 font-heading text-[15px] font-bold leading-5 text-foreground shadow-sm outline-none"
             />
             <p className="mt-2 text-[11px] leading-4 text-muted-foreground">
               Bu başlık mühürlü içerikten önce görünür.
             </p>
-          </div>
-
-          <div>
-            <div className="mb-2 flex items-center justify-between">
-              <label className="text-sm font-bold text-foreground">Kısa açıklama</label>
-              <span className="text-[11px] font-medium text-muted-foreground">İsteğe bağlı</span>
-            </div>
-            <textarea
-              defaultValue="Bu sezonun formuna güveniyorum."
-              rows={2}
-              className="w-full resize-none rounded-theme border border-border bg-input px-4 py-3 text-sm leading-5 text-foreground shadow-sm outline-none"
-            />
           </div>
         </section>
 
@@ -103,7 +126,9 @@ export default function TahminOlustur() {
             </span>
           </div>
           <textarea
-            defaultValue="Fenerbahçe, Galatasaray'ı 3-2 yenecek."
+            value={sealedContent}
+            onChange={(e) => setSealedContent(e.target.value)}
+            placeholder="Fenerbahçe, Galatasaray'ı 3-2 yenecek."
             rows={2}
             className="mt-4 w-full resize-none rounded-theme border border-border bg-muted px-4 py-3.5 font-heading text-[16px] font-bold leading-6 text-foreground outline-none"
           />
@@ -118,7 +143,6 @@ export default function TahminOlustur() {
         <section>
           <div className="mb-3 flex items-center justify-between">
             <h2 className="font-heading text-[16px] font-extrabold tracking-tight">Kategori</h2>
-            <button className="text-xs font-semibold text-primary">Tümünü gör</button>
           </div>
           <div className="flex flex-wrap gap-2">
             {CATEGORIES.map((cat) => {
@@ -141,52 +165,18 @@ export default function TahminOlustur() {
         </section>
 
         <section>
-          <h2 className="font-heading text-[16px] font-extrabold tracking-tight">Açılış koşulu</h2>
-          <div className="mt-3 grid grid-cols-2 gap-2">
-            <button
-              onClick={() => setOpenCondition('date')}
-              className={`rounded-theme px-3 py-3 text-left ${
-                openCondition === 'date' ? 'border-2 border-primary bg-secondary' : 'border border-border bg-card'
-              }`}
-            >
-              <div className={`flex items-center gap-2 ${openCondition === 'date' ? 'text-primary' : 'text-muted-foreground'}`}>
-                <iconify-icon icon="lucide:calendar-days" class="text-[17px]"></iconify-icon>
-                <span className="text-xs font-bold">Tarih seç</span>
-              </div>
-            </button>
-            <button
-              onClick={() => setOpenCondition('event')}
-              className={`rounded-theme px-3 py-3 text-left ${
-                openCondition === 'event' ? 'border-2 border-primary bg-secondary' : 'border border-border bg-card'
-              }`}
-            >
-              <div className={`flex items-center gap-2 ${openCondition === 'event' ? 'text-primary' : 'text-muted-foreground'}`}>
-                <iconify-icon icon="lucide:link-2" class="text-[17px]"></iconify-icon>
-                <span className="text-xs font-bold">Etkinliğe bağla</span>
-              </div>
-            </button>
-          </div>
-
-          {openCondition === 'event' && (
-            <article className="mt-3 rounded-theme border border-border bg-card p-4 shadow-sm">
-              <div className="flex items-start gap-3">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-theme bg-secondary text-primary">
-                  <iconify-icon icon="lucide:trophy" class="text-[19px]"></iconify-icon>
-                </div>
-                <div className="min-w-0 flex-1">
-                  <p className="font-heading text-sm font-extrabold leading-5">Galatasaray - Fenerbahçe</p>
-                  <p className="mt-1 text-xs text-muted-foreground">31 Ağustos 2026 · İstanbul</p>
-                </div>
-                <iconify-icon icon="lucide:check-circle-2" class="shrink-0 text-[19px] text-success"></iconify-icon>
-              </div>
-              <div className="mt-3 border-t border-border pt-3">
-                <p className="flex items-start gap-2 text-[11px] leading-5 text-muted-foreground">
-                  <iconify-icon icon="lucide:badge-check" class="mt-0.5 shrink-0 text-[15px] text-primary"></iconify-icon>
-                  Sistem, doğrulanmış resmi sonuç açıklanana kadar bekler.
-                </p>
-              </div>
-            </article>
-          )}
+          <h2 className="font-heading text-[16px] font-extrabold tracking-tight">Açılış tarihi</h2>
+          <p className="mt-1 text-[11px] leading-4 text-muted-foreground">
+            Kayıt bu tarihe kadar mühürlü kalır, tarih geçince herkese açılır.
+          </p>
+          <input
+            type="date"
+            required
+            value={eventDate}
+            onChange={(e) => setEventDate(e.target.value)}
+            min={new Date().toISOString().slice(0, 10)}
+            className="mt-3 w-full rounded-theme border border-border bg-input px-4 py-3 text-sm font-semibold text-foreground shadow-sm outline-none"
+          />
         </section>
 
         <section className="flex gap-3 rounded-theme bg-muted p-4">
@@ -206,12 +196,18 @@ export default function TahminOlustur() {
 
       <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-border bg-background/95 px-5 pb-5 pt-3 backdrop-blur-md">
         <div className="mx-auto max-w-[393px]">
+          {error && (
+            <p className="mb-2 rounded-theme bg-destructive/10 px-3 py-2.5 text-xs font-semibold text-destructive">
+              {error}
+            </p>
+          )}
           <button
-            onClick={() => navigate(-1)}
-            className="flex w-full items-center justify-center gap-2 rounded-theme bg-primary px-4 py-4 text-sm font-extrabold text-primary-foreground shadow-sm"
+            onClick={handleSeal}
+            disabled={!canSubmit || submitting}
+            className="flex w-full items-center justify-center gap-2 rounded-theme bg-primary px-4 py-4 text-sm font-extrabold text-primary-foreground shadow-sm disabled:opacity-50"
           >
             <iconify-icon icon="lucide:lock-keyhole" class="text-[18px]"></iconify-icon>
-            Tahmini mühürle
+            {submitting ? 'Mühürleniyor…' : 'Tahmini mühürle'}
           </button>
           <p className="mt-2 text-center text-[10px] text-muted-foreground">
             Mühürleme işleminden sonra kayıt değiştirilemez.

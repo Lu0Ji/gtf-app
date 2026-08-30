@@ -1,0 +1,497 @@
+<title>GTF Yasal Belgeler</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@500;700;800&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+
+<style>
+  :root {
+    --ink: #172b3a;
+    --paper: #f6fafd;
+    --card: #ffffff;
+    --line: #c9dae4;
+    --muted: #607583;
+    --accent: #356a8a;
+    --accent-soft: #dceaf2;
+    --accent-ink: #24465c;
+    --warn-soft: #fbeceb;
+    --warn-ink: #8a3630;
+
+    --font-display: "Manrope", ui-sans-serif, system-ui, sans-serif;
+    --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
+  }
+
+  @media (prefers-color-scheme: dark) {
+    :root:not([data-theme="light"]) {
+      --ink: #e9f1f7;
+      --paper: #101c26;
+      --card: #16232f;
+      --line: #26394a;
+      --muted: #93aabc;
+      --accent: #6f9fba;
+      --accent-soft: #1c2f3d;
+      --accent-ink: #bcdcee;
+      --warn-soft: #33201f;
+      --warn-ink: #e2a29c;
+    }
+  }
+  :root[data-theme="dark"] {
+    --ink: #e9f1f7;
+    --paper: #101c26;
+    --card: #16232f;
+    --line: #26394a;
+    --muted: #93aabc;
+    --accent: #6f9fba;
+    --accent-soft: #1c2f3d;
+    --accent-ink: #bcdcee;
+    --warn-soft: #33201f;
+    --warn-ink: #e2a29c;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--paper);
+    color: var(--ink);
+    font-family: var(--font-body);
+    font-size: 16px;
+    line-height: 1.65;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  a { color: var(--accent); }
+  a:focus-visible, button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    background: color-mix(in srgb, var(--paper) 88%, transparent);
+    backdrop-filter: blur(10px);
+    border-bottom: 1px solid var(--line);
+  }
+  .mark {
+    width: 34px;
+    height: 34px;
+    border-radius: 10px;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 12px;
+    letter-spacing: -0.03em;
+    flex-shrink: 0;
+  }
+  .topbar-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 15px;
+    letter-spacing: -0.01em;
+  }
+  .topbar-sub {
+    font-size: 12px;
+    color: var(--muted);
+    margin-top: 1px;
+  }
+
+  .shell {
+    max-width: 1080px;
+    margin: 0 auto;
+    padding: 40px 20px 100px;
+    display: grid;
+    grid-template-columns: 220px minmax(0, 1fr);
+    gap: 56px;
+    align-items: start;
+  }
+  @media (max-width: 860px) {
+    .shell { grid-template-columns: 1fr; gap: 28px; padding-top: 24px; }
+    .toc { display: none; }
+    .toc-mobile { display: block; }
+  }
+
+  .toc {
+    position: sticky;
+    top: 78px;
+  }
+  .toc-mobile { display: none; }
+  .toc-group + .toc-group { margin-top: 22px; }
+  .toc-eyebrow {
+    font-family: var(--font-display);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin: 0 0 8px;
+  }
+  .toc a {
+    display: block;
+    padding: 6px 0;
+    font-size: 13.5px;
+    color: var(--muted);
+    text-decoration: none;
+    border-left: 2px solid transparent;
+    padding-left: 10px;
+    margin-left: -1px;
+  }
+  .toc a:hover { color: var(--ink); }
+
+  .toc-mobile-scroll {
+    display: flex;
+    gap: 8px;
+    overflow-x: auto;
+    padding-bottom: 4px;
+    margin-bottom: 8px;
+  }
+  .toc-mobile-scroll a {
+    flex-shrink: 0;
+    font-size: 12.5px;
+    font-weight: 600;
+    color: var(--accent-ink);
+    background: var(--accent-soft);
+    padding: 7px 12px;
+    border-radius: 100px;
+    text-decoration: none;
+    white-space: nowrap;
+  }
+
+  main { min-width: 0; }
+
+  .doc-header { margin-bottom: 40px; }
+  .doc-eyebrow {
+    font-family: var(--font-display);
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent);
+    margin: 0 0 10px;
+  }
+  h1 {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(28px, 4vw, 38px);
+    letter-spacing: -0.03em;
+    line-height: 1.1;
+    margin: 0 0 12px;
+    text-wrap: balance;
+  }
+  .doc-meta {
+    font-size: 13.5px;
+    color: var(--muted);
+  }
+
+  .callout {
+    display: flex;
+    gap: 12px;
+    background: var(--card);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin: 28px 0 44px;
+    font-size: 14.5px;
+    color: var(--muted);
+  }
+  .callout strong { color: var(--ink); }
+  .callout .dot {
+    width: 8px; height: 8px; border-radius: 50%;
+    background: var(--accent);
+    margin-top: 7px;
+    flex-shrink: 0;
+  }
+
+  section.doc-section {
+    padding: 30px 0;
+    border-top: 1px solid var(--line);
+    scroll-margin-top: 90px;
+  }
+  section.doc-section:first-of-type { border-top: none; padding-top: 0; }
+
+  .section-head {
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+    margin-bottom: 14px;
+  }
+  .section-num {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 13px;
+    color: var(--accent);
+    background: var(--accent-soft);
+    border-radius: 8px;
+    padding: 3px 8px;
+    flex-shrink: 0;
+  }
+  h2 {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 19px;
+    letter-spacing: -0.015em;
+    margin: 0;
+    text-wrap: balance;
+  }
+
+  .doc-section p { margin: 0 0 14px; max-width: 66ch; color: var(--ink); }
+  .doc-section ul { margin: 0 0 14px; padding-left: 20px; max-width: 64ch; }
+  .doc-section li { margin-bottom: 7px; }
+  .doc-section p:last-child, .doc-section ul:last-child { margin-bottom: 0; }
+
+  .data-table {
+    width: 100%;
+    max-width: 620px;
+    border-collapse: collapse;
+    margin: 6px 0 18px;
+    font-size: 13.5px;
+    overflow-x: auto;
+    display: block;
+  }
+  .data-table thead, .data-table tbody { display: table; width: 100%; table-layout: fixed; }
+  .data-table th {
+    text-align: left;
+    font-family: var(--font-display);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    color: var(--muted);
+    padding: 8px 10px;
+    border-bottom: 1px solid var(--line);
+  }
+  .data-table td {
+    padding: 10px 10px;
+    border-bottom: 1px solid var(--line);
+    color: var(--ink);
+    vertical-align: top;
+  }
+  .data-table tr:last-child td { border-bottom: none; }
+
+  .honor-note {
+    display: flex;
+    gap: 12px;
+    background: var(--warn-soft);
+    border-radius: 14px;
+    padding: 16px 18px;
+    margin: 4px 0 18px;
+  }
+  .honor-note svg { flex-shrink: 0; margin-top: 2px; color: var(--warn-ink); }
+  .honor-note p { margin: 0; color: var(--warn-ink); font-size: 14px; max-width: 60ch; }
+
+  .divider-band {
+    margin: 8px 0 44px;
+    padding: 26px 24px;
+    border-radius: 16px;
+    background: var(--accent);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+  .divider-band .mark { background: rgba(255,255,255,0.18); }
+  .divider-band h1 { color: #fff; font-size: clamp(22px, 3vw, 28px); margin: 0; }
+  .divider-band .doc-eyebrow { color: rgba(255,255,255,0.75); }
+
+  footer {
+    margin-top: 60px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    font-size: 13px;
+    color: var(--muted);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  footer a { color: var(--muted); text-decoration: underline; text-underline-offset: 2px; }
+</style>
+
+<div class="topbar">
+  <div class="mark">GTF</div>
+  <div>
+    <div class="topbar-title">Gelecek Tahmin Fonu</div>
+    <div class="topbar-sub">Yasal belgeler</div>
+  </div>
+</div>
+
+<div class="shell">
+  <nav class="toc">
+    <div class="toc-group">
+      <p class="toc-eyebrow">Gizlilik Politikası</p>
+      <a href="#g1">1. Kim olduğumuz</a>
+      <a href="#g2">2. Topladığımız veriler</a>
+      <a href="#g3">3. Verileri nasıl kullanırız</a>
+      <a href="#g4">4. Altyapı ve üçüncü taraflar</a>
+      <a href="#g5">5. Saklama süresi</a>
+      <a href="#g6">6. Haklarınız</a>
+      <a href="#g7">7. Çocukların gizliliği</a>
+      <a href="#g8">8. İletişim</a>
+    </div>
+    <div class="toc-group">
+      <p class="toc-eyebrow">Kullanım Koşulları</p>
+      <a href="#k1">1. Kabul</a>
+      <a href="#k2">2. Hesabınız</a>
+      <a href="#k3">3. Tahmin ve doğrulama sistemi</a>
+      <a href="#k4">4. Puanlar</a>
+      <a href="#k5">5. Kullanıcı içeriği</a>
+      <a href="#k6">6. Yasaklı kullanım</a>
+      <a href="#k7">7. Fesih</a>
+      <a href="#k8">8. Sorumluluk sınırı</a>
+    </div>
+  </nav>
+
+  <main>
+    <div class="toc-mobile">
+      <div class="toc-mobile-scroll" id="mobileToc"></div>
+    </div>
+
+    <div class="doc-header">
+      <p class="doc-eyebrow">Gizlilik Politikası</p>
+      <h1>Verilerinizle ne yapıyoruz, ne yapmıyoruz</h1>
+      <p class="doc-meta">Son güncelleme: 29 Ağustos 2026 · Gelecek Tahmin Fonu ("GTF") için geçerlidir</p>
+    </div>
+
+    <div class="callout">
+      <span class="dot"></span>
+      <div><strong>Kısaca:</strong> Hesabınızı çalıştırmak için gereken verileri topluyoruz — e-posta, profil bilgileri, tahminleriniz ve mesajlarınız. Bunları satmıyoruz, reklam ağlarıyla paylaşmıyoruz. Verileriniz altyapı sağlayıcımız Supabase üzerinde barınır.</div>
+    </div>
+
+    <section class="doc-section" id="g1">
+      <div class="section-head"><span class="section-num">§1</span><h2>Kim olduğumuz</h2></div>
+      <p>Gelecek Tahmin Fonu (GTF), kullanıcıların gelecekle ilgili tahminlerini mühürleyip zamanı geldiğinde doğrulayabildiği bir sosyal uygulamadır. Bu belge, uygulamayı kullanırken hangi verilerin toplandığını ve nasıl kullanıldığını açıklar.</p>
+    </section>
+
+    <section class="doc-section" id="g2">
+      <div class="section-head"><span class="section-num">§2</span><h2>Topladığımız veriler</h2></div>
+      <p>Yalnızca hesabınızı oluşturmak ve uygulamanın özelliklerini çalıştırmak için gereken verileri topluyoruz:</p>
+      <table class="data-table">
+        <thead><tr><th>Veri</th><th>Nereden gelir</th></tr></thead>
+        <tbody>
+          <tr><td>E-posta ve şifre</td><td>Kayıt olurken siz sağlarsınız; şifre asla düz metin olarak saklanmaz</td></tr>
+          <tr><td>Görünen ad, kullanıcı adı</td><td>Kayıt sırasında siz belirlersiniz</td></tr>
+          <tr><td>Biyografi, profil fotoğrafı</td><td>İsteğe bağlı olarak Profil Ayarları'ndan eklersiniz</td></tr>
+          <tr><td>Tahminler, yorumlar, mesajlar</td><td>Uygulamayı kullanırken oluşturduğunuz içerik</td></tr>
+          <tr><td>Takip, beğeni, kaydetme, grup üyeliği</td><td>Uygulama içi etkileşimleriniz</td></tr>
+          <tr><td>Puan ve işlem zamanları</td><td>Otomatik olarak, uygulama içi etkinliğinize göre hesaplanır</td></tr>
+        </tbody>
+      </table>
+      <p>Konum, kamera, kişi listesi veya reklam kimliği gibi verilere erişmiyoruz.</p>
+    </section>
+
+    <section class="doc-section" id="g3">
+      <div class="section-head"><span class="section-num">§3</span><h2>Verileri nasıl kullanırız</h2></div>
+      <ul>
+        <li>Hesabınızı doğrulamak ve oturumunuzu açık tutmak için</li>
+        <li>Akışınızı, mesajlarınızı, liderlik tablosunu ve profilinizi oluşturmak için</li>
+        <li>Tahminlerinizin doğrulama sonucuna göre puanınızı güncellemek için</li>
+      </ul>
+      <p>Verilerinizi reklam hedeflemesi, pazarlama analitiği veya üçüncü taraf pazarlama amacıyla kullanmıyoruz.</p>
+    </section>
+
+    <section class="doc-section" id="g4">
+      <div class="section-head"><span class="section-num">§4</span><h2>Altyapı ve üçüncü taraflar</h2></div>
+      <p>Verileriniz altyapı sağlayıcımız <strong>Supabase</strong> (veritabanı, kimlik doğrulama ve dosya depolama) üzerinde barınır. Supabase, verilerinizi yalnızca bizim adımıza, GTF'i çalıştırmak amacıyla işler; kendi amaçları için kullanmaz. Verilerinizi başka hiçbir üçüncü tarafla paylaşmıyor, satmıyoruz.</p>
+    </section>
+
+    <section class="doc-section" id="g5">
+      <div class="section-head"><span class="section-num">§5</span><h2>Saklama süresi</h2></div>
+      <p>Verileriniz, hesabınız aktif olduğu sürece saklanır. Hesabınızın silinmesini talep ettiğinizde, verileriniz makul bir süre içinde kalıcı olarak kaldırılır.</p>
+    </section>
+
+    <section class="doc-section" id="g6">
+      <div class="section-head"><span class="section-num">§6</span><h2>Haklarınız</h2></div>
+      <p>Profil bilgilerinizi (ad, kullanıcı adı, biyografi, fotoğraf) doğrudan uygulama içinden istediğiniz zaman düzenleyebilirsiniz. Hesabınızı ve tüm verilerinizi <strong>Uygulama Ayarları → Tehlikeli bölge → Hesabımı sil</strong> yoluyla, hiçbir onay beklemeden, anında ve kalıcı olarak silebilirsiniz. Sorularınız için aşağıdaki adresten bize de ulaşabilirsiniz.</p>
+    </section>
+
+    <section class="doc-section" id="g7">
+      <div class="section-head"><span class="section-num">§7</span><h2>Çocukların gizliliği</h2></div>
+      <p>GTF, 13 yaşın altındaki kullanıcılar için tasarlanmamıştır ve bu yaş grubundan bilerek veri toplamayız.</p>
+    </section>
+
+    <section class="doc-section" id="g8">
+      <div class="section-head"><span class="section-num">§8</span><h2>İletişim</h2></div>
+      <p>Gizlilikle ilgili sorularınız için: <a href="mailto:aliyusufbusiness1@gmail.com">aliyusufbusiness1@gmail.com</a></p>
+    </section>
+
+    <div class="divider-band">
+      <div>
+        <p class="doc-eyebrow">İkinci belge</p>
+        <h1>Kullanım Koşulları</h1>
+      </div>
+      <div class="mark">→</div>
+    </div>
+
+    <section class="doc-section" id="k1">
+      <div class="section-head"><span class="section-num">§1</span><h2>Kabul</h2></div>
+      <p>GTF'i kullanarak bu koşulları kabul etmiş olursunuz. Kabul etmiyorsanız uygulamayı kullanmamalısınız.</p>
+    </section>
+
+    <section class="doc-section" id="k2">
+      <div class="section-head"><span class="section-num">§2</span><h2>Hesabınız</h2></div>
+      <p>Hesap bilgilerinizin gizliliğinden ve hesabınız üzerinden yapılan tüm işlemlerden siz sorumlusunuz. Doğru ve güncel bilgi sağlamakla yükümlüsünüz.</p>
+    </section>
+
+    <section class="doc-section" id="k3">
+      <div class="section-head"><span class="section-num">§3</span><h2>Tahmin ve doğrulama sistemi</h2></div>
+      <p>Bir tahmini mühürlediğinizde, içeriği belirlediğiniz açılış tarihine kadar gizli kalır. Tarih geçtiğinde, <strong>yalnızca tahminin sahibi</strong> sonucu "doğru" veya "yanlış" olarak işaretleyebilir.</p>
+      <div class="honor-note">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M12 9v4M12 17h.01M10.29 3.86l-8.18 14.18A2 2 0 0 0 3.82 21h16.36a2 2 0 0 0 1.71-2.96L13.71 3.86a2 2 0 0 0-3.42 0z" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <p>Bu, bağımsız veya yapay zekâ destekli bir doğrulama değil, <strong>beyana dayalı (onur sistemi)</strong> bir işaretlemedir. GTF, işaretlenen sonucun doğruluğunu ayrıca denetlemez.</p>
+      </div>
+    </section>
+
+    <section class="doc-section" id="k4">
+      <div class="section-head"><span class="section-num">§4</span><h2>Puanlar</h2></div>
+      <p>Uygulama içi puanların <strong>hiçbir nakit veya gerçek dünya parasal değeri yoktur</strong>. Puanlar satılamaz, devredilemez veya paraya çevrilemez; yalnızca uygulama içi başarı göstergesi olarak kullanılır.</p>
+    </section>
+
+    <section class="doc-section" id="k5">
+      <div class="section-head"><span class="section-num">§5</span><h2>Kullanıcı içeriği</h2></div>
+      <p>Paylaştığınız tahminler, yorumlar ve mesajlar size aittir; içeriğinizden siz sorumlusunuz. GTF, topluluk kurallarını ihlal eden içerikleri kaldırma hakkını saklı tutar.</p>
+    </section>
+
+    <section class="doc-section" id="k6">
+      <div class="section-head"><span class="section-num">§6</span><h2>Yasaklı kullanım</h2></div>
+      <ul>
+        <li>Taciz, nefret söylemi veya başkalarını hedef alan içerik paylaşmak</li>
+        <li>Sahte hesap oluşturmak veya başkasının kimliğine bürünmek</li>
+        <li>Spam veya otomatik (bot) etkileşim üretmek</li>
+        <li>Uygulamanın güvenliğini veya bütünlüğünü tehlikeye atmaya çalışmak</li>
+      </ul>
+    </section>
+
+    <section class="doc-section" id="k7">
+      <div class="section-head"><span class="section-num">§7</span><h2>Fesih</h2></div>
+      <p>Hesabınızı istediğiniz zaman silmemizi talep edebilirsiniz. Bu koşulları ihlal etmeniz durumunda hesabınızı askıya alma veya kapatma hakkımız saklıdır.</p>
+    </section>
+
+    <section class="doc-section" id="k8">
+      <div class="section-head"><span class="section-num">§8</span><h2>Sorumluluk sınırı</h2></div>
+      <p>GTF "olduğu gibi" sunulur. Kullanıcılar tarafından paylaşılan tahminlerin veya işaretlenen sonuçların doğruluğunu garanti etmeyiz.</p>
+    </section>
+
+    <footer>
+      <span>© 2026 Gelecek Tahmin Fonu</span>
+      <a href="mailto:aliyusufbusiness1@gmail.com">aliyusufbusiness1@gmail.com</a>
+    </footer>
+  </main>
+</div>
+
+<script>
+  (function () {
+    var mobileToc = document.getElementById('mobileToc');
+    var links = document.querySelectorAll('.toc a');
+    links.forEach(function (a) {
+      var clone = a.cloneNode(true);
+      mobileToc.appendChild(clone);
+    });
+  })();
+</script>

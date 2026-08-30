@@ -1,23 +1,18 @@
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { IMG } from '../lib/images.js'
+import { supabase } from '../lib/supabase.js'
+import { useAuth } from '../contexts/AuthContext.jsx'
+import { useToast } from '../contexts/ToastContext.jsx'
+import { useUserSettings } from '../hooks/useUserSettings.js'
+import { formatDateLong, timeAgo } from '../lib/format.js'
 
-const CATEGORIES = ['Senin akışın', 'Futbol', 'Teknoloji', 'Ekonomi', 'Kültür']
-
-const SUGGESTED_PEOPLE = [
-  {
-    name: 'İpek Akın',
-    tag: 'Teknoloji · %74 isabet',
-    imageId: 'ab59d891-10d6-4a41-87c3-b2a58037bcbf',
-  },
-  {
-    name: 'Bora Eren',
-    tag: 'Piyasalar · %71 isabet',
-    imageId: 'cddf8abb-4b13-4037-a4de-7e7cf40becac',
-  },
-]
+const CATEGORIES = ['Tümü', 'Spor', 'Teknoloji', 'Bilim', 'Kültür', 'Ekonomi', 'Dünya']
+const DEFAULT_AVATAR = IMG('fc4eb4df-87ce-4cd9-bdd3-80a434cd8ddd')
 
 function Header() {
+  const { profile } = useAuth()
+
   return (
     <header className="px-5 pt-12">
       <div className="flex items-center justify-between">
@@ -30,31 +25,12 @@ function Header() {
               Gelecek Tahmin Fonu
             </p>
             <p className="mt-1 text-[10px] font-medium text-muted-foreground">
-              Takip ettiklerinden yeni kayıtlar
+              Herkese açık akış
             </p>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <button
-            aria-label="Ara"
-            className="flex h-10 w-10 items-center justify-center rounded-theme border border-border bg-card text-foreground shadow-sm"
-          >
-            <iconify-icon icon="lucide:search" class="text-[19px]"></iconify-icon>
-          </button>
-          <button
-            aria-label="Bildirimler"
-            className="relative flex h-10 w-10 items-center justify-center rounded-theme border border-border bg-card text-foreground shadow-sm"
-          >
-            <iconify-icon icon="lucide:bell" class="text-[19px]"></iconify-icon>
-            <span className="absolute right-2.5 top-2.5 h-2 w-2 rounded-full bg-accent ring-2 ring-card" />
-          </button>
-          <div className="h-10 w-10 overflow-hidden rounded-full border-2 border-card shadow-sm">
-            <img
-              src={IMG('fc4eb4df-87ce-4cd9-bdd3-80a434cd8ddd')}
-              alt="Profilin"
-              className="h-full w-full object-cover"
-            />
-          </div>
+        <div className="h-10 w-10 overflow-hidden rounded-full border-2 border-card shadow-sm">
+          <img src={profile?.avatar_url || DEFAULT_AVATAR} alt="Profilin" className="h-full w-full object-cover" />
         </div>
       </div>
     </header>
@@ -63,16 +39,13 @@ function Header() {
 
 function ComposeCard() {
   const navigate = useNavigate()
+  const { profile } = useAuth()
 
   return (
     <section className="mx-5 rounded-theme border border-border bg-card p-4 shadow-sm">
       <div className="flex items-center gap-3">
         <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full">
-          <img
-            src={IMG('b7a3aceb-e89d-4839-aabd-5f89f4519b11')}
-            alt="Profilin"
-            className="h-full w-full object-cover"
-          />
+          <img src={profile?.avatar_url || DEFAULT_AVATAR} alt="Profilin" className="h-full w-full object-cover" />
         </div>
         <button
           onClick={() => navigate('/tahmin-olustur')}
@@ -90,7 +63,10 @@ function ComposeCard() {
             <iconify-icon icon="lucide:pen-line" class="text-sm text-primary"></iconify-icon>
             Tahmin
           </button>
-          <button className="flex items-center gap-1.5 rounded-theme bg-muted px-3 py-2 text-xs font-bold text-muted-foreground">
+          <button
+            onClick={() => navigate('/tahmin-olustur')}
+            className="flex items-center gap-1.5 rounded-theme bg-muted px-3 py-2 text-xs font-bold text-muted-foreground"
+          >
             <iconify-icon icon="lucide:archive" class="text-sm"></iconify-icon>
             Zaman kapsülü
           </button>
@@ -133,123 +109,178 @@ function CategoryTabs({ active, onSelect }) {
   )
 }
 
-function NearbyEventsCard() {
+function StatsBanner() {
+  const [stats, setStats] = useState(null)
+
+  useEffect(() => {
+    let cancelled = false
+    async function load() {
+      const [{ count: sealedCount }, { count: verifiedCount }] = await Promise.all([
+        supabase
+          .from('predictions')
+          .select('*', { count: 'exact', head: true })
+          .eq('is_private', false)
+          .eq('status', 'sealed'),
+        supabase
+          .from('predictions')
+          .select('*', { count: 'exact', head: true })
+          .eq('is_private', false)
+          .in('status', ['verified_correct', 'verified_incorrect']),
+      ])
+      if (!cancelled) setStats({ sealed: sealedCount || 0, verified: verifiedCount || 0 })
+    }
+    load()
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  if (!stats || (stats.sealed === 0 && stats.verified === 0)) return null
+
   return (
     <section className="mx-5 mt-5 rounded-theme border border-border bg-card p-4 shadow-sm">
-      <div className="flex items-start gap-3">
+      <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-theme bg-secondary text-primary">
-          <iconify-icon icon="lucide:map-pin" class="text-lg"></iconify-icon>
+          <iconify-icon icon="lucide:activity" class="text-lg"></iconify-icon>
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-bold text-foreground">İstanbul'da yaklaşanlar</p>
+          <p className="text-xs font-bold text-foreground">Platformda şu an</p>
           <p className="mt-1 text-[11px] leading-4 text-muted-foreground">
-            Takip ettiklerin bu hafta sonu derbi ve teknoloji zirvesi için kayıt açıyor.
+            <span className="font-semibold text-foreground">{stats.sealed}</span> açılmayı bekleyen mühürlü kayıt ·{' '}
+            <span className="font-semibold text-foreground">{stats.verified}</span> doğrulanmış sonuç
           </p>
-          <div className="mt-3 flex items-center gap-2">
-            <span className="rounded-full bg-muted px-2.5 py-1 text-[10px] font-semibold text-muted-foreground">
-              15 Şub · Kadıköy
-            </span>
-            <span className="rounded-full bg-muted px-2.5 py-1 text-[10px] font-semibold text-muted-foreground">
-              18 Şub · Şişli
-            </span>
-          </div>
         </div>
-        <iconify-icon icon="lucide:chevron-right" class="mt-2 text-lg text-muted-foreground"></iconify-icon>
       </div>
     </section>
   )
 }
 
-function SealedPredictionPost() {
+function PredictionCard({ prediction, social, onToggleLike, onToggleSave }) {
   const navigate = useNavigate()
+  const author = prediction.profiles
+  const isVerified = prediction.status === 'verified_correct' || prediction.status === 'verified_incorrect'
+  const isCorrect = prediction.status === 'verified_correct'
+  const { liked, likeCount, saved, commentCount } = social
 
   return (
     <article
-      onClick={() => navigate('/tahmin-kaydi')}
+      onClick={() => navigate('/tahmin-kaydi', { state: { prediction } })}
       className="mx-5 mt-4 cursor-pointer rounded-theme border border-border bg-card p-4 shadow-sm"
     >
       <div className="flex items-start gap-3">
-        <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full">
+        <button
+          onClick={(e) => {
+            e.stopPropagation()
+            navigate(`/kullanici/${prediction.author_id}`)
+          }}
+          className="h-11 w-11 shrink-0 overflow-hidden rounded-full"
+        >
           <img
-            src={IMG('720546f3-d053-4b76-a70c-e7017ed0f68c')}
-            alt="Emir Can"
+            src={author?.avatar_url || DEFAULT_AVATAR}
+            alt={author?.display_name || 'Kullanıcı'}
             className="h-full w-full object-cover"
           />
-        </div>
+        </button>
         <div className="min-w-0 flex-1">
           <div className="flex items-start justify-between gap-2">
-            <div>
+            <button
+              onClick={(e) => {
+                e.stopPropagation()
+                navigate(`/kullanici/${prediction.author_id}`)
+              }}
+              className="text-left"
+            >
               <div className="flex items-center gap-1.5">
-                <h2 className="text-sm font-bold">Emir Can</h2>
+                <h2 className="text-sm font-bold">{author?.display_name || 'Kullanıcı'}</h2>
                 <iconify-icon icon="lucide:badge-check" class="text-sm text-primary"></iconify-icon>
               </div>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">@emircan · 18 dk</p>
-            </div>
-            <button className="rounded-theme bg-secondary px-2.5 py-1.5 text-[10px] font-bold text-secondary-foreground">
-              Takipte
+              <p className="mt-0.5 text-[11px] text-muted-foreground">
+                @{author?.username || 'kullanici'} · {timeAgo(prediction.created_at)}
+              </p>
             </button>
           </div>
-          <p className="mt-3 text-[15px] font-medium leading-6 text-foreground">
-            Bu akşamki derbide ilk golün ikinci yarıda geleceğini düşünüyorum.
-          </p>
-          <div className="mt-3 rounded-theme border border-border bg-muted p-3">
-            <div className="flex items-center justify-between">
-              <span className="rounded-full bg-card px-2.5 py-1 text-[10px] font-bold text-primary">SPOR</span>
-              <span className="flex items-center gap-1 text-[10px] font-semibold text-accent">
-                <iconify-icon icon="lucide:stamp" class="text-xs"></iconify-icon>
-                Mühürlü tahmin
-              </span>
-            </div>
-            <div className="mt-4 flex items-center gap-3">
-              <div className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-primary">
-                <iconify-icon icon="lucide:calendar-days" class="text-base"></iconify-icon>
+          <p className="mt-3 text-[15px] font-medium leading-6 text-foreground">{prediction.title}</p>
+
+          {isVerified ? (
+            <div className="mt-3 overflow-hidden rounded-theme border border-border">
+              <div
+                className={`flex items-center justify-between px-3 py-2 text-[11px] font-bold ${
+                  isCorrect ? 'bg-success text-success-foreground' : 'bg-destructive text-destructive-foreground'
+                }`}
+              >
+                <span className="flex items-center gap-1.5">
+                  <iconify-icon icon={isCorrect ? 'lucide:badge-check' : 'lucide:x-circle'} class="text-sm"></iconify-icon>
+                  {isCorrect ? 'Doğrulandı' : 'Gerçekleşmedi'}
+                </span>
+                <span>{formatDateLong(prediction.verified_at)}</span>
               </div>
-              <div>
-                <p className="text-xs font-bold">19 Şubat 2026'da açılacak</p>
-                <p className="mt-0.5 text-[10px] text-muted-foreground">
-                  Kayıt sabit; içerik açılana kadar gizli.
-                </p>
+              <div className="bg-muted p-3">
+                <span className="rounded-full bg-card px-2.5 py-1 text-[10px] font-bold text-primary">
+                  {prediction.category?.toUpperCase()}
+                </span>
+                <p className="mt-3 text-sm font-bold leading-5">&ldquo;{prediction.sealed_content}&rdquo;</p>
               </div>
             </div>
-          </div>
+          ) : (
+            <div className="mt-3 rounded-theme border border-border bg-muted p-3">
+              <div className="flex items-center justify-between">
+                <span className="rounded-full bg-card px-2.5 py-1 text-[10px] font-bold text-primary">
+                  {prediction.category?.toUpperCase()}
+                </span>
+                <span className="flex items-center gap-1 text-[10px] font-semibold text-accent">
+                  <iconify-icon icon="lucide:stamp" class="text-xs"></iconify-icon>
+                  Mühürlü tahmin
+                </span>
+              </div>
+              <div className="mt-4 flex items-center gap-3">
+                <div className="flex h-9 w-9 items-center justify-center rounded-full border border-border bg-card text-primary">
+                  <iconify-icon icon="lucide:calendar-days" class="text-base"></iconify-icon>
+                </div>
+                <div>
+                  <p className="text-xs font-bold">{formatDateLong(prediction.event_date)}'da açılacak</p>
+                  <p className="mt-0.5 text-[10px] text-muted-foreground">
+                    Kayıt sabit; içerik açılana kadar gizli.
+                  </p>
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="mt-3 flex items-center justify-between">
             <div className="flex items-center gap-4 text-muted-foreground">
-              <button aria-label="Beğen" className="flex items-center gap-1.5 text-xs font-semibold">
+              <button
+                aria-label="Beğen"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  onToggleLike(prediction.id)
+                }}
+                className={`flex items-center gap-1.5 text-xs font-semibold ${liked ? 'text-destructive' : ''}`}
+              >
                 <iconify-icon icon="lucide:heart" class="text-[18px]"></iconify-icon>
-                48
+                {likeCount}
               </button>
-              <button aria-label="Yorum yap" className="flex items-center gap-1.5 text-xs font-semibold">
+              <button
+                aria-label="Yorum yap"
+                onClick={(e) => {
+                  e.stopPropagation()
+                  navigate('/tahmin-kaydi', { state: { prediction } })
+                }}
+                className="flex items-center gap-1.5 text-xs font-semibold"
+              >
                 <iconify-icon icon="lucide:message-circle" class="text-[18px]"></iconify-icon>
-                12
-              </button>
-              <button aria-label="Paylaş" className="flex items-center">
-                <iconify-icon icon="lucide:send" class="text-[18px]"></iconify-icon>
+                {commentCount}
               </button>
             </div>
-            <button aria-label="Kaydet" className="text-muted-foreground">
-              <iconify-icon icon="lucide:bookmark" class="text-[18px]"></iconify-icon>
+            <button
+              aria-label="Kaydet"
+              onClick={(e) => {
+                e.stopPropagation()
+                onToggleSave(prediction.id)
+              }}
+              className={saved ? 'text-primary' : 'text-muted-foreground'}
+            >
+              <iconify-icon icon={saved ? 'lucide:bookmark-check' : 'lucide:bookmark'} class="text-[18px]"></iconify-icon>
             </button>
-          </div>
-          <div className="mt-3 flex items-center gap-2 border-t border-border pt-3">
-            <div className="flex -space-x-2">
-              <div className="h-5 w-5 overflow-hidden rounded-full border-2 border-card">
-                <img
-                  src={IMG('d017d967-cf31-4c33-bd50-b42767685f5c')}
-                  alt="Takipçi"
-                  className="h-full w-full object-cover"
-                />
-              </div>
-              <div className="h-5 w-5 overflow-hidden rounded-full border-2 border-card">
-                <img
-                  src={IMG('53a0ac8e-c64c-44c1-acf7-1ebfff86ff06')}
-                  alt="Takipçi"
-                  className="h-full w-full object-cover"
-                />
-              </div>
-            </div>
-            <p className="truncate text-[11px] text-muted-foreground">
-              <span className="font-semibold text-foreground">Seda</span> ve 46 kişi beğendi
-            </p>
           </div>
         </div>
       </div>
@@ -257,31 +288,202 @@ function SealedPredictionPost() {
   )
 }
 
+const EMPTY_SOCIAL = { liked: false, likeCount: 0, saved: false, commentCount: 0 }
+
+function PredictionFeed({ category }) {
+  const { user } = useAuth()
+  const { showToast } = useToast()
+  const { settings } = useUserSettings()
+  const [predictions, setPredictions] = useState([])
+  const [socialById, setSocialById] = useState({})
+  const [loading, setLoading] = useState(true)
+
+  async function loadSocial(ids) {
+    if (ids.length === 0) return {}
+    const [{ data: likes }, { data: comments }, { data: saves }] = await Promise.all([
+      supabase.from('prediction_likes').select('prediction_id, user_id').in('prediction_id', ids),
+      supabase.from('prediction_comments').select('prediction_id').in('prediction_id', ids),
+      user
+        ? supabase.from('prediction_saves').select('prediction_id').eq('user_id', user.id).in('prediction_id', ids)
+        : Promise.resolve({ data: [] }),
+    ])
+    const savedIds = new Set((saves || []).map((s) => s.prediction_id))
+    const map = {}
+    for (const id of ids) {
+      const idLikes = (likes || []).filter((l) => l.prediction_id === id)
+      map[id] = {
+        liked: user ? idLikes.some((l) => l.user_id === user.id) : false,
+        likeCount: idLikes.length,
+        saved: savedIds.has(id),
+        commentCount: (comments || []).filter((c) => c.prediction_id === id).length,
+      }
+    }
+    return map
+  }
+
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    async function load() {
+      let query = supabase
+        .from('predictions')
+        .select('*, profiles:author_id(display_name, username, avatar_url)')
+        .eq('is_private', false)
+        .order('created_at', { ascending: false })
+        .limit(30)
+      if (category !== 'Tümü') {
+        query = query.eq('category', category.toLowerCase())
+      }
+      const [{ data, error }, { data: blockedRows }] = await Promise.all([
+        query,
+        user ? supabase.rpc('blocked_user_ids') : Promise.resolve({ data: [] }),
+      ])
+      if (cancelled) return
+      const blockedSet = new Set((blockedRows || []).map((row) => row.blocked_user_ids ?? row))
+      const mutedWords = (settings.content.mutedWords || []).map((w) => w.toLowerCase()).filter(Boolean)
+      const list = error
+        ? []
+        : (data || []).filter(
+            (p) => !blockedSet.has(p.author_id) && !mutedWords.some((w) => p.title?.toLowerCase().includes(w))
+          )
+      setPredictions(list)
+      const social = await loadSocial(list.map((p) => p.id))
+      if (!cancelled) {
+        setSocialById(social)
+        setLoading(false)
+      }
+    }
+    load()
+    return () => {
+      cancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [category, user, settings.content.mutedWords])
+
+  async function handleToggleLike(predictionId) {
+    if (!user) return
+    const current = socialById[predictionId] || EMPTY_SOCIAL
+    const nextLiked = !current.liked
+    setSocialById((prev) => ({
+      ...prev,
+      [predictionId]: { ...current, liked: nextLiked, likeCount: current.likeCount + (nextLiked ? 1 : -1) },
+    }))
+    const { error } = nextLiked
+      ? await supabase.from('prediction_likes').insert({ user_id: user.id, prediction_id: predictionId })
+      : await supabase.from('prediction_likes').delete().eq('user_id', user.id).eq('prediction_id', predictionId)
+    if (error) {
+      setSocialById((prev) => ({ ...prev, [predictionId]: current }))
+      showToast('Beğeni kaydedilemedi, tekrar dene.')
+    }
+  }
+
+  async function handleToggleSave(predictionId) {
+    if (!user) return
+    const current = socialById[predictionId] || EMPTY_SOCIAL
+    const nextSaved = !current.saved
+    setSocialById((prev) => ({ ...prev, [predictionId]: { ...current, saved: nextSaved } }))
+    const { error } = nextSaved
+      ? await supabase.from('prediction_saves').insert({ user_id: user.id, prediction_id: predictionId })
+      : await supabase.from('prediction_saves').delete().eq('user_id', user.id).eq('prediction_id', predictionId)
+    if (error) {
+      setSocialById((prev) => ({ ...prev, [predictionId]: current }))
+      showToast('Kaydetme işlemi başarısız oldu, tekrar dene.')
+    }
+  }
+
+  if (loading) {
+    return <p className="mx-5 mt-4 text-xs text-muted-foreground">Kayıtlar yükleniyor…</p>
+  }
+
+  if (predictions.length === 0) {
+    return (
+      <div className="mx-5 mt-4 rounded-theme border border-dashed border-border bg-card p-6 text-center">
+        <p className="text-sm font-bold text-foreground">Henüz kayıt yok</p>
+        <p className="mt-1 text-xs text-muted-foreground">İlk tahminini oluşturarak akışı başlat.</p>
+      </div>
+    )
+  }
+
+  return (
+    <>
+      {predictions.map((prediction) => (
+        <PredictionCard
+          key={prediction.id}
+          prediction={prediction}
+          social={socialById[prediction.id] || EMPTY_SOCIAL}
+          onToggleLike={handleToggleLike}
+          onToggleSave={handleToggleSave}
+        />
+      ))}
+    </>
+  )
+}
+
 function SuggestedPeople() {
+  const navigate = useNavigate()
+  const { user } = useAuth()
+  const { showToast } = useToast()
+  const [people, setPeople] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  async function load() {
+    const [{ data: following }, { data: blockedIds }] = await Promise.all([
+      supabase.from('follows').select('following_id').eq('follower_id', user.id),
+      supabase.rpc('blocked_user_ids'),
+    ])
+    const excludeSet = new Set((following || []).map((f) => f.following_id))
+    excludeSet.add(user.id)
+    for (const row of blockedIds || []) excludeSet.add(row.blocked_user_ids ?? row)
+
+    const { data: profiles } = await supabase
+      .from('profiles')
+      .select('id, display_name, username, avatar_url')
+      .order('created_at', { ascending: false })
+      .limit(20)
+
+    setPeople((profiles || []).filter((p) => !excludeSet.has(p.id)).slice(0, 5))
+    setLoading(false)
+  }
+
+  useEffect(() => {
+    if (user) load()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [user])
+
+  async function handleFollow(personId) {
+    const removed = people.find((p) => p.id === personId)
+    setPeople((prev) => prev.filter((p) => p.id !== personId))
+    const { error } = await supabase.from('follows').insert({ follower_id: user.id, following_id: personId })
+    if (error) {
+      setPeople((prev) => (removed ? [...prev, removed] : prev))
+      showToast('Takip edilemedi, tekrar dene.')
+    }
+  }
+
+  if (loading || people.length === 0) return null
+
   return (
     <section className="mt-7">
       <div className="flex items-end justify-between px-5">
         <div>
           <h2 className="font-heading text-lg font-bold tracking-tight">Sana önerilen kişiler</h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">Benzer kayıtları takip ediyorlar</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">GTF'e yeni katılanlar</p>
         </div>
-        <button className="text-xs font-bold text-primary">Tümü</button>
       </div>
       <div className="mt-4 flex gap-3 overflow-x-auto px-5 pb-1">
-        {SUGGESTED_PEOPLE.map((person) => (
-          <article
-            key={person.name}
-            className="min-w-[166px] rounded-theme border border-border bg-card p-3 shadow-sm"
-          >
-            <div className="flex items-start justify-between">
+        {people.map((person) => (
+          <article key={person.id} className="min-w-[166px] rounded-theme border border-border bg-card p-3 shadow-sm">
+            <button onClick={() => navigate(`/kullanici/${person.id}`)} className="block text-left">
               <div className="h-11 w-11 overflow-hidden rounded-full">
-                <img src={IMG(person.imageId)} alt={person.name} className="h-full w-full object-cover" />
+                <img src={person.avatar_url || DEFAULT_AVATAR} alt={person.display_name} className="h-full w-full object-cover" />
               </div>
-              <iconify-icon icon="lucide:more-horizontal" class="text-muted-foreground"></iconify-icon>
-            </div>
-            <h3 className="mt-3 text-sm font-bold">{person.name}</h3>
-            <p className="mt-1 text-[10px] text-muted-foreground">{person.tag}</p>
-            <button className="mt-3 w-full rounded-theme bg-secondary py-2 text-xs font-bold text-secondary-foreground">
+              <h3 className="mt-3 text-sm font-bold">{person.display_name}</h3>
+              <p className="mt-1 text-[10px] text-muted-foreground">@{person.username}</p>
+            </button>
+            <button
+              onClick={() => handleFollow(person.id)}
+              className="mt-3 w-full rounded-theme bg-secondary py-2 text-xs font-bold text-secondary-foreground"
+            >
               Takip et
             </button>
           </article>
@@ -291,153 +493,100 @@ function SuggestedPeople() {
   )
 }
 
-function VerifiedResultPost() {
-  return (
-    <article className="mx-5 mt-7 rounded-theme border border-border bg-card p-4 shadow-sm">
-      <div className="flex items-start gap-3">
-        <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full">
-          <img
-            src={IMG('a2aa2b58-b1a9-495f-a096-8c3e1dc9a86c')}
-            alt="Derya Aras"
-            className="h-full w-full object-cover"
-          />
-        </div>
-        <div className="min-w-0 flex-1">
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="flex items-center gap-1.5">
-                <h2 className="text-sm font-bold">Derya Aras</h2>
-                <iconify-icon icon="lucide:badge-check" class="text-sm text-success"></iconify-icon>
-              </div>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">@deryaaras · Dün</p>
-            </div>
-            <button aria-label="Gönderi seçenekleri" className="text-muted-foreground">
-              <iconify-icon icon="lucide:ellipsis" class="text-lg"></iconify-icon>
-            </button>
-          </div>
-          <p className="mt-3 text-[15px] font-medium leading-6">
-            Ocak sonunda yaptığım faiz tahmini bugün açıldı. Beklediğim gibi sabit kaldı.
-          </p>
-          <div className="mt-3 overflow-hidden rounded-theme border border-border">
-            <div className="flex items-center justify-between bg-success px-3 py-2 text-success-foreground">
-              <span className="flex items-center gap-1.5 text-[11px] font-bold">
-                <iconify-icon icon="lucide:badge-check" class="text-sm"></iconify-icon>
-                Doğrulandı
-              </span>
-              <span className="text-[10px] font-semibold">Açıldı · Bugün</span>
-            </div>
-            <div className="p-3">
-              <div className="flex items-center justify-between">
-                <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold text-secondary-foreground">
-                  EKONOMİ
-                </span>
-                <span className="text-[10px] text-muted-foreground">28 gün önce mühürlendi</span>
-              </div>
-              <p className="mt-3 text-sm font-bold leading-5">
-                &ldquo;TCMB politika faizini ocak sonunda sabit tutacak.&rdquo;
-              </p>
-              <div className="mt-3 flex items-center gap-2 text-[11px] text-success">
-                <iconify-icon icon="lucide:check-circle-2" class="text-base"></iconify-icon>
-                <span className="font-semibold">Sonuç, tahminle eşleşti</span>
-              </div>
-            </div>
-          </div>
-          <div className="mt-3 flex items-center justify-between">
-            <div className="flex items-center gap-4 text-muted-foreground">
-              <button className="flex items-center gap-1.5 text-xs font-semibold">
-                <iconify-icon icon="lucide:heart" class="text-[18px]"></iconify-icon>
-                126
-              </button>
-              <button className="flex items-center gap-1.5 text-xs font-semibold">
-                <iconify-icon icon="lucide:message-circle" class="text-[18px]"></iconify-icon>
-                19
-              </button>
-              <button aria-label="Paylaş" className="flex items-center">
-                <iconify-icon icon="lucide:send" class="text-[18px]"></iconify-icon>
-              </button>
-            </div>
-            <button aria-label="Kaydet" className="text-muted-foreground">
-              <iconify-icon icon="lucide:bookmark" class="text-[18px]"></iconify-icon>
-            </button>
-          </div>
-          <div className="mt-3 rounded-theme bg-muted px-3 py-2.5">
-            <p className="text-[11px] text-muted-foreground">
-              <span className="font-semibold text-foreground">Mehmet Y.</span> &ldquo;Gerekçen de çok
-              yerindeydi.&rdquo;
-            </p>
-          </div>
-        </div>
-      </div>
-    </article>
-  )
-}
-
 function FollowedGroups() {
+  const { user } = useAuth()
+  const navigate = useNavigate()
+  const [groups, setGroups] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    if (!user) return
+    let cancelled = false
+    supabase
+      .from('group_members')
+      .select('groups(id, name, category, description, cover_image_url)')
+      .eq('user_id', user.id)
+      .then(({ data }) => {
+        if (!cancelled) {
+          setGroups((data || []).map((m) => m.groups).filter(Boolean))
+          setLoading(false)
+        }
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [user])
+
+  if (loading) return null
+
   return (
     <section className="mt-7">
       <div className="flex items-end justify-between px-5">
         <div>
-          <h2 className="font-heading text-lg font-bold tracking-tight">Takip ettiğin gruplardan</h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">Sohbete katıl, yeni kayıtları gör</p>
-        </div>
-        <button className="text-xs font-bold text-primary">Gruplar</button>
-      </div>
-      <div className="mt-4 flex gap-3 overflow-x-auto px-5 pb-2">
-        <article className="min-w-[248px] overflow-hidden rounded-theme border border-border bg-card shadow-sm">
-          <div className="relative h-24 w-full overflow-hidden">
-            <img
-              src={IMG('db7bc3c4-2a6a-454e-849e-b413d1ef2154')}
-              alt="Derbi Odası"
-              className="h-full w-full object-cover"
-            />
-            <div className="absolute inset-0 bg-gradient-to-t from-black/65 to-transparent" />
-            <div className="absolute bottom-3 left-3">
-              <p className="font-heading text-sm font-bold text-white">Derbi Odası</p>
-            </div>
-          </div>
-          <div className="p-3">
-            <p className="text-xs font-semibold">&ldquo;İlk 11'ler açıklanınca tahminler değişir mi?&rdquo;</p>
-            <div className="mt-3 flex items-center justify-between">
-              <div className="flex -space-x-2">
-                <div className="h-5 w-5 overflow-hidden rounded-full border-2 border-card">
-                  <img
-                    src={IMG('8ab48b09-455b-4a3e-a6d7-6f75d793e3ad')}
-                    alt="Üye"
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-                <div className="h-5 w-5 overflow-hidden rounded-full border-2 border-card">
-                  <img
-                    src={IMG('966e81ef-e363-48fa-b521-2ea03cc081e2')}
-                    alt="Üye"
-                    className="h-full w-full object-cover"
-                  />
-                </div>
-              </div>
-              <span className="text-[10px] font-semibold text-muted-foreground">34 yeni yorum</span>
-            </div>
-          </div>
-        </article>
-        <article className="min-w-[210px] rounded-theme border border-border bg-card p-4 shadow-sm">
-          <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold text-secondary-foreground">
-            TEKNOLOJİ
-          </span>
-          <div className="mt-4 flex h-10 w-10 items-center justify-center rounded-theme bg-muted text-primary">
-            <iconify-icon icon="lucide:orbit" class="text-xl"></iconify-icon>
-          </div>
-          <h3 className="mt-3 font-heading text-[16px] font-bold">Geleceğin Teknolojisi</h3>
-          <p className="mt-1 text-[11px] leading-4 text-muted-foreground">
-            Yapay zekâ cihazları üzerine 16 yeni tahmin.
+          <h2 className="font-heading text-lg font-bold tracking-tight">Gruplarından</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">
+            {groups.length === 0 ? 'Henüz bir gruba katılmadın' : 'Üyesi olduğun topluluklar'}
           </p>
-          <button className="mt-4 text-xs font-bold text-primary">Gruba git →</button>
-        </article>
+        </div>
+        <button onClick={() => navigate('/gruplar')} className="text-xs font-bold text-primary">
+          Gruplar
+        </button>
       </div>
+
+      {groups.length === 0 ? (
+        <button
+          onClick={() => navigate('/gruplar')}
+          className="mx-5 mt-4 flex w-[calc(100%-40px)] items-center justify-center gap-2 rounded-theme border border-dashed border-border bg-card py-4 text-xs font-bold text-primary"
+        >
+          <iconify-icon icon="lucide:users-round" class="text-base"></iconify-icon>
+          Bir gruba katıl veya yeni grup kur
+        </button>
+      ) : (
+        <div className="mt-4 flex gap-3 overflow-x-auto px-5 pb-2">
+          {groups.map((group) => (
+            <button
+              key={group.id}
+              onClick={() => navigate(`/grup/${group.id}`)}
+              className="min-w-[210px] overflow-hidden rounded-theme border border-border bg-card text-left shadow-sm"
+            >
+              {group.cover_image_url && (
+                <div className="h-20 w-full overflow-hidden bg-muted">
+                  <img src={group.cover_image_url} alt={group.name} className="h-full w-full object-cover" />
+                </div>
+              )}
+              <div className="p-4">
+                <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold text-secondary-foreground">
+                  {group.category?.toUpperCase()}
+                </span>
+                <h3 className="mt-3 font-heading text-[16px] font-bold">{group.name}</h3>
+                {group.description && (
+                  <p className="mt-1 line-clamp-2 text-[11px] leading-4 text-muted-foreground">{group.description}</p>
+                )}
+              </div>
+            </button>
+          ))}
+        </div>
+      )}
     </section>
   )
 }
 
 export default function Anasayfa() {
-  const [activeCategory, setActiveCategory] = useState('Senin akışın')
+  const [activeCategory, setActiveCategory] = useState('Tümü')
+  const { settings } = useUserSettings()
+  const appliedInterestDefault = useRef(false)
+
+  // Land people with a single declared interest straight on that tab. Only
+  // applies once, and only before the user has touched the tabs themselves.
+  useEffect(() => {
+    if (appliedInterestDefault.current) return
+    const interests = settings.content.interests
+    if (interests.length === 0) return
+    appliedInterestDefault.current = true
+    if (interests.length === 1 && CATEGORIES.includes(interests[0])) {
+      setActiveCategory(interests[0])
+    }
+  }, [settings.content.interests])
 
   return (
     <div className="min-h-screen w-full bg-background pb-28 text-foreground font-body">
@@ -445,21 +594,17 @@ export default function Anasayfa() {
       <main className="pt-5">
         <ComposeCard />
         <CategoryTabs active={activeCategory} onSelect={setActiveCategory} />
-        <NearbyEventsCard />
+        <StatsBanner />
         <section className="mt-7">
           <div className="flex items-center justify-between px-5">
             <div>
-              <h1 className="font-heading text-xl font-extrabold tracking-[-0.045em]">
-                Takip ettiklerinden
-              </h1>
-              <p className="mt-1 text-xs text-muted-foreground">Bugün açılan ve mühürlenen kayıtlar</p>
+              <h1 className="font-heading text-xl font-extrabold tracking-[-0.045em]">Akış</h1>
+              <p className="mt-1 text-xs text-muted-foreground">Herkese açık mühürlü ve doğrulanmış kayıtlar</p>
             </div>
-            <button className="text-xs font-bold text-primary">Sırala</button>
           </div>
-          <SealedPredictionPost />
+          <PredictionFeed category={activeCategory} />
         </section>
         <SuggestedPeople />
-        <VerifiedResultPost />
         <FollowedGroups />
       </main>
     </div>

@@ -1,8 +1,164 @@
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { IMG } from '../lib/images.js'
+import { supabase } from '../lib/supabase.js'
+import { useAuth } from '../contexts/AuthContext.jsx'
+import { timeAgo } from '../lib/format.js'
+
+const DEFAULT_AVATAR = IMG('30bcaf3b-c1a8-4dcb-bb98-3fdcc1b6b596')
+
+function NewChatModal({ onClose, onPick }) {
+  const { user } = useAuth()
+  const [query, setQuery] = useState('')
+  const [people, setPeople] = useState([])
+  const [loading, setLoading] = useState(true)
+
+  useEffect(() => {
+    let cancelled = false
+    setLoading(true)
+    const handle = setTimeout(async () => {
+      const term = query.trim()
+      const [{ data: blockedRows }, { data: peopleData }] = await Promise.all([
+        supabase.rpc('blocked_user_ids'),
+        term
+          ? supabase
+              .from('profiles')
+              .select('id, display_name, username, avatar_url')
+              .neq('id', user.id)
+              .or(`username.ilike.%${term}%,display_name.ilike.%${term}%`)
+              .order('display_name')
+              .limit(20)
+          : supabase
+              .from('follows')
+              .select('profiles:following_id(id, display_name, username, avatar_url)')
+              .eq('follower_id', user.id)
+              .eq('status', 'accepted')
+              .limit(20),
+      ])
+      if (cancelled) return
+      const blockedSet = new Set((blockedRows || []).map((row) => row.blocked_user_ids ?? row))
+      const list = term ? peopleData || [] : (peopleData || []).map((r) => r.profiles).filter(Boolean)
+      setPeople(list.filter((p) => !blockedSet.has(p.id)))
+      setLoading(false)
+    }, 250)
+    return () => {
+      cancelled = true
+      clearTimeout(handle)
+    }
+  }, [user, query])
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end bg-black/40" onClick={onClose}>
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="flex max-h-[70vh] w-full flex-col overflow-hidden rounded-t-theme bg-background pb-8"
+      >
+        <div className="sticky top-0 border-b border-border bg-background px-5 py-4">
+          <div className="flex items-center justify-between">
+            <h2 className="font-heading text-lg font-bold">Yeni mesaj</h2>
+            <button onClick={onClose} aria-label="Kapat" className="text-muted-foreground">
+              <iconify-icon icon="lucide:x" class="text-xl"></iconify-icon>
+            </button>
+          </div>
+          <div className="mt-3 flex items-center gap-2 rounded-theme border border-border bg-card px-3.5 py-2.5">
+            <iconify-icon icon="lucide:search" class="text-base text-muted-foreground"></iconify-icon>
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Kullanıcı ara…"
+              className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+            />
+          </div>
+        </div>
+        <div className="overflow-y-auto">
+          {loading ? (
+            <p className="px-5 py-6 text-xs text-muted-foreground">Yükleniyor…</p>
+          ) : people.length === 0 ? (
+            <p className="px-5 py-6 text-xs text-muted-foreground">
+              {query.trim() ? 'Kimse bulunamadı.' : 'Takip ettiğin kimse yok. Aramak için yaz.'}
+            </p>
+          ) : (
+            people.map((p) => (
+            <button
+              key={p.id}
+              onClick={() => onPick(p)}
+              className="flex w-full items-center gap-3 border-b border-border px-5 py-3.5 text-left"
+            >
+              <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full bg-muted">
+                <img src={p.avatar_url || DEFAULT_AVATAR} alt={p.display_name} className="h-full w-full object-cover" />
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-sm font-bold">{p.display_name}</p>
+                <p className="truncate text-xs text-muted-foreground">@{p.username}</p>
+              </div>
+            </button>
+            ))
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
 
 export default function Mesajlar() {
   const navigate = useNavigate()
+  const { user } = useAuth()
+  const [conversations, setConversations] = useState([])
+  const [loading, setLoading] = useState(true)
+  const [showNewChat, setShowNewChat] = useState(false)
+
+  useEffect(() => {
+    if (!user) return
+    let cancelled = false
+
+    async function load() {
+      const { data, error } = await supabase
+        .from('messages')
+        .select(
+          'id, content, created_at, sender_id, recipient_id, sender:sender_id(id, display_name, username, avatar_url), recipient:recipient_id(id, display_name, username, avatar_url)'
+        )
+        .or(`sender_id.eq.${user.id},recipient_id.eq.${user.id}`)
+        .order('created_at', { ascending: false })
+
+      if (cancelled) return
+      if (error) {
+        setLoading(false)
+        return
+      }
+
+      const byPartner = new Map()
+      for (const msg of data || []) {
+        const partner = msg.sender_id === user.id ? msg.recipient : msg.sender
+        if (!partner) continue
+        if (!byPartner.has(partner.id)) {
+          byPartner.set(partner.id, { partner, lastMessage: msg })
+        }
+      }
+      setConversations(Array.from(byPartner.values()))
+      setLoading(false)
+    }
+
+    load()
+
+    const channel = supabase
+      .channel('messages-list')
+      .on(
+        'postgres_changes',
+        { event: 'INSERT', schema: 'public', table: 'messages', filter: `recipient_id=eq.${user.id}` },
+        () => load()
+      )
+      .subscribe()
+
+    return () => {
+      cancelled = true
+      supabase.removeChannel(channel)
+    }
+  }, [user])
+
+  function openChat(partner) {
+    setShowNewChat(false)
+    navigate('/sohbet', { state: { partner } })
+  }
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-body pb-28">
@@ -16,193 +172,74 @@ export default function Mesajlar() {
           </div>
           <button
             aria-label="Yeni mesaj oluştur"
+            onClick={() => setShowNewChat(true)}
             className="flex h-11 w-11 items-center justify-center rounded-theme bg-primary text-primary-foreground shadow-sm"
           >
             <iconify-icon icon="lucide:pen-square" class="text-xl"></iconify-icon>
           </button>
-        </div>
-
-        <div className="relative mt-5">
-          <iconify-icon
-            icon="lucide:search"
-            class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-lg text-muted-foreground"
-          ></iconify-icon>
-          <input
-            aria-label="Mesajlarda ara"
-            type="search"
-            placeholder="Mesajlarda ara"
-            className="h-12 w-full rounded-theme border border-border bg-input pl-11 pr-4 text-sm text-foreground outline-none placeholder:text-muted-foreground focus:border-primary"
-          />
         </div>
       </header>
 
       <main>
         <section className="mt-6">
           <div className="flex items-center justify-between px-5">
-            <h2 className="font-heading text-sm font-bold tracking-tight">Sabitlenenler</h2>
-            <button className="text-xs font-semibold text-primary">Düzenle</button>
-          </div>
-
-          <div className="mt-3 flex gap-4 overflow-x-auto px-5 pb-2">
-            <button className="flex min-w-[70px] flex-col items-center text-center">
-              <div className="relative h-[62px] w-[62px] rounded-full border-2 border-accent p-0.5">
-                <div className="h-full w-full overflow-hidden rounded-full bg-muted">
-                  <img src={IMG('2ebd8673-cdb6-436f-8c55-6f6cb7489059')} alt="Ece Arslan" className="h-full w-full object-cover" />
-                </div>
-                <span className="absolute bottom-0 right-0 flex h-5 w-5 items-center justify-center rounded-full border-2 border-background bg-primary text-primary-foreground">
-                  <iconify-icon icon="lucide:pin" class="text-[10px]"></iconify-icon>
-                </span>
-              </div>
-              <span className="mt-2 max-w-[72px] truncate text-[11px] font-semibold">Ece Arslan</span>
-            </button>
-
-            <button className="flex min-w-[82px] flex-col items-center text-center">
-              <div className="relative flex h-[62px] w-[62px] items-center justify-center rounded-full border-2 border-accent bg-secondary text-primary">
-                <div className="grid grid-cols-2 gap-0.5">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-card text-[9px] font-bold">D</span>
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-primary text-[9px] font-bold text-primary-foreground">O</span>
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[9px] font-bold text-accent-foreground">Y</span>
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-card text-[9px] font-bold">3</span>
-                </div>
-                <span className="absolute bottom-0 right-0 flex h-5 w-5 items-center justify-center rounded-full border-2 border-background bg-primary text-primary-foreground">
-                  <iconify-icon icon="lucide:pin" class="text-[10px]"></iconify-icon>
-                </span>
-              </div>
-              <span className="mt-2 max-w-[82px] truncate text-[11px] font-semibold">Derbi Odası</span>
-            </button>
-
-            <button className="flex min-w-[70px] flex-col items-center text-center">
-              <div className="relative flex h-[62px] w-[62px] items-center justify-center rounded-full bg-muted text-primary">
-                <iconify-icon icon="lucide:users-round" class="text-2xl"></iconify-icon>
-                <span className="absolute bottom-0 right-0 flex h-5 w-5 items-center justify-center rounded-full border-2 border-background bg-card text-muted-foreground">
-                  <iconify-icon icon="lucide:pin" class="text-[10px]"></iconify-icon>
-                </span>
-              </div>
-              <span className="mt-2 max-w-[72px] truncate text-[11px] font-semibold">Gelecek Lab</span>
-            </button>
-          </div>
-        </section>
-
-        <section className="mt-6">
-          <div className="flex items-center justify-between px-5">
             <h2 className="font-heading text-lg font-bold tracking-tight">Sohbetler</h2>
-            <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold text-secondary-foreground">
-              3 okunmamış
-            </span>
           </div>
 
-          <div className="mt-3 border-y border-border bg-card">
-            <button
-              onClick={() => navigate('/sohbet')}
-              className="flex w-full items-center gap-3 border-b border-border px-5 py-4 text-left"
-            >
-              <div className="relative h-14 w-14 shrink-0">
-                <div className="h-14 w-14 overflow-hidden rounded-full bg-muted">
-                  <img src={IMG('30bcaf3b-c1a8-4dcb-bb98-3fdcc1b6b596')} alt="Ece Arslan" className="h-full w-full object-cover" />
-                </div>
-                <span className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-card bg-success" />
+          {loading ? (
+            <p className="mt-4 px-5 text-xs text-muted-foreground">Yükleniyor…</p>
+          ) : conversations.length === 0 ? (
+            <section className="mx-5 mt-4 rounded-theme border border-dashed border-border bg-muted/60 px-5 py-6 text-center">
+              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-card text-primary shadow-sm">
+                <iconify-icon icon="lucide:message-circle" class="text-lg"></iconify-icon>
               </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-baseline justify-between gap-3">
-                  <p className="truncate text-sm font-bold">Ece Arslan</p>
-                  <time className="shrink-0 text-[11px] font-semibold text-primary">14:32</time>
-                </div>
-                <div className="mt-1 flex items-center gap-2">
-                  <p className="truncate text-xs font-medium text-foreground">Açılınca sonucu birlikte konuşalım.</p>
-                  <span className="h-2 w-2 shrink-0 rounded-full bg-accent" />
-                </div>
-                <div className="mt-1.5 flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                  <iconify-icon icon="lucide:lock-keyhole" class="text-xs text-primary"></iconify-icon>
-                  <span>Mühürlü kayıt hakkında</span>
-                </div>
-              </div>
-            </button>
-
-            <button className="flex w-full items-center gap-3 border-b border-border px-5 py-4 text-left">
-              <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-primary text-primary-foreground">
-                <div className="grid grid-cols-2 gap-1">
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-[9px] font-bold">D</span>
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-[9px] font-bold">O</span>
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-white/20 text-[9px] font-bold">Y</span>
-                  <span className="flex h-5 w-5 items-center justify-center rounded-full bg-accent text-[9px] font-bold">3</span>
-                </div>
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-baseline justify-between gap-3">
-                  <p className="truncate text-sm font-bold">Derbi Odası Yöneticileri</p>
-                  <time className="shrink-0 text-[11px] text-muted-foreground">13:08</time>
-                </div>
-                <div className="mt-1 flex items-center gap-2">
-                  <p className="truncate text-xs text-muted-foreground">Yeni etkinlik eklendi: Galatasaray - Fenerbahçe</p>
-                  <span className="flex h-5 min-w-5 items-center justify-center rounded-full bg-primary px-1 text-[10px] font-bold text-primary-foreground">
-                    2
-                  </span>
-                </div>
-                <div className="mt-1.5 flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                  <iconify-icon icon="lucide:users-round" class="text-xs"></iconify-icon>
-                  <span>Grup sohbeti · 184 üye</span>
-                </div>
-              </div>
-            </button>
-
-            <button className="flex w-full items-center gap-3 border-b border-border px-5 py-4 text-left">
-              <div className="relative h-14 w-14 shrink-0">
-                <div className="h-14 w-14 overflow-hidden rounded-full bg-muted">
-                  <img src={IMG('86e36643-3023-4f68-ba1c-4d2addba5617')} alt="Onur Şahin" className="h-full w-full object-cover" />
-                </div>
-                <span className="absolute bottom-0 right-0 h-3.5 w-3.5 rounded-full border-2 border-card bg-success" />
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-baseline justify-between gap-3">
-                  <p className="truncate text-sm font-bold">Onur Şahin</p>
-                  <time className="shrink-0 text-[11px] text-muted-foreground">Dün</time>
-                </div>
-                <div className="mt-1 flex items-center gap-2">
-                  <p className="truncate text-xs text-muted-foreground">Dünya Kupası tahminini mühürledin mi?</p>
-                </div>
-                <div className="mt-1.5 flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                  <iconify-icon icon="lucide:check-check" class="text-xs text-success"></iconify-icon>
-                  <span>Görüldü</span>
-                </div>
-              </div>
-            </button>
-
-            <button className="flex w-full items-center gap-3 px-5 py-4 text-left">
-              <div className="relative flex h-14 w-14 shrink-0 items-center justify-center rounded-full bg-secondary text-primary">
-                <iconify-icon icon="lucide:landmark" class="text-xl"></iconify-icon>
-                <span className="absolute bottom-0 right-0 flex h-5 w-5 items-center justify-center rounded-full border-2 border-card bg-muted text-muted-foreground">
-                  <iconify-icon icon="lucide:volume-x" class="text-[10px]"></iconify-icon>
-                </span>
-              </div>
-              <div className="min-w-0 flex-1">
-                <div className="flex items-baseline justify-between gap-3">
-                  <p className="truncate text-sm font-bold">Ekonomi Notları</p>
-                  <time className="shrink-0 text-[11px] text-muted-foreground">Pzt</time>
-                </div>
-                <p className="mt-1 truncate text-xs text-muted-foreground">Selin Acar: Açılış tarihi için not düştüm.</p>
-                <div className="mt-1.5 flex items-center gap-1.5 text-[10px] text-muted-foreground">
-                  <iconify-icon icon="lucide:volume-x" class="text-xs"></iconify-icon>
-                  <span>Bildirimler sessizde</span>
-                </div>
-              </div>
-            </button>
-          </div>
-        </section>
-
-        <section className="mx-5 mt-7 rounded-theme border border-dashed border-border bg-muted/60 px-5 py-6 text-center">
-          <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-card text-primary shadow-sm">
-            <iconify-icon icon="lucide:message-circle" class="text-lg"></iconify-icon>
-          </div>
-          <h2 className="mt-3 font-heading text-sm font-bold">Yeni bir sohbet başlat</h2>
-          <p className="mx-auto mt-1 max-w-[250px] text-xs leading-5 text-muted-foreground">
-            Birini takip ettiğinde veya gruba katıldığında, buradan kolayca mesajlaşabilirsin.
-          </p>
-          <button className="mt-4 inline-flex items-center gap-2 rounded-theme bg-secondary px-4 py-2.5 text-xs font-bold text-secondary-foreground">
-            <iconify-icon icon="lucide:user-plus" class="text-sm"></iconify-icon>
-            Kişi bul
-          </button>
+              <h2 className="mt-3 font-heading text-sm font-bold">Yeni bir sohbet başlat</h2>
+              <p className="mx-auto mt-1 max-w-[250px] text-xs leading-5 text-muted-foreground">
+                Henüz kimseyle mesajlaşmadın. Bir kullanıcı seçip ilk mesajını gönder.
+              </p>
+              <button
+                onClick={() => setShowNewChat(true)}
+                className="mt-4 inline-flex items-center gap-2 rounded-theme bg-secondary px-4 py-2.5 text-xs font-bold text-secondary-foreground"
+              >
+                <iconify-icon icon="lucide:user-plus" class="text-sm"></iconify-icon>
+                Kişi bul
+              </button>
+            </section>
+          ) : (
+            <div className="mt-3 border-y border-border bg-card">
+              {conversations.map(({ partner, lastMessage }) => (
+                <button
+                  key={partner.id}
+                  onClick={() => openChat(partner)}
+                  className="flex w-full items-center gap-3 border-b border-border px-5 py-4 text-left last:border-b-0"
+                >
+                  <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full bg-muted">
+                    <img
+                      src={partner.avatar_url || DEFAULT_AVATAR}
+                      alt={partner.display_name}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-baseline justify-between gap-3">
+                      <p className="truncate text-sm font-bold">{partner.display_name}</p>
+                      <time className="shrink-0 text-[11px] font-semibold text-muted-foreground">
+                        {timeAgo(lastMessage.created_at)}
+                      </time>
+                    </div>
+                    <p className="mt-1 truncate text-xs font-medium text-foreground">
+                      {lastMessage.sender_id === user.id ? 'Sen: ' : ''}
+                      {lastMessage.content}
+                    </p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          )}
         </section>
       </main>
+
+      {showNewChat && <NewChatModal onClose={() => setShowNewChat(false)} onPick={openChat} />}
     </div>
   )
 }
