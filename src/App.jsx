@@ -7,6 +7,7 @@ import { PresenceProvider } from './contexts/PresenceContext.jsx'
 import { UserSettingsProvider } from './contexts/UserSettingsContext.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 import AccentColor from './components/AccentColor.jsx'
+import AndroidBackButton from './components/AndroidBackButton.jsx'
 import TabLayout from './layouts/TabLayout.jsx'
 import Giris from './screens/Giris.jsx'
 import Anasayfa from './screens/Anasayfa.jsx'
@@ -48,6 +49,7 @@ export default function App() {
           <UserSettingsProvider>
             <PresenceProvider>
               <AccentColor />
+              <AndroidBackButton />
               <HashRouter>
                 <Suspense fallback={<ScreenFallback />}>
                   <Routes>
