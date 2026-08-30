@@ -3,8 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import { supabase } from '../lib/supabase.js'
-
-const CATEGORIES = ['Genel', 'Spor', 'Teknoloji', 'Ekonomi', 'Kültür', 'Dünya']
+import { GROUP_CATEGORIES as CATEGORIES } from '../lib/categories.js'
 
 function CreateGroupModal({ onClose, onCreated }) {
   const { user } = useAuth()

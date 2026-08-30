@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { IMG } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { timeAgo } from '../lib/format.js'
+import { CATEGORY_META } from '../lib/categories.js'
 
 function SearchResults({ query, navigate }) {
   const [profiles, setProfiles] = useState([])
@@ -107,16 +108,6 @@ function SearchResults({ query, navigate }) {
 }
 
 const DEFAULT_AVATAR = IMG('e5c6a2fd-2700-478a-a8f3-1ed0f5acfc3e')
-
-const CATEGORY_META = {
-  spor: { icon: 'lucide:trophy', label: 'Spor' },
-  teknoloji: { icon: 'lucide:cpu', label: 'Teknoloji' },
-  bilim: { icon: 'lucide:flask-conical', label: 'Bilim' },
-  kültür: { icon: 'lucide:book-open', label: 'Kültür' },
-  ekonomi: { icon: 'lucide:chart-no-axes-combined', label: 'Ekonomi' },
-  dünya: { icon: 'lucide:globe-2', label: 'Dünya' },
-  genel: { icon: 'lucide:sparkles', label: 'Genel' },
-}
 
 function CategoryTile({ category, count, variant }) {
   const meta = CATEGORY_META[category] || { icon: 'lucide:tag', label: category }

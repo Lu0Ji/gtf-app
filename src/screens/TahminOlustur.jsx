@@ -2,8 +2,7 @@ import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
-
-const CATEGORIES = ['Spor', 'Teknoloji', 'Bilim', 'Kültür', 'Ekonomi', 'Dünya']
+import { CATEGORIES } from '../lib/categories.js'
 
 export default function TahminOlustur() {
   const navigate = useNavigate()

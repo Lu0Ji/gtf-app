@@ -6,8 +6,9 @@ import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import { useUserSettings } from '../hooks/useUserSettings.js'
 import { formatDateLong, timeAgo } from '../lib/format.js'
+import { CATEGORIES as PREDICTION_CATEGORIES } from '../lib/categories.js'
 
-const CATEGORIES = ['Tümü', 'Spor', 'Teknoloji', 'Bilim', 'Kültür', 'Ekonomi', 'Dünya']
+const CATEGORIES = ['Tümü', ...PREDICTION_CATEGORIES]
 const DEFAULT_AVATAR = IMG('fc4eb4df-87ce-4cd9-bdd3-80a434cd8ddd')
 
 function Header() {
