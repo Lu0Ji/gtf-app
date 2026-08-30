@@ -84,6 +84,55 @@ function ComposeCard() {
   )
 }
 
+// Personal hook: your own sealed predictions whose reveal date has arrived
+// are the one thing only you can act on right now, so surface them above
+// everything else instead of leaving them to be found on your profile.
+function OpeningTodayBanner() {
+  const { user } = useAuth()
+  const navigate = useNavigate()
+  const [pending, setPending] = useState([])
+
+  useEffect(() => {
+    if (!user) return
+    let cancelled = false
+    supabase
+      .from('predictions')
+      .select('id, title, sealed_content, category, status, event_date, author_id')
+      .eq('author_id', user.id)
+      .eq('status', 'sealed')
+      .lte('event_date', new Date().toISOString())
+      .order('event_date', { ascending: true })
+      .then(({ data }) => {
+        if (!cancelled) setPending(data || [])
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [user])
+
+  if (pending.length === 0) return null
+
+  return (
+    <button
+      onClick={() => navigate('/tahmin-kaydi', { state: { prediction: pending[0] } })}
+      className="mx-5 mt-4 flex w-[calc(100%-40px)] items-center gap-3 rounded-theme border-2 border-accent bg-accent/10 p-4 text-left shadow-sm"
+    >
+      <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-theme bg-accent text-accent-foreground">
+        <iconify-icon icon="lucide:stamp" class="text-lg"></iconify-icon>
+      </span>
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-bold">
+          {pending.length === 1 ? 'Bir mührün açılmaya hazır!' : `${pending.length} mührün açılmaya hazır!`}
+        </p>
+        <p className="mt-0.5 truncate text-xs text-muted-foreground">
+          "{pending[0].title}" — sonucu şimdi işaretle.
+        </p>
+      </div>
+      <iconify-icon icon="lucide:chevron-right" class="shrink-0 text-lg text-muted-foreground"></iconify-icon>
+    </button>
+  )
+}
+
 function CategoryTabs({ active, onSelect }) {
   return (
     <section className="mt-5">
@@ -599,6 +648,7 @@ export default function Anasayfa() {
       <Header />
       <main className="pt-5">
         <ComposeCard />
+        <OpeningTodayBanner />
         <CategoryTabs active={activeCategory} onSelect={setActiveCategory} />
         <StatsBanner />
         <section className="mt-7">
