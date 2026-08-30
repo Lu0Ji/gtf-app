@@ -23,8 +23,16 @@ const INTEREST_OPTIONS = ['Spor', 'Teknoloji', 'Bilim', 'Kültür', 'Ekonomi', '
 
 function Toggle({ on }) {
   return (
-    <span className={`flex h-6 w-11 items-center rounded-full p-1 ${on ? 'justify-end bg-primary' : 'bg-muted'}`}>
-      <span className={`h-4 w-4 rounded-full shadow-sm ${on ? 'bg-primary-foreground' : 'bg-card'}`} />
+    <span
+      className={`relative inline-flex h-6 w-11 shrink-0 items-center rounded-full transition-colors duration-200 ease-out ${
+        on ? 'bg-primary' : 'bg-muted'
+      }`}
+    >
+      <span
+        className={`h-4 w-4 rounded-full shadow-sm transition-transform duration-200 ease-out ${
+          on ? 'translate-x-6 bg-primary-foreground' : 'translate-x-1 bg-card'
+        }`}
+      />
     </span>
   )
 }
