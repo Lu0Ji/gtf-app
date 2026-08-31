@@ -954,6 +954,40 @@ create trigger group_members_identity_immutable
   before update on public.group_members
   for each row execute function public.protect_group_membership_identity();
 
+-- ROZETLER v2: FireVibe's badge catalog was hand-expanded to 120 badges
+-- across 4 tiers (Başlangıç/İstikrar/Ustalık/Efsane) — see
+-- src/lib/badges.js for the full catalog and its criteria, all derived
+-- from real, already-tracked activity (no new stats needed for the
+-- criteria themselves). Two small additions needed for the parts of the
+-- redesign that need real persistence:
+--
+-- 1) Real earn dates + "bu ay kazanılan" count. Badge status itself stays
+--    computed live client-side (same as before) — this table just records
+--    the first moment each badge was OBSERVED as earned, written
+--    client-side the first time Rozetler notices a badge crossed its
+--    threshold (see Rozetler.jsx). Honest limitation: a badge you already
+--    qualified for before this shipped gets today's date as its "earned"
+--    date, not your true historical achievement date — there's no
+--    retroactive data to backfill from.
+create table public.earned_badges (
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  badge_slug text not null,
+  earned_at timestamptz not null default now(),
+  primary key (user_id, badge_slug)
+);
+
+alter table public.earned_badges enable row level security;
+create policy "Earned badges are viewable by everyone" on public.earned_badges for select using (true);
+create policy "Users can record their own earned badges" on public.earned_badges for insert with check (auth.uid() = user_id);
+
+grant select on public.earned_badges to anon, authenticated;
+grant insert on public.earned_badges to authenticated;
+
+-- "Profil vitrini" (pinning up to 3 badges to feature) is deliberately
+-- NOT backed by a DB column — it's a per-device display preference (same
+-- localStorage pattern as Arama Geçmişi), not something other users need
+-- to see, so it doesn't need a migration at all.
+
 -- ─────────────────────────────────────────────────────────────────────────
 -- NOT YET DEPLOYABLE FROM HERE: real independent verification (full
 -- "Option B") and push notifications both need a Supabase Edge Function
