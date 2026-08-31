@@ -1,6 +1,7 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from './AuthContext.jsx'
+import { setTimeFormatPreference } from '../lib/format.js'
 
 export const DEFAULT_SETTINGS = {
   notifications: {
@@ -19,6 +20,11 @@ export const DEFAULT_SETTINGS = {
   privacy: {
     showOnline: true,
   },
+  // Bölge ve Tarih Biçimi — the one real region/format control (see
+  // lib/format.js for why country/timezone/date-order aren't here too).
+  region: {
+    timeFormat: '24h',
+  },
 }
 
 function mergeSettings(stored) {
@@ -27,6 +33,7 @@ function mergeSettings(stored) {
     notifications: { ...DEFAULT_SETTINGS.notifications, ...(s.notifications || {}) },
     content: { ...DEFAULT_SETTINGS.content, ...(s.content || {}) },
     privacy: { ...DEFAULT_SETTINGS.privacy, ...(s.privacy || {}) },
+    region: { ...DEFAULT_SETTINGS.region, ...(s.region || {}) },
   }
 }
 
@@ -63,6 +70,10 @@ export function UserSettingsProvider({ children }) {
       cancelled = true
     }
   }, [user])
+
+  useEffect(() => {
+    setTimeFormatPreference(settings.region.timeFormat)
+  }, [settings.region.timeFormat])
 
   const update = useCallback(
     async (section, patch) => {

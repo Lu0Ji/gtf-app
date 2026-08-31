@@ -264,6 +264,12 @@ function PredictionCard({ prediction, social, onToggleLike, onToggleSave }) {
               </p>
             </button>
           </div>
+          {prediction.is_sensitive && (
+            <span className="mt-3 inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-1 text-[10px] font-bold text-destructive">
+              <iconify-icon icon="lucide:triangle-alert" class="text-xs"></iconify-icon>
+              Hassas içerik olarak işaretlendi
+            </span>
+          )}
           <p className="mt-3 text-[15px] font-medium leading-6 text-foreground">{prediction.title}</p>
 
           {isVerified ? (
@@ -356,7 +362,7 @@ function PredictionCard({ prediction, social, onToggleLike, onToggleSave }) {
 const EMPTY_SOCIAL = { liked: false, likeCount: 0, saved: false, commentCount: 0 }
 
 function PredictionFeed({ category }) {
-  const { user } = useAuth()
+  const { user, profile } = useAuth()
   const { showToast } = useToast()
   const { settings } = useUserSettings()
   const [predictions, setPredictions] = useState([])
@@ -407,10 +413,14 @@ function PredictionFeed({ category }) {
       if (cancelled) return
       const blockedSet = new Set((blockedRows || []).map((row) => row.blocked_user_ids ?? row))
       const mutedWords = (settings.content.mutedWords || []).map((w) => w.toLowerCase()).filter(Boolean)
+      const hideSensitive = profile?.content_filter_level === 'less'
       const list = error
         ? []
         : (data || []).filter(
-            (p) => !blockedSet.has(p.author_id) && !mutedWords.some((w) => p.title?.toLowerCase().includes(w))
+            (p) =>
+              !blockedSet.has(p.author_id) &&
+              !mutedWords.some((w) => p.title?.toLowerCase().includes(w)) &&
+              !(hideSensitive && p.is_sensitive)
           )
       setPredictions(list)
       const social = await loadSocial(list.map((p) => p.id))
@@ -424,7 +434,7 @@ function PredictionFeed({ category }) {
       cancelled = true
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [category, user, settings.content.mutedWords])
+  }, [category, user, settings.content.mutedWords, profile?.content_filter_level])
 
   async function handleToggleLike(predictionId) {
     if (!user) return

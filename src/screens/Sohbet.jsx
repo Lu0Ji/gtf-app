@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import { useOnlineUsers } from '../contexts/PresenceContext.jsx'
+import { formatTime } from '../lib/format.js'
 
 const DEFAULT_AVATAR = IMG('45ef8632-46e1-43ca-9a32-ce5f5800af73')
 
@@ -186,7 +187,7 @@ export default function Sohbet() {
                         <p className="text-sm leading-5">{m.content}</p>
                       </div>
                       <p className={`mt-1.5 px-1 text-[10px] text-muted-foreground ${isMine ? 'text-right' : ''}`}>
-                        {new Date(m.created_at).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+                        {formatTime(m.created_at)}
                       </p>
                     </div>
                   </div>

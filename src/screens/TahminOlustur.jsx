@@ -19,6 +19,7 @@ export default function TahminOlustur() {
   const [title, setTitle] = useState('')
   const [sealedContent, setSealedContent] = useState('')
   const [eventDate, setEventDate] = useState('')
+  const [isSensitive, setIsSensitive] = useState(false)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
 
@@ -41,19 +42,19 @@ export default function TahminOlustur() {
         event_date: new Date(eventDate).toISOString(),
         sealed_at: new Date().toISOString(),
       }
-      // Only add group_id to the payload when actually needed — PostgREST
-      // rejects the whole insert (PGRST204) if a key isn't a real column,
-      // and that column only exists once the group-predictions migration
-      // (see supabase/schema.sql) has run. Omitting the key entirely covers
-      // every ordinary (non-group) prediction regardless of migration
-      // status; only a genuine group-scoped seal needs the fallback retry.
-      let { error: insertError } = targetGroupId
-        ? await supabase.from('predictions').insert({ ...basePayload, group_id: targetGroupId })
-        : await supabase.from('predictions').insert(basePayload)
+      // Optional columns only added to the payload when actually set —
+      // PostgREST rejects the whole insert (PGRST204) if a key isn't a real
+      // column, and both of these only exist once their migrations (see
+      // supabase/schema.sql) have run. Omitting an unset key covers the
+      // common case regardless of migration status; if a genuinely-used
+      // optional field 42P01/PGRST204s, fall back to the base payload alone
+      // rather than losing the user's work.
+      const fullPayload = { ...basePayload }
+      if (targetGroupId) fullPayload.group_id = targetGroupId
+      if (isSensitive) fullPayload.is_sensitive = true
 
-      if (insertError?.code === 'PGRST204' && targetGroupId) {
-        // Group predictions aren't live yet on this database — fall back to
-        // an ordinary personal seal rather than losing the user's work.
+      let { error: insertError } = await supabase.from('predictions').insert(fullPayload)
+      if (insertError?.code === 'PGRST204' && Object.keys(fullPayload).length > Object.keys(basePayload).length) {
         ;({ error: insertError } = await supabase.from('predictions').insert(basePayload))
         if (!insertError) {
           navigate('/', { replace: true })
@@ -208,6 +209,28 @@ export default function TahminOlustur() {
               )
             })}
           </div>
+        </section>
+
+        <section>
+          <button
+            type="button"
+            onClick={() => setIsSensitive((v) => !v)}
+            className="flex w-full items-center gap-3 rounded-theme border border-border bg-card p-3.5 text-left"
+          >
+            <span
+              className={`flex h-5 w-5 shrink-0 items-center justify-center rounded-md border-2 ${
+                isSensitive ? 'border-destructive bg-destructive text-destructive-foreground' : 'border-border'
+              }`}
+            >
+              {isSensitive && <iconify-icon icon="lucide:check" class="text-xs"></iconify-icon>}
+            </span>
+            <span className="min-w-0 flex-1">
+              <span className="block text-sm font-bold text-foreground">Hassas içerik olarak işaretle</span>
+              <span className="mt-0.5 block text-[11px] leading-4 text-muted-foreground">
+                Görenlerin gösterim tercihine göre bir uyarı etiketiyle gösterilir.
+              </span>
+            </span>
+          </button>
         </section>
 
         <section>

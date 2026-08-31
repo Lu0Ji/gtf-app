@@ -557,8 +557,15 @@ export default function UygulamaAyarlari() {
               icon="lucide:volume-x"
               title="Sessize alınan kelimeler"
               subtitle={settings.content.mutedWords.length === 0 ? 'Kelime gizlenmiyor' : `${settings.content.mutedWords.length} kelime gizleniyor`}
-              last
               onClick={() => setOpenPicker('mutedWords')}
+              right={<iconify-icon icon="lucide:chevron-right" class="text-lg text-muted-foreground"></iconify-icon>}
+            />
+            <Row
+              icon="lucide:shield-check"
+              title="Hassas içerik kontrolü"
+              subtitle="Hassas işaretli kayıtları nasıl göreceğin"
+              last
+              onClick={() => navigate('/ayarlar/hassas-icerik')}
               right={<iconify-icon icon="lucide:chevron-right" class="text-lg text-muted-foreground"></iconify-icon>}
             />
           </div>
@@ -572,7 +579,14 @@ export default function UygulamaAyarlari() {
               iconTone="bg-muted text-muted-foreground"
               title="Uygulama dili"
               subtitle="Şu an yalnızca Türkçe · diğer diller henüz yok"
+            />
+            <Row
+              icon="lucide:calendar-clock"
+              title="Bölge ve Tarih Biçimi"
+              subtitle="Saat biçimi tercihin"
               last
+              onClick={() => navigate('/ayarlar/bolge-tarih')}
+              right={<iconify-icon icon="lucide:chevron-right" class="text-lg text-muted-foreground"></iconify-icon>}
             />
           </div>
         </section>
