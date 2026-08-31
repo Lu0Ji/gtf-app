@@ -2,6 +2,15 @@ import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { supabase } from '../lib/supabase.js'
+import { IMG } from '../lib/images.js'
+
+// FireVibe-generated hero (regenerated this session, third attempt — the
+// project's original asset for this screen was completely mismatched, and
+// the first two regenerations kept inserting an unwanted robot mascot;
+// this one was downloaded and inspected pixel-by-pixel before use). The
+// login/signup form is the first thing every new user sees, so it's the
+// highest-leverage place for a real illustration.
+const LOGIN_HERO = IMG('d76337dd-bf81-4ef5-af58-fc919db6bf60')
 
 export default function Giris() {
   const navigate = useNavigate()
@@ -153,10 +162,15 @@ export default function Giris() {
   }
 
   return (
-    <div className="flex min-h-screen w-full flex-col justify-center bg-background px-6 font-body text-foreground">
-      <div className="mx-auto w-full max-w-[360px]">
+    <div className="min-h-screen w-full bg-background font-body text-foreground">
+      <div className="relative h-[190px] w-full overflow-hidden">
+        <img src={LOGIN_HERO} alt="" className="h-full w-full object-cover" />
+        <div className="absolute inset-0 bg-gradient-to-b from-background/10 via-background/45 to-background" />
+      </div>
+
+      <div className="mx-auto -mt-10 w-full max-w-[360px] px-6 pb-10">
         <div className="flex flex-col items-center">
-          <div className="flex h-14 w-14 items-center justify-center rounded-theme bg-primary font-heading text-lg font-extrabold tracking-[-0.08em] text-primary-foreground">
+          <div className="flex h-14 w-14 items-center justify-center rounded-theme bg-primary font-heading text-lg font-extrabold tracking-[-0.08em] text-primary-foreground shadow-lg">
             GTF
           </div>
           <h1 className="mt-4 font-heading text-2xl font-extrabold tracking-[-0.05em] text-primary">
