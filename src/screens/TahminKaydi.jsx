@@ -133,10 +133,43 @@ export default function TahminKaydi() {
     const trimmedNote = evidenceNote.trim()
     const trimmedUrl = evidenceUrl.trim()
 
-    // evidence_note/evidence_url are the newest migration section — if it
-    // hasn't been run yet, PGRST204 rejects the whole update for any
-    // unknown key even when both are empty strings, so only include them
-    // when there's actually something to save, and fall back without them.
+    // Real fix (see supabase/schema.sql's SECURITY REVIEW section): status
+    // + evidence + the points award now happen atomically inside a single
+    // server-side function that checks ownership/state itself, instead of
+    // the client updating profiles.points directly — a raw client update
+    // to points is now rejected by a trigger, so this RPC is the only way
+    // to actually award them. Falls back to the old direct-update path
+    // (no server-side validation, but still functional) only when that
+    // migration hasn't been run yet — PGRST202 is PostgREST's "function
+    // not found in schema cache".
+    const { error: rpcError } = await supabase.rpc('verify_prediction', {
+      p_prediction_id: record.id,
+      p_result: result,
+      p_evidence_note: trimmedNote || null,
+      p_evidence_url: trimmedUrl || null,
+    })
+
+    if (!rpcError) {
+      setRecord((prev) => ({
+        ...prev,
+        status: newStatus,
+        verified_at: verifiedAt,
+        evidence_note: trimmedNote || null,
+        evidence_url: trimmedUrl || null,
+      }))
+      await refreshProfile()
+      setPendingResult(null)
+      setVerifying(false)
+      return
+    }
+
+    if (rpcError.code !== 'PGRST202') {
+      showToast('Sonuç işaretlenemedi, tekrar dene.')
+      setVerifying(false)
+      return
+    }
+
+    // Fallback: verify_prediction() doesn't exist yet.
     const basePayload = { status: newStatus, verified_at: verifiedAt }
     const fullPayload =
       trimmedNote || trimmedUrl

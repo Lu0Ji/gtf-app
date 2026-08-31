@@ -731,6 +731,229 @@ create policy "Users can upload their own prediction media"
     and (storage.foldername(name))[1] = auth.uid()::text
   );
 
+-- SECURITY REVIEW: several UPDATE policies above have no WITH CHECK, which
+-- only restricts which ROWS an update can touch, not which COLUMNS change
+-- within an allowed row. Worst finding: "Users can update own profile"
+-- (very top of this file) lets any signed-in user set their OWN `points`
+-- to any value via a raw REST call — e.g.
+-- `supabase.from('profiles').update({points: 999999999})` — trivially
+-- topping Liderlik Tablosu, since nothing ever validated that points only
+-- change via a correct/honest-close verification or a referral. Second
+-- finding: predictions/messages UPDATE policies let an author rewrite a
+-- sealed prediction's title/content/status or a recipient rewrite a
+-- message's content after the fact, directly contradicting the
+-- immutability TahminKaydi.jsx's UI prominently promises ("İçerik
+-- kaydedildi ve değiştirilemez"). RLS can't express "this column may
+-- never change" — that needs a trigger, so all of this is doable with
+-- what already exists (no new infra, unlike the Edge Function items
+-- below).
+
+-- Points can now ONLY change through verify_prediction() below, which
+-- itself checks caller/state server-side instead of trusting the client's
+-- claimed reward. Legitimate points writes (this function, and the
+-- referral bonus in handle_new_user() below) set a transaction-local flag
+-- to get past the trigger; a raw client update never sets it.
+create or replace function public.protect_profile_integrity()
+returns trigger as $$
+begin
+  if old.id is distinct from new.id or old.created_at is distinct from new.created_at then
+    raise exception 'Bu alanlar değiştirilemez.';
+  end if;
+  if old.points is distinct from new.points
+     and coalesce(current_setting('gtf.allow_points_write', true), 'off') <> 'on' then
+    raise exception 'Puan doğrudan değiştirilemez.';
+  end if;
+  return new;
+end;
+$$ language plpgsql;
+
+drop trigger if exists profiles_integrity on public.profiles;
+create trigger profiles_integrity
+  before update on public.profiles
+  for each row execute function public.protect_profile_integrity();
+
+-- Re-run with the same referral logic as before, just wrapping both
+-- points writes in the new flag so profiles_integrity lets them through.
+create or replace function public.handle_new_user()
+returns trigger as $$
+declare
+  referrer_id uuid;
+begin
+  select id into referrer_id from public.profiles
+  where username = new.raw_user_meta_data->>'referred_by_username';
+
+  insert into public.profiles (id, username, display_name, referred_by)
+  values (
+    new.id,
+    coalesce(new.raw_user_meta_data->>'username', 'user_' || substr(new.id::text, 1, 8)),
+    coalesce(new.raw_user_meta_data->>'display_name', 'Yeni Kullanıcı'),
+    referrer_id
+  );
+
+  if referrer_id is not null then
+    perform set_config('gtf.allow_points_write', 'on', true);
+    update public.profiles set points = points + 100 where id = referrer_id;
+    update public.profiles set points = points + 100 where id = new.id;
+    perform set_config('gtf.allow_points_write', 'off', true);
+  end if;
+
+  return new;
+end;
+$$ language plpgsql security definer set search_path = public;
+
+-- The only server-validated way to resolve a sealed prediction: checks
+-- ownership, current status, and that the reveal date has actually
+-- passed itself (rather than trusting the client's canVerify check), then
+-- awards the reward and records the optional evidence atomically. See
+-- handleVerify() in src/screens/TahminKaydi.jsx — it calls this first and
+-- only falls back to the old direct-update path if this function doesn't
+-- exist yet (migration not run).
+create or replace function public.verify_prediction(
+  p_prediction_id uuid,
+  p_result text,
+  p_evidence_note text default null,
+  p_evidence_url text default null
+)
+returns void as $$
+declare
+  v_author_id uuid;
+  v_status text;
+  v_event_date timestamptz;
+  v_reward integer;
+  v_new_status text;
+begin
+  if p_result not in ('correct', 'incorrect') then
+    raise exception 'Geçersiz sonuç.';
+  end if;
+
+  select author_id, status, event_date into v_author_id, v_status, v_event_date
+  from public.predictions where id = p_prediction_id for update;
+
+  if v_author_id is null then
+    raise exception 'Tahmin bulunamadı.';
+  end if;
+  if v_author_id <> auth.uid() then
+    raise exception 'Sadece tahminin sahibi sonucu işaretleyebilir.';
+  end if;
+  if v_status <> 'sealed' then
+    raise exception 'Bu tahmin zaten sonuçlandırılmış veya henüz mühürlenmemiş.';
+  end if;
+  if v_event_date is not null and v_event_date > now() then
+    raise exception 'Açılış zamanı henüz gelmedi.';
+  end if;
+
+  v_new_status := case when p_result = 'correct' then 'verified_correct' else 'verified_incorrect' end;
+  v_reward := case when p_result = 'correct' then 50 else 5 end;
+
+  update public.predictions
+  set status = v_new_status,
+      verified_at = now(),
+      evidence_note = nullif(trim(coalesce(p_evidence_note, '')), ''),
+      evidence_url = nullif(trim(coalesce(p_evidence_url, '')), '')
+  where id = p_prediction_id;
+
+  perform set_config('gtf.allow_points_write', 'on', true);
+  update public.profiles set points = points + v_reward where id = auth.uid();
+  perform set_config('gtf.allow_points_write', 'off', true);
+end;
+$$ language plpgsql security definer set search_path = public;
+
+grant execute on function public.verify_prediction(uuid, text, text, text) to authenticated;
+
+-- Content immutability: title/sealed_content/category/author_id/event_date
+-- never change after a prediction exists (sealed or not), and a verified
+-- result can't be re-marked. evidence_note/evidence_url are deliberately
+-- excluded — verify_prediction() above is the only path that sets status
+-- anyway, so this is redundant-but-cheap defense in depth for that path
+-- and a hard block against a raw client update bypassing it entirely.
+create or replace function public.protect_prediction_immutability()
+returns trigger as $$
+begin
+  if old.title is distinct from new.title
+    or old.sealed_content is distinct from new.sealed_content
+    or old.category is distinct from new.category
+    or old.author_id is distinct from new.author_id
+    or old.event_date is distinct from new.event_date
+    or old.is_private is distinct from new.is_private
+    or old.created_at is distinct from new.created_at
+  then
+    raise exception 'Bu alanlar oluşturulduktan sonra değiştirilemez.';
+  end if;
+  if old.status in ('verified_correct', 'verified_incorrect') and new.status is distinct from old.status then
+    raise exception 'Doğrulanmış bir tahminin sonucu değiştirilemez.';
+  end if;
+  return new;
+end;
+$$ language plpgsql;
+
+drop trigger if exists predictions_immutability on public.predictions;
+create trigger predictions_immutability
+  before update on public.predictions
+  for each row execute function public.protect_prediction_immutability();
+
+-- A message recipient could only ever legitimately set read_at.
+create or replace function public.protect_message_immutability()
+returns trigger as $$
+begin
+  if old.content is distinct from new.content
+    or old.sender_id is distinct from new.sender_id
+    or old.recipient_id is distinct from new.recipient_id
+    or old.created_at is distinct from new.created_at
+  then
+    raise exception 'Bir mesajın içeriği değiştirilemez.';
+  end if;
+  return new;
+end;
+$$ language plpgsql;
+
+drop trigger if exists messages_immutability on public.messages;
+create trigger messages_immutability
+  before update on public.messages
+  for each row execute function public.protect_message_immutability();
+
+-- A group's founder identity shouldn't be reassignable via a raw update
+-- (the "Admins can update their groups" policy above only restricts which
+-- ROWS an admin can touch, not which columns — without this, an admin
+-- could rewrite created_by to hijack founder status).
+create or replace function public.protect_group_ownership()
+returns trigger as $$
+begin
+  if old.created_by is distinct from new.created_by
+    or old.id is distinct from new.id
+    or old.created_at is distinct from new.created_at
+  then
+    raise exception 'Bir grubun kurucusu değiştirilemez.';
+  end if;
+  return new;
+end;
+$$ language plpgsql;
+
+drop trigger if exists groups_ownership_immutable on public.groups;
+create trigger groups_ownership_immutable
+  before update on public.groups
+  for each row execute function public.protect_group_ownership();
+
+-- Same gap in this session's own new "Admins can change member roles"
+-- policy: it restricts which membership rows an admin can update, but not
+-- which columns — an admin of two groups could otherwise reassign a
+-- member's group_id to transplant them into their other group without
+-- that member's consent, or reassign user_id to hand the row to someone
+-- else entirely. Only `role` (and joined_at) should ever be updatable.
+create or replace function public.protect_group_membership_identity()
+returns trigger as $$
+begin
+  if old.group_id is distinct from new.group_id or old.user_id is distinct from new.user_id then
+    raise exception 'Bir üyeliğin grubu veya kullanıcısı değiştirilemez, sadece rolü.';
+  end if;
+  return new;
+end;
+$$ language plpgsql;
+
+drop trigger if exists group_members_identity_immutable on public.group_members;
+create trigger group_members_identity_immutable
+  before update on public.group_members
+  for each row execute function public.protect_group_membership_identity();
+
 -- ─────────────────────────────────────────────────────────────────────────
 -- NOT YET DEPLOYABLE FROM HERE: real independent verification (full
 -- "Option B") and push notifications both need a Supabase Edge Function
