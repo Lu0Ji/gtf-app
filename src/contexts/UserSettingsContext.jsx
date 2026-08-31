@@ -10,6 +10,7 @@ export const DEFAULT_SETTINGS = {
     groupActivity: true,
     messages: true,
     sealOpenings: true,
+    mentions: true,
   },
   content: {
     interests: [],

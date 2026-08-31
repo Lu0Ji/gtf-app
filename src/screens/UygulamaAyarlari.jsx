@@ -61,11 +61,12 @@ function Row({ icon, iconTone = 'bg-muted text-primary', title, subtitle, right,
   )
 }
 
-function buildAccountRows(email, onChangePassword, onOpenContact, onOpenMfa, onOpenFreeze) {
+function buildAccountRows(email, onChangePassword, onOpenContact, onOpenMfa, onOpenFreeze, onOpenSessions) {
   return [
     { icon: 'lucide:mail', title: 'E-posta ve Telefon', subtitle: email || 'Yükleniyor…', chevron: true, onClick: onOpenContact },
     { icon: 'lucide:key-round', title: 'Şifre değiştir', subtitle: 'Hesap güvenliğini yönet', chevron: true, onClick: onChangePassword },
     { icon: 'lucide:badge-check', title: 'İki aşamalı doğrulama', subtitle: 'Doğrulayıcı uygulamayla koru', chevron: true, onClick: onOpenMfa },
+    { icon: 'lucide:monitor-smartphone', title: 'Aktif oturumlar', subtitle: 'Diğer cihazlardan çıkış yap', chevron: true, onClick: onOpenSessions },
     { icon: 'lucide:pause-circle', iconTone: 'bg-muted text-muted-foreground', title: 'Hesabı geçici olarak dondur', subtitle: 'Profilini gizle, istediğinde geri dön', chevron: true, onClick: onOpenFreeze },
   ]
 }
@@ -277,7 +278,8 @@ export default function UygulamaAyarlari() {
     () => navigate('/ayarlar/sifre-degistir'),
     () => navigate('/ayarlar/eposta-telefon'),
     () => navigate('/ayarlar/iki-asamali-dogrulama'),
-    () => navigate('/ayarlar/hesabi-dondur')
+    () => navigate('/ayarlar/hesabi-dondur'),
+    () => navigate('/ayarlar/aktif-oturumlar')
   )
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
@@ -493,6 +495,20 @@ export default function UygulamaAyarlari() {
               subtitle={pendingCount === 0 ? 'Bekleyen istek yok' : `${pendingCount} bekleyen istek`}
               badge={pendingCount > 0 ? String(pendingCount) : undefined}
               onClick={() => navigate('/ayarlar/takip-istekleri')}
+              right={<iconify-icon icon="lucide:chevron-right" class="text-lg text-muted-foreground"></iconify-icon>}
+            />
+            <Row
+              icon="lucide:mail-check"
+              title="Mesaj istekleri"
+              subtitle="Kim sana mesaj gönderebilir"
+              onClick={() => navigate('/ayarlar/mesaj-istekleri')}
+              right={<iconify-icon icon="lucide:chevron-right" class="text-lg text-muted-foreground"></iconify-icon>}
+            />
+            <Row
+              icon="lucide:at-sign"
+              title="Etiketleme ve Bahsetmeler"
+              subtitle="Kim seni yorumlarda bahsedebilir"
+              onClick={() => navigate('/ayarlar/etiketleme-bahsetmeler')}
               right={<iconify-icon icon="lucide:chevron-right" class="text-lg text-muted-foreground"></iconify-icon>}
             />
             <Row

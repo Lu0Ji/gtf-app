@@ -199,6 +199,37 @@ export default function TahminKaydi() {
     }
   }
 
+  // Best-effort — never blocks the comment that already posted. Only
+  // comments support @mentions today (see Etiketleme ve Bahsetmeler); a
+  // mentioned user's own permission (herkes/takip ettiklerim/hiç kimse)
+  // decides whether the mention actually gets recorded.
+  async function createMentions(content, commentId) {
+    const usernames = [...new Set([...content.matchAll(/@([a-z0-9_]{2,32})/gi)].map((m) => m[1].toLowerCase()))]
+    if (usernames.length === 0 || !user) return
+    const { data: candidates } = await supabase
+      .from('profiles')
+      .select('id, username, mention_permission')
+      .in('username', usernames)
+    for (const candidate of candidates || []) {
+      if (candidate.id === user.id) continue
+      const permission = candidate.mention_permission || 'everyone'
+      if (permission === 'none') continue
+      if (permission === 'following') {
+        const { count } = await supabase
+          .from('follows')
+          .select('*', { count: 'exact', head: true })
+          .eq('follower_id', candidate.id)
+          .eq('following_id', user.id)
+          .eq('status', 'accepted')
+        if (!count) continue
+      }
+      await supabase
+        .from('mentions')
+        .insert({ mentioned_user_id: candidate.id, author_id: user.id, comment_id: commentId })
+        .then(() => {}, () => {})
+    }
+  }
+
   async function handlePostComment() {
     const content = commentDraft.trim()
     if (!content || postingComment || !user) return
@@ -211,6 +242,7 @@ export default function TahminKaydi() {
     if (!error && data) {
       setComments((prev) => [...prev, data])
       setCommentDraft('')
+      createMentions(content, data.id)
     } else {
       showToast('Yorum gönderilemedi, tekrar dene.')
     }

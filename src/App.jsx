@@ -35,6 +35,9 @@ const SifreDegistir = lazy(() => import('./screens/SifreDegistir.jsx'))
 const IkiAsamaliDogrulama = lazy(() => import('./screens/IkiAsamaliDogrulama.jsx'))
 const HesabiDondur = lazy(() => import('./screens/HesabiDondur.jsx'))
 const TahminGorunurlugu = lazy(() => import('./screens/TahminGorunurlugu.jsx'))
+const MesajIstekleri = lazy(() => import('./screens/MesajIstekleri.jsx'))
+const AktifOturumlar = lazy(() => import('./screens/AktifOturumlar.jsx'))
+const EtiketlemeVeBahsetmeler = lazy(() => import('./screens/EtiketlemeVeBahsetmeler.jsx'))
 
 function ScreenFallback() {
   return (
@@ -86,6 +89,9 @@ export default function App() {
                       <Route path="/ayarlar/iki-asamali-dogrulama" element={<IkiAsamaliDogrulama />} />
                       <Route path="/ayarlar/hesabi-dondur" element={<HesabiDondur />} />
                       <Route path="/ayarlar/tahmin-gorunurlugu" element={<TahminGorunurlugu />} />
+                      <Route path="/ayarlar/mesaj-istekleri" element={<MesajIstekleri />} />
+                      <Route path="/ayarlar/aktif-oturumlar" element={<AktifOturumlar />} />
+                      <Route path="/ayarlar/etiketleme-bahsetmeler" element={<EtiketlemeVeBahsetmeler />} />
                     </Route>
                   </Routes>
                 </Suspense>
