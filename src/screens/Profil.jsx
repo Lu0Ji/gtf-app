@@ -268,6 +268,13 @@ export default function Profil() {
                   <iconify-icon icon="lucide:award" class="text-sm"></iconify-icon>
                 </button>
                 <button
+                  onClick={() => navigate('/begeniler')}
+                  className="flex items-center gap-1.5 text-xs font-bold text-primary"
+                >
+                  Beğeniler
+                  <iconify-icon icon="lucide:heart" class="text-sm"></iconify-icon>
+                </button>
+                <button
                   onClick={() => navigate('/uygulama-ayarlari')}
                   className="flex items-center gap-1.5 text-xs font-bold text-primary"
                 >

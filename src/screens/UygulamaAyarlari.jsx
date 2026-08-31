@@ -633,8 +633,15 @@ export default function UygulamaAyarlari() {
               icon="lucide:trash-2"
               title="Önbelleği temizle"
               subtitle={`Cihazında ${bytesLabel(cacheBytes)} kullanılıyor`}
-              last
               onClick={handleClearCache}
+              right={<iconify-icon icon="lucide:chevron-right" class="text-lg text-muted-foreground"></iconify-icon>}
+            />
+            <Row
+              icon="lucide:history"
+              title="Arama geçmişi"
+              subtitle="Bu cihazdaki son aramaların"
+              last
+              onClick={() => navigate('/ayarlar/arama-gecmisi')}
               right={<iconify-icon icon="lucide:chevron-right" class="text-lg text-muted-foreground"></iconify-icon>}
             />
           </div>

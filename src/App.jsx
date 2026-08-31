@@ -40,6 +40,8 @@ const AktifOturumlar = lazy(() => import('./screens/AktifOturumlar.jsx'))
 const EtiketlemeVeBahsetmeler = lazy(() => import('./screens/EtiketlemeVeBahsetmeler.jsx'))
 const HassasIcerikKontrolu = lazy(() => import('./screens/HassasIcerikKontrolu.jsx'))
 const BolgeVeTarihBicimi = lazy(() => import('./screens/BolgeVeTarihBicimi.jsx'))
+const AramaGecmisi = lazy(() => import('./screens/AramaGecmisi.jsx'))
+const Begeniler = lazy(() => import('./screens/Begeniler.jsx'))
 
 function ScreenFallback() {
   return (
@@ -96,6 +98,8 @@ export default function App() {
                       <Route path="/ayarlar/etiketleme-bahsetmeler" element={<EtiketlemeVeBahsetmeler />} />
                       <Route path="/ayarlar/hassas-icerik" element={<HassasIcerikKontrolu />} />
                       <Route path="/ayarlar/bolge-tarih" element={<BolgeVeTarihBicimi />} />
+                      <Route path="/ayarlar/arama-gecmisi" element={<AramaGecmisi />} />
+                      <Route path="/begeniler" element={<Begeniler />} />
                     </Route>
                   </Routes>
                 </Suspense>

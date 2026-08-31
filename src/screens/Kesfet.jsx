@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { IMG } from '../lib/images.js'
 import { supabase, queryWithGroupIdFallback } from '../lib/supabase.js'
 import { timeAgo } from '../lib/format.js'
 import { CATEGORY_META } from '../lib/categories.js'
+import { addSearchHistoryEntry } from '../lib/searchHistory.js'
 
 function SearchResults({ query, navigate }) {
   const [profiles, setProfiles] = useState([])
@@ -15,6 +16,7 @@ function SearchResults({ query, navigate }) {
     setLoading(true)
     const handle = setTimeout(async () => {
       const term = query.trim()
+      addSearchHistoryEntry(term)
       const [{ data: blockedRows }, { data: profileRows }, { data: predictionRows }] = await Promise.all([
         supabase.rpc('blocked_user_ids'),
         supabase
@@ -140,7 +142,9 @@ function CategoryTile({ category, count, variant }) {
 
 export default function Kesfet() {
   const navigate = useNavigate()
-  const [query, setQuery] = useState('')
+  const location = useLocation()
+  // Arama geçmişinden bir sorguya tekrar dokununca buraya prefilled gelir.
+  const [query, setQuery] = useState(() => location.state?.query || '')
   const [categoryCounts, setCategoryCounts] = useState([])
   const [topRanked, setTopRanked] = useState([])
   const [recentPredictions, setRecentPredictions] = useState([])
