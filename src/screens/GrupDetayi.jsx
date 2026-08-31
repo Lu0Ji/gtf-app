@@ -5,7 +5,7 @@ import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import { formatDateLong, timeAgo } from '../lib/format.js'
-import { GROUP_CATEGORIES } from '../lib/categories.js'
+import { CATEGORY_META, GROUP_CATEGORIES } from '../lib/categories.js'
 
 
 function EditGroupModal({ group, onClose, onSaved }) {
@@ -241,6 +241,18 @@ export default function GrupDetayi() {
     )
   }
 
+  const categoryMeta = CATEGORY_META[group.category] || CATEGORY_META.genel
+  const groupResolved = predictions.filter((p) => p.status === 'verified_correct' || p.status === 'verified_incorrect')
+  const groupVerifiedCount = groupResolved.length
+  const groupAccuracyPct =
+    groupVerifiedCount > 0
+      ? Math.round((groupResolved.filter((p) => p.status === 'verified_correct').length / groupVerifiedCount) * 100)
+      : null
+  const nextOpening = predictions
+    .filter((p) => p.status === 'sealed' && new Date(p.event_date) > new Date())
+    .sort((a, b) => new Date(a.event_date) - new Date(b.event_date))[0]
+  const nextOpeningLabel = nextOpening ? formatDateLong(nextOpening.event_date) : '—'
+
   return (
     <div className="min-h-screen w-full bg-background pb-28 text-foreground font-body">
       <header className="absolute left-0 right-0 top-0 z-10 flex items-center justify-between px-5 pt-12">
@@ -263,21 +275,42 @@ export default function GrupDetayi() {
       </header>
 
       {group.cover_image_url ? (
-        <div className="h-40 w-full overflow-hidden bg-muted">
+        <div className="relative h-48 w-full overflow-hidden bg-muted">
           <img src={group.cover_image_url} alt={group.name} className="h-full w-full object-cover" />
+          <div className="absolute inset-0 bg-gradient-to-t from-black/65 via-black/10 to-transparent" />
+          <div className="absolute bottom-4 left-5 flex items-center gap-2">
+            <span
+              className="rounded-full bg-background/90 px-2.5 py-1 text-[10px] font-bold backdrop-blur-sm"
+              style={{ color: categoryMeta.ink }}
+            >
+              {group.category?.toUpperCase()}
+            </span>
+            <span className="flex items-center gap-1 rounded-full bg-black/40 px-2.5 py-1 text-[10px] font-semibold text-white backdrop-blur-sm">
+              <iconify-icon icon="lucide:users" class="text-xs"></iconify-icon>
+              {members.length}
+            </span>
+          </div>
         </div>
       ) : (
-        <div className="flex h-40 w-full items-center justify-center bg-secondary text-primary">
-          <iconify-icon icon="lucide:users-round" class="text-4xl"></iconify-icon>
+        <div
+          className="flex h-48 w-full items-center justify-center"
+          style={{ background: `color-mix(in srgb, ${categoryMeta.ink} 16%, white)`, color: categoryMeta.ink }}
+        >
+          <iconify-icon icon={categoryMeta.icon} class="text-5xl"></iconify-icon>
         </div>
       )}
 
       <main className="px-5 pt-5">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold text-secondary-foreground">
-              {group.category?.toUpperCase()}
-            </span>
+            {!group.cover_image_url && (
+              <span
+                className="rounded-full px-2.5 py-1 text-[10px] font-bold"
+                style={{ background: `color-mix(in srgb, ${categoryMeta.ink} 14%, white)`, color: categoryMeta.ink }}
+              >
+                {group.category?.toUpperCase()}
+              </span>
+            )}
             <h1 className="mt-2 font-heading text-[22px] font-extrabold tracking-[-0.04em]">{group.name}</h1>
             <p className="mt-1 text-xs text-muted-foreground">
               {members.length} üye · {formatDateLong(group.created_at)} kuruldu
@@ -296,6 +329,64 @@ export default function GrupDetayi() {
 
         {group.description && (
           <p className="mt-4 text-sm leading-6 text-foreground">{group.description}</p>
+        )}
+
+        {members.length > 0 && (
+          <button
+            onClick={() => document.getElementById('grup-uyeler')?.scrollIntoView({ behavior: 'smooth' })}
+            className="mt-4 flex items-center gap-2"
+          >
+            <div className="flex -space-x-2">
+              {members.slice(0, 5).map((m) => (
+                <div key={m.user_id} className="h-8 w-8 overflow-hidden rounded-full border-2 border-background bg-muted">
+                  <img
+                    src={m.profiles.avatar_url || fallbackAvatarFor(m.user_id)}
+                    alt={m.profiles.display_name}
+                    className="h-full w-full object-cover"
+                  />
+                </div>
+              ))}
+            </div>
+            <span className="text-xs font-semibold text-muted-foreground">
+              {members.length > 5 ? `+${members.length - 5} daha` : members.length === 1 ? 'İlk üye sensin' : `${members.length} üye`}
+            </span>
+          </button>
+        )}
+
+        {predictions.length > 0 && (
+          <section className="mt-6 overflow-hidden rounded-theme bg-primary text-primary-foreground shadow-sm">
+            <div className="flex items-start justify-between px-5 pt-5">
+              <div>
+                <p className="text-[11px] font-semibold uppercase tracking-[0.13em] text-primary-foreground/75">
+                  Topluluk performansı
+                </p>
+                <div className="mt-1 flex items-end gap-2">
+                  <span className="font-heading text-[36px] font-extrabold leading-none tracking-[-0.08em]">
+                    {groupAccuracyPct !== null ? `%${groupAccuracyPct}` : '—'}
+                  </span>
+                  <span className="mb-1 text-xs font-semibold text-primary-foreground/80">isabet oranı</span>
+                </div>
+              </div>
+              <div className="flex h-11 w-11 items-center justify-center rounded-full border border-primary-foreground/25 bg-primary-foreground/10">
+                <iconify-icon icon="lucide:chart-no-axes-combined" class="text-xl"></iconify-icon>
+              </div>
+            </div>
+            <div className="mx-5 mt-4 h-px bg-primary-foreground/20" />
+            <div className="grid grid-cols-3 gap-2 px-5 py-4">
+              <div>
+                <p className="text-[10px] font-medium text-primary-foreground/70">Toplam tahmin</p>
+                <p className="mt-1 text-sm font-bold">{predictions.length}</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-medium text-primary-foreground/70">Doğrulanan</p>
+                <p className="mt-1 text-sm font-bold">{groupVerifiedCount}</p>
+              </div>
+              <div>
+                <p className="text-[10px] font-medium text-primary-foreground/70">Yaklaşan</p>
+                <p className="mt-1 text-sm font-bold">{nextOpeningLabel}</p>
+              </div>
+            </div>
+          </section>
         )}
 
         <section className="mt-7">
@@ -330,7 +421,7 @@ export default function GrupDetayi() {
           )}
         </section>
 
-        <section className="mt-7">
+        <section id="grup-uyeler" className="mt-7 scroll-mt-5">
           <h2 className="font-heading text-base font-bold tracking-tight">Üyeler ({members.length})</h2>
           {members.length === 0 ? (
             <p className="mt-3 text-xs text-muted-foreground">Henüz üye yok.</p>

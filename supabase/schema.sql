@@ -933,6 +933,55 @@ create trigger groups_ownership_immutable
   before update on public.groups
   for each row execute function public.protect_group_ownership();
 
+-- BUGFIX: group cover photo upload has apparently never actually worked —
+-- "Group creators can upload group cover" (COVER PHOTOS section, near the
+-- top of this file) rejects every real upload attempt with a bare RLS
+-- denial (confirmed live tonight: 403 "new row violates row-level
+-- security policy", no more specific detail available without direct DB
+-- access to inspect further). The policy read correctly and mirrors the
+-- proven-working profile-cover policy right above it in structure, so the
+-- exact root cause is unclear — replacing the created_by-only check with
+-- one via group_members (role = 'admin'), the same pattern already
+-- confirmed working tonight for the admin-tooling policies below, kept
+-- alongside the original creator check rather than instead of it.
+drop policy if exists "Group creators can upload group cover" on storage.objects;
+create policy "Group admins can upload group cover" on storage.objects for insert
+  with check (
+    bucket_id = 'covers'
+    and (storage.foldername(name))[1] = 'group'
+    and (
+      exists (
+        select 1 from public.group_members gm
+        where gm.group_id::text = (storage.foldername(name))[2]
+          and gm.user_id = auth.uid()
+          and gm.role = 'admin'
+      )
+      or exists (
+        select 1 from public.groups g
+        where g.id::text = (storage.foldername(name))[2] and g.created_by = auth.uid()
+      )
+    )
+  );
+
+drop policy if exists "Group creators can update group cover" on storage.objects;
+create policy "Group admins can update group cover" on storage.objects for update
+  using (
+    bucket_id = 'covers'
+    and (storage.foldername(name))[1] = 'group'
+    and (
+      exists (
+        select 1 from public.group_members gm
+        where gm.group_id::text = (storage.foldername(name))[2]
+          and gm.user_id = auth.uid()
+          and gm.role = 'admin'
+      )
+      or exists (
+        select 1 from public.groups g
+        where g.id::text = (storage.foldername(name))[2] and g.created_by = auth.uid()
+      )
+    )
+  );
+
 -- Same gap in this session's own new "Admins can change member roles"
 -- policy: it restricts which membership rows an admin can update, but not
 -- which columns — an admin of two groups could otherwise reassign a
