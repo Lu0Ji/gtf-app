@@ -1,5 +1,14 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { IMG } from '../lib/images.js'
+
+// FireVibe-generated illustration (regenerated this session — the
+// project's original asset for this screen didn't match its own
+// description at all; this replacement was downloaded and inspected
+// pixel-by-pixel before use). Used as a soft ambient accent behind the
+// per-slide icon rather than a literal depiction of any one slide's
+// content, since it fits the "prediction journal" concept generally.
+const ONBOARDING_ILLUSTRATION = IMG('a6eec16b-b7cc-4e14-950f-461559fcebda')
 
 const SLIDES = [
   {
@@ -72,8 +81,13 @@ export default function IlkKullanimRehberi() {
           ))}
         </div>
 
-        <section className="relative mt-8 flex min-h-[280px] items-center justify-center rounded-[28px] border border-border bg-card shadow-sm">
-          <div className="flex h-24 w-24 items-center justify-center rounded-full bg-secondary text-primary">
+        <section className="relative mt-8 flex min-h-[280px] items-center justify-center overflow-hidden rounded-[28px] border border-border bg-card shadow-sm">
+          <img
+            src={ONBOARDING_ILLUSTRATION}
+            alt=""
+            className="absolute bottom-0 right-0 h-40 w-40 object-contain opacity-45"
+          />
+          <div className="relative flex h-24 w-24 items-center justify-center rounded-full bg-secondary text-primary shadow-sm">
             <iconify-icon icon={slide.icon} class="text-5xl"></iconify-icon>
           </div>
         </section>
