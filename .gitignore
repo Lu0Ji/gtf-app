@@ -41,3 +41,6 @@ ios/App/App/public
 ios/App/App/capacitor.config.json
 *.xcuserstate
 xcuserdata/
+
+# Supabase CLI local cache (created by npx supabase probing)
+supabase/.temp/

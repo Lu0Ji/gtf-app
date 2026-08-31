@@ -50,6 +50,12 @@ export default function TahminKaydi() {
   const [disputeCount, setDisputeCount] = useState(0)
   const [hasDisputed, setHasDisputed] = useState(false)
   const [disputing, setDisputing] = useState(false)
+  // Which result the owner tapped, while they're still filling in the
+  // optional evidence citation — null means the correct/incorrect buttons
+  // are showing, not the citation form.
+  const [pendingResult, setPendingResult] = useState(null)
+  const [evidenceNote, setEvidenceNote] = useState('')
+  const [evidenceUrl, setEvidenceUrl] = useState('')
 
   useEffect(() => {
     if (!record) {
@@ -124,11 +130,26 @@ export default function TahminKaydi() {
     setVerifying(true)
     const newStatus = result === 'correct' ? 'verified_correct' : 'verified_incorrect'
     const verifiedAt = new Date().toISOString()
+    const trimmedNote = evidenceNote.trim()
+    const trimmedUrl = evidenceUrl.trim()
 
-    const { error } = await supabase
-      .from('predictions')
-      .update({ status: newStatus, verified_at: verifiedAt })
-      .eq('id', record.id)
+    // evidence_note/evidence_url are the newest migration section — if it
+    // hasn't been run yet, PGRST204 rejects the whole update for any
+    // unknown key even when both are empty strings, so only include them
+    // when there's actually something to save, and fall back without them.
+    const basePayload = { status: newStatus, verified_at: verifiedAt }
+    const fullPayload =
+      trimmedNote || trimmedUrl
+        ? { ...basePayload, evidence_note: trimmedNote || null, evidence_url: trimmedUrl || null }
+        : basePayload
+
+    let evidenceSaved = fullPayload !== basePayload
+    let { error } = await supabase.from('predictions').update(fullPayload).eq('id', record.id)
+    if (error?.code === 'PGRST204' && fullPayload !== basePayload) {
+      showToast('Kaynak henüz kaydedilemiyor, sonuç kaynaksız işaretlendi.')
+      evidenceSaved = false
+      ;({ error } = await supabase.from('predictions').update(basePayload).eq('id', record.id))
+    }
 
     if (!error) {
       if (profile) {
@@ -143,7 +164,13 @@ export default function TahminKaydi() {
           await refreshProfile()
         }
       }
-      setRecord((prev) => ({ ...prev, status: newStatus, verified_at: verifiedAt }))
+      setRecord((prev) => ({
+        ...prev,
+        status: newStatus,
+        verified_at: verifiedAt,
+        ...(evidenceSaved ? { evidence_note: trimmedNote || null, evidence_url: trimmedUrl || null } : {}),
+      }))
+      setPendingResult(null)
     } else {
       showToast('Sonuç işaretlenemedi, tekrar dene.')
     }
@@ -311,6 +338,12 @@ export default function TahminKaydi() {
               </h1>
             </div>
 
+            {record.media_url && (
+              <div className="mt-4 overflow-hidden rounded-theme border border-border bg-muted">
+                <img src={record.media_url} alt="" className="max-h-80 w-full object-cover" />
+              </div>
+            )}
+
             <div className="mt-5 flex items-center justify-between border-t border-border pt-4">
               <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
                 <iconify-icon icon="lucide:shield-check" class="text-base text-success"></iconify-icon>
@@ -357,6 +390,28 @@ export default function TahminKaydi() {
               <p className="mt-2 font-heading text-lg font-bold leading-6">
                 &ldquo;{record.sealed_content}&rdquo;
               </p>
+              {(record.evidence_note || record.evidence_url) && (
+                <div className="mt-3 rounded-theme border border-dashed border-border bg-muted/60 p-3">
+                  <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">
+                    <iconify-icon icon="lucide:link" class="text-xs"></iconify-icon>
+                    Yazarın eklediği kaynak
+                  </p>
+                  {record.evidence_note && (
+                    <p className="mt-1.5 text-xs leading-5 text-foreground">{record.evidence_note}</p>
+                  )}
+                  {record.evidence_url && (
+                    <a
+                      href={record.evidence_url}
+                      target="_blank"
+                      rel="noreferrer"
+                      onClick={(e) => e.stopPropagation()}
+                      className="mt-1.5 block truncate text-xs font-semibold text-primary underline"
+                    >
+                      {record.evidence_url}
+                    </a>
+                  )}
+                </div>
+              )}
             </div>
             {!isOwner && user && (
               <div className="flex items-center justify-between border-t border-border px-5 py-3">
@@ -419,14 +474,14 @@ export default function TahminKaydi() {
                 </div>
               </div>
 
-              {canVerify && (
+              {canVerify && pendingResult === null && (
                 <div className="relative mt-4 rounded-theme border border-white/15 bg-white/10 p-4">
                   <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/60">
                     Bu tahmin gerçekleşti mi?
                   </p>
                   <div className="mt-3 flex gap-2">
                     <button
-                      onClick={() => handleVerify('correct')}
+                      onClick={() => setPendingResult('correct')}
                       disabled={verifying}
                       className="flex flex-1 items-center justify-center gap-1.5 rounded-theme bg-success py-2.5 text-xs font-bold text-success-foreground disabled:opacity-60"
                     >
@@ -434,7 +489,7 @@ export default function TahminKaydi() {
                       Doğru çıktı
                     </button>
                     <button
-                      onClick={() => handleVerify('incorrect')}
+                      onClick={() => setPendingResult('incorrect')}
                       disabled={verifying}
                       className="flex flex-1 items-center justify-center gap-1.5 rounded-theme bg-destructive py-2.5 text-xs font-bold text-destructive-foreground disabled:opacity-60"
                     >
@@ -446,6 +501,55 @@ export default function TahminKaydi() {
                     Doğru çıktıysa +{CORRECT_POINTS_REWARD}, yanlış çıktıysa dürüstçe kapattığın için +
                     {HONEST_CLOSE_REWARD} puan kazanırsın.
                   </p>
+                </div>
+              )}
+
+              {canVerify && pendingResult !== null && (
+                <div className="relative mt-4 rounded-theme border border-white/15 bg-white/10 p-4">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/60">
+                    Kaynak ekle (isteğe bağlı)
+                  </p>
+                  <p className="mt-1.5 text-[11px] leading-4 text-white/70">
+                    Sonuç hâlâ beyana dayalı, ama bir kaynak eklersen itiraz edenler ve diğer kullanıcılar
+                    kontrol edebilir.
+                  </p>
+                  <textarea
+                    value={evidenceNote}
+                    onChange={(e) => setEvidenceNote(e.target.value)}
+                    rows={2}
+                    placeholder="Kısa not (opsiyonel)"
+                    className="mt-3 w-full resize-none rounded-theme border border-white/20 bg-white/10 px-3 py-2.5 text-xs leading-5 text-white outline-none placeholder:text-white/50"
+                  />
+                  <input
+                    value={evidenceUrl}
+                    onChange={(e) => setEvidenceUrl(e.target.value)}
+                    placeholder="Kaynak bağlantısı (opsiyonel)"
+                    className="mt-2 w-full rounded-theme border border-white/20 bg-white/10 px-3 py-2.5 text-xs text-white outline-none placeholder:text-white/50"
+                  />
+                  <div className="mt-3 flex gap-2">
+                    <button
+                      onClick={() => {
+                        setPendingResult(null)
+                        setEvidenceNote('')
+                        setEvidenceUrl('')
+                      }}
+                      disabled={verifying}
+                      className="flex-1 rounded-theme bg-white/10 py-2.5 text-xs font-bold text-white disabled:opacity-60"
+                    >
+                      Vazgeç
+                    </button>
+                    <button
+                      onClick={() => handleVerify(pendingResult)}
+                      disabled={verifying}
+                      className={`flex-1 rounded-theme py-2.5 text-xs font-bold disabled:opacity-60 ${
+                        pendingResult === 'correct'
+                          ? 'bg-success text-success-foreground'
+                          : 'bg-destructive text-destructive-foreground'
+                      }`}
+                    >
+                      {verifying ? 'Kaydediliyor…' : 'Sonucu onayla'}
+                    </button>
+                  </div>
                 </div>
               )}
 

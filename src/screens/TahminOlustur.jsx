@@ -1,13 +1,15 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
+import { useToast } from '../contexts/ToastContext.jsx'
 import { CATEGORIES } from '../lib/categories.js'
 
 export default function TahminOlustur() {
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuth()
+  const { showToast } = useToast()
   // Present when launched from Grup Detayı's "Tahmin oluştur" — tags the
   // prediction to that group so it lands in the group's own feed instead of
   // the public one. Only applies to "Tahmin" mode: a Zaman kapsülü stays a
@@ -20,10 +22,26 @@ export default function TahminOlustur() {
   const [sealedContent, setSealedContent] = useState('')
   const [eventDate, setEventDate] = useState('')
   const [isSensitive, setIsSensitive] = useState(false)
+  const [mediaFile, setMediaFile] = useState(null)
+  const [mediaPreview, setMediaPreview] = useState(null)
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
+  const mediaInputRef = useRef(null)
 
   const canSubmit = title.trim().length > 0 && sealedContent.trim().length > 0 && eventDate
+
+  function handlePickMedia(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setMediaFile(file)
+    setMediaPreview(URL.createObjectURL(file))
+  }
+
+  function handleRemoveMedia() {
+    setMediaFile(null)
+    setMediaPreview(null)
+    if (mediaInputRef.current) mediaInputRef.current.value = ''
+  }
 
   async function handleSeal() {
     if (!canSubmit || submitting) return
@@ -42,6 +60,23 @@ export default function TahminOlustur() {
         event_date: new Date(eventDate).toISOString(),
         sealed_at: new Date().toISOString(),
       }
+
+      let mediaUrl = null
+      if (mediaFile) {
+        const ext = mediaFile.name.split('.').pop()
+        const path = `${user.id}/${Date.now()}.${ext}`
+        const { error: uploadError } = await supabase.storage.from('prediction-media').upload(path, mediaFile)
+        // A missing bucket (migration not run yet) shouldn't block the
+        // whole prediction — the text content still matters more than the
+        // image. Just drop the image and tell the user why.
+        if (uploadError) {
+          showToast('Görsel yüklenemedi, tahmin görselsiz kaydedilecek.')
+        } else {
+          const { data: publicUrlData } = supabase.storage.from('prediction-media').getPublicUrl(path)
+          mediaUrl = publicUrlData.publicUrl
+        }
+      }
+
       // Optional columns only added to the payload when actually set —
       // PostgREST rejects the whole insert (PGRST204) if a key isn't a real
       // column, and both of these only exist once their migrations (see
@@ -52,6 +87,7 @@ export default function TahminOlustur() {
       const fullPayload = { ...basePayload }
       if (targetGroupId) fullPayload.group_id = targetGroupId
       if (isSensitive) fullPayload.is_sensitive = true
+      if (mediaUrl) fullPayload.media_url = mediaUrl
 
       let { error: insertError } = await supabase.from('predictions').insert(fullPayload)
       if (insertError?.code === 'PGRST204' && Object.keys(fullPayload).length > Object.keys(basePayload).length) {
@@ -155,6 +191,36 @@ export default function TahminOlustur() {
               Bu başlık mühürlü içerikten önce görünür.
             </p>
           </div>
+        </section>
+
+        <section>
+          <div className="mb-2 flex items-center justify-between">
+            <label className="text-sm font-bold text-foreground">Görsel</label>
+            <span className="text-[11px] font-medium text-muted-foreground">İsteğe bağlı</span>
+          </div>
+          <input ref={mediaInputRef} type="file" accept="image/*" className="hidden" onChange={handlePickMedia} />
+          {mediaPreview ? (
+            <div className="relative overflow-hidden rounded-theme border border-border bg-muted">
+              <img src={mediaPreview} alt="Seçilen görsel" className="h-40 w-full object-cover" />
+              <button
+                type="button"
+                aria-label="Görseli kaldır"
+                onClick={handleRemoveMedia}
+                className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white"
+              >
+                <iconify-icon icon="lucide:x" class="text-sm"></iconify-icon>
+              </button>
+            </div>
+          ) : (
+            <button
+              type="button"
+              onClick={() => mediaInputRef.current?.click()}
+              className="flex h-24 w-full items-center justify-center gap-1.5 rounded-theme border border-dashed border-border bg-muted text-xs font-bold text-muted-foreground"
+            >
+              <iconify-icon icon="lucide:image-plus" class="text-base"></iconify-icon>
+              Bir görsel ekle
+            </button>
+          )}
         </section>
 
         <section className="rounded-theme border-2 border-primary bg-card p-4 shadow-sm">

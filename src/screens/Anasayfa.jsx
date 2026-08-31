@@ -272,6 +272,12 @@ function PredictionCard({ prediction, social, onToggleLike, onToggleSave }) {
           )}
           <p className="mt-3 text-[15px] font-medium leading-6 text-foreground">{prediction.title}</p>
 
+          {prediction.media_url && (
+            <div className="mt-3 overflow-hidden rounded-theme border border-border bg-muted">
+              <img src={prediction.media_url} alt="" className="max-h-72 w-full object-cover" />
+            </div>
+          )}
+
           {isVerified ? (
             <div className="mt-3 overflow-hidden rounded-theme border border-border">
               <div
@@ -360,6 +366,7 @@ function PredictionCard({ prediction, social, onToggleLike, onToggleSave }) {
 }
 
 const EMPTY_SOCIAL = { liked: false, likeCount: 0, saved: false, commentCount: 0 }
+const FEED_PAGE_SIZE = 15
 
 function PredictionFeed({ category }) {
   const { user, profile } = useAuth()
@@ -368,6 +375,9 @@ function PredictionFeed({ category }) {
   const [predictions, setPredictions] = useState([])
   const [socialById, setSocialById] = useState({})
   const [loading, setLoading] = useState(true)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [hasMore, setHasMore] = useState(true)
+  const [page, setPage] = useState(0)
 
   async function loadSocial(ids) {
     if (ids.length === 0) return {}
@@ -392,49 +402,76 @@ function PredictionFeed({ category }) {
     return map
   }
 
+  // Fetches one page of raw rows plus the viewer's block list, applies the
+  // block/mute/sensitivity filters, and reports whether the *unfiltered*
+  // page came back full — that's the real signal for "more rows might
+  // exist server-side", since a filtered page can come back short even
+  // when there's more to load.
+  async function fetchPage(pageIndex) {
+    const from = pageIndex * FEED_PAGE_SIZE
+    const to = from + FEED_PAGE_SIZE - 1
+    const [{ data, error }, { data: blockedRows }] = await Promise.all([
+      queryWithGroupIdFallback((filterGroupId) => {
+        let q = supabase
+          .from('predictions')
+          .select('*, profiles:author_id(display_name, username, avatar_url)')
+          .eq('is_private', false)
+          .order('created_at', { ascending: false })
+          .range(from, to)
+        if (filterGroupId) q = q.is('group_id', null)
+        if (category !== 'Tümü') q = q.eq('category', category.toLowerCase())
+        return q
+      }),
+      user ? supabase.rpc('blocked_user_ids') : Promise.resolve({ data: [] }),
+    ])
+    const rawRows = error ? [] : data || []
+    const blockedSet = new Set((blockedRows || []).map((row) => row.blocked_user_ids ?? row))
+    const mutedWords = (settings.content.mutedWords || []).map((w) => w.toLowerCase()).filter(Boolean)
+    const hideSensitive = profile?.content_filter_level === 'less'
+    const filtered = rawRows.filter(
+      (p) =>
+        !blockedSet.has(p.author_id) &&
+        !mutedWords.some((w) => p.title?.toLowerCase().includes(w)) &&
+        !(hideSensitive && p.is_sensitive)
+    )
+    return { filtered, rawCount: rawRows.length }
+  }
+
   useEffect(() => {
     let cancelled = false
     setLoading(true)
-    async function load() {
-      const [{ data, error }, { data: blockedRows }] = await Promise.all([
-        queryWithGroupIdFallback((filterGroupId) => {
-          let q = supabase
-            .from('predictions')
-            .select('*, profiles:author_id(display_name, username, avatar_url)')
-            .eq('is_private', false)
-            .order('created_at', { ascending: false })
-            .limit(30)
-          if (filterGroupId) q = q.is('group_id', null)
-          if (category !== 'Tümü') q = q.eq('category', category.toLowerCase())
-          return q
-        }),
-        user ? supabase.rpc('blocked_user_ids') : Promise.resolve({ data: [] }),
-      ])
+    setPage(0)
+    setHasMore(true)
+    async function init() {
+      const { filtered, rawCount } = await fetchPage(0)
       if (cancelled) return
-      const blockedSet = new Set((blockedRows || []).map((row) => row.blocked_user_ids ?? row))
-      const mutedWords = (settings.content.mutedWords || []).map((w) => w.toLowerCase()).filter(Boolean)
-      const hideSensitive = profile?.content_filter_level === 'less'
-      const list = error
-        ? []
-        : (data || []).filter(
-            (p) =>
-              !blockedSet.has(p.author_id) &&
-              !mutedWords.some((w) => p.title?.toLowerCase().includes(w)) &&
-              !(hideSensitive && p.is_sensitive)
-          )
-      setPredictions(list)
-      const social = await loadSocial(list.map((p) => p.id))
+      setPredictions(filtered)
+      setHasMore(rawCount === FEED_PAGE_SIZE)
+      const social = await loadSocial(filtered.map((p) => p.id))
       if (!cancelled) {
         setSocialById(social)
         setLoading(false)
       }
     }
-    load()
+    init()
     return () => {
       cancelled = true
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [category, user, settings.content.mutedWords, profile?.content_filter_level])
+
+  async function handleLoadMore() {
+    if (loadingMore || !hasMore) return
+    setLoadingMore(true)
+    const nextPage = page + 1
+    const { filtered, rawCount } = await fetchPage(nextPage)
+    setPredictions((prev) => [...prev, ...filtered])
+    setPage(nextPage)
+    setHasMore(rawCount === FEED_PAGE_SIZE)
+    const social = await loadSocial(filtered.map((p) => p.id))
+    setSocialById((prev) => ({ ...prev, ...social }))
+    setLoadingMore(false)
+  }
 
   async function handleToggleLike(predictionId) {
     if (!user) return
@@ -491,6 +528,15 @@ function PredictionFeed({ category }) {
           onToggleSave={handleToggleSave}
         />
       ))}
+      {hasMore && (
+        <button
+          onClick={handleLoadMore}
+          disabled={loadingMore}
+          className="mx-5 mt-4 flex h-11 w-[calc(100%-40px)] items-center justify-center gap-2 rounded-theme border border-border bg-card text-xs font-bold text-foreground shadow-sm disabled:opacity-60"
+        >
+          {loadingMore ? 'Yükleniyor…' : 'Daha fazla göster'}
+        </button>
+      )}
     </>
   )
 }

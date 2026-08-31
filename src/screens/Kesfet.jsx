@@ -6,24 +6,34 @@ import { timeAgo } from '../lib/format.js'
 import { CATEGORY_META } from '../lib/categories.js'
 import { addSearchHistoryEntry } from '../lib/searchHistory.js'
 
+const SEARCH_PAGE_SIZE = 15
+
 function SearchResults({ query, navigate }) {
   const [profiles, setProfiles] = useState([])
   const [predictions, setPredictions] = useState([])
   const [loading, setLoading] = useState(true)
+  const [limit, setLimit] = useState(SEARCH_PAGE_SIZE)
+  const [loadingMore, setLoadingMore] = useState(false)
+  const [predictionsFull, setPredictionsFull] = useState(false)
+
+  useEffect(() => {
+    setLimit(SEARCH_PAGE_SIZE)
+  }, [query])
 
   useEffect(() => {
     let cancelled = false
-    setLoading(true)
+    if (limit === SEARCH_PAGE_SIZE) setLoading(true)
+    else setLoadingMore(true)
     const handle = setTimeout(async () => {
       const term = query.trim()
-      addSearchHistoryEntry(term)
+      if (limit === SEARCH_PAGE_SIZE) addSearchHistoryEntry(term)
       const [{ data: blockedRows }, { data: profileRows }, { data: predictionRows }] = await Promise.all([
         supabase.rpc('blocked_user_ids'),
         supabase
           .from('profiles')
           .select('id, display_name, username, avatar_url')
           .or(`username.ilike.%${term}%,display_name.ilike.%${term}%`)
-          .limit(15),
+          .limit(limit),
         queryWithGroupIdFallback((filterGroupId) => {
           let q = supabase
             .from('predictions')
@@ -31,7 +41,7 @@ function SearchResults({ query, navigate }) {
             .eq('is_private', false)
             .ilike('title', `%${term}%`)
             .order('created_at', { ascending: false })
-            .limit(15)
+            .limit(limit)
           if (filterGroupId) q = q.is('group_id', null)
           return q
         }),
@@ -39,14 +49,17 @@ function SearchResults({ query, navigate }) {
       if (cancelled) return
       const blockedSet = new Set((blockedRows || []).map((row) => row.blocked_user_ids ?? row))
       setProfiles((profileRows || []).filter((p) => !blockedSet.has(p.id)))
-      setPredictions((predictionRows || []).filter((p) => !blockedSet.has(p.author_id)))
+      const filteredPredictions = (predictionRows || []).filter((p) => !blockedSet.has(p.author_id))
+      setPredictions(filteredPredictions)
+      setPredictionsFull((predictionRows || []).length === limit)
       setLoading(false)
+      setLoadingMore(false)
     }, 300)
     return () => {
       cancelled = true
       clearTimeout(handle)
     }
-  }, [query])
+  }, [query, limit])
 
   if (loading) {
     return <p className="px-5 text-xs text-muted-foreground">Aranıyor…</p>
@@ -106,6 +119,15 @@ function SearchResults({ query, navigate }) {
               </button>
             ))}
           </div>
+          {predictionsFull && (
+            <button
+              onClick={() => setLimit((l) => l + SEARCH_PAGE_SIZE)}
+              disabled={loadingMore}
+              className="mx-5 mt-3 flex h-10 w-[calc(100%-40px)] items-center justify-center rounded-theme border border-border bg-card text-xs font-bold text-foreground shadow-sm disabled:opacity-60"
+            >
+              {loadingMore ? 'Yükleniyor…' : 'Daha fazla göster'}
+            </button>
+          )}
         </section>
       )}
     </div>
