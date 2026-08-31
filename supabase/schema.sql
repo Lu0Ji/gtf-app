@@ -649,3 +649,105 @@ grant insert on public.mentions to authenticated;
 alter table public.predictions add column is_sensitive boolean not null default false;
 alter table public.profiles add column content_filter_level text not null default 'standard'
   check (content_filter_level in ('less', 'standard', 'more'));
+
+-- VERIFICATION MECHANIC, next step ("Option B-lite"): a real independent
+-- AI/official-source check (full "Option B") needs a server-side function
+-- calling an outside data source — this project has no Supabase CLI access
+-- to deploy an Edge Function yet, so it can't be wired up today (see the
+-- deployment-ready notes at the very end of this file for when it can be).
+-- What ships now instead: the author can optionally cite a source (link
+-- and/or a short note) at the moment they mark a sealed prediction
+-- correct/incorrect. It's still self-reported, but a bare claim next to a
+-- checkable citation is a real accountability improvement, and it gives
+-- disputers (see prediction_disputes above) something concrete to weigh.
+alter table public.predictions add column evidence_note text;
+alter table public.predictions add column evidence_url text;
+
+-- GROUP ADMIN TOOLING: a group's creator is seeded as its first admin (see
+-- Gruplar.jsx's CreateGroupModal), but until now no one — not even that
+-- admin — could remove a member, promote/demote roles, or edit the group's
+-- name/description/category after creation. All three are real gaps for
+-- "a working social product": a spam member or a stale description had no
+-- fix. This grants any current admin of a group (which always includes at
+-- least its creator) those three abilities.
+drop policy "Owners can update their groups" on public.groups;
+create policy "Admins can update their groups" on public.groups for update
+  using (
+    exists (
+      select 1 from public.group_members gm
+      where gm.group_id = groups.id and gm.user_id = auth.uid() and gm.role = 'admin'
+    )
+  );
+
+create policy "Admins can remove other members" on public.group_members for delete
+  using (
+    exists (
+      select 1 from public.group_members admin_check
+      where admin_check.group_id = group_members.group_id
+        and admin_check.user_id = auth.uid()
+        and admin_check.role = 'admin'
+    )
+  );
+
+create policy "Admins can change member roles" on public.group_members for update
+  using (
+    exists (
+      select 1 from public.group_members admin_check
+      where admin_check.group_id = group_members.group_id
+        and admin_check.user_id = auth.uid()
+        and admin_check.role = 'admin'
+    )
+  )
+  with check (
+    exists (
+      select 1 from public.group_members admin_check
+      where admin_check.group_id = group_members.group_id
+        and admin_check.user_id = auth.uid()
+        and admin_check.role = 'admin'
+    )
+  );
+
+grant update on public.group_members to authenticated;
+
+-- PREDICTION MEDIA: one optional image attached at creation time (before
+-- the prediction is sealed — like the title, it's then immutable). Same
+-- public-bucket-with-owner-scoped-path pattern as the existing `covers`
+-- bucket above.
+alter table public.predictions add column media_url text;
+
+insert into storage.buckets (id, name, public)
+values ('prediction-media', 'prediction-media', true)
+on conflict (id) do nothing;
+
+create policy "Prediction media is publicly accessible"
+  on storage.objects for select
+  using (bucket_id = 'prediction-media');
+
+-- Path convention: {author_id}/... — only the uploading user may write.
+create policy "Users can upload their own prediction media"
+  on storage.objects for insert
+  with check (
+    bucket_id = 'prediction-media'
+    and (storage.foldername(name))[1] = auth.uid()::text
+  );
+
+-- ─────────────────────────────────────────────────────────────────────────
+-- NOT YET DEPLOYABLE FROM HERE: real independent verification (full
+-- "Option B") and push notifications both need a Supabase Edge Function
+-- (to safely hold an API key server-side / call FCM), which requires the
+-- Supabase CLI logged in with a personal access token or Dashboard access
+-- neither of which this environment has. When that access exists, the
+-- concrete next steps are:
+--   1. `supabase functions new verify-prediction` — calls an external
+--      real-world data API (sports scores, election results, etc. depend
+--      on the category) plus an LLM to compare it against sealed_content;
+--      never call an LLM for this client-side (it would need to embed a
+--      secret key in the bundle) or trust an LLM's own "knowledge" without
+--      a live external source (hallucination risk on anything after its
+--      training cutoff).
+--   2. `supabase functions new send-push` + a `push_tokens` table (user_id,
+--      token, platform) + `@capacitor/push-notifications` on the client +
+--      a Postgres trigger (or a scheduled function) that calls it on new
+--      follower/mention/comment/message/prediction-opened events. Needs a
+--      Firebase project (Android) and an APNs key (iOS) first.
+-- ─────────────────────────────────────────────────────────────────────────
