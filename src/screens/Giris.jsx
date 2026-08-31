@@ -73,8 +73,10 @@ export default function Giris() {
       } else {
         const result = await signUp({ email, password, username, displayName, referredByUsername })
         if (result.session) {
-          // Email confirmation is disabled on the backend — we're already logged in.
-          navigate('/', { replace: true })
+          // Email confirmation is disabled on the backend — we're already
+          // logged in, so a brand-new account goes through İlk Kullanım
+          // Rehberi once before landing on the real feed.
+          navigate('/rehber', { replace: true })
         } else {
           setSignupDone(true)
         }

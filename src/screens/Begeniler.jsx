@@ -109,7 +109,6 @@ export default function Begeniler() {
               {group.map(({ created_at, predictions: p }) => {
                 const author = p.profiles
                 const isVerified = p.status === 'verified_correct' || p.status === 'verified_incorrect'
-                const isCorrect = p.status === 'verified_correct'
                 return (
                   <article
                     key={p.id}

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
@@ -27,7 +27,10 @@ export default function HesabiDondur() {
   const [submitting, setSubmitting] = useState(false)
   const [error, setError] = useState('')
 
-  const until = new Date(Date.now() + days * 24 * 60 * 60 * 1000)
+  const [until, setUntil] = useState(() => new Date(Date.now() + 30 * 24 * 60 * 60 * 1000))
+  useEffect(() => {
+    setUntil(new Date(Date.now() + days * 24 * 60 * 60 * 1000))
+  }, [days])
 
   async function handleFreeze() {
     if (!password || submitting) return

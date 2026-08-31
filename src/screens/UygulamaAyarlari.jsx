@@ -74,8 +74,9 @@ function buildAccountRows(email, onChangePassword, onOpenContact, onOpenMfa, onO
 const LEGAL_URL = 'https://lu0ji.github.io/gtf-app/legal.html'
 
 const SUPPORT_ROWS = [
-  { icon: 'lucide:help-circle', title: 'Yardım merkezi', subtitle: 'Henüz kullanılamıyor' },
-  { icon: 'lucide:scale', title: 'Topluluk kuralları', subtitle: 'Henüz kullanılamıyor' },
+  { icon: 'lucide:sparkles', title: 'İlk kullanım rehberini tekrar gör', route: '/rehber' },
+  { icon: 'lucide:help-circle', title: 'Yardım merkezi', route: '/ayarlar/yardim-merkezi' },
+  { icon: 'lucide:scale', title: 'Topluluk kuralları', route: '/ayarlar/topluluk-kurallari' },
   { icon: 'lucide:shield', title: 'Gizlilik politikası', url: LEGAL_URL + '#g1' },
   { icon: 'lucide:file-text', title: 'Kullanım koşulları', url: LEGAL_URL + '#k1' },
 ]
@@ -651,11 +652,17 @@ export default function UygulamaAyarlari() {
           <SectionHeader icon="lucide:circle-help" title="Destek ve yasal" subtitle="GTF hakkında daha fazlası" />
           <div className="overflow-hidden rounded-theme border border-border bg-card shadow-sm">
             {SUPPORT_ROWS.map((row, i) => {
-              const Comp = row.url ? 'button' : 'div'
+              const isInteractive = Boolean(row.url || row.route)
+              const Comp = isInteractive ? 'button' : 'div'
+              const onClick = row.route
+                ? () => navigate(row.route)
+                : row.url
+                  ? () => window.open(row.url, '_system')
+                  : undefined
               return (
                 <Comp
                   key={row.title}
-                  onClick={row.url ? () => window.open(row.url, '_system') : undefined}
+                  onClick={onClick}
                   className={`flex w-full items-center gap-3 p-4 text-left ${i < SUPPORT_ROWS.length - 1 ? 'border-b border-border' : ''}`}
                 >
                   <span className="flex h-10 w-10 items-center justify-center rounded-theme bg-muted text-primary">
@@ -665,7 +672,7 @@ export default function UygulamaAyarlari() {
                     <span className="block text-sm font-bold">{row.title}</span>
                     {row.subtitle && <span className="mt-0.5 block truncate text-[11px] text-muted-foreground">{row.subtitle}</span>}
                   </span>
-                  {row.url && <iconify-icon icon="lucide:chevron-right" class="text-lg text-muted-foreground"></iconify-icon>}
+                  {isInteractive && <iconify-icon icon="lucide:chevron-right" class="text-lg text-muted-foreground"></iconify-icon>}
                 </Comp>
               )
             })}

@@ -42,6 +42,9 @@ const HassasIcerikKontrolu = lazy(() => import('./screens/HassasIcerikKontrolu.j
 const BolgeVeTarihBicimi = lazy(() => import('./screens/BolgeVeTarihBicimi.jsx'))
 const AramaGecmisi = lazy(() => import('./screens/AramaGecmisi.jsx'))
 const Begeniler = lazy(() => import('./screens/Begeniler.jsx'))
+const YardimMerkezi = lazy(() => import('./screens/YardimMerkezi.jsx'))
+const TopluluKurallari = lazy(() => import('./screens/TopluluKurallari.jsx'))
+const IlkKullanimRehberi = lazy(() => import('./screens/IlkKullanimRehberi.jsx'))
 
 function ScreenFallback() {
   return (
@@ -100,6 +103,9 @@ export default function App() {
                       <Route path="/ayarlar/bolge-tarih" element={<BolgeVeTarihBicimi />} />
                       <Route path="/ayarlar/arama-gecmisi" element={<AramaGecmisi />} />
                       <Route path="/begeniler" element={<Begeniler />} />
+                      <Route path="/ayarlar/yardim-merkezi" element={<YardimMerkezi />} />
+                      <Route path="/ayarlar/topluluk-kurallari" element={<TopluluKurallari />} />
+                      <Route path="/rehber" element={<IlkKullanimRehberi />} />
                     </Route>
                   </Routes>
                 </Suspense>
