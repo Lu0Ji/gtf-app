@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { IMG } from '../lib/images.js'
+import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
@@ -15,7 +15,6 @@ const CORRECT_POINTS_REWARD = 50
 // punishing the honest close.
 const HONEST_CLOSE_REWARD = 5
 
-const DEFAULT_AVATAR = IMG('a4692a40-aad2-478a-927f-ac284145b46f')
 
 function useCountdown(targetDate) {
   const [remaining, setRemaining] = useState(() => Math.max(0, new Date(targetDate).getTime() - Date.now()))
@@ -338,7 +337,7 @@ export default function TahminKaydi() {
                 className="h-12 w-12 shrink-0 overflow-hidden rounded-full bg-muted"
               >
                 <img
-                  src={author?.avatar_url || DEFAULT_AVATAR}
+                  src={author?.avatar_url || fallbackAvatarFor(record.author_id)}
                   alt={author?.display_name || 'Kullanıcı'}
                   className="h-full w-full object-cover"
                 />
@@ -641,7 +640,7 @@ export default function TahminKaydi() {
                 <div key={c.id} className="flex gap-2.5">
                   <div className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-muted">
                     <img
-                      src={c.profiles?.avatar_url || DEFAULT_AVATAR}
+                      src={c.profiles?.avatar_url || fallbackAvatarFor(c.author_id)}
                       alt={c.profiles?.display_name || 'Kullanıcı'}
                       className="h-full w-full object-cover"
                     />

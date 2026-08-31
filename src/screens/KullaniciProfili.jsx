@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { IMG } from '../lib/images.js'
+import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import { formatDateLong, timeAgo } from '../lib/format.js'
 
-const DEFAULT_AVATAR = IMG('a97f3f05-c665-4b5c-94c7-c83149118bc9')
 
 const CATEGORY_ICONS = {
   spor: 'lucide:trophy',
@@ -309,7 +308,7 @@ export default function KullaniciProfili() {
           <div className="flex items-start gap-4">
             <div className="relative shrink-0">
               <div className="h-[86px] w-[86px] overflow-hidden rounded-full border-4 border-card bg-muted shadow-md">
-                <img src={profile.avatar_url || DEFAULT_AVATAR} alt={profile.display_name} className="h-full w-full object-cover" />
+                <img src={profile.avatar_url || fallbackAvatarFor(userId)} alt={profile.display_name} className="h-full w-full object-cover" />
               </div>
               <span className="absolute bottom-0 right-0 flex h-6 w-6 items-center justify-center rounded-full border-2 border-background bg-primary text-primary-foreground">
                 <iconify-icon icon="lucide:badge-check" class="text-[14px]"></iconify-icon>

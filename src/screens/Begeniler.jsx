@@ -1,12 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { IMG } from '../lib/images.js'
+import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import { formatDateLong, formatTime, timeAgo } from '../lib/format.js'
 
-const DEFAULT_AVATAR = IMG('fc4eb4df-87ce-4cd9-bdd3-80a434cd8ddd')
 
 function groupByDay(rows) {
   const todayKey = new Date().toDateString()
@@ -117,7 +116,7 @@ export default function Begeniler() {
                   >
                     <div className="flex items-start gap-3">
                       <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-secondary">
-                        <img src={author?.avatar_url || DEFAULT_AVATAR} alt={author?.display_name} className="h-full w-full object-cover" />
+                        <img src={author?.avatar_url || fallbackAvatarFor(p.author_id)} alt={author?.display_name} className="h-full w-full object-cover" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <div className="flex items-start justify-between gap-2">

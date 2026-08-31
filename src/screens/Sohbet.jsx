@@ -1,13 +1,12 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { IMG } from '../lib/images.js'
+import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import { useOnlineUsers } from '../contexts/PresenceContext.jsx'
 import { formatTime } from '../lib/format.js'
 
-const DEFAULT_AVATAR = IMG('45ef8632-46e1-43ca-9a32-ce5f5800af73')
 
 export default function Sohbet() {
   const navigate = useNavigate()
@@ -134,7 +133,7 @@ export default function Sohbet() {
             >
               <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-muted">
                 <img
-                  src={partner.avatar_url || DEFAULT_AVATAR}
+                  src={partner.avatar_url || fallbackAvatarFor(partner.id)}
                   alt={partner.display_name}
                   className="h-full w-full object-cover"
                 />
@@ -170,7 +169,7 @@ export default function Sohbet() {
                     {!isMine && (
                       <div className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-muted">
                         <img
-                          src={partner.avatar_url || DEFAULT_AVATAR}
+                          src={partner.avatar_url || fallbackAvatarFor(partner.id)}
                           alt={partner.display_name}
                           className="h-full w-full object-cover"
                         />

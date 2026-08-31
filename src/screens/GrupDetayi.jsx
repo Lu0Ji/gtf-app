@@ -1,13 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
-import { IMG } from '../lib/images.js'
+import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import { formatDateLong, timeAgo } from '../lib/format.js'
 import { GROUP_CATEGORIES } from '../lib/categories.js'
 
-const DEFAULT_AVATAR = IMG('fc4eb4df-87ce-4cd9-bdd3-80a434cd8ddd')
 
 function EditGroupModal({ group, onClose, onSaved }) {
   const { showToast } = useToast()
@@ -101,7 +100,7 @@ function GroupPredictionCard({ prediction, onOpen }) {
     >
       <div className="flex items-center gap-2">
         <div className="h-7 w-7 shrink-0 overflow-hidden rounded-full">
-          <img src={author?.avatar_url || DEFAULT_AVATAR} alt={author?.display_name} className="h-full w-full object-cover" />
+          <img src={author?.avatar_url || fallbackAvatarFor(prediction.author_id)} alt={author?.display_name} className="h-full w-full object-cover" />
         </div>
         <p className="min-w-0 flex-1 truncate text-xs font-semibold text-muted-foreground">
           {author?.display_name || 'Kullanıcı'} · {timeAgo(prediction.created_at)}
@@ -346,7 +345,7 @@ export default function GrupDetayi() {
                     >
                       <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-muted">
                         <img
-                          src={m.profiles.avatar_url || DEFAULT_AVATAR}
+                          src={m.profiles.avatar_url || fallbackAvatarFor(m.user_id)}
                           alt={m.profiles.display_name}
                           className="h-full w-full object-cover"
                         />

@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { IMG } from '../lib/images.js'
+import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase, queryWithGroupIdFallback } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
@@ -9,7 +9,6 @@ import { formatDateLong, timeAgo } from '../lib/format.js'
 import { CATEGORIES as PREDICTION_CATEGORIES } from '../lib/categories.js'
 
 const CATEGORIES = ['Tümü', ...PREDICTION_CATEGORIES]
-const DEFAULT_AVATAR = IMG('fc4eb4df-87ce-4cd9-bdd3-80a434cd8ddd')
 
 function Header() {
   const { profile } = useAuth()
@@ -41,7 +40,7 @@ function Header() {
             </span>
           )}
           <div className="h-10 w-10 overflow-hidden rounded-full border-2 border-card shadow-sm">
-            <img src={profile?.avatar_url || DEFAULT_AVATAR} alt="Profilin" className="h-full w-full object-cover" />
+            <img src={profile?.avatar_url || fallbackAvatarFor(profile?.id)} alt="Profilin" className="h-full w-full object-cover" />
           </div>
         </div>
       </div>
@@ -57,7 +56,7 @@ function ComposeCard() {
     <section className="mx-5 rounded-theme border border-border bg-card p-4 shadow-sm">
       <div className="flex items-center gap-3">
         <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full">
-          <img src={profile?.avatar_url || DEFAULT_AVATAR} alt="Profilin" className="h-full w-full object-cover" />
+          <img src={profile?.avatar_url || fallbackAvatarFor(profile?.id)} alt="Profilin" className="h-full w-full object-cover" />
         </div>
         <button
           onClick={() => navigate('/tahmin-olustur')}
@@ -241,7 +240,7 @@ function PredictionCard({ prediction, social, onToggleLike, onToggleSave }) {
           className="h-11 w-11 shrink-0 overflow-hidden rounded-full"
         >
           <img
-            src={author?.avatar_url || DEFAULT_AVATAR}
+            src={author?.avatar_url || fallbackAvatarFor(prediction.author_id)}
             alt={author?.display_name || 'Kullanıcı'}
             className="h-full w-full object-cover"
           />
@@ -597,7 +596,7 @@ function SuggestedPeople() {
           <article key={person.id} className="min-w-[166px] rounded-theme border border-border bg-card p-3 shadow-sm">
             <button onClick={() => navigate(`/kullanici/${person.id}`)} className="block text-left">
               <div className="h-11 w-11 overflow-hidden rounded-full">
-                <img src={person.avatar_url || DEFAULT_AVATAR} alt={person.display_name} className="h-full w-full object-cover" />
+                <img src={person.avatar_url || fallbackAvatarFor(person.id)} alt={person.display_name} className="h-full w-full object-cover" />
               </div>
               <h3 className="mt-3 text-sm font-bold">{person.display_name}</h3>
               <p className="mt-1 text-[10px] text-muted-foreground">@{person.username}</p>

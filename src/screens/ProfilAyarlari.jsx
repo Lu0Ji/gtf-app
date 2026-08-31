@@ -1,6 +1,6 @@
 import { useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { IMG } from '../lib/images.js'
+import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 
@@ -18,7 +18,6 @@ function colorNameFor(hex) {
   return THEME_COLORS.find((c) => c.hex === (hex || null))?.name || 'Uygulama varsayılanı'
 }
 
-const DEFAULT_AVATAR = IMG('b2552d37-f604-48b3-9b67-704f4b8acb1e')
 
 export default function ProfilAyarlari() {
   const navigate = useNavigate()
@@ -122,7 +121,7 @@ export default function ProfilAyarlari() {
     }
   }
 
-  const previewAvatar = avatarPreview || avatarUrl || DEFAULT_AVATAR
+  const previewAvatar = avatarPreview || avatarUrl || fallbackAvatarFor(user?.id)
   const previewCover = coverRemoved ? null : coverPreview || coverUrl || null
 
   return (

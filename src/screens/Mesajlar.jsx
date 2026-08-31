@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { IMG } from '../lib/images.js'
+import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { timeAgo } from '../lib/format.js'
 
-const DEFAULT_AVATAR = IMG('30bcaf3b-c1a8-4dcb-bb98-3fdcc1b6b596')
 
 function NewChatModal({ onClose, onPick }) {
   const { user } = useAuth()
@@ -85,7 +84,7 @@ function NewChatModal({ onClose, onPick }) {
               className="flex w-full items-center gap-3 border-b border-border px-5 py-3.5 text-left"
             >
               <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full bg-muted">
-                <img src={p.avatar_url || DEFAULT_AVATAR} alt={p.display_name} className="h-full w-full object-cover" />
+                <img src={p.avatar_url || fallbackAvatarFor(p.id)} alt={p.display_name} className="h-full w-full object-cover" />
               </div>
               <div className="min-w-0">
                 <p className="truncate text-sm font-bold">{p.display_name}</p>
@@ -215,7 +214,7 @@ export default function Mesajlar() {
                 >
                   <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full bg-muted">
                     <img
-                      src={partner.avatar_url || DEFAULT_AVATAR}
+                      src={partner.avatar_url || fallbackAvatarFor(partner.id)}
                       alt={partner.display_name}
                       className="h-full w-full object-cover"
                     />

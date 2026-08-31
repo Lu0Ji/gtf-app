@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { IMG } from '../lib/images.js'
+import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 
-const DEFAULT_AVATAR = IMG('6ff2f211-4470-4cea-be7a-27dd9e2c267d')
 const PODIUM_ACCENTS = ['#9A5C14', '#B87935', '#C18B57']
 
 function initials(name) {
@@ -105,7 +104,7 @@ export default function LiderlikTablosu() {
                         className={`overflow-hidden rounded-full border-2 bg-muted ${isFirst ? 'h-[68px] w-[68px]' : 'h-14 w-14'}`}
                         style={{ borderColor: accent }}
                       >
-                        <img src={p.avatar_url || DEFAULT_AVATAR} alt={p.display_name} className="h-full w-full object-cover" />
+                        <img src={p.avatar_url || fallbackAvatarFor(p.id)} alt={p.display_name} className="h-full w-full object-cover" />
                       </div>
                       <p className={`mt-2 w-full truncate font-bold ${isFirst ? 'text-sm' : 'text-xs'}`}>{p.display_name}</p>
                       <p className={`mt-1 font-heading font-extrabold text-primary ${isFirst ? 'text-lg' : 'text-base'}`}>

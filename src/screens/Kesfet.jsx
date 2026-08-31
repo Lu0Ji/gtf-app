@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
-import { IMG } from '../lib/images.js'
+import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase, queryWithGroupIdFallback } from '../lib/supabase.js'
 import { timeAgo } from '../lib/format.js'
 import { CATEGORY_META } from '../lib/categories.js'
@@ -86,7 +86,7 @@ function SearchResults({ query, navigate }) {
                 className={`flex w-full items-center gap-3 p-4 text-left ${i < profiles.length - 1 ? 'border-b border-border' : ''}`}
               >
                 <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-muted">
-                  <img src={p.avatar_url || DEFAULT_AVATAR} alt={p.display_name} className="h-full w-full object-cover" />
+                  <img src={p.avatar_url || fallbackAvatarFor(p.id)} alt={p.display_name} className="h-full w-full object-cover" />
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-bold">{p.display_name}</p>
@@ -134,7 +134,6 @@ function SearchResults({ query, navigate }) {
   )
 }
 
-const DEFAULT_AVATAR = IMG('e5c6a2fd-2700-478a-a8f3-1ed0f5acfc3e')
 
 function CategoryTile({ category, count, variant }) {
   const meta = CATEGORY_META[category] || { icon: 'lucide:tag', label: category }
@@ -336,7 +335,7 @@ export default function Kesfet() {
                     >
                       <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full">
                         <img
-                          src={prediction.profiles?.avatar_url || DEFAULT_AVATAR}
+                          src={prediction.profiles?.avatar_url || fallbackAvatarFor(prediction.author_id)}
                           alt={prediction.profiles?.display_name}
                           className="h-full w-full object-cover"
                         />
@@ -407,7 +406,7 @@ export default function Kesfet() {
                         {i + 1}
                       </span>
                       <div className="h-9 w-9 overflow-hidden rounded-full bg-muted">
-                        <img src={entry.avatar_url || DEFAULT_AVATAR} alt={entry.display_name} className="h-full w-full object-cover" />
+                        <img src={entry.avatar_url || fallbackAvatarFor(entry.id)} alt={entry.display_name} className="h-full w-full object-cover" />
                       </div>
                       <div className="min-w-0 flex-1">
                         <p className="text-sm font-bold">{entry.display_name}</p>

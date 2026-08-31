@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { IMG } from '../lib/images.js'
+import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 
-const DEFAULT_AVATAR = IMG('a97f3f05-c665-4b5c-94c7-c83149118bc9')
 
 export default function EngellenenHesaplar() {
   const navigate = useNavigate()
@@ -92,7 +91,7 @@ export default function EngellenenHesaplar() {
                   className="h-11 w-11 shrink-0 overflow-hidden rounded-full"
                 >
                   <img
-                    src={row.profiles.avatar_url || DEFAULT_AVATAR}
+                    src={row.profiles.avatar_url || fallbackAvatarFor(row.blocked_id)}
                     alt={row.profiles.display_name}
                     className="h-full w-full object-cover"
                   />

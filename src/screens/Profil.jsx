@@ -1,11 +1,10 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
-import { IMG } from '../lib/images.js'
+import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { formatDateLong, timeAgo } from '../lib/format.js'
 
-const DEFAULT_AVATAR = IMG('a97f3f05-c665-4b5c-94c7-c83149118bc9')
 
 const CATEGORY_ICONS = {
   spor: 'lucide:trophy',
@@ -88,7 +87,7 @@ function SavedPredictionCard({ prediction }) {
       className="mx-5 mt-3 flex w-[calc(100%-40px)] items-start gap-3 rounded-theme border border-border bg-card p-4 text-left shadow-sm"
     >
       <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted">
-        <img src={author?.avatar_url || DEFAULT_AVATAR} alt={author?.display_name} className="h-full w-full object-cover" />
+        <img src={author?.avatar_url || fallbackAvatarFor(prediction.author_id)} alt={author?.display_name} className="h-full w-full object-cover" />
       </div>
       <div className="min-w-0 flex-1">
         <p className="text-[11px] text-muted-foreground">{author?.display_name || 'Kullanıcı'}</p>
@@ -226,7 +225,7 @@ export default function Profil() {
             <div className="relative shrink-0">
               <div className="h-[86px] w-[86px] overflow-hidden rounded-full border-4 border-card bg-muted shadow-md">
                 <img
-                  src={profile?.avatar_url || DEFAULT_AVATAR}
+                  src={profile?.avatar_url || fallbackAvatarFor(profile?.id)}
                   alt={profile?.display_name || 'Profil'}
                   className="h-full w-full object-cover"
                 />
