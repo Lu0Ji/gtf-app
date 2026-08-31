@@ -213,7 +213,13 @@ export default function Kesfet() {
       setTopRanked(profilesRes.data || [])
       setRecentPredictions((predictionsRes.data || []).slice(0, 6))
       setTrending(trendingList)
-      setOpeningSoon(openingSoonRes.data || [])
+      const now = Date.now()
+      setOpeningSoon(
+        (openingSoonRes.data || []).map((p) => ({
+          ...p,
+          hoursLeft: Math.max(1, Math.round((new Date(p.event_date) - now) / 3600000)),
+        }))
+      )
       setLoading(false)
     }
 
@@ -264,7 +270,7 @@ export default function Kesfet() {
                 <div className="mt-3 flex gap-3 overflow-x-auto px-5 pb-1">
                   {openingSoon.map((p) => {
                     const meta = CATEGORY_META[p.category] || { icon: 'lucide:tag', label: p.category }
-                    const hoursLeft = Math.max(1, Math.round((new Date(p.event_date) - Date.now()) / 3600000))
+                    const { hoursLeft } = p
                     return (
                       <div
                         key={p.id}

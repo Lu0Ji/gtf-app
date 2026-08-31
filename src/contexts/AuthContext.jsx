@@ -32,6 +32,21 @@ export function AuthProvider({ children }) {
     return error ? currentProfile : data
   }, [])
 
+  // Hesabı Dondur: logging back in is the reactivation action (per its own
+  // copy — "giriş yaparak hesabını yeniden etkinleştirebilirsin"), so any
+  // successful session load clears a pending freeze rather than waiting for
+  // frozen_until to lapse on its own.
+  const unfreezeIfNeeded = useCallback(async (currentProfile) => {
+    if (!currentProfile?.frozen_until) return currentProfile
+    const { data, error } = await supabase
+      .from('profiles')
+      .update({ frozen_until: null, freeze_reason: null })
+      .eq('id', currentProfile.id)
+      .select()
+      .single()
+    return error ? currentProfile : data
+  }, [])
+
   const loadProfile = useCallback(
     async (userId) => {
       if (!userId) {
@@ -43,9 +58,9 @@ export function AuthProvider({ children }) {
         console.error('loadProfile failed:', error.message, error)
         return
       }
-      setProfile(await bumpStreak(data))
+      setProfile(await bumpStreak(await unfreezeIfNeeded(data)))
     },
-    [bumpStreak]
+    [bumpStreak, unfreezeIfNeeded]
   )
 
   useEffect(() => {

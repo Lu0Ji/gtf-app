@@ -30,6 +30,11 @@ const KullaniciProfili = lazy(() => import('./screens/KullaniciProfili.jsx'))
 const GrupDetayi = lazy(() => import('./screens/GrupDetayi.jsx'))
 const EngellenenHesaplar = lazy(() => import('./screens/EngellenenHesaplar.jsx'))
 const TakipIstekleri = lazy(() => import('./screens/TakipIstekleri.jsx'))
+const EpostaVeTelefon = lazy(() => import('./screens/EpostaVeTelefon.jsx'))
+const SifreDegistir = lazy(() => import('./screens/SifreDegistir.jsx'))
+const IkiAsamaliDogrulama = lazy(() => import('./screens/IkiAsamaliDogrulama.jsx'))
+const HesabiDondur = lazy(() => import('./screens/HesabiDondur.jsx'))
+const TahminGorunurlugu = lazy(() => import('./screens/TahminGorunurlugu.jsx'))
 
 function ScreenFallback() {
   return (
@@ -76,6 +81,11 @@ export default function App() {
                       <Route path="/grup/:groupId" element={<GrupDetayi />} />
                       <Route path="/ayarlar/engellenenler" element={<EngellenenHesaplar />} />
                       <Route path="/ayarlar/takip-istekleri" element={<TakipIstekleri />} />
+                      <Route path="/ayarlar/eposta-telefon" element={<EpostaVeTelefon />} />
+                      <Route path="/ayarlar/sifre-degistir" element={<SifreDegistir />} />
+                      <Route path="/ayarlar/iki-asamali-dogrulama" element={<IkiAsamaliDogrulama />} />
+                      <Route path="/ayarlar/hesabi-dondur" element={<HesabiDondur />} />
+                      <Route path="/ayarlar/tahmin-gorunurlugu" element={<TahminGorunurlugu />} />
                     </Route>
                   </Routes>
                 </Suspense>

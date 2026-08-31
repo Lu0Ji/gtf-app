@@ -61,12 +61,12 @@ function Row({ icon, iconTone = 'bg-muted text-primary', title, subtitle, right,
   )
 }
 
-function buildAccountRows(email, onChangePassword) {
+function buildAccountRows(email, onChangePassword, onOpenContact, onOpenMfa, onOpenFreeze) {
   return [
-    { icon: 'lucide:mail', title: 'E-posta', subtitle: email || 'Yükleniyor…', chevron: false },
+    { icon: 'lucide:mail', title: 'E-posta ve Telefon', subtitle: email || 'Yükleniyor…', chevron: true, onClick: onOpenContact },
     { icon: 'lucide:key-round', title: 'Şifre değiştir', subtitle: 'Hesap güvenliğini yönet', chevron: true, onClick: onChangePassword },
-    { icon: 'lucide:badge-check', title: 'İki aşamalı doğrulama', subtitle: 'Henüz kullanılamıyor', chevron: false },
-    { icon: 'lucide:pause-circle', iconTone: 'bg-muted text-muted-foreground', title: 'Hesabı geçici olarak dondur', subtitle: 'Henüz kullanılamıyor', chevron: false },
+    { icon: 'lucide:badge-check', title: 'İki aşamalı doğrulama', subtitle: 'Doğrulayıcı uygulamayla koru', chevron: true, onClick: onOpenMfa },
+    { icon: 'lucide:pause-circle', iconTone: 'bg-muted text-muted-foreground', title: 'Hesabı geçici olarak dondur', subtitle: 'Profilini gizle, istediğinde geri dön', chevron: true, onClick: onOpenFreeze },
   ]
 }
 
@@ -208,83 +208,6 @@ function WordListSheet({ title, subtitle, words, onAdd, onRemove, onClose }) {
   )
 }
 
-function PasswordSheet({ onSubmit, onClose }) {
-  const [current, setCurrent] = useState('')
-  const [next, setNext] = useState('')
-  const [confirm, setConfirm] = useState('')
-  const [error, setError] = useState('')
-  const [busy, setBusy] = useState(false)
-
-  async function submit() {
-    if (busy) return
-    setError('')
-    if (!current) {
-      setError('Mevcut şifreni gir.')
-      return
-    }
-    if (next.length < 6) {
-      setError('Yeni şifre en az 6 karakter olmalı.')
-      return
-    }
-    if (next !== confirm) {
-      setError('Şifreler eşleşmiyor.')
-      return
-    }
-    setBusy(true)
-    const result = await onSubmit(current, next)
-    setBusy(false)
-    if (result?.error) {
-      setError(result.error)
-      return
-    }
-    onClose()
-  }
-
-  return (
-    <div className="fixed inset-0 z-50 flex items-end bg-black/40" onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} className="w-full rounded-t-theme bg-background p-5 pb-8">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-heading text-lg font-bold">Şifre değiştir</h2>
-          <button onClick={onClose} aria-label="Kapat" className="text-muted-foreground">
-            <iconify-icon icon="lucide:x" class="text-xl"></iconify-icon>
-          </button>
-        </div>
-        <div className="space-y-3">
-          <input
-            type="password"
-            value={current}
-            onChange={(e) => setCurrent(e.target.value)}
-            placeholder="Mevcut şifre"
-            className="h-12 w-full rounded-theme border border-border bg-input px-4 text-sm text-foreground outline-none placeholder:text-muted-foreground"
-          />
-          <input
-            type="password"
-            value={next}
-            onChange={(e) => setNext(e.target.value)}
-            placeholder="Yeni şifre"
-            className="h-12 w-full rounded-theme border border-border bg-input px-4 text-sm text-foreground outline-none placeholder:text-muted-foreground"
-          />
-          <input
-            type="password"
-            value={confirm}
-            onChange={(e) => setConfirm(e.target.value)}
-            placeholder="Yeni şifre (tekrar)"
-            className="h-12 w-full rounded-theme border border-border bg-input px-4 text-sm text-foreground outline-none placeholder:text-muted-foreground"
-          />
-        </div>
-        {error && <p className="mt-3 text-xs font-semibold text-destructive">{error}</p>}
-        <button
-          onClick={submit}
-          disabled={busy}
-          className="mt-5 w-full rounded-theme bg-primary py-3 text-sm font-bold text-primary-foreground disabled:opacity-60"
-        >
-          {busy ? 'Güncelleniyor…' : 'Şifreyi güncelle'}
-        </button>
-      </div>
-    </div>
-  )
-}
-
 function SectionHeader({ icon, title, subtitle }) {
   return (
     <div className="mb-3 flex items-center gap-2">
@@ -349,8 +272,13 @@ export default function UygulamaAyarlari() {
   const { showToast } = useToast()
   const { theme, setTheme, fontScale, setFontScale, reduceMotion, setReduceMotion } = useTheme()
   const { settings, update: updateSettings } = useUserSettings()
-  const [showPasswordSheet, setShowPasswordSheet] = useState(false)
-  const accountRows = buildAccountRows(user?.email, () => setShowPasswordSheet(true))
+  const accountRows = buildAccountRows(
+    user?.email,
+    () => navigate('/ayarlar/sifre-degistir'),
+    () => navigate('/ayarlar/eposta-telefon'),
+    () => navigate('/ayarlar/iki-asamali-dogrulama'),
+    () => navigate('/ayarlar/hesabi-dondur')
+  )
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [openPicker, setOpenPicker] = useState(null)
@@ -412,18 +340,6 @@ export default function UygulamaAyarlari() {
     }
     await signOut()
     navigate('/giris', { replace: true })
-  }
-
-  async function handleChangePassword(currentPassword, newPassword) {
-    const { error: reauthError } = await supabase.auth.signInWithPassword({
-      email: user.email,
-      password: currentPassword,
-    })
-    if (reauthError) return { error: 'Mevcut şifre yanlış.' }
-    const { error } = await supabase.auth.updateUser({ password: newPassword })
-    if (error) return { error: error.message }
-    showToast('Şifren güncellendi.', 'success')
-    return {}
   }
 
   async function handleTogglePrivate() {
@@ -563,6 +479,13 @@ export default function UygulamaAyarlari() {
               subtitle={profile?.is_private ? 'Yalnızca onayladığın kişiler tahminlerini görür' : 'Herkes tahminlerini görebilir'}
               onClick={handleTogglePrivate}
               right={<Toggle on={!!profile?.is_private} />}
+            />
+            <Row
+              icon="lucide:eye"
+              title="Tahmin görünürlüğü"
+              subtitle="Kim görebilir, ne zaman görebilir"
+              onClick={() => navigate('/ayarlar/tahmin-gorunurlugu')}
+              right={<iconify-icon icon="lucide:chevron-right" class="text-lg text-muted-foreground"></iconify-icon>}
             />
             <Row
               icon="lucide:user-round-check"
@@ -786,10 +709,6 @@ export default function UygulamaAyarlari() {
               </div>
             </div>
           </div>
-        )}
-
-        {showPasswordSheet && (
-          <PasswordSheet onSubmit={handleChangePassword} onClose={() => setShowPasswordSheet(false)} />
         )}
 
         {openPicker === 'theme' && (

@@ -119,6 +119,8 @@ export default function Profil() {
   const [followerCount, setFollowerCount] = useState(null)
   const [followingCount, setFollowingCount] = useState(null)
   const [newFollowerCount, setNewFollowerCount] = useState(0)
+  const [sealedThisWeek, setSealedThisWeek] = useState(0)
+  const [verifiedThisWeek, setVerifiedThisWeek] = useState(0)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -144,11 +146,14 @@ export default function Profil() {
           .gte('created_at', weekAgo),
       ])
       if (cancelled) return
-      setPredictions(predictionsRes.data || [])
+      const allPredictions = predictionsRes.data || []
+      setPredictions(allPredictions)
       setFollowerCount(followersRes.count ?? 0)
       setFollowingCount(followingRes.count ?? 0)
       setSavedPredictions((savesRes.data || []).map((s) => s.predictions).filter(Boolean))
       setNewFollowerCount(newFollowersRes.count ?? 0)
+      setSealedThisWeek(allPredictions.filter((p) => p.sealed_at && p.sealed_at >= weekAgo).length)
+      setVerifiedThisWeek(allPredictions.filter((p) => p.verified_at && p.verified_at >= weekAgo).length)
       setLoading(false)
     }
 
@@ -158,11 +163,6 @@ export default function Profil() {
     }
   }, [user])
 
-  const weekAgoMs = Date.now() - 7 * 24 * 60 * 60 * 1000
-  const sealedThisWeek = predictions.filter((p) => p.sealed_at && new Date(p.sealed_at).getTime() >= weekAgoMs).length
-  const verifiedThisWeek = predictions.filter(
-    (p) => p.verified_at && new Date(p.verified_at).getTime() >= weekAgoMs
-  ).length
   const hasWeeklyActivity = sealedThisWeek > 0 || verifiedThisWeek > 0 || newFollowerCount > 0
 
   const sealedCount = predictions.filter((p) => p.status === 'sealed').length
