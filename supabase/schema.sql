@@ -569,3 +569,83 @@ create policy "Users can retract their own dispute" on public.prediction_dispute
 
 grant select on public.prediction_disputes to anon, authenticated;
 grant insert, delete on public.prediction_disputes to authenticated;
+
+-- FIREVIBE SCREEN COVERAGE: the remaining columns/tables needed for the
+-- newly-built settings screens (E-posta ve Telefon, Hesabı Dondur, Mesaj
+-- İstekleri, Etiketleme ve Bahsetmeler, Hassas İçerik Kontrolü). Every
+-- other FireVibe screen this pass added (Yardım Merkezi, Topluluk
+-- Kuralları, İlk Kullanım Rehberi, Arama Geçmişi, Aktif Oturumlar, Şifre
+-- Değiştir, İki Aşamalı Doğrulama, Beğeniler, Tahmin Görünürlüğü, Bölge ve
+-- Tarih Biçimi) works entirely off columns/tables that already exist —
+-- nothing else to run for those.
+
+-- E-posta ve Telefon: a plain contact field, not SMS-verified (no SMS
+-- provider configured on this project).
+alter table public.profiles add column phone text;
+
+-- Hesabı Dondur: logging back in is the reactivation action (see
+-- AuthContext's unfreezeIfNeeded), so frozen_until is cleared automatically
+-- on next session load rather than needing its own "reactivate" flow.
+alter table public.profiles add column frozen_until timestamptz;
+alter table public.profiles add column freeze_reason text;
+
+drop policy "Profiles are viewable by everyone" on public.profiles;
+create policy "Profiles are viewable by everyone unless frozen" on public.profiles
+  for select using (frozen_until is null or frozen_until < now() or auth.uid() = id);
+
+-- Mesaj İstekleri: who can message you. Enforced at the RLS level (not
+-- just a cosmetic setting) — see the messages insert policy below.
+alter table public.profiles add column message_permission text not null default 'following'
+  check (message_permission in ('everyone', 'following', 'none'));
+
+drop policy "Users can send messages" on public.messages;
+create policy "Users can send messages respecting recipient preference" on public.messages
+  for insert
+  with check (
+    auth.uid() = sender_id
+    and (
+      auth.uid() = recipient_id
+      or exists (
+        select 1 from public.profiles r
+        where r.id = recipient_id
+          and (
+            r.message_permission = 'everyone'
+            or (
+              r.message_permission = 'following'
+              and exists (
+                select 1 from public.follows f
+                where f.follower_id = recipient_id and f.following_id = auth.uid() and f.status = 'accepted'
+              )
+            )
+          )
+      )
+    )
+  );
+
+-- Etiketleme ve Bahsetmeler: @username mentions in comments only (no
+-- mention parsing in prediction text or group content yet — see
+-- TahminKaydi.jsx's createMentions()).
+alter table public.profiles add column mention_permission text not null default 'everyone'
+  check (mention_permission in ('everyone', 'following', 'none'));
+
+create table public.mentions (
+  id uuid primary key default gen_random_uuid(),
+  mentioned_user_id uuid not null references public.profiles(id) on delete cascade,
+  author_id uuid not null references public.profiles(id) on delete cascade,
+  comment_id uuid references public.prediction_comments(id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+
+alter table public.mentions enable row level security;
+create policy "Mentions are viewable by everyone" on public.mentions for select using (true);
+create policy "Users can create mentions when commenting" on public.mentions for insert with check (auth.uid() = author_id);
+
+grant select on public.mentions to anon, authenticated;
+grant insert on public.mentions to authenticated;
+
+-- Hassas İçerik Kontrolü: self-declared by the author at creation time (no
+-- automated moderation/image analysis exists), filtered client-side in
+-- Anasayfa's feed query based on the viewer's own content_filter_level.
+alter table public.predictions add column is_sensitive boolean not null default false;
+alter table public.profiles add column content_filter_level text not null default 'standard'
+  check (content_filter_level in ('less', 'standard', 'more'));
