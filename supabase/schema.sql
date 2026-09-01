@@ -1401,3 +1401,23 @@ create index real_world_events_category_idx on public.real_world_events (categor
 -- a table is created via a raw db query connection the way this one was.
 -- Learned by hitting "permission denied for table real_world_events" first.
 grant select, insert, update on public.real_world_events to service_role;
+-- ─────────────────────────────────────────────────────────────────────────
+
+-- GÜNDEM (news headlines) — Ticketmaster/SeatGeek both turned out to have
+-- zero Turkey coverage (verified live: querying SeatGeek for Istanbul,
+-- Ankara, and country=TR each returned total:0 — a real coverage gap, not
+-- a signup problem), so "şehir etkinlikleri" is on hold. Turkish news RSS
+-- feeds, by contrast, need no API key/signup and are genuinely Turkey-
+-- relevant — added as a second real_world_events `kind` alongside sports.
+--
+-- Reused the same table rather than a new one since the shape mostly
+-- matches, but `event_date` means something different per kind: for
+-- 'sports' it's the future kickoff you're predicting the outcome of; for
+-- 'news' there's no future decision point at all, so it's repurposed as
+-- the article's publish time (recency, not countdown) — the client (see
+-- Kesfet.jsx) renders "X önce" for news and "X sonra" for sports off the
+-- same column, and only sports prefills an event date into Tahmin
+-- Oluştur — a news card leaves that for the user to pick themselves.
+alter table public.real_world_events drop constraint real_world_events_kind_check;
+alter table public.real_world_events add constraint real_world_events_kind_check
+  check (kind in ('sports', 'city_event', 'news'));

@@ -178,16 +178,21 @@ export default function Kesfet() {
   const [trending, setTrending] = useState([])
   const [openingSoon, setOpeningSoon] = useState([])
   const [upcomingEvents, setUpcomingEvents] = useState([])
+  const [newsHeadlines, setNewsHeadlines] = useState([])
   const [loading, setLoading] = useState(true)
 
-  // Fire-and-forget: the function itself checks whether its cache is
-  // actually stale before calling out to football-data.org, so it's cheap
-  // to just ask on every visit rather than wiring up a real cron job (see
-  // supabase/schema.sql's note on why there isn't one). Not awaited — the
-  // screen renders off whatever's already in real_world_events, and picks
-  // up anything newer on the next visit/reload instead of blocking on it.
+  // Fire-and-forget: each function checks whether its own cache is
+  // actually stale before calling out (football-data.org / Hürriyet's RSS),
+  // so it's cheap to just ask on every visit rather than wiring up a real
+  // cron job (see supabase/schema.sql's notes on why there isn't one). Not
+  // awaited — the screen renders off whatever's already in
+  // real_world_events, and picks up anything newer on the next visit/reload.
   useEffect(() => {
     supabase.functions.invoke('fetch-sports-fixtures').then(
+      () => {},
+      () => {}
+    )
+    supabase.functions.invoke('fetch-news-headlines').then(
       () => {},
       () => {}
     )
@@ -198,7 +203,7 @@ export default function Kesfet() {
 
     async function load() {
       const in48h = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
-      const [predictionsRes, profilesRes, openingSoonRes, eventsRes] = await Promise.all([
+      const [predictionsRes, profilesRes, openingSoonRes, eventsRes, newsRes] = await Promise.all([
         queryWithGroupIdFallback((filterGroupId) => {
           let q = supabase
             .from('predictions')
@@ -229,8 +234,18 @@ export default function Kesfet() {
         supabase
           .from('real_world_events')
           .select('*')
+          .eq('kind', 'sports')
           .gte('event_date', new Date().toISOString())
           .order('event_date', { ascending: true })
+          .limit(20),
+        // News rows use event_date as publish time, not a future point —
+        // see the GÜNDEM comment in supabase/schema.sql — so this is a
+        // plain "most recent first" query, no gte() cutoff.
+        supabase
+          .from('real_world_events')
+          .select('*')
+          .eq('kind', 'news')
+          .order('event_date', { ascending: false })
           .limit(20),
       ])
 
@@ -283,6 +298,15 @@ export default function Kesfet() {
         return new Date(a.event_date) - new Date(b.event_date)
       })
       setUpcomingEvents(rankedEvents)
+
+      const news = newsRes.error ? [] : newsRes.data || []
+      const rankedNews = [...news].sort((a, b) => {
+        const aMatch = interests.has(a.category) ? 0 : 1
+        const bMatch = interests.has(b.category) ? 0 : 1
+        if (aMatch !== bMatch) return aMatch - bMatch
+        return new Date(b.event_date) - new Date(a.event_date)
+      })
+      setNewsHeadlines(rankedNews)
       setLoading(false)
     }
 
@@ -379,6 +403,58 @@ export default function Kesfet() {
                         >
                           <iconify-icon icon="lucide:pen-line" class="text-xs"></iconify-icon>
                           Tahmin oluştur
+                        </button>
+                      </div>
+                    )
+                  })}
+                </div>
+              </section>
+            )}
+
+            {newsHeadlines.length > 0 && (
+              <section className="mb-8">
+                <div className="px-5">
+                  <h2 className="flex items-center gap-1.5 font-heading text-lg font-bold tracking-tight">
+                    <iconify-icon icon="lucide:newspaper" class="text-accent"></iconify-icon>
+                    Gündemde
+                  </h2>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    Türkiye gündeminden — bir tahmine ilham olabilir
+                  </p>
+                </div>
+                <div className="mt-3 space-y-2.5 px-5">
+                  {newsHeadlines.slice(0, 8).map((item) => {
+                    const meta = CATEGORY_META[item.category] || { icon: 'lucide:tag', label: item.category }
+                    return (
+                      <div
+                        key={item.id}
+                        className="rounded-theme border border-border bg-card p-3.5 shadow-sm"
+                      >
+                        <div className="flex items-center justify-between gap-2">
+                          <span className="flex items-center gap-1 rounded-full bg-muted px-2 py-1 text-[10px] font-bold text-primary">
+                            <iconify-icon icon={meta.icon} class="text-xs"></iconify-icon>
+                            {meta.label}
+                          </span>
+                          <span className="shrink-0 text-[10px] text-muted-foreground">{timeAgo(item.event_date)}</span>
+                        </div>
+                        <a
+                          href={item.metadata?.link}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="mt-2 block text-sm font-bold leading-5 text-foreground"
+                        >
+                          {item.title}
+                        </a>
+                        <button
+                          onClick={() =>
+                            navigate('/tahmin-olustur', {
+                              state: { prefill: { title: item.title, category: item.category } },
+                            })
+                          }
+                          className="mt-2.5 flex items-center gap-1.5 text-[11px] font-bold text-primary"
+                        >
+                          <iconify-icon icon="lucide:pen-line" class="text-xs"></iconify-icon>
+                          Bu konuda tahmin oluştur
                         </button>
                       </div>
                     )
