@@ -4,7 +4,7 @@ import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
-import { formatDateLong, timeAgo } from '../lib/format.js'
+import { formatDateLong, formatTimeUntil, timeAgo } from '../lib/format.js'
 import { CATEGORY_META, GROUP_CATEGORIES } from '../lib/categories.js'
 
 
@@ -251,7 +251,10 @@ export default function GrupDetayi() {
   const nextOpening = predictions
     .filter((p) => p.status === 'sealed' && new Date(p.event_date) > new Date())
     .sort((a, b) => new Date(a.event_date) - new Date(b.event_date))[0]
-  const nextOpeningLabel = nextOpening ? formatDateLong(nextOpening.event_date) : '—'
+  // Countdown framing ("3 gün sonra"), not a bare date — the point of
+  // surfacing this at all is to make someone curious enough to come back,
+  // and a date on its own doesn't do that the way a ticking countdown does.
+  const nextOpeningLabel = nextOpening ? formatTimeUntil(nextOpening.event_date) : '—'
 
   return (
     <div className="min-h-screen w-full bg-background pb-28 text-foreground font-body">
@@ -403,11 +406,22 @@ export default function GrupDetayi() {
             )}
           </div>
           {predictions.length === 0 ? (
-            <p className="mt-3 text-xs text-muted-foreground">
-              {isMember
-                ? 'Henüz bir tahmin veya zaman kapsülü yok. İlkini sen oluştur.'
-                : 'Tahminleri görmek ve oluşturmak için gruba katıl.'}
-            </p>
+            <div className="mt-3 flex flex-col items-center gap-2 rounded-theme border border-dashed border-border bg-muted/60 p-6 text-center">
+              <div
+                className="flex h-11 w-11 items-center justify-center rounded-full bg-card shadow-sm"
+                style={{ color: categoryMeta.ink }}
+              >
+                <iconify-icon icon="lucide:lock-keyhole" class="text-xl"></iconify-icon>
+              </div>
+              <p className="text-sm font-bold text-foreground">
+                {isMember ? 'Henüz mühürlenmiş bir kayıt yok' : 'Tahminler kilitli'}
+              </p>
+              <p className="text-xs leading-5 text-muted-foreground">
+                {isMember
+                  ? 'Bu grupta ilk mührü sen bas — açılış anını üyeler merakla bekleyecek.'
+                  : 'Neler mühürlendiğini görmek ve kendi tahminini eklemek için gruba katıl.'}
+              </p>
+            </div>
           ) : (
             <div className="mt-3 space-y-2.5">
               {predictions.map((prediction) => (

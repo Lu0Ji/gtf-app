@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import { supabase } from '../lib/supabase.js'
+import { formatTimeUntil } from '../lib/format.js'
 import { CATEGORY_META, GROUP_CATEGORIES as CATEGORIES } from '../lib/categories.js'
 
 function CreateGroupModal({ onClose, onCreated }) {
@@ -156,6 +157,21 @@ function CreateGroupModal({ onClose, onCreated }) {
   )
 }
 
+// A flat line of muted text reads as "nothing here" rather than "come back
+// once there's something" — an icon + a two-line pitch does more to make an
+// empty list feel like an invitation instead of a dead end.
+function EmptyState({ icon, title, subtitle }) {
+  return (
+    <div className="mx-5 mt-4 flex flex-col items-center gap-2 rounded-theme border border-dashed border-border bg-muted/60 p-6 text-center">
+      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-card text-primary shadow-sm">
+        <iconify-icon icon={icon} class="text-xl"></iconify-icon>
+      </div>
+      <p className="text-sm font-bold text-foreground">{title}</p>
+      {subtitle && <p className="text-xs leading-5 text-muted-foreground">{subtitle}</p>}
+    </div>
+  )
+}
+
 function categoryTint(ink) {
   return `color-mix(in srgb, ${ink} 14%, white)`
 }
@@ -166,6 +182,7 @@ function GroupCard({ group, isMember, onToggleMembership }) {
   const memberCount = group.memberCount ?? 0
   const predictionCount = group.predictionCount ?? 0
   const todayCount = group.todayCount ?? 0
+  const nextOpeningAt = group.nextOpeningAt ?? null
 
   const JoinButton = (
     <button
@@ -224,7 +241,14 @@ function GroupCard({ group, isMember, onToggleMembership }) {
                 </div>
                 <p className="text-xs font-semibold text-foreground">{predictionCount} mühürlü tahmin</p>
               </div>
-              {todayCount > 0 && <span className="text-[11px] font-semibold text-success">+{todayCount} bugün</span>}
+              {nextOpeningAt ? (
+                <span className="flex items-center gap-1 text-[11px] font-semibold text-accent">
+                  <iconify-icon icon="lucide:hourglass" class="text-xs"></iconify-icon>
+                  {formatTimeUntil(nextOpeningAt)}
+                </span>
+              ) : (
+                todayCount > 0 && <span className="text-[11px] font-semibold text-success">+{todayCount} bugün</span>
+              )}
             </div>
           )}
         </div>
@@ -254,10 +278,18 @@ function GroupCard({ group, isMember, onToggleMembership }) {
           </span>
         </div>
         {group.description && <p className="mt-1 line-clamp-1 text-[11px] text-muted-foreground">{group.description}</p>}
-        <p className="mt-1 text-[11px] text-muted-foreground">
-          {memberCount} üye
-          {predictionCount > 0 && ` · ${predictionCount} tahmin`}
-          {todayCount > 0 && ` · +${todayCount} bugün`}
+        <p className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
+          <span className="truncate">
+            {memberCount} üye
+            {predictionCount > 0 && ` · ${predictionCount} tahmin`}
+            {!nextOpeningAt && todayCount > 0 && ` · +${todayCount} bugün`}
+          </span>
+          {nextOpeningAt && (
+            <span className="flex shrink-0 items-center gap-1 font-semibold text-accent">
+              · <iconify-icon icon="lucide:hourglass" class="text-xs"></iconify-icon>
+              {formatTimeUntil(nextOpeningAt)}
+            </span>
+          )}
         </p>
       </div>
       {JoinButton}
@@ -278,7 +310,7 @@ export default function Gruplar() {
     const [{ data: groupsData }, { data: membersData }, { data: predictionsData }] = await Promise.all([
       supabase.from('groups').select('*').order('created_at', { ascending: false }),
       supabase.from('group_members').select('group_id, user_id'),
-      supabase.from('predictions').select('group_id, created_at').not('group_id', 'is', null),
+      supabase.from('predictions').select('group_id, created_at, status, event_date').not('group_id', 'is', null),
     ])
 
     const memberCounts = new Map()
@@ -289,12 +321,23 @@ export default function Gruplar() {
     }
 
     const todayKey = new Date().toDateString()
+    const now = new Date()
     const predictionCounts = new Map()
     const todayCounts = new Map()
+    // Earliest still-sealed opening per group — the one thing worth
+    // dangling in front of someone deciding whether a group is worth
+    // joining: a concrete "something's about to be revealed here."
+    const nextOpenings = new Map()
     for (const p of predictionsData || []) {
       predictionCounts.set(p.group_id, (predictionCounts.get(p.group_id) || 0) + 1)
       if (new Date(p.created_at).toDateString() === todayKey) {
         todayCounts.set(p.group_id, (todayCounts.get(p.group_id) || 0) + 1)
+      }
+      if (p.status === 'sealed' && new Date(p.event_date) > now) {
+        const current = nextOpenings.get(p.group_id)
+        if (!current || new Date(p.event_date) < new Date(current)) {
+          nextOpenings.set(p.group_id, p.event_date)
+        }
       }
     }
 
@@ -304,6 +347,7 @@ export default function Gruplar() {
         memberCount: memberCounts.get(g.id) || 0,
         predictionCount: predictionCounts.get(g.id) || 0,
         todayCount: todayCounts.get(g.id) || 0,
+        nextOpeningAt: nextOpenings.get(g.id) || null,
       }))
     )
     setMyGroupIds(mine)
@@ -386,9 +430,17 @@ export default function Gruplar() {
                 </div>
               </div>
               {myGroups.length === 0 ? (
-                <p className="mx-5 mt-4 rounded-theme border border-dashed border-border bg-muted/60 p-4 text-center text-xs text-muted-foreground">
-                  {trimmedQuery ? 'Eşleşen bir grubun yok.' : 'Henüz bir gruba katılmadın.'}
-                </p>
+                <EmptyState
+                  icon={trimmedQuery ? 'lucide:search-x' : 'lucide:users-round'}
+                  title={trimmedQuery ? 'Eşleşen bir grubun yok.' : 'Henüz bir gruba katılmadın.'}
+                  subtitle={
+                    trimmedQuery
+                      ? null
+                      : otherGroups.length > 0
+                        ? 'Aşağıdaki topluluklardan birine katıl, ya da kendi grubunu kurup ilk mührü sen bas.'
+                        : 'İlk grubu sen kur — mühürlü tahminlerin etrafında bir topluluk başlat.'
+                  }
+                />
               ) : (
                 myGroups.map((g) => (
                   <GroupCard key={g.id} group={g} isMember onToggleMembership={handleToggleMembership} />
@@ -404,9 +456,11 @@ export default function Gruplar() {
                 </div>
               </div>
               {otherGroups.length === 0 ? (
-                <p className="mx-5 mt-4 rounded-theme border border-dashed border-border bg-muted/60 p-4 text-center text-xs text-muted-foreground">
-                  {trimmedQuery ? 'Eşleşen bir grup yok.' : 'Henüz keşfedilecek başka grup yok. İlk grubu sen kur.'}
-                </p>
+                <EmptyState
+                  icon={trimmedQuery ? 'lucide:search-x' : 'lucide:compass'}
+                  title={trimmedQuery ? 'Eşleşen bir grup yok.' : 'Henüz keşfedilecek başka grup yok.'}
+                  subtitle={trimmedQuery ? null : 'İlk grubu sen kur, herkes senin peşinden gelsin.'}
+                />
               ) : (
                 otherGroups.map((g) => (
                   <GroupCard key={g.id} group={g} isMember={false} onToggleMembership={handleToggleMembership} />

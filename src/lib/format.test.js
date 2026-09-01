@@ -1,5 +1,5 @@
 import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest'
-import { formatDateLong, formatTime, setTimeFormatPreference, timeAgo } from './format.js'
+import { formatDateLong, formatTime, formatTimeUntil, setTimeFormatPreference, timeAgo } from './format.js'
 
 describe('formatDateLong', () => {
   it('renders a full Turkish date', () => {
@@ -74,5 +74,36 @@ describe('timeAgo', () => {
 
   it('returns empty string for a missing date', () => {
     expect(timeAgo(null)).toBe('')
+  })
+})
+
+// Regression: ISSUE — extracted from Kesfet.jsx's inline "Yakında
+// açılacaklar" countdown so Gruplar/GrupDetayi's group-opening teaser reuses
+// the exact same wording instead of drifting into a second implementation.
+// Found by /qa-adjacent feature work on 2026-09-01.
+describe('formatTimeUntil', () => {
+  beforeEach(() => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date('2026-08-31T12:00:00Z'))
+  })
+
+  afterEach(() => {
+    vi.useRealTimers()
+  })
+
+  it('shows hours under a day', () => {
+    expect(formatTimeUntil(new Date('2026-08-31T15:00:00Z').toISOString())).toBe('3 saat sonra')
+  })
+
+  it('shows days at 24h+', () => {
+    expect(formatTimeUntil(new Date('2026-09-03T12:00:00Z').toISOString())).toBe('3 gün sonra')
+  })
+
+  it('floors at "1 saat sonra" instead of going to 0/negative for something opening any moment now', () => {
+    expect(formatTimeUntil(new Date('2026-08-31T12:00:10Z').toISOString())).toBe('1 saat sonra')
+  })
+
+  it('returns empty string for a missing date', () => {
+    expect(formatTimeUntil(null)).toBe('')
   })
 })

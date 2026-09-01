@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase, queryWithGroupIdFallback } from '../lib/supabase.js'
-import { timeAgo } from '../lib/format.js'
+import { timeAgo, formatTimeUntil } from '../lib/format.js'
 import { CATEGORY_META } from '../lib/categories.js'
 import { addSearchHistoryEntry } from '../lib/searchHistory.js'
 
@@ -238,13 +238,7 @@ export default function Kesfet() {
       setTopRanked(profilesRes.data || [])
       setRecentPredictions((predictionsRes.data || []).slice(0, 6))
       setTrending(trendingList)
-      const now = Date.now()
-      setOpeningSoon(
-        (openingSoonRes.data || []).map((p) => ({
-          ...p,
-          hoursLeft: Math.max(1, Math.round((new Date(p.event_date) - now) / 3600000)),
-        }))
-      )
+      setOpeningSoon(openingSoonRes.data || [])
       setLoading(false)
     }
 
@@ -295,7 +289,6 @@ export default function Kesfet() {
                 <div className="mt-3 flex gap-3 overflow-x-auto px-5 pb-1">
                   {openingSoon.map((p) => {
                     const meta = CATEGORY_META[p.category] || { icon: 'lucide:tag', label: p.category }
-                    const { hoursLeft } = p
                     return (
                       <div
                         key={p.id}
@@ -303,7 +296,7 @@ export default function Kesfet() {
                       >
                         <div className="flex items-center gap-1.5 text-[10px] font-bold text-accent">
                           <iconify-icon icon="lucide:hourglass" class="text-xs"></iconify-icon>
-                          {hoursLeft < 24 ? `${hoursLeft} saat sonra` : `${Math.round(hoursLeft / 24)} gün sonra`}
+                          {formatTimeUntil(p.event_date)}
                         </div>
                         <p className="mt-2 text-sm font-bold leading-5">{p.title}</p>
                         <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-muted px-2 py-1 text-[10px] font-bold text-primary">

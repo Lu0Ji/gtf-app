@@ -24,6 +24,17 @@ export function formatDateLong(dateStr) {
   )
 }
 
+// The inverse of timeAgo — a future date, phrased as a countdown ("3 saat
+// sonra" / "5 gün sonra"). This is the app's one real curiosity hook (sealed
+// content opening later), so the wording is shared verbatim everywhere a
+// mühürlü kayıt's opening time shows up, not just Keşfet's "Yakında
+// açılacaklar" where it first appeared.
+export function formatTimeUntil(dateStr) {
+  if (!dateStr) return ''
+  const hoursLeft = Math.max(1, Math.round((new Date(dateStr).getTime() - Date.now()) / 3600000))
+  return hoursLeft < 24 ? `${hoursLeft} saat sonra` : `${Math.round(hoursLeft / 24)} gün sonra`
+}
+
 export function timeAgo(dateStr) {
   if (!dateStr) return ''
   const diffMs = Date.now() - new Date(dateStr).getTime()
