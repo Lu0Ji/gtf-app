@@ -14,7 +14,7 @@ export default function Sohbet() {
   const { user } = useAuth()
   const { showToast } = useToast()
   const onlineIds = useOnlineUsers()
-  const partner = location.state?.partner
+  const [partner, setPartner] = useState(location.state?.partner || null)
   const partnerOnline = partner ? onlineIds.has(partner.id) : false
 
   const [messages, setMessages] = useState([])
@@ -24,11 +24,32 @@ export default function Sohbet() {
   const [blocked, setBlocked] = useState(false)
   const bottomRef = useRef(null)
 
+  // Arriving from a push notification deep link means there's no navigation
+  // state to read the chat partner from — only ?userId=. Fetch the profile
+  // once before giving up and bouncing back to Mesajlar.
   useEffect(() => {
-    if (!partner) {
+    if (partner) return
+    const userId = new URLSearchParams(location.search).get('userId')
+    if (!userId) {
       navigate('/mesajlar', { replace: true })
+      return
     }
-  }, [partner, navigate])
+    let cancelled = false
+    supabase
+      .from('profiles')
+      .select('id, display_name, username, avatar_url')
+      .eq('id', userId)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (cancelled) return
+        if (data) setPartner(data)
+        else navigate('/mesajlar', { replace: true })
+      })
+    return () => {
+      cancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [partner])
 
   useEffect(() => {
     if (!partner) return

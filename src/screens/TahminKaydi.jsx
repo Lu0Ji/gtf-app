@@ -58,11 +58,32 @@ export default function TahminKaydi() {
   const [evidenceNote, setEvidenceNote] = useState('')
   const [evidenceUrl, setEvidenceUrl] = useState('')
 
+  // Arriving from a push notification deep link (or any bare URL) means
+  // there's no navigation state to read the prediction from — only the
+  // ?id= query param. Fetch it once before giving up and redirecting home.
   useEffect(() => {
-    if (!record) {
+    if (record) return
+    const id = new URLSearchParams(location.search).get('id')
+    if (!id) {
       navigate('/', { replace: true })
+      return
     }
-  }, [record, navigate])
+    let cancelled = false
+    supabase
+      .from('predictions')
+      .select('*, profiles:author_id(display_name, username, avatar_url)')
+      .eq('id', id)
+      .maybeSingle()
+      .then(({ data }) => {
+        if (cancelled) return
+        if (data) setRecord(data)
+        else navigate('/', { replace: true })
+      })
+    return () => {
+      cancelled = true
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [record])
 
   useEffect(() => {
     if (!record) return

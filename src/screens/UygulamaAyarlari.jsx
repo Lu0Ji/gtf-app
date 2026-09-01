@@ -5,6 +5,7 @@ import { useToast } from '../contexts/ToastContext.jsx'
 import { useTheme } from '../contexts/ThemeContext.jsx'
 import { useUserSettings } from '../hooks/useUserSettings.js'
 import { supabase } from '../lib/supabase.js'
+import { getPushSubscriptionState, subscribeToPush, unsubscribeFromPush } from '../lib/pushNotifications.js'
 
 const THEME_OPTIONS = [
   { value: 'system', label: 'Sistem ayarı', desc: 'Cihazının temasını takip eder', icon: 'lucide:smartphone' },
@@ -291,6 +292,33 @@ export default function UygulamaAyarlari() {
   const [exporting, setExporting] = useState(false)
   const [cacheBytes, setCacheBytes] = useState(0)
   const [inviteCopied, setInviteCopied] = useState(false)
+  // 'unsupported' | 'denied' | 'subscribed' | 'unsubscribed' | null (still checking)
+  const [pushState, setPushState] = useState(null)
+  const [pushBusy, setPushBusy] = useState(false)
+
+  useEffect(() => {
+    getPushSubscriptionState().then(setPushState)
+  }, [])
+
+  async function handleTogglePush() {
+    if (pushBusy || !user) return
+    setPushBusy(true)
+    try {
+      if (pushState === 'subscribed') {
+        await unsubscribeFromPush()
+        setPushState('unsubscribed')
+      } else {
+        await subscribeToPush(user.id)
+        setPushState('subscribed')
+        showToast('Push bildirimleri açıldı.', 'success')
+      }
+    } catch (e) {
+      showToast(e.message || 'Bildirimler açılamadı, tekrar dene.')
+      setPushState(await getPushSubscriptionState())
+    } finally {
+      setPushBusy(false)
+    }
+  }
 
   async function handleCopyInvite() {
     const message = `GTF'e katıl, ikimiz de 100 puan kazanalım! Davet kodum: @${profile?.username}`
@@ -534,6 +562,21 @@ export default function UygulamaAyarlari() {
           <SectionHeader icon="lucide:bell-ring" title="Bildirimler" subtitle="Hareketler akışında neyi görmek istediğin" />
           <RowList
             rows={[
+              {
+                icon: 'lucide:bell',
+                iconTone: pushState === 'subscribed' ? 'bg-success/10 text-success' : 'bg-muted text-primary',
+                title: 'Push bildirimleri',
+                subtitle:
+                  pushState === 'unsupported'
+                    ? 'Bu tarayıcı desteklemiyor'
+                    : pushState === 'denied'
+                      ? 'Tarayıcı ayarlarından izin vermen gerek'
+                      : pushState === 'subscribed'
+                        ? 'Bu cihazda açık'
+                        : 'Uygulama kapalıyken de haber al',
+                toggle: pushState === 'subscribed',
+                onClick: pushState === 'unsupported' || pushState === 'denied' || pushBusy ? undefined : handleTogglePush,
+              },
               { icon: 'lucide:heart', title: 'Beğeniler', subtitle: 'Tahmin ve yorum beğenileri', toggle: settings.notifications.likes, onClick: () => toggleNotification('likes') },
               { icon: 'lucide:message-circle', title: 'Yorumlar', subtitle: 'Kayıtlarına gelen yanıtlar', toggle: settings.notifications.comments, onClick: () => toggleNotification('comments') },
               { icon: 'lucide:user-plus', title: 'Yeni takipçiler', subtitle: 'Takip istekleri ve yeni bağlantılar', toggle: settings.notifications.newFollowers, onClick: () => toggleNotification('newFollowers') },

@@ -1461,3 +1461,365 @@ grant select, insert on public.group_messages to authenticated;
 create index group_messages_group_id_idx on public.group_messages (group_id, created_at);
 
 alter publication supabase_realtime add table public.group_messages;
+
+-- WEB PUSH BİLDİRİMLERİ — the app was only ever "live" while a tab was open;
+-- this is what pulls people back in (new follower, comment, DM, tahmin
+-- sonucu). Chose Web Push over native FCM/APNs: no external account signup,
+-- works for the web app + installed PWA + Android's Chrome-based WebView,
+-- and is fully testable by re-running this file + the edge function — see
+-- supabase/functions/send-push. (Not reachable from the plain Capacitor iOS
+-- shell — that needs APNs separately, out of scope here.)
+-- Not added to config.toml's exposed `schemas` list on purpose — these
+-- helper functions are only ever called from other security definer
+-- function bodies or as trigger functions, never through PostgREST.
+create schema if not exists private;
+
+create table public.push_subscriptions (
+  id uuid primary key default gen_random_uuid(),
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  endpoint text not null unique,
+  p256dh text not null,
+  auth text not null,
+  user_agent text,
+  created_at timestamptz not null default now()
+);
+
+alter table public.push_subscriptions enable row level security;
+create policy "Users manage their own push subscriptions" on public.push_subscriptions
+  for all using (auth.uid() = user_id) with check (auth.uid() = user_id);
+-- The edge function reads across users (it's told a user_id, not scoped to
+-- a single caller) via its service-role admin client — same base-table-grant
+-- lesson as real_world_events above: RLS bypass alone isn't enough.
+grant select, insert, update, delete on public.push_subscriptions to authenticated;
+grant select, delete on public.push_subscriptions to service_role;
+create index push_subscriptions_user_id_idx on public.push_subscriptions (user_id);
+
+-- Trigger-to-edge-function plumbing. The edge function is deployed with
+-- --no-verify-jwt (see send-push/index.ts) and checks a shared secret
+-- header instead of a Supabase JWT — deliberately NOT the project's real
+-- service_role key, so a leak of this secret can only ever be used to ask
+-- "send this one push", never to read/write any table. Both values live in
+-- Vault (encrypted at rest), readable only from inside a security definer
+-- function body — never exposed through PostgREST.
+select vault.create_secret(
+  'https://xkxvyljothmxdwzpgyps.supabase.co/functions/v1/send-push',
+  'push_edge_function_url',
+  'send-push edge function URL, called from DB triggers via pg_net'
+);
+select vault.create_secret(
+  'M6C4yK-tPMky0X-XNi141AFfxEYXggp9u40fr9zMRvg',
+  'push_trigger_secret',
+  'Shared secret the send-push edge function checks instead of a Supabase JWT'
+);
+
+-- pg_net is not relocatable — it always installs into its own `net` schema
+-- regardless of any WITH SCHEMA clause, so none is given here.
+create extension if not exists pg_net;
+
+-- Fire-and-forget: pg_net.http_post queues the request and returns
+-- immediately (async), so a slow or failing push never blocks the write
+-- that triggered it. Missing Vault config (not set up yet, e.g. locally)
+-- is swallowed rather than raised — a notification is never worth failing
+-- someone's follow/comment/message over.
+create or replace function private.send_push_notification(
+  p_user_id uuid,
+  p_title text,
+  p_body text,
+  p_url text default '/'
+) returns void
+language plpgsql
+security definer
+set search_path = public
+as $$
+declare
+  v_url text;
+  v_secret text;
+begin
+  select decrypted_secret into v_url from vault.decrypted_secrets where name = 'push_edge_function_url';
+  select decrypted_secret into v_secret from vault.decrypted_secrets where name = 'push_trigger_secret';
+  if v_url is null or v_secret is null then
+    return;
+  end if;
+  perform net.http_post(
+    url := v_url,
+    headers := jsonb_build_object('Content-Type', 'application/json', 'x-push-trigger-secret', v_secret),
+    body := jsonb_build_object('user_id', p_user_id, 'title', p_title, 'body', p_body, 'url', p_url)
+  );
+exception when others then
+  null;
+end;
+$$;
+
+-- Yeni takipçi — fires on a direct follow (public account, insert lands
+-- accepted) and on a follow request being approved (private account,
+-- pending -> accepted). Never on the pending request itself — that would
+-- tip off the target before they've decided whether to approve it.
+create or replace function private.notify_new_follower() returns trigger
+language plpgsql security definer set search_path = public as $$
+declare
+  v_name text;
+begin
+  if new.status = 'accepted' and (tg_op = 'INSERT' or old.status <> 'accepted') then
+    select coalesce(display_name, username) into v_name from public.profiles where id = new.follower_id;
+    perform private.send_push_notification(
+      new.following_id,
+      'Yeni takipçi',
+      coalesce(v_name, 'Biri') || ' seni takip etmeye başladı.',
+      '/kullanici/' || new.follower_id
+    );
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists push_new_follower on public.follows;
+create trigger push_new_follower
+  after insert or update on public.follows
+  for each row execute function private.notify_new_follower();
+
+-- Tahmine yorum — only pings the prediction's author, and never for their
+-- own comment on their own prediction.
+create or replace function private.notify_prediction_comment() returns trigger
+language plpgsql security definer set search_path = public as $$
+declare
+  v_author_id uuid;
+  v_name text;
+  v_title text;
+begin
+  select author_id, title into v_author_id, v_title from public.predictions where id = new.prediction_id;
+  if v_author_id is not null and v_author_id <> new.author_id then
+    select coalesce(display_name, username) into v_name from public.profiles where id = new.author_id;
+    perform private.send_push_notification(
+      v_author_id,
+      'Yeni yorum',
+      coalesce(v_name, 'Biri') || ' tahminine yorum yaptı: ' || left(coalesce(v_title, ''), 60),
+      '/tahmin-kaydi?id=' || new.prediction_id
+    );
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists push_prediction_comment on public.prediction_comments;
+create trigger push_prediction_comment
+  after insert on public.prediction_comments
+  for each row execute function private.notify_prediction_comment();
+
+-- Yeni mesaj — DMs only (group chat is a live thread people check while
+-- they're in the group, not a push-worthy 1:1 ping).
+create or replace function private.notify_new_message() returns trigger
+language plpgsql security definer set search_path = public as $$
+declare
+  v_name text;
+begin
+  select coalesce(display_name, username) into v_name from public.profiles where id = new.sender_id;
+  perform private.send_push_notification(
+    new.recipient_id,
+    coalesce(v_name, 'Biri') || ' sana mesaj gönderdi',
+    left(new.content, 100),
+    '/sohbet?userId=' || new.sender_id
+  );
+  return new;
+end;
+$$;
+
+drop trigger if exists push_new_message on public.messages;
+create trigger push_new_message
+  after insert on public.messages
+  for each row execute function private.notify_new_message();
+-- ─────────────────────────────────────────────────────────────────────────
+
+-- Tahmin sonucu belirlendi — pings the author once their sealed prediction
+-- is resolved, whether by their own verify_prediction() call or by the
+-- community voting it to quorum in cast_prediction_vote(). Re-declaring
+-- both functions in full (schema.sql is append-only) with one added
+-- `perform private.send_push_notification(...)` line each at the end.
+create or replace function public.verify_prediction(
+  p_prediction_id uuid,
+  p_result text,
+  p_evidence_note text default null,
+  p_evidence_url text default null
+)
+returns void as $$
+declare
+  v_author_id uuid;
+  v_status text;
+  v_event_date timestamptz;
+  v_tier text;
+  v_new_status text;
+  v_multiplier numeric;
+  v_reward integer;
+  v_title text;
+begin
+  if p_result not in ('correct', 'incorrect') then
+    raise exception 'Geçersiz sonuç.';
+  end if;
+
+  select author_id, status, event_date, difficulty_tier, title
+    into v_author_id, v_status, v_event_date, v_tier, v_title
+    from public.predictions where id = p_prediction_id for update;
+
+  if v_author_id is null then
+    raise exception 'Tahmin bulunamadı.';
+  end if;
+  if v_author_id <> auth.uid() then
+    raise exception 'Sadece tahminin sahibi sonucu işaretleyebilir.';
+  end if;
+  if v_status <> 'sealed' then
+    raise exception 'Bu tahmin zaten sonuçlandırılmış veya henüz mühürlenmemiş.';
+  end if;
+  if v_event_date is not null and v_event_date > now() then
+    raise exception 'Açılış zamanı henüz gelmedi.';
+  end if;
+
+  v_new_status := case when p_result = 'correct' then 'verified_correct' else 'verified_incorrect' end;
+  v_multiplier := case v_tier
+    when 'istikrar' then 1.25
+    when 'ustalik' then 1.75
+    when 'efsane' then 2.5
+    else 1.0
+  end;
+  v_reward := round((case when p_result = 'correct' then 50 else 5 end) * v_multiplier);
+
+  update public.predictions
+  set status = v_new_status,
+      verified_at = now(),
+      resolved_by = 'author',
+      evidence_note = nullif(trim(coalesce(p_evidence_note, '')), ''),
+      evidence_url = nullif(trim(coalesce(p_evidence_url, '')), '')
+  where id = p_prediction_id;
+
+  perform set_config('gtf.allow_points_write', 'on', true);
+  update public.profiles set points = points + v_reward where id = auth.uid();
+  perform set_config('gtf.allow_points_write', 'off', true);
+
+  perform private.send_push_notification(
+    v_author_id,
+    case when p_result = 'correct' then 'Tahmin doğrulandı!' else 'Tahmin sonuçlandı' end,
+    left(coalesce(v_title, ''), 60) || ' — ' || (case when p_result = 'correct' then 'gerçekleşti' else 'gerçekleşmedi' end),
+    '/tahmin-kaydi?id=' || p_prediction_id
+  );
+end;
+$$ language plpgsql security definer set search_path = public;
+
+grant execute on function public.verify_prediction(uuid, text, text, text) to authenticated;
+
+-- Same re-declaration for the community-vote path (quorum resolves a
+-- 'sealed' prediction, or enough opposing votes flip an already-verified
+-- one) — only pushes when a status change actually happened this call.
+create or replace function public.cast_prediction_vote(
+  p_prediction_id uuid,
+  p_vote text
+)
+returns void as $$
+declare
+  v_author_id uuid;
+  v_status text;
+  v_event_date timestamptz;
+  v_tier text;
+  v_title text;
+  v_correct_weight integer;
+  v_incorrect_weight integer;
+  v_author_weight constant integer := 3;
+  v_new_status text;
+  v_multiplier numeric;
+  v_old_reward integer;
+  v_new_reward integer;
+begin
+  if p_vote not in ('correct', 'incorrect') then
+    raise exception 'Geçersiz oy.';
+  end if;
+
+  select author_id, status, event_date, difficulty_tier, title
+    into v_author_id, v_status, v_event_date, v_tier, v_title
+    from public.predictions where id = p_prediction_id for update;
+
+  if v_author_id is null then
+    raise exception 'Tahmin bulunamadı.';
+  end if;
+  if v_author_id = auth.uid() then
+    raise exception 'Kendi tahminine oy veremezsin, sonucu doğrudan işaretle.';
+  end if;
+  if v_status = 'open' then
+    raise exception 'Bu tahmin henüz mühürlenmemiş.';
+  end if;
+  if v_event_date is not null and v_event_date > now() then
+    raise exception 'Açılış zamanı henüz gelmedi.';
+  end if;
+
+  insert into public.prediction_votes (prediction_id, voter_id, vote)
+  values (p_prediction_id, auth.uid(), p_vote)
+  on conflict (prediction_id, voter_id) do update set vote = excluded.vote, created_at = now();
+
+  if v_status in ('verified_correct', 'verified_incorrect') then
+    if (p_vote = 'correct' and v_status = 'verified_incorrect')
+       or (p_vote = 'incorrect' and v_status = 'verified_correct') then
+      insert into public.prediction_disputes (prediction_id, user_id)
+      values (p_prediction_id, auth.uid())
+      on conflict (prediction_id, user_id) do nothing;
+    else
+      delete from public.prediction_disputes where prediction_id = p_prediction_id and user_id = auth.uid();
+    end if;
+  end if;
+
+  select count(*) filter (where vote = 'correct'), count(*) filter (where vote = 'incorrect')
+    into v_correct_weight, v_incorrect_weight
+    from public.prediction_votes where prediction_id = p_prediction_id;
+
+  if v_status = 'verified_correct' then
+    v_correct_weight := v_correct_weight + v_author_weight;
+  elsif v_status = 'verified_incorrect' then
+    v_incorrect_weight := v_incorrect_weight + v_author_weight;
+  end if;
+
+  v_new_status := null;
+
+  if v_status = 'sealed' then
+    if (v_correct_weight + v_incorrect_weight) >= 3 and v_correct_weight <> v_incorrect_weight then
+      v_new_status := case when v_correct_weight > v_incorrect_weight then 'verified_correct' else 'verified_incorrect' end;
+    end if;
+  elsif v_status = 'verified_correct' and v_incorrect_weight > v_author_weight then
+    v_new_status := 'verified_incorrect';
+  elsif v_status = 'verified_incorrect' and v_correct_weight > v_author_weight then
+    v_new_status := 'verified_correct';
+  end if;
+
+  if v_new_status is not null and v_new_status <> v_status then
+    v_multiplier := case v_tier
+      when 'istikrar' then 1.25
+      when 'ustalik' then 1.75
+      when 'efsane' then 2.5
+      else 1.0
+    end;
+
+    perform set_config('gtf.allow_points_write', 'on', true);
+
+    if v_status in ('verified_correct', 'verified_incorrect') then
+      v_old_reward := round((case when v_status = 'verified_correct' then 50 else 5 end) * v_multiplier);
+      update public.profiles set points = points - v_old_reward where id = v_author_id;
+    end if;
+
+    v_new_reward := round((case when v_new_status = 'verified_correct' then 50 else 5 end) * v_multiplier);
+    update public.profiles set points = points + v_new_reward where id = v_author_id;
+
+    perform set_config('gtf.allow_points_write', 'off', true);
+
+    update public.predictions
+    set status = v_new_status,
+        verified_at = coalesce(verified_at, now()),
+        disputed = true,
+        resolved_by = 'community'
+    where id = p_prediction_id;
+
+    perform private.send_push_notification(
+      v_author_id,
+      case when v_new_status = 'verified_correct' then 'Tahmin doğrulandı!' else 'Tahmin sonuçlandı' end,
+      left(coalesce(v_title, ''), 60) || ' — topluluk oyuyla ' ||
+        (case when v_new_status = 'verified_correct' then 'gerçekleşti' else 'gerçekleşmedi' end),
+      '/tahmin-kaydi?id=' || p_prediction_id
+    );
+  end if;
+end;
+$$ language plpgsql security definer set search_path = public;
+
+grant execute on function public.cast_prediction_vote(uuid, text) to authenticated;
