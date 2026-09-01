@@ -107,7 +107,15 @@ export default function Sohbet() {
     if (error) {
       setMessages((prev) => prev.filter((m) => m.id !== optimistic.id))
       setDraft(content)
-      showToast('Mesaj gönderilemedi, tekrar dene.')
+      // 42501 = RLS insert policy rejected it — this user's "kimin mesaj
+      // atabileceği" preference permanently blocks us (see MesajIstekleri),
+      // not a network blip. "tekrar dene" would be a lie: retrying can't
+      // ever succeed here, so say what's actually true instead.
+      showToast(
+        error.code === '42501'
+          ? 'Bu kişi yalnızca takip ettiklerinden mesaj kabul ediyor.'
+          : 'Mesaj gönderilemedi, tekrar dene.'
+      )
     }
     setSending(false)
   }
