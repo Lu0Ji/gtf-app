@@ -1,0 +1,64 @@
+import { useNavigate } from 'react-router-dom'
+import { BADGES, TIERS } from '../lib/badges.js'
+
+// Glamorous badge showcase for a profile header — Rozetler.jsx already
+// guards `showcase_badges` so only a badge the owner has actually earned
+// can end up in it (the star-toggle there only renders on earned badges),
+// so displaying a showcased slug elsewhere just needs a catalog lookup by
+// slug, not a full stats recompute for whoever's profile this is.
+export default function BadgeShowcase({ slugs, totalEarned, isOwn }) {
+  const navigate = useNavigate()
+  const showcased = (slugs || []).map((slug) => BADGES.find((b) => b.slug === slug)).filter(Boolean)
+
+  if (showcased.length === 0 && !isOwn) return null
+
+  const slots = isOwn ? [...showcased, ...Array(Math.max(0, 3 - showcased.length)).fill(null)] : showcased
+
+  return (
+    <section className="mx-5 mt-5 overflow-hidden rounded-theme border border-border bg-card p-4 shadow-sm">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-1.5">
+          <iconify-icon icon="lucide:sparkles" class="text-base text-accent"></iconify-icon>
+          <h2 className="font-heading text-sm font-extrabold tracking-tight">Rozet Vitrini</h2>
+        </div>
+        <button onClick={() => navigate('/rozetler')} className="text-[11px] font-bold text-primary">
+          {totalEarned > 0 ? `${totalEarned} rozet · Tümü` : 'Tümü'}
+        </button>
+      </div>
+      <div className="mt-3 grid grid-cols-3 gap-2.5">
+        {slots.map((badge, i) =>
+          badge ? (
+            <button
+              key={badge.slug}
+              onClick={() => navigate('/rozetler')}
+              className="flex flex-col items-center gap-1.5 rounded-theme p-2.5"
+              style={{ background: TIERS.find((t) => t.key === badge.tier)?.tint }}
+            >
+              <span
+                className="flex h-12 w-12 items-center justify-center rounded-full bg-card text-2xl shadow-sm ring-2"
+                style={{ color: TIERS.find((t) => t.key === badge.tier)?.ink, '--tw-ring-color': TIERS.find((t) => t.key === badge.tier)?.ink }}
+              >
+                <iconify-icon icon={badge.icon}></iconify-icon>
+              </span>
+              <span
+                className="line-clamp-2 text-center text-[10px] font-bold leading-tight"
+                style={{ color: TIERS.find((t) => t.key === badge.tier)?.ink }}
+              >
+                {badge.title}
+              </span>
+            </button>
+          ) : (
+            <button
+              key={`empty-${i}`}
+              onClick={() => navigate('/rozetler')}
+              className="flex flex-col items-center justify-center gap-1.5 rounded-theme border border-dashed border-border py-3.5 text-muted-foreground"
+            >
+              <iconify-icon icon="lucide:plus" class="text-lg"></iconify-icon>
+              <span className="text-[9px] font-bold">Ekle</span>
+            </button>
+          )
+        )}
+      </div>
+    </section>
+  )
+}

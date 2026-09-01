@@ -5,6 +5,8 @@ import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import { formatDateLong, timeAgo } from '../lib/format.js'
+import BadgeShowcase from '../components/BadgeShowcase.jsx'
+import DifficultyChip from '../components/DifficultyChip.jsx'
 
 
 const CATEGORY_ICONS = {
@@ -40,9 +42,12 @@ function PredictionCard({ prediction }) {
           <span>{formatDateLong(prediction.verified_at)}</span>
         </div>
         <div className="p-4">
-          <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold text-secondary-foreground">
-            {prediction.category?.toUpperCase()}
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold text-secondary-foreground">
+              {prediction.category?.toUpperCase()}
+            </span>
+            <DifficultyChip tier={prediction.difficulty_tier} />
+          </div>
           <p className="mt-3 text-[15px] font-semibold leading-6">&ldquo;{prediction.sealed_content}&rdquo;</p>
         </div>
       </button>
@@ -55,9 +60,12 @@ function PredictionCard({ prediction }) {
       className="mx-5 mt-3 block w-[calc(100%-40px)] rounded-theme border border-border bg-card p-4 text-left shadow-sm"
     >
       <div className="flex items-center justify-between gap-2">
-        <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold text-secondary-foreground">
-          {prediction.category?.toUpperCase()}
-        </span>
+        <div className="flex items-center gap-1.5">
+          <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold text-secondary-foreground">
+            {prediction.category?.toUpperCase()}
+          </span>
+          <DifficultyChip tier={prediction.difficulty_tier} />
+        </div>
         <span className="flex items-center gap-1 text-[10px] font-semibold text-accent">
           <iconify-icon icon="lucide:clock-3" class="text-xs"></iconify-icon>
           Mühürlü
@@ -90,6 +98,7 @@ export default function KullaniciProfili() {
   const [isBlocked, setIsBlocked] = useState(false)
   const [blockBusy, setBlockBusy] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
+  const [earnedBadgeCount, setEarnedBadgeCount] = useState(0)
   const [loading, setLoading] = useState(true)
 
   // Viewing your own profile through this route just goes to the real tab.
@@ -104,7 +113,7 @@ export default function KullaniciProfili() {
     let cancelled = false
 
     async function load() {
-      const [profileRes, predictionsRes, followersRes, followingRes, followingMeRes, blockedRes] = await Promise.all([
+      const [profileRes, predictionsRes, followersRes, followingRes, followingMeRes, blockedRes, earnedBadgesRes] = await Promise.all([
         supabase.from('profiles').select('*').eq('id', userId).single(),
         supabase.from('predictions').select('*').eq('author_id', userId).order('created_at', { ascending: false }),
         supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', userId).eq('status', 'accepted'),
@@ -120,6 +129,9 @@ export default function KullaniciProfili() {
           .select('*', { count: 'exact', head: true })
           .eq('blocker_id', currentUser.id)
           .eq('blocked_id', userId),
+        // earned_badges may not exist yet (see supabase/schema.sql) — count
+        // just stays 0 until the migration runs.
+        supabase.from('earned_badges').select('*', { count: 'exact', head: true }).eq('user_id', userId),
       ])
       if (cancelled) return
       setProfile(profileRes.data || null)
@@ -129,6 +141,7 @@ export default function KullaniciProfili() {
       setIsFollowing(followingMeRes.data?.status === 'accepted')
       setFollowPending(followingMeRes.data?.status === 'pending')
       setIsBlocked((blockedRes.count ?? 0) > 0)
+      setEarnedBadgeCount(earnedBadgesRes.count ?? 0)
       setLoading(false)
     }
 
@@ -369,6 +382,8 @@ export default function KullaniciProfili() {
             </div>
           </div>
         </section>
+
+        <BadgeShowcase slugs={profile.showcase_badges} totalEarned={earnedBadgeCount} isOwn={false} />
 
         {accuracyPct !== null && (
           <section className="mx-5 mt-6 overflow-hidden rounded-theme bg-primary text-primary-foreground shadow-sm">

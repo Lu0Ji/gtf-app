@@ -4,6 +4,8 @@ import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { formatDateLong, timeAgo } from '../lib/format.js'
+import BadgeShowcase from '../components/BadgeShowcase.jsx'
+import DifficultyChip from '../components/DifficultyChip.jsx'
 
 
 const CATEGORY_ICONS = {
@@ -39,6 +41,7 @@ function OwnPredictionCard({ prediction }) {
             <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold text-secondary-foreground">
               {prediction.category?.toUpperCase()}
             </span>
+            <DifficultyChip tier={prediction.difficulty_tier} />
             {prediction.is_private && (
               <span className="flex items-center gap-1 text-[10px] font-semibold text-accent">
                 <iconify-icon icon="lucide:archive" class="text-xs"></iconify-icon>
@@ -55,9 +58,12 @@ function OwnPredictionCard({ prediction }) {
   return (
     <div className="mx-5 mt-3 rounded-theme border border-border bg-card p-4 shadow-sm">
       <div className="flex items-center justify-between gap-2">
-        <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold text-secondary-foreground">
-          {prediction.category?.toUpperCase()}
-        </span>
+        <div className="flex items-center gap-1.5">
+          <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold text-secondary-foreground">
+            {prediction.category?.toUpperCase()}
+          </span>
+          <DifficultyChip tier={prediction.difficulty_tier} />
+        </div>
         <span className="flex items-center gap-1 text-[10px] font-semibold text-accent">
           <iconify-icon icon={prediction.is_private ? 'lucide:archive' : 'lucide:clock-3'} class="text-xs"></iconify-icon>
           {prediction.is_private ? 'Zaman kapsülü' : 'Mühürlü'}
@@ -130,6 +136,7 @@ export default function Profil() {
   const [newFollowerCount, setNewFollowerCount] = useState(0)
   const [sealedThisWeek, setSealedThisWeek] = useState(0)
   const [verifiedThisWeek, setVerifiedThisWeek] = useState(0)
+  const [earnedBadgeCount, setEarnedBadgeCount] = useState(0)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -138,7 +145,7 @@ export default function Profil() {
 
     async function load() {
       const weekAgo = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
-      const [predictionsRes, followersRes, followingRes, savesRes, newFollowersRes] = await Promise.all([
+      const [predictionsRes, followersRes, followingRes, savesRes, newFollowersRes, earnedBadgesRes] = await Promise.all([
         supabase.from('predictions').select('*').eq('author_id', user.id).order('created_at', { ascending: false }),
         supabase.from('follows').select('*', { count: 'exact', head: true }).eq('following_id', user.id).eq('status', 'accepted'),
         supabase.from('follows').select('*', { count: 'exact', head: true }).eq('follower_id', user.id).eq('status', 'accepted'),
@@ -153,6 +160,9 @@ export default function Profil() {
           .eq('following_id', user.id)
           .eq('status', 'accepted')
           .gte('created_at', weekAgo),
+        // earned_badges may not exist yet (see supabase/schema.sql) —
+        // count just stays 0 until the migration runs.
+        supabase.from('earned_badges').select('*', { count: 'exact', head: true }).eq('user_id', user.id),
       ])
       if (cancelled) return
       const allPredictions = predictionsRes.data || []
@@ -161,6 +171,7 @@ export default function Profil() {
       setFollowingCount(followingRes.count ?? 0)
       setSavedPredictions((savesRes.data || []).map((s) => s.predictions).filter(Boolean))
       setNewFollowerCount(newFollowersRes.count ?? 0)
+      setEarnedBadgeCount(earnedBadgesRes.count ?? 0)
       setSealedThisWeek(allPredictions.filter((p) => p.sealed_at && p.sealed_at >= weekAgo).length)
       setVerifiedThisWeek(allPredictions.filter((p) => p.verified_at && p.verified_at >= weekAgo).length)
       setLoading(false)
@@ -291,6 +302,8 @@ export default function Profil() {
             ))}
           </div>
         </section>
+
+        <BadgeShowcase slugs={profile?.showcase_badges} totalEarned={earnedBadgeCount} isOwn />
 
         <section className="mx-5 mt-6 overflow-hidden rounded-theme bg-primary text-primary-foreground shadow-sm">
           <div className="flex items-start justify-between px-5 pt-5">

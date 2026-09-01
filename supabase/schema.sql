@@ -1337,3 +1337,19 @@ $$ language plpgsql security definer set search_path = public;
 
 grant execute on function public.cast_prediction_vote(uuid, text) to authenticated;
 -- ─────────────────────────────────────────────────────────────────────────
+
+-- ROZET VİTRİNİ, server-side — the "vitrin" picks used to live in
+-- localStorage only, which meant they were invisible to anyone but the
+-- owner on that one device: a profile someone else views could never show
+-- them. Moved to a real column so Profil/KullaniciProfili can actually
+-- showcase it. No extra RLS policy needed (the existing "Users can update
+-- own profile" policy already covers this column), and no integrity
+-- trigger exception needed either — protect_profile_integrity only guards
+-- id/created_at/points, everything else already passes through freely.
+-- Client-side (Rozetler.jsx) already only lets you add a badge you've
+-- actually earned, so no server-side re-check of earned status is needed
+-- when *displaying* a showcased slug elsewhere — the badge catalog lookup
+-- alone is enough.
+alter table public.profiles add column showcase_badges text[] not null default '{}';
+alter table public.profiles add constraint showcase_badges_max_3
+  check (array_length(showcase_badges, 1) is null or array_length(showcase_badges, 1) <= 3);

@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import { formatDateLong, formatTimeUntil, timeAgo } from '../lib/format.js'
 import { CATEGORY_META, GROUP_CATEGORIES } from '../lib/categories.js'
+import DifficultyChip from '../components/DifficultyChip.jsx'
 
 
 function EditGroupModal({ group, onClose, onSaved }) {
@@ -121,9 +122,12 @@ function GroupPredictionCard({ prediction, onOpen }) {
         </div>
       ) : (
         <div className="flex items-center justify-between rounded-theme bg-muted px-3 py-2 text-[11px] font-semibold text-muted-foreground">
-          <span className="rounded-full bg-card px-2 py-0.5 text-[10px] font-bold text-primary">
-            {prediction.category?.toUpperCase()}
-          </span>
+          <div className="flex items-center gap-1.5">
+            <span className="rounded-full bg-card px-2 py-0.5 text-[10px] font-bold text-primary">
+              {prediction.category?.toUpperCase()}
+            </span>
+            <DifficultyChip tier={prediction.difficulty_tier} />
+          </div>
           <span>{formatDateLong(prediction.event_date)}'da açılacak</span>
         </div>
       )}

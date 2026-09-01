@@ -7,6 +7,7 @@ import { useToast } from '../contexts/ToastContext.jsx'
 import { useUserSettings } from '../hooks/useUserSettings.js'
 import { formatDateLong, timeAgo } from '../lib/format.js'
 import { CATEGORIES as PREDICTION_CATEGORIES } from '../lib/categories.js'
+import DifficultyChip from '../components/DifficultyChip.jsx'
 
 const CATEGORIES = ['Tümü', ...PREDICTION_CATEGORIES]
 
@@ -291,18 +292,24 @@ function PredictionCard({ prediction, social, onToggleLike, onToggleSave }) {
                 <span>{formatDateLong(prediction.verified_at)}</span>
               </div>
               <div className="bg-muted p-3">
-                <span className="rounded-full bg-card px-2.5 py-1 text-[10px] font-bold text-primary">
-                  {prediction.category?.toUpperCase()}
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="rounded-full bg-card px-2.5 py-1 text-[10px] font-bold text-primary">
+                    {prediction.category?.toUpperCase()}
+                  </span>
+                  <DifficultyChip tier={prediction.difficulty_tier} />
+                </div>
                 <p className="mt-3 text-sm font-bold leading-5">&ldquo;{prediction.sealed_content}&rdquo;</p>
               </div>
             </div>
           ) : (
             <div className="mt-3 rounded-theme border border-border bg-muted p-3">
               <div className="flex items-center justify-between">
-                <span className="rounded-full bg-card px-2.5 py-1 text-[10px] font-bold text-primary">
-                  {prediction.category?.toUpperCase()}
-                </span>
+                <div className="flex items-center gap-1.5">
+                  <span className="rounded-full bg-card px-2.5 py-1 text-[10px] font-bold text-primary">
+                    {prediction.category?.toUpperCase()}
+                  </span>
+                  <DifficultyChip tier={prediction.difficulty_tier} />
+                </div>
                 <span className="flex items-center gap-1 text-[10px] font-semibold text-accent">
                   <iconify-icon icon="lucide:stamp" class="text-xs"></iconify-icon>
                   Mühürlü tahmin

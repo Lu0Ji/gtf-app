@@ -5,6 +5,7 @@ import { supabase, queryWithGroupIdFallback } from '../lib/supabase.js'
 import { timeAgo, formatTimeUntil } from '../lib/format.js'
 import { CATEGORY_META } from '../lib/categories.js'
 import { addSearchHistoryEntry } from '../lib/searchHistory.js'
+import DifficultyChip from '../components/DifficultyChip.jsx'
 
 const SEARCH_PAGE_SIZE = 15
 
@@ -109,9 +110,12 @@ function SearchResults({ query, navigate }) {
                 className="block w-full rounded-theme border border-border bg-card p-4 text-left shadow-sm"
               >
                 <div className="flex items-center justify-between">
-                  <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold text-secondary-foreground">
-                    {p.category?.toUpperCase()}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold text-secondary-foreground">
+                      {p.category?.toUpperCase()}
+                    </span>
+                    <DifficultyChip tier={p.difficulty_tier} />
+                  </div>
                   <span className="text-[10px] text-muted-foreground">{timeAgo(p.created_at)}</span>
                 </div>
                 <h3 className="mt-3 text-sm font-bold leading-5">{p.title}</h3>
@@ -432,9 +436,12 @@ export default function Kesfet() {
                       className="min-w-[240px] rounded-theme border border-border bg-card p-4 text-left shadow-sm"
                     >
                       <div className="flex items-center justify-between">
-                        <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold text-secondary-foreground">
-                          {p.category?.toUpperCase()}
-                        </span>
+                        <div className="flex items-center gap-1.5">
+                          <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold text-secondary-foreground">
+                            {p.category?.toUpperCase()}
+                          </span>
+                          <DifficultyChip tier={p.difficulty_tier} />
+                        </div>
                         <span className="text-[10px] text-muted-foreground">{timeAgo(p.created_at)}</span>
                       </div>
                       <h3 className="mt-3 font-heading text-sm font-bold leading-5">{p.title}</h3>

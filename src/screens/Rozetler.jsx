@@ -6,26 +6,7 @@ import { useToast } from '../contexts/ToastContext.jsx'
 import { formatDateLong } from '../lib/format.js'
 import { TIERS, computeBadgeStats, evaluateBadges } from '../lib/badges.js'
 
-const SHOWCASE_KEY = 'gtf-featured-badges'
 const INITIAL_PER_TIER = 6
-
-function readShowcase() {
-  try {
-    const raw = localStorage.getItem(SHOWCASE_KEY)
-    const parsed = raw ? JSON.parse(raw) : []
-    return Array.isArray(parsed) ? parsed.slice(0, 3) : []
-  } catch {
-    return []
-  }
-}
-
-function writeShowcase(slugs) {
-  try {
-    localStorage.setItem(SHOWCASE_KEY, JSON.stringify(slugs.slice(0, 3)))
-  } catch {
-    // Storage unavailable — showcase just won't persist across sessions.
-  }
-}
 
 async function safeCount(promise) {
   try {
@@ -115,7 +96,7 @@ function BadgeCard({ badge, tier, earnedAt, showcased, editingShowcase, onToggle
 
 export default function Rozetler() {
   const navigate = useNavigate()
-  const { user, profile } = useAuth()
+  const { user, profile, refreshProfile } = useAuth()
   const { showToast } = useToast()
   const [badges, setBadges] = useState([])
   const [earnedAtBySlug, setEarnedAtBySlug] = useState({})
@@ -125,8 +106,15 @@ export default function Rozetler() {
   const [statusFilter, setStatusFilter] = useState('all') // all | earned | locked
   const [tierFilter, setTierFilter] = useState(null)
   const [expandedTiers, setExpandedTiers] = useState(() => new Set())
-  const [showcase, setShowcase] = useState(readShowcase)
+  // Mirrors profile.showcase_badges — server-persisted (see
+  // supabase/schema.sql) so it actually shows up on this profile for other
+  // viewers, not just this device.
+  const [showcase, setShowcase] = useState([])
   const [editingShowcase, setEditingShowcase] = useState(false)
+
+  useEffect(() => {
+    setShowcase(profile?.showcase_badges || [])
+  }, [profile?.showcase_badges])
 
   useEffect(() => {
     if (!user || !profile) return
@@ -227,15 +215,23 @@ export default function Rozetler() {
     }
   }, [user, profile])
 
-  function toggleShowcase(slug) {
-    setShowcase((prev) => {
-      const next = prev.includes(slug) ? prev.filter((s) => s !== slug) : prev.length >= 3 ? prev : [...prev, slug]
-      if (!prev.includes(slug) && prev.length >= 3) {
-        showToast('Vitrinde en fazla 3 rozet gösterebilirsin.')
-      }
-      writeShowcase(next)
-      return next
-    })
+  async function toggleShowcase(slug) {
+    const prev = showcase
+    if (!prev.includes(slug) && prev.length >= 3) {
+      showToast('Vitrinde en fazla 3 rozet gösterebilirsin.')
+      return
+    }
+    const next = prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug]
+    setShowcase(next)
+    const { error } = await supabase.from('profiles').update({ showcase_badges: next }).eq('id', user.id)
+    if (error) {
+      setShowcase(prev)
+      showToast(
+        error.code === 'PGRST204' ? 'Rozet vitrini özelliği henüz etkin değil.' : 'Vitrin güncellenemedi, tekrar dene.'
+      )
+      return
+    }
+    refreshProfile()
   }
 
   const earnedCount = badges.filter((b) => b.earned).length
