@@ -45,10 +45,10 @@ export default function RightRail() {
     }
   }, [])
 
-  if (loading) return <aside className="sticky top-6 hidden w-[300px] shrink-0 xl:block" />
+  if (loading) return <aside className="sticky top-6 hidden min-w-[300px] max-w-[420px] flex-1 xl:block" />
 
   return (
-    <aside className="sticky top-6 hidden h-fit w-[300px] shrink-0 flex-col gap-5 xl:flex">
+    <aside className="sticky top-6 hidden h-fit min-w-[300px] max-w-[420px] flex-1 flex-col gap-5 xl:flex">
       {openingSoon.length > 0 && (
         <section className="rounded-theme border border-border bg-card p-4 shadow-sm">
           <h2 className="text-sm font-bold text-foreground">Yaklaşan açılışlar</h2>
