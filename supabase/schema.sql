@@ -1057,3 +1057,283 @@ grant insert on public.earned_badges to authenticated;
 --      follower/mention/comment/message/prediction-opened events. Needs a
 --      Firebase project (Android) and an APNs key (iOS) first.
 -- ─────────────────────────────────────────────────────────────────────────
+
+-- ZORLUK PUANI + TOPLULUK OYLAMASI — the core-mechanic pass: (1) a rule-
+-- based "is this actually a prediction" check happens client-side (see
+-- lib/predictionCheck.js — no DB change needed for that piece), (2) every
+-- prediction now gets a computed difficulty score/tier, whose multiplier
+-- feeds into (3) a weighted community vote that can resolve a still-sealed
+-- prediction the author never showed up for, or overturn one they got
+-- wrong, instead of the pure self-report honor system this shipped with.
+
+alter table public.predictions add column difficulty_score integer;
+alter table public.predictions add column difficulty_tier text
+  check (difficulty_tier in ('baslangic', 'istikrar', 'ustalik', 'efsane'));
+alter table public.predictions add column disputed boolean not null default false;
+alter table public.predictions add column resolved_by text check (resolved_by in ('author', 'community'));
+
+-- Computed once, at insert, from two real signals — never recomputed
+-- later, so a prediction's difficulty (and the multiplier it already paid
+-- out at) can't drift after the fact:
+--   1. Time horizon: the further out event_date is, the harder to call.
+--      Saturates at 90 days (anything 3+ months out maxes this half).
+--   2. This category's own accuracy rate so far, across all users: a
+--      category people are historically often wrong about counts as
+--      harder. Fewer than 5 resolved predictions in the category yet ->
+--      not enough signal, use a neutral 50%.
+-- Score 0-100, bucketed into the same 4 tiers Rozetler already uses
+-- (Başlangıç/İstikrar/Ustalık/Efsane — see lib/badges.js's TIERS) so the
+-- vocabulary stays one system instead of two parallel tier scales.
+create or replace function public.compute_prediction_difficulty()
+returns trigger as $$
+declare
+  v_days numeric;
+  v_time_score numeric;
+  v_cat_total integer;
+  v_cat_correct integer;
+  v_cat_accuracy numeric;
+  v_cat_score numeric;
+  v_score integer;
+begin
+  v_days := greatest(0, extract(epoch from (coalesce(new.event_date, new.created_at) - new.created_at)) / 86400.0);
+  v_time_score := least(v_days / 90.0, 1) * 50;
+
+  select count(*) filter (where status = 'verified_correct'),
+         count(*) filter (where status in ('verified_correct', 'verified_incorrect'))
+    into v_cat_correct, v_cat_total
+    from public.predictions
+    where category = new.category;
+
+  if coalesce(v_cat_total, 0) < 5 then
+    v_cat_accuracy := 50;
+  else
+    v_cat_accuracy := (v_cat_correct::numeric / v_cat_total) * 100;
+  end if;
+  v_cat_score := (100 - v_cat_accuracy) * 0.5;
+
+  v_score := round(v_time_score + v_cat_score);
+  new.difficulty_score := v_score;
+  new.difficulty_tier := case
+    when v_score <= 25 then 'baslangic'
+    when v_score <= 50 then 'istikrar'
+    when v_score <= 75 then 'ustalik'
+    else 'efsane'
+  end;
+  return new;
+end;
+$$ language plpgsql;
+
+drop trigger if exists predictions_difficulty on public.predictions;
+create trigger predictions_difficulty
+  before insert on public.predictions
+  for each row execute function public.compute_prediction_difficulty();
+
+-- verify_prediction() replaced in place (same signature/grant) — same
+-- ownership/state checks as before, just the reward is now
+-- difficulty-weighted instead of a flat 50/5, and it records who resolved
+-- it (matters once cast_prediction_vote() below can also resolve one).
+create or replace function public.verify_prediction(
+  p_prediction_id uuid,
+  p_result text,
+  p_evidence_note text default null,
+  p_evidence_url text default null
+)
+returns void as $$
+declare
+  v_author_id uuid;
+  v_status text;
+  v_event_date timestamptz;
+  v_tier text;
+  v_new_status text;
+  v_multiplier numeric;
+  v_reward integer;
+begin
+  if p_result not in ('correct', 'incorrect') then
+    raise exception 'Geçersiz sonuç.';
+  end if;
+
+  select author_id, status, event_date, difficulty_tier
+    into v_author_id, v_status, v_event_date, v_tier
+    from public.predictions where id = p_prediction_id for update;
+
+  if v_author_id is null then
+    raise exception 'Tahmin bulunamadı.';
+  end if;
+  if v_author_id <> auth.uid() then
+    raise exception 'Sadece tahminin sahibi sonucu işaretleyebilir.';
+  end if;
+  if v_status <> 'sealed' then
+    raise exception 'Bu tahmin zaten sonuçlandırılmış veya henüz mühürlenmemiş.';
+  end if;
+  if v_event_date is not null and v_event_date > now() then
+    raise exception 'Açılış zamanı henüz gelmedi.';
+  end if;
+
+  v_new_status := case when p_result = 'correct' then 'verified_correct' else 'verified_incorrect' end;
+  v_multiplier := case v_tier
+    when 'istikrar' then 1.25
+    when 'ustalik' then 1.75
+    when 'efsane' then 2.5
+    else 1.0
+  end;
+  v_reward := round((case when p_result = 'correct' then 50 else 5 end) * v_multiplier);
+
+  update public.predictions
+  set status = v_new_status,
+      verified_at = now(),
+      resolved_by = 'author',
+      evidence_note = nullif(trim(coalesce(p_evidence_note, '')), ''),
+      evidence_url = nullif(trim(coalesce(p_evidence_url, '')), '')
+  where id = p_prediction_id;
+
+  perform set_config('gtf.allow_points_write', 'on', true);
+  update public.profiles set points = points + v_reward where id = auth.uid();
+  perform set_config('gtf.allow_points_write', 'off', true);
+end;
+$$ language plpgsql security definer set search_path = public;
+
+grant execute on function public.verify_prediction(uuid, text, text, text) to authenticated;
+
+-- One vote per (prediction, voter) — re-voting updates it (see the RPC's
+-- upsert) rather than stacking duplicate rows.
+create table public.prediction_votes (
+  prediction_id uuid not null references public.predictions(id) on delete cascade,
+  voter_id uuid not null references public.profiles(id) on delete cascade,
+  vote text not null check (vote in ('correct', 'incorrect')),
+  created_at timestamptz not null default now(),
+  primary key (prediction_id, voter_id)
+);
+
+alter table public.prediction_votes enable row level security;
+create policy "Votes are viewable by everyone" on public.prediction_votes for select using (true);
+-- No insert/update grant here on purpose — every write goes through
+-- cast_prediction_vote() (security definer), which validates event_date/
+-- author/state server-side the same way verify_prediction() does. A
+-- direct table insert would skip all of that.
+grant select on public.prediction_votes to anon, authenticated;
+
+-- Weighted community verification. The author's own claim (via
+-- verify_prediction above) counts as AUTHOR_WEIGHT votes on its side —
+-- strong enough that a couple of stray disagreeing votes can't flip a
+-- correctly-reported result, but not so strong that real consensus
+-- against it never can:
+--   - Still 'sealed' past its event_date (author hasn't shown up): once
+--     total votes reach quorum (3) with a clear (non-tied) leader, the
+--     crowd resolves it on its own. resolved_by = 'community'.
+--   - Already verified by the author: only flips if the OPPOSING side's
+--     community votes alone exceed AUTHOR_WEIGHT (4+ people saying the
+--     author got it wrong). On flip: disputed = true, resolved_by =
+--     'community', and points are corrected — the author's original
+--     (wrong) reward is clawed back, the right one is paid instead.
+-- A vote against whatever the CURRENT resolved status is also feeds the
+-- existing prediction_disputes table (already wired into Rozetler's
+-- badge stats) — one user action, not two separate "I disagree" buttons
+-- in the UI.
+create or replace function public.cast_prediction_vote(
+  p_prediction_id uuid,
+  p_vote text
+)
+returns void as $$
+declare
+  v_author_id uuid;
+  v_status text;
+  v_event_date timestamptz;
+  v_tier text;
+  v_correct_weight integer;
+  v_incorrect_weight integer;
+  v_author_weight constant integer := 3;
+  v_new_status text;
+  v_multiplier numeric;
+  v_old_reward integer;
+  v_new_reward integer;
+begin
+  if p_vote not in ('correct', 'incorrect') then
+    raise exception 'Geçersiz oy.';
+  end if;
+
+  select author_id, status, event_date, difficulty_tier
+    into v_author_id, v_status, v_event_date, v_tier
+    from public.predictions where id = p_prediction_id for update;
+
+  if v_author_id is null then
+    raise exception 'Tahmin bulunamadı.';
+  end if;
+  if v_author_id = auth.uid() then
+    raise exception 'Kendi tahminine oy veremezsin, sonucu doğrudan işaretle.';
+  end if;
+  if v_status = 'open' then
+    raise exception 'Bu tahmin henüz mühürlenmemiş.';
+  end if;
+  if v_event_date is not null and v_event_date > now() then
+    raise exception 'Açılış zamanı henüz gelmedi.';
+  end if;
+
+  insert into public.prediction_votes (prediction_id, voter_id, vote)
+  values (p_prediction_id, auth.uid(), p_vote)
+  on conflict (prediction_id, voter_id) do update set vote = excluded.vote, created_at = now();
+
+  if v_status in ('verified_correct', 'verified_incorrect') then
+    if (p_vote = 'correct' and v_status = 'verified_incorrect')
+       or (p_vote = 'incorrect' and v_status = 'verified_correct') then
+      insert into public.prediction_disputes (prediction_id, user_id)
+      values (p_prediction_id, auth.uid())
+      on conflict (prediction_id, user_id) do nothing;
+    else
+      delete from public.prediction_disputes where prediction_id = p_prediction_id and user_id = auth.uid();
+    end if;
+  end if;
+
+  select count(*) filter (where vote = 'correct'), count(*) filter (where vote = 'incorrect')
+    into v_correct_weight, v_incorrect_weight
+    from public.prediction_votes where prediction_id = p_prediction_id;
+
+  if v_status = 'verified_correct' then
+    v_correct_weight := v_correct_weight + v_author_weight;
+  elsif v_status = 'verified_incorrect' then
+    v_incorrect_weight := v_incorrect_weight + v_author_weight;
+  end if;
+
+  v_new_status := null;
+
+  if v_status = 'sealed' then
+    if (v_correct_weight + v_incorrect_weight) >= 3 and v_correct_weight <> v_incorrect_weight then
+      v_new_status := case when v_correct_weight > v_incorrect_weight then 'verified_correct' else 'verified_incorrect' end;
+    end if;
+  elsif v_status = 'verified_correct' and v_incorrect_weight > v_author_weight then
+    v_new_status := 'verified_incorrect';
+  elsif v_status = 'verified_incorrect' and v_correct_weight > v_author_weight then
+    v_new_status := 'verified_correct';
+  end if;
+
+  if v_new_status is not null and v_new_status <> v_status then
+    v_multiplier := case v_tier
+      when 'istikrar' then 1.25
+      when 'ustalik' then 1.75
+      when 'efsane' then 2.5
+      else 1.0
+    end;
+
+    perform set_config('gtf.allow_points_write', 'on', true);
+
+    if v_status in ('verified_correct', 'verified_incorrect') then
+      v_old_reward := round((case when v_status = 'verified_correct' then 50 else 5 end) * v_multiplier);
+      update public.profiles set points = points - v_old_reward where id = v_author_id;
+    end if;
+
+    v_new_reward := round((case when v_new_status = 'verified_correct' then 50 else 5 end) * v_multiplier);
+    update public.profiles set points = points + v_new_reward where id = v_author_id;
+
+    perform set_config('gtf.allow_points_write', 'off', true);
+
+    update public.predictions
+    set status = v_new_status,
+        verified_at = coalesce(verified_at, now()),
+        disputed = true,
+        resolved_by = 'community'
+    where id = p_prediction_id;
+  end if;
+end;
+$$ language plpgsql security definer set search_path = public;
+
+grant execute on function public.cast_prediction_vote(uuid, text) to authenticated;
+-- ─────────────────────────────────────────────────────────────────────────

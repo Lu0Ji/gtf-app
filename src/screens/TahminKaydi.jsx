@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import { formatDateLong } from '../lib/format.js'
+import { difficultyMeta } from '../lib/difficulty.js'
 
 const CORRECT_POINTS_REWARD = 50
 // Marking a sealed prediction is self-reported (honor system — there's no
@@ -46,9 +47,10 @@ export default function TahminKaydi() {
   const [comments, setComments] = useState([])
   const [commentDraft, setCommentDraft] = useState('')
   const [postingComment, setPostingComment] = useState(false)
-  const [disputeCount, setDisputeCount] = useState(0)
-  const [hasDisputed, setHasDisputed] = useState(false)
-  const [disputing, setDisputing] = useState(false)
+  const [correctVotes, setCorrectVotes] = useState(0)
+  const [incorrectVotes, setIncorrectVotes] = useState(0)
+  const [myVote, setMyVote] = useState(null)
+  const [voting, setVoting] = useState(false)
   // Which result the owner tapped, while they're still filling in the
   // optional evidence citation — null means the correct/incorrect buttons
   // are showing, not the citation form.
@@ -67,7 +69,7 @@ export default function TahminKaydi() {
     let cancelled = false
 
     async function loadSocial() {
-      const [{ data: likes }, { data: comments }, saveRes, disputesRes] = await Promise.all([
+      const [{ data: likes }, { data: comments }, saveRes, votesRes] = await Promise.all([
         supabase.from('prediction_likes').select('user_id').eq('prediction_id', record.id),
         supabase
           .from('prediction_comments')
@@ -81,20 +83,21 @@ export default function TahminKaydi() {
               .eq('user_id', user.id)
               .eq('prediction_id', record.id)
           : Promise.resolve({ count: 0 }),
-        // prediction_disputes may not exist yet (see supabase/schema.sql —
-        // it's the newest migration section); PostgREST's "table not found"
-        // (PGRST205) just means the dispute feature quietly shows as
-        // 0/hidden until the migration is run.
-        supabase.from('prediction_disputes').select('user_id').eq('prediction_id', record.id),
+        // prediction_votes may not exist yet (see supabase/schema.sql — it's
+        // the newest migration section); PostgREST's "table not found"
+        // (PGRST205) just means voting quietly shows as 0/hidden until the
+        // migration is run.
+        supabase.from('prediction_votes').select('voter_id, vote').eq('prediction_id', record.id),
       ])
       if (cancelled) return
       setLikeCount((likes || []).length)
       setLiked(user ? (likes || []).some((l) => l.user_id === user.id) : false)
       setComments(comments || [])
       setSaved((saveRes.count || 0) > 0)
-      const disputeRows = disputesRes.error ? [] : disputesRes.data || []
-      setDisputeCount(disputeRows.length)
-      setHasDisputed(user ? disputeRows.some((d) => d.user_id === user.id) : false)
+      const voteRows = votesRes.error ? [] : votesRes.data || []
+      setCorrectVotes(voteRows.filter((v) => v.vote === 'correct').length)
+      setIncorrectVotes(voteRows.filter((v) => v.vote === 'incorrect').length)
+      setMyVote(user ? voteRows.find((v) => v.voter_id === user.id)?.vote || null : null)
     }
 
     loadSocial()
@@ -113,6 +116,11 @@ export default function TahminKaydi() {
   const isCorrect = record.status === 'verified_correct'
   const isOwner = user?.id === record.author_id
   const canVerify = isOwner && record.status === 'sealed' && countdown.isPast
+  // Anyone but the author, once the seal has opened — whether the author
+  // already resolved it (a vote against that is a dispute) or never
+  // showed up (a vote here is what resolves it in the first place).
+  const canVote = !isOwner && user && countdown.isPast && record.status !== 'open'
+  const tierMeta = difficultyMeta(record.difficulty_tier)
 
   async function handleShare() {
     try {
@@ -209,25 +217,47 @@ export default function TahminKaydi() {
     setVerifying(false)
   }
 
-  async function handleDispute() {
-    if (!user || disputing) return
-    setDisputing(true)
-    const nextDisputed = !hasDisputed
-    setHasDisputed(nextDisputed)
-    setDisputeCount((c) => c + (nextDisputed ? 1 : -1))
-    const { error } = nextDisputed
-      ? await supabase.from('prediction_disputes').insert({ user_id: user.id, prediction_id: record.id })
-      : await supabase.from('prediction_disputes').delete().eq('user_id', user.id).eq('prediction_id', record.id)
+  // Weighted community vote — resolves a sealed prediction the author
+  // never showed up for, or overturns one they got wrong (see
+  // cast_prediction_vote() in supabase/schema.sql). Replaces the old
+  // flat "itiraz et" button: a vote against the current result IS a
+  // dispute, the RPC records both in one action.
+  async function handleVote(vote) {
+    if (!user || voting) return
+    setVoting(true)
+    const prevVote = myVote
+    setMyVote(vote)
+    setCorrectVotes((c) => c + (vote === 'correct' ? 1 : 0) - (prevVote === 'correct' ? 1 : 0))
+    setIncorrectVotes((c) => c + (vote === 'incorrect' ? 1 : 0) - (prevVote === 'incorrect' ? 1 : 0))
+
+    const { error } = await supabase.rpc('cast_prediction_vote', {
+      p_prediction_id: record.id,
+      p_vote: vote,
+    })
+
     if (error) {
-      setHasDisputed(!nextDisputed)
-      setDisputeCount((c) => c + (nextDisputed ? -1 : 1))
+      setMyVote(prevVote)
+      setCorrectVotes((c) => c - (vote === 'correct' ? 1 : 0) + (prevVote === 'correct' ? 1 : 0))
+      setIncorrectVotes((c) => c - (vote === 'incorrect' ? 1 : 0) + (prevVote === 'incorrect' ? 1 : 0))
       showToast(
-        error.code === 'PGRST205' || error.code === '42P01'
-          ? 'İtiraz özelliği henüz etkin değil.'
-          : 'İtiraz kaydedilemedi, tekrar dene.'
+        error.code === 'PGRST202' || error.code === 'PGRST205' || error.code === '42883'
+          ? 'Topluluk oylaması özelliği henüz etkin değil.'
+          : error.message || 'Oy kaydedilemedi, tekrar dene.'
       )
+      setVoting(false)
+      return
     }
-    setDisputing(false)
+
+    // The vote may have just resolved or flipped the prediction server-side
+    // (quorum reached, or the community outweighed the author) — re-fetch
+    // to reflect that instead of the client guessing at the new state.
+    const { data: fresh } = await supabase
+      .from('predictions')
+      .select('status, verified_at, disputed, resolved_by')
+      .eq('id', record.id)
+      .single()
+    if (fresh) setRecord((prev) => ({ ...prev, ...fresh }))
+    setVoting(false)
   }
 
   async function handleToggleLike() {
@@ -355,6 +385,15 @@ export default function TahminKaydi() {
                 <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold text-secondary-foreground">
                   {record.category?.toUpperCase()}
                 </span>
+                {tierMeta && (
+                  <span
+                    className="flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold"
+                    style={{ background: tierMeta.tint, color: tierMeta.ink }}
+                  >
+                    <iconify-icon icon={tierMeta.icon} class="text-xs"></iconify-icon>
+                    {tierMeta.label}
+                  </span>
+                )}
                 {record.is_private && (
                   <span className="flex items-center gap-1 text-[10px] font-semibold text-accent">
                     <iconify-icon icon="lucide:archive" class="text-xs"></iconify-icon>
@@ -412,6 +451,9 @@ export default function TahminKaydi() {
               <span className="flex items-center gap-2">
                 <iconify-icon icon={isCorrect ? 'lucide:badge-check' : 'lucide:x-circle'} class="text-lg"></iconify-icon>
                 {isCorrect ? 'Doğrulandı' : 'Gerçekleşmedi'}
+                {record.disputed && (
+                  <span className="rounded-full bg-black/15 px-2 py-0.5 text-[9px] font-bold">TARTIŞMALI</span>
+                )}
               </span>
               <span className="text-xs font-semibold">{formatDateLong(record.verified_at)}</span>
             </div>
@@ -445,23 +487,34 @@ export default function TahminKaydi() {
                 </div>
               )}
             </div>
-            {!isOwner && user && (
-              <div className="flex items-center justify-between border-t border-border px-5 py-3">
-                <p className="text-[11px] text-muted-foreground">
-                  {disputeCount > 0
-                    ? `${disputeCount} kişi bu sonuca itiraz etti`
-                    : 'Bu sonuç beyana dayalı — şüpheliysen itiraz et'}
+            {canVote && (
+              <div className="border-t border-border px-5 py-4">
+                <p className="text-xs font-semibold text-foreground">Bu sonuca katılıyor musun?</p>
+                <p className="mt-0.5 text-[11px] leading-4 text-muted-foreground">
+                  Topluluk yeterince katılmazsa sonuç değişebilir — yazarın kaydı tek başına son söz değil.
                 </p>
-                <button
-                  onClick={handleDispute}
-                  disabled={disputing}
-                  className={`flex shrink-0 items-center gap-1.5 rounded-theme px-3 py-1.5 text-[11px] font-bold disabled:opacity-60 ${
-                    hasDisputed ? 'bg-destructive text-destructive-foreground' : 'bg-muted text-muted-foreground'
-                  }`}
-                >
-                  <iconify-icon icon="lucide:flag" class="text-xs"></iconify-icon>
-                  {hasDisputed ? 'İtirazını geri çek' : 'İtiraz et'}
-                </button>
+                <div className="mt-3 flex items-center gap-2">
+                  <button
+                    onClick={() => handleVote('correct')}
+                    disabled={voting}
+                    className={`flex flex-1 items-center justify-center gap-1.5 rounded-theme py-2.5 text-xs font-bold disabled:opacity-60 ${
+                      myVote === 'correct' ? 'bg-success text-success-foreground' : 'bg-muted text-muted-foreground'
+                    }`}
+                  >
+                    <iconify-icon icon="lucide:thumbs-up" class="text-sm"></iconify-icon>
+                    Katılıyorum · {correctVotes}
+                  </button>
+                  <button
+                    onClick={() => handleVote('incorrect')}
+                    disabled={voting}
+                    className={`flex flex-1 items-center justify-center gap-1.5 rounded-theme py-2.5 text-xs font-bold disabled:opacity-60 ${
+                      myVote === 'incorrect' ? 'bg-destructive text-destructive-foreground' : 'bg-muted text-muted-foreground'
+                    }`}
+                  >
+                    <iconify-icon icon="lucide:thumbs-down" class="text-sm"></iconify-icon>
+                    Katılmıyorum · {incorrectVotes}
+                  </button>
+                </div>
               </div>
             )}
           </section>
@@ -500,7 +553,7 @@ export default function TahminKaydi() {
                     {countdown.isPast
                       ? isOwner
                         ? 'Süre doldu. Sonucu aşağıdan işaretleyebilirsin.'
-                        : 'Süre doldu, yazar sonucu henüz işaretlemedi.'
+                        : 'Süre doldu, yazar sonucu henüz işaretlemedi — aşağıdan sen oy verebilirsin.'
                       : 'Tahmin metni açılışa kadar görüntülenemez.'}
                   </span>
                 </div>
@@ -582,6 +635,39 @@ export default function TahminKaydi() {
                       {verifying ? 'Kaydediliyor…' : 'Sonucu onayla'}
                     </button>
                   </div>
+                </div>
+              )}
+
+              {canVote && (
+                <div className="relative mt-4 rounded-theme border border-white/15 bg-white/10 p-4">
+                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/60">
+                    Yazar henüz işaretlemedi — sen ne düşünüyorsun?
+                  </p>
+                  <div className="mt-3 flex gap-2">
+                    <button
+                      onClick={() => handleVote('correct')}
+                      disabled={voting}
+                      className={`flex flex-1 items-center justify-center gap-1.5 rounded-theme py-2.5 text-xs font-bold disabled:opacity-60 ${
+                        myVote === 'correct' ? 'bg-success text-success-foreground' : 'bg-white/10 text-white'
+                      }`}
+                    >
+                      <iconify-icon icon="lucide:check-circle-2" class="text-sm"></iconify-icon>
+                      Doğru · {correctVotes}
+                    </button>
+                    <button
+                      onClick={() => handleVote('incorrect')}
+                      disabled={voting}
+                      className={`flex flex-1 items-center justify-center gap-1.5 rounded-theme py-2.5 text-xs font-bold disabled:opacity-60 ${
+                        myVote === 'incorrect' ? 'bg-destructive text-destructive-foreground' : 'bg-white/10 text-white'
+                      }`}
+                    >
+                      <iconify-icon icon="lucide:x-circle" class="text-sm"></iconify-icon>
+                      Yanlış · {incorrectVotes}
+                    </button>
+                  </div>
+                  <p className="mt-2 text-[10px] text-white/60">
+                    Yeterince kişi katılırsa, yazar hiç işaretlemese bile sonuç topluluğun oyuna göre belirlenir.
+                  </p>
                 </div>
               )}
 

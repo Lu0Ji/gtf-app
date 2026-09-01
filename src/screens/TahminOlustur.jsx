@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import { CATEGORIES } from '../lib/categories.js'
+import { checkPredictionText } from '../lib/predictionCheck.js'
 
 export default function TahminOlustur() {
   const navigate = useNavigate()
@@ -45,8 +46,20 @@ export default function TahminOlustur() {
 
   async function handleSeal() {
     if (!canSubmit || submitting) return
-    setSubmitting(true)
     setError('')
+
+    // Zaman kapsülü is a personal note, not a public claim someone else
+    // will ever vote on — only real "Tahmin" mode content needs to look
+    // like an actual prediction. See lib/predictionCheck.js.
+    if (mode === 'Tahmin') {
+      const check = checkPredictionText(sealedContent)
+      if (!check.valid) {
+        setError(check.reason)
+        return
+      }
+    }
+
+    setSubmitting(true)
     try {
       const isCapsule = mode === 'Zaman kapsülü'
       const targetGroupId = !isCapsule ? groupId : null
@@ -321,8 +334,8 @@ export default function TahminOlustur() {
           <div>
             <h2 className="text-sm font-bold text-foreground">Nasıl doğrulanır?</h2>
             <p className="mt-1 text-xs leading-5 text-muted-foreground">
-              Sonucu, açılış anında yalnızca sen işaretlersin — şu an bağımsız bir doğrulama yok, bu beyana
-              dayalı bir onur sistemidir.
+              Açılış anında sonucu ilk sen işaretlersin, ama son karar sende kalmaz — diğer kullanıcılar da
+              "doğru/yanlış" oyu verebilir, topluluk senden farklı düşünürse sonuç değişebilir.
             </p>
           </div>
         </section>
