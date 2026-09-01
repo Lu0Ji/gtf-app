@@ -107,6 +107,16 @@ function SavedPredictionCard({ prediction }) {
   )
 }
 
+// Header shortcuts, as one coherent grid instead of 5 wrapping inline text
+// links crammed together (the "dağınık" complaint) — "Uygulama Ayarları" is
+// dropped here since the header gear icon already opens the same screen.
+const PROFILE_SHORTCUTS = [
+  { label: 'Profil Ayarları', icon: 'lucide:user-cog', route: '/profil-ayarlari' },
+  { label: 'Hareketler', icon: 'lucide:activity', route: '/hareketler' },
+  { label: 'Rozetler', icon: 'lucide:award', route: '/rozetler' },
+  { label: 'Beğeniler', icon: 'lucide:heart', route: '/begeniler' },
+]
+
 const PROFILE_TABS = ['Tahminlerin', 'Kaydedilenler']
 
 export default function Profil() {
@@ -244,43 +254,6 @@ export default function Profil() {
                 </span>
               </div>
               <p className="mt-1 text-[13px] text-muted-foreground">@{profile?.username}</p>
-              <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-2">
-                <button
-                  onClick={() => navigate('/profil-ayarlari')}
-                  className="flex items-center gap-1.5 text-xs font-bold text-primary"
-                >
-                  Profil Ayarları
-                  <iconify-icon icon="lucide:arrow-up-right" class="text-sm"></iconify-icon>
-                </button>
-                <button
-                  onClick={() => navigate('/hareketler')}
-                  className="flex items-center gap-1.5 text-xs font-bold text-primary"
-                >
-                  Hareketler
-                  <iconify-icon icon="lucide:activity" class="text-sm"></iconify-icon>
-                </button>
-                <button
-                  onClick={() => navigate('/rozetler')}
-                  className="flex items-center gap-1.5 text-xs font-bold text-primary"
-                >
-                  Rozetler
-                  <iconify-icon icon="lucide:award" class="text-sm"></iconify-icon>
-                </button>
-                <button
-                  onClick={() => navigate('/begeniler')}
-                  className="flex items-center gap-1.5 text-xs font-bold text-primary"
-                >
-                  Beğeniler
-                  <iconify-icon icon="lucide:heart" class="text-sm"></iconify-icon>
-                </button>
-                <button
-                  onClick={() => navigate('/uygulama-ayarlari')}
-                  className="flex items-center gap-1.5 text-xs font-bold text-primary"
-                >
-                  Uygulama Ayarları
-                  <iconify-icon icon="lucide:settings-2" class="text-sm"></iconify-icon>
-                </button>
-              </div>
             </div>
           </div>
 
@@ -303,6 +276,19 @@ export default function Profil() {
               <p className="font-heading text-lg font-extrabold tracking-[-0.05em]">{predictions.length}</p>
               <p className="mt-0.5 text-[11px] text-muted-foreground">Tahmin</p>
             </div>
+          </div>
+
+          <div className="mt-5 grid grid-cols-4 overflow-hidden rounded-theme border border-border bg-card shadow-sm">
+            {PROFILE_SHORTCUTS.map((s, i) => (
+              <button
+                key={s.route}
+                onClick={() => navigate(s.route)}
+                className={`flex flex-col items-center gap-1.5 py-3.5 ${i > 0 ? 'border-l border-border' : ''}`}
+              >
+                <iconify-icon icon={s.icon} class="text-lg text-primary"></iconify-icon>
+                <span className="text-[10px] font-semibold leading-tight text-foreground">{s.label}</span>
+              </button>
+            ))}
           </div>
         </section>
 
