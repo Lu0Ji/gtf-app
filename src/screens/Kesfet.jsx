@@ -140,7 +140,7 @@ function SearchResults({ query, navigate }) {
 }
 
 
-function CategoryTile({ category, count, variant }) {
+function CategoryTile({ category, count, variant, navigate }) {
   const meta = CATEGORY_META[category] || { icon: 'lucide:tag', label: category }
   const variantClass =
     variant === 'primary'
@@ -148,7 +148,10 @@ function CategoryTile({ category, count, variant }) {
       : 'border border-border bg-card text-card-foreground shadow-sm'
 
   return (
-    <div className={`rounded-theme p-4 text-left ${variantClass}`}>
+    <button
+      onClick={() => navigate('/', { state: { category: meta.label } })}
+      className={`rounded-theme p-4 text-left ${variantClass}`}
+    >
       <div className="flex items-start justify-between">
         {variant === 'primary' ? (
           <iconify-icon icon={meta.icon} class="text-xl"></iconify-icon>
@@ -162,7 +165,7 @@ function CategoryTile({ category, count, variant }) {
       <p className={`mt-1 text-[11px] ${variant === 'primary' ? 'text-white/70' : 'text-muted-foreground'}`}>
         {count} tahmin
       </p>
-    </div>
+    </button>
   )
 }
 
@@ -542,7 +545,13 @@ export default function Kesfet() {
               ) : (
                 <div className="mt-3 grid grid-cols-2 gap-3 px-5">
                   {categoryCounts.map((c, i) => (
-                    <CategoryTile key={c.category} category={c.category} count={c.count} variant={i === 0 ? 'primary' : 'card'} />
+                    <CategoryTile
+                      key={c.category}
+                      category={c.category}
+                      count={c.count}
+                      variant={i === 0 ? 'primary' : 'card'}
+                      navigate={navigate}
+                    />
                   ))}
                 </div>
               )}

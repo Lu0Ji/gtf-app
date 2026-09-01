@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
+import { useLocation, useNavigate } from 'react-router-dom'
 import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase, queryWithGroupIdFallback } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
@@ -700,9 +700,16 @@ function FollowedGroups() {
 }
 
 export default function Anasayfa() {
-  const [activeCategory, setActiveCategory] = useState('Tümü')
+  const location = useLocation()
+  // Keşfet's "Popüler alanlar" tiles land here with a category already
+  // chosen — someone tapping "Ekonomi" there wants Ekonomi predictions,
+  // not to land on Tümü and have to find the tab themselves.
+  const [activeCategory, setActiveCategory] = useState(() => location.state?.category || 'Tümü')
   const { settings } = useUserSettings()
-  const appliedInterestDefault = useRef(false)
+  // Already-satisfied by the state above when arriving with a category —
+  // the interest-based default below is a fallback for a plain visit, not
+  // something that should override an explicit choice just made in Keşfet.
+  const appliedInterestDefault = useRef(!!location.state?.category)
 
   // Land people with a single declared interest straight on that tab. Only
   // applies once, and only before the user has touched the tabs themselves.
