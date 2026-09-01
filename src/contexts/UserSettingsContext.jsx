@@ -56,16 +56,31 @@ export function UserSettingsProvider({ children }) {
     }
     let cancelled = false
     setLoading(true)
-    supabase
-      .from('user_settings')
-      .select('settings')
-      .eq('user_id', user.id)
-      .maybeSingle()
-      .then(({ data }) => {
-        if (cancelled) return
-        setSettings(mergeSettings(data?.settings))
-        setLoading(false)
-      })
+
+    // Right after signup/signin, this can fire before the client's
+    // auth-header context has fully caught up with the freshly-issued
+    // session, which 401s once and then works fine on any later request.
+    // Retry once before giving up and falling back to defaults, instead of
+    // silently eating a real failure.
+    function fetchSettings(retriesLeft) {
+      supabase
+        .from('user_settings')
+        .select('settings')
+        .eq('user_id', user.id)
+        .maybeSingle()
+        .then(({ data, error }) => {
+          if (cancelled) return
+          if (error && retriesLeft > 0) {
+            setTimeout(() => !cancelled && fetchSettings(retriesLeft - 1), 500)
+            return
+          }
+          if (error) console.error('user_settings fetch failed:', error.message)
+          setSettings(mergeSettings(data?.settings))
+          setLoading(false)
+        })
+    }
+    fetchSettings(1)
+
     return () => {
       cancelled = true
     }
