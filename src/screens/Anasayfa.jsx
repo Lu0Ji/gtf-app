@@ -8,6 +8,7 @@ import { useUserSettings } from '../hooks/useUserSettings.js'
 import { formatDateLong, timeAgo } from '../lib/format.js'
 import { CATEGORIES as PREDICTION_CATEGORIES } from '../lib/categories.js'
 import DifficultyChip from '../components/DifficultyChip.jsx'
+import { rankFeed } from '../lib/feedRanking.js'
 
 const CATEGORIES = ['Tümü', ...PREDICTION_CATEGORIES]
 
@@ -384,6 +385,28 @@ function PredictionFeed({ category }) {
   const [loadingMore, setLoadingMore] = useState(false)
   const [hasMore, setHasMore] = useState(true)
   const [page, setPage] = useState(0)
+  const [followingIds, setFollowingIds] = useState(new Set())
+
+  // Who the viewer follows, for the ranking follow-boost — fetched once per
+  // signed-in user, independent of category/page.
+  useEffect(() => {
+    let cancelled = false
+    if (!user) {
+      setFollowingIds(new Set())
+      return
+    }
+    supabase
+      .from('follows')
+      .select('following_id')
+      .eq('follower_id', user.id)
+      .eq('status', 'accepted')
+      .then(({ data }) => {
+        if (!cancelled) setFollowingIds(new Set((data || []).map((row) => row.following_id)))
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [user])
 
   async function loadSocial(ids) {
     if (ids.length === 0) return {}
@@ -451,10 +474,14 @@ function PredictionFeed({ category }) {
     async function init() {
       const { filtered, rawCount } = await fetchPage(0)
       if (cancelled) return
-      setPredictions(filtered)
       setHasMore(rawCount === FEED_PAGE_SIZE)
+      // Social counts (likes/comments) feed the engagement signal, so fetch
+      // them before ranking — not after, or the first render would briefly
+      // show plain chronological order and then jump.
       const social = await loadSocial(filtered.map((p) => p.id))
       if (!cancelled) {
+        const ranked = rankFeed(filtered, social, { followingIds, interests: settings.content.interests })
+        setPredictions(ranked)
         setSocialById(social)
         setLoading(false)
       }
@@ -464,17 +491,21 @@ function PredictionFeed({ category }) {
       cancelled = true
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [category, user, settings.content.mutedWords, profile?.content_filter_level])
+  }, [category, user, settings.content.mutedWords, profile?.content_filter_level, followingIds])
 
   async function handleLoadMore() {
     if (loadingMore || !hasMore) return
     setLoadingMore(true)
     const nextPage = page + 1
     const { filtered, rawCount } = await fetchPage(nextPage)
-    setPredictions((prev) => [...prev, ...filtered])
+    const social = await loadSocial(filtered.map((p) => p.id))
+    // Each newly-fetched page is ranked among itself (not re-mixed with
+    // already-shown pages above it) — see feedRanking.js's file comment for
+    // why a per-page re-rank, not a full-corpus one.
+    const ranked = rankFeed(filtered, social, { followingIds, interests: settings.content.interests })
+    setPredictions((prev) => [...prev, ...ranked])
     setPage(nextPage)
     setHasMore(rawCount === FEED_PAGE_SIZE)
-    const social = await loadSocial(filtered.map((p) => p.id))
     setSocialById((prev) => ({ ...prev, ...social }))
     setLoadingMore(false)
   }
