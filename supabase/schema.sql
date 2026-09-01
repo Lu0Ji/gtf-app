@@ -1421,3 +1421,43 @@ grant select, insert, update on public.real_world_events to service_role;
 alter table public.real_world_events drop constraint real_world_events_kind_check;
 alter table public.real_world_events add constraint real_world_events_kind_check
   check (kind in ('sports', 'city_event', 'news'));
+-- ─────────────────────────────────────────────────────────────────────────
+
+-- GRUP SOHBETİ — a live group chat, one thread per group (not per pair —
+-- see public.messages for 1:1 DMs). Reuses the same shared presence
+-- channel (PresenceContext.jsx) other members already track themselves in
+-- for "kim şu an çevrimiçi", and the same postgres_changes INSERT
+-- subscribe-per-open-thread pattern Sohbet.jsx already uses for 1:1, just
+-- filtered by group_id instead of a (sender,recipient) pair.
+create table public.group_messages (
+  id uuid primary key default gen_random_uuid(),
+  group_id uuid not null references public.groups(id) on delete cascade,
+  sender_id uuid not null references public.profiles(id) on delete cascade,
+  content text not null,
+  created_at timestamptz not null default now()
+);
+
+alter table public.group_messages enable row level security;
+
+create policy "Group members can view group messages" on public.group_messages for select
+  using (
+    exists (
+      select 1 from public.group_members gm
+      where gm.group_id = group_messages.group_id and gm.user_id = auth.uid()
+    )
+  );
+
+create policy "Group members can send group messages" on public.group_messages for insert
+  with check (
+    auth.uid() = sender_id
+    and exists (
+      select 1 from public.group_members gm
+      where gm.group_id = group_messages.group_id and gm.user_id = auth.uid()
+    )
+  );
+
+grant select, insert on public.group_messages to authenticated;
+
+create index group_messages_group_id_idx on public.group_messages (group_id, created_at);
+
+alter publication supabase_realtime add table public.group_messages;

@@ -270,15 +270,26 @@ export default function GrupDetayi() {
         >
           <iconify-icon icon="lucide:arrow-left" class="text-[19px]"></iconify-icon>
         </button>
-        {isAdmin && (
-          <button
-            aria-label="Grubu düzenle"
-            onClick={() => setShowEdit(true)}
-            className="flex h-10 w-10 items-center justify-center rounded-theme border border-border bg-card/90 text-foreground shadow-sm backdrop-blur-sm"
-          >
-            <iconify-icon icon="lucide:pencil" class="text-[17px]"></iconify-icon>
-          </button>
-        )}
+        <div className="flex items-center gap-2">
+          {isMember && (
+            <button
+              aria-label="Grup sohbeti"
+              onClick={() => navigate('/grup-sohbeti', { state: { groupId: group.id, groupName: group.name } })}
+              className="flex h-10 w-10 items-center justify-center rounded-theme border border-border bg-card/90 text-foreground shadow-sm backdrop-blur-sm"
+            >
+              <iconify-icon icon="lucide:message-circle" class="text-[17px]"></iconify-icon>
+            </button>
+          )}
+          {isAdmin && (
+            <button
+              aria-label="Grubu düzenle"
+              onClick={() => setShowEdit(true)}
+              className="flex h-10 w-10 items-center justify-center rounded-theme border border-border bg-card/90 text-foreground shadow-sm backdrop-blur-sm"
+            >
+              <iconify-icon icon="lucide:pencil" class="text-[17px]"></iconify-icon>
+            </button>
+          )}
+        </div>
       </header>
 
       {group.cover_image_url ? (

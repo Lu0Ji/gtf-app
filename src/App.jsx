@@ -23,6 +23,7 @@ const Profil = lazy(() => import('./screens/Profil.jsx'))
 const TahminOlustur = lazy(() => import('./screens/TahminOlustur.jsx'))
 const TahminKaydi = lazy(() => import('./screens/TahminKaydi.jsx'))
 const Sohbet = lazy(() => import('./screens/Sohbet.jsx'))
+const GrupSohbeti = lazy(() => import('./screens/GrupSohbeti.jsx'))
 const LiderlikTablosu = lazy(() => import('./screens/LiderlikTablosu.jsx'))
 const Rozetler = lazy(() => import('./screens/Rozetler.jsx'))
 const ProfilAyarlari = lazy(() => import('./screens/ProfilAyarlari.jsx'))
@@ -90,6 +91,7 @@ export default function App() {
                           <Route path="/tahmin-olustur" element={<TahminOlustur />} />
                           <Route path="/tahmin-kaydi" element={<TahminKaydi />} />
                           <Route path="/sohbet" element={<Sohbet />} />
+                          <Route path="/grup-sohbeti" element={<GrupSohbeti />} />
                           <Route path="/liderlik-tablosu" element={<LiderlikTablosu />} />
                           <Route path="/rozetler" element={<Rozetler />} />
                           <Route path="/profil-ayarlari" element={<ProfilAyarlari />} />
