@@ -275,7 +275,11 @@ function PredictionCard({ prediction, social, onToggleLike, onToggleSave }) {
 
           {prediction.media_url && (
             <div className="mt-3 overflow-hidden rounded-theme border border-border bg-muted">
-              <img src={prediction.media_url} alt="" className="max-h-72 w-full object-cover" />
+              {prediction.media_type === 'video' ? (
+                <video src={prediction.media_url} controls className="max-h-72 w-full object-cover" />
+              ) : (
+                <img src={prediction.media_url} alt="" className="max-h-72 w-full object-cover" />
+              )}
             </div>
           )}
 

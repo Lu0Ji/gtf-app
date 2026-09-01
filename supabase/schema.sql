@@ -1823,3 +1823,50 @@ end;
 $$ language plpgsql security definer set search_path = public;
 
 grant execute on function public.cast_prediction_vote(uuid, text) to authenticated;
+-- ─────────────────────────────────────────────────────────────────────────
+
+-- PREDICTION MEDIA — VİDEO DESTEĞİ: the existing "Görsel" attach (image
+-- only, see the PREDICTION MEDIA section above) now also accepts a short
+-- video clip. media_type tells the client which element to render;
+-- existing rows with media_url but no media_type predate this and were
+-- always images (video wasn't possible before), so the client treats a
+-- null media_type as 'image'.
+alter table public.predictions add column media_type text check (media_type in ('image', 'video'));
+
+-- Server-side enforcement, not just the client's <input accept> + size
+-- check — a raw API call could otherwise upload anything of any size to
+-- this public bucket. 25MB covers a several-second clip without this
+-- becoming a video-hosting bill.
+update storage.buckets
+set file_size_limit = 25 * 1024 * 1024,
+    allowed_mime_types = array['image/jpeg','image/png','image/webp','image/gif','video/mp4','video/webm','video/quicktime']
+where id = 'prediction-media';
+
+-- media_url/media_type were missed when protect_prediction_immutability
+-- was first written (before the prediction-media bucket existed) — the
+-- same class of gap the SECURITY REVIEW comment above already called out
+-- for other columns: an RLS UPDATE policy alone doesn't stop a raw client
+-- update from silently swapping a prediction's attached media after the
+-- fact. Re-declaring the same trigger function (no need to re-create the
+-- trigger itself — it already points at this function by name).
+create or replace function public.protect_prediction_immutability()
+returns trigger as $$
+begin
+  if old.title is distinct from new.title
+    or old.sealed_content is distinct from new.sealed_content
+    or old.category is distinct from new.category
+    or old.author_id is distinct from new.author_id
+    or old.event_date is distinct from new.event_date
+    or old.is_private is distinct from new.is_private
+    or old.created_at is distinct from new.created_at
+    or old.media_url is distinct from new.media_url
+    or old.media_type is distinct from new.media_type
+  then
+    raise exception 'Bu alanlar oluşturulduktan sonra değiştirilemez.';
+  end if;
+  if old.status in ('verified_correct', 'verified_incorrect') and new.status is distinct from old.status then
+    raise exception 'Doğrulanmış bir tahminin sonucu değiştirilemez.';
+  end if;
+  return new;
+end;
+$$ language plpgsql;

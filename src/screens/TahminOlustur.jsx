@@ -39,9 +39,23 @@ export default function TahminOlustur() {
 
   const canSubmit = title.trim().length > 0 && sealedContent.trim().length > 0 && eventDate
 
+  // Client-side check for fast feedback only — the storage bucket itself
+  // enforces the real limit (see supabase/schema.sql's PREDICTION MEDIA —
+  // VİDEO DESTEĞİ section) since a raw API call could otherwise skip this.
+  const MAX_IMAGE_BYTES = 8 * 1024 * 1024
+  const MAX_VIDEO_BYTES = 25 * 1024 * 1024
+
   function handlePickMedia(e) {
     const file = e.target.files?.[0]
     if (!file) return
+    const isVideo = file.type.startsWith('video/')
+    const limit = isVideo ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES
+    if (file.size > limit) {
+      setError(isVideo ? 'Video en fazla 25 MB olabilir.' : 'Görsel en fazla 8 MB olabilir.')
+      if (mediaInputRef.current) mediaInputRef.current.value = ''
+      return
+    }
+    setError('')
     setMediaFile(file)
     setMediaPreview(URL.createObjectURL(file))
   }
@@ -83,15 +97,18 @@ export default function TahminOlustur() {
       }
 
       let mediaUrl = null
+      let mediaType = null
       if (mediaFile) {
+        mediaType = mediaFile.type.startsWith('video/') ? 'video' : 'image'
         const ext = mediaFile.name.split('.').pop()
         const path = `${user.id}/${Date.now()}.${ext}`
         const { error: uploadError } = await supabase.storage.from('prediction-media').upload(path, mediaFile)
         // A missing bucket (migration not run yet) shouldn't block the
         // whole prediction — the text content still matters more than the
-        // image. Just drop the image and tell the user why.
+        // attached media. Just drop it and tell the user why.
         if (uploadError) {
-          showToast('Görsel yüklenemedi, tahmin görselsiz kaydedilecek.')
+          showToast(mediaType === 'video' ? 'Video yüklenemedi, tahmin medyasız kaydedilecek.' : 'Görsel yüklenemedi, tahmin görselsiz kaydedilecek.')
+          mediaType = null
         } else {
           const { data: publicUrlData } = supabase.storage.from('prediction-media').getPublicUrl(path)
           mediaUrl = publicUrlData.publicUrl
@@ -109,6 +126,7 @@ export default function TahminOlustur() {
       if (targetGroupId) fullPayload.group_id = targetGroupId
       if (isSensitive) fullPayload.is_sensitive = true
       if (mediaUrl) fullPayload.media_url = mediaUrl
+      if (mediaType) fullPayload.media_type = mediaType
 
       let { error: insertError } = await supabase.from('predictions').insert(fullPayload)
       if (insertError?.code === 'PGRST204' && Object.keys(fullPayload).length > Object.keys(basePayload).length) {
@@ -225,16 +243,26 @@ export default function TahminOlustur() {
 
         <section>
           <div className="mb-2 flex items-center justify-between">
-            <label className="text-sm font-bold text-foreground">Görsel</label>
+            <label className="text-sm font-bold text-foreground">Görsel veya video</label>
             <span className="text-[11px] font-medium text-muted-foreground">İsteğe bağlı</span>
           </div>
-          <input ref={mediaInputRef} type="file" accept="image/*" className="hidden" onChange={handlePickMedia} />
+          <input
+            ref={mediaInputRef}
+            type="file"
+            accept="image/*,video/*"
+            className="hidden"
+            onChange={handlePickMedia}
+          />
           {mediaPreview ? (
             <div className="relative overflow-hidden rounded-theme border border-border bg-muted">
-              <img src={mediaPreview} alt="Seçilen görsel" className="h-40 w-full object-cover" />
+              {mediaFile?.type.startsWith('video/') ? (
+                <video src={mediaPreview} controls className="h-40 w-full object-cover" />
+              ) : (
+                <img src={mediaPreview} alt="Seçilen görsel" className="h-40 w-full object-cover" />
+              )}
               <button
                 type="button"
-                aria-label="Görseli kaldır"
+                aria-label="Medyayı kaldır"
                 onClick={handleRemoveMedia}
                 className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white"
               >
@@ -248,7 +276,7 @@ export default function TahminOlustur() {
               className="flex h-24 w-full items-center justify-center gap-1.5 rounded-theme border border-dashed border-border bg-muted text-xs font-bold text-muted-foreground"
             >
               <iconify-icon icon="lucide:image-plus" class="text-base"></iconify-icon>
-              Bir görsel ekle
+              Görsel (8 MB) veya video (25 MB) ekle
             </button>
           )}
         </section>

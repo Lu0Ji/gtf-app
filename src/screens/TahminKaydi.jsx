@@ -432,7 +432,11 @@ export default function TahminKaydi() {
 
             {record.media_url && (
               <div className="mt-4 overflow-hidden rounded-theme border border-border bg-muted">
-                <img src={record.media_url} alt="" className="max-h-80 w-full object-cover" />
+                {record.media_type === 'video' ? (
+                  <video src={record.media_url} controls className="max-h-80 w-full object-cover" />
+                ) : (
+                  <img src={record.media_url} alt="" className="max-h-80 w-full object-cover" />
+                )}
               </div>
             )}
 
