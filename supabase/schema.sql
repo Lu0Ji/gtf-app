@@ -1383,6 +1383,11 @@ create table public.real_world_events (
 alter table public.real_world_events enable row level security;
 create policy "Real world events are viewable by everyone"
   on public.real_world_events for select using (true);
+-- The select policy alone 403s without this — same lesson as the
+-- service_role grant below, just the other direction (PostgREST needs the
+-- base table grant in addition to the RLS policy, for every role, not just
+-- the one that writes).
+grant select on public.real_world_events to anon, authenticated;
 -- No insert/update grant to anon/authenticated — only the Edge Function
 -- (via its service-role admin client, which bypasses RLS entirely) writes
 -- here. A regular client could otherwise plant a fake "event" to promote
