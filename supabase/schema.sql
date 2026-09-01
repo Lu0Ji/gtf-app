@@ -1353,3 +1353,46 @@ grant execute on function public.cast_prediction_vote(uuid, text) to authenticat
 alter table public.profiles add column showcase_badges text[] not null default '{}';
 alter table public.profiles add constraint showcase_badges_max_3
   check (array_length(showcase_badges, 1) is null or array_length(showcase_badges, 1) <= 3);
+-- ─────────────────────────────────────────────────────────────────────────
+
+-- YAKLAŞAN ETKİNLİKLER — real-world events (starting with football
+-- fixtures from football-data.org) to give people something concrete to
+-- make a prediction about, not just what other users already posted.
+-- Populated by the fetch-sports-fixtures Edge Function (supabase/functions/),
+-- called from the client with a staleness check (see Kesfet.jsx) rather
+-- than a true cron job — this environment can set an Edge Function secret
+-- and deploy the function, but scheduling one (pg_cron / Dashboard cron)
+-- needs Dashboard access this session doesn't have, so "sürekli güncellenen"
+-- means "refreshes itself the next time someone opens the screen and the
+-- cached data is stale", not a background job ticking on its own.
+create table public.real_world_events (
+  id uuid primary key default gen_random_uuid(),
+  source text not null,
+  external_id text not null,
+  kind text not null check (kind in ('sports', 'city_event')),
+  category text not null default 'spor',
+  title text not null,
+  subtitle text,
+  event_date timestamptz not null,
+  location text,
+  metadata jsonb not null default '{}'::jsonb,
+  fetched_at timestamptz not null default now(),
+  unique (source, external_id)
+);
+
+alter table public.real_world_events enable row level security;
+create policy "Real world events are viewable by everyone"
+  on public.real_world_events for select using (true);
+-- No insert/update grant to anon/authenticated — only the Edge Function
+-- (via its service-role admin client, which bypasses RLS entirely) writes
+-- here. A regular client could otherwise plant a fake "event" to promote
+-- their own prediction.
+create index real_world_events_event_date_idx on public.real_world_events (event_date);
+create index real_world_events_category_idx on public.real_world_events (category);
+-- Unlike every other table in this file, this one is written by an Edge
+-- Function's admin client, not by an authenticated user through PostgREST —
+-- service_role bypasses RLS but still needs an actual table grant, which
+-- (unlike on Supabase-managed migrations) isn't applied automatically when
+-- a table is created via a raw db query connection the way this one was.
+-- Learned by hitting "permission denied for table real_world_events" first.
+grant select, insert, update on public.real_world_events to service_role;

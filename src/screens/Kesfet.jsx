@@ -6,6 +6,7 @@ import { timeAgo, formatTimeUntil } from '../lib/format.js'
 import { CATEGORY_META } from '../lib/categories.js'
 import { addSearchHistoryEntry } from '../lib/searchHistory.js'
 import DifficultyChip from '../components/DifficultyChip.jsx'
+import { useUserSettings } from '../hooks/useUserSettings.js'
 
 const SEARCH_PAGE_SIZE = 15
 
@@ -168,6 +169,7 @@ function CategoryTile({ category, count, variant }) {
 export default function Kesfet() {
   const navigate = useNavigate()
   const location = useLocation()
+  const { settings } = useUserSettings()
   // Arama geçmişinden bir sorguya tekrar dokununca buraya prefilled gelir.
   const [query, setQuery] = useState(() => location.state?.query || '')
   const [categoryCounts, setCategoryCounts] = useState([])
@@ -175,14 +177,28 @@ export default function Kesfet() {
   const [recentPredictions, setRecentPredictions] = useState([])
   const [trending, setTrending] = useState([])
   const [openingSoon, setOpeningSoon] = useState([])
+  const [upcomingEvents, setUpcomingEvents] = useState([])
   const [loading, setLoading] = useState(true)
+
+  // Fire-and-forget: the function itself checks whether its cache is
+  // actually stale before calling out to football-data.org, so it's cheap
+  // to just ask on every visit rather than wiring up a real cron job (see
+  // supabase/schema.sql's note on why there isn't one). Not awaited — the
+  // screen renders off whatever's already in real_world_events, and picks
+  // up anything newer on the next visit/reload instead of blocking on it.
+  useEffect(() => {
+    supabase.functions.invoke('fetch-sports-fixtures').then(
+      () => {},
+      () => {}
+    )
+  }, [])
 
   useEffect(() => {
     let cancelled = false
 
     async function load() {
       const in48h = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
-      const [predictionsRes, profilesRes, openingSoonRes] = await Promise.all([
+      const [predictionsRes, profilesRes, openingSoonRes, eventsRes] = await Promise.all([
         queryWithGroupIdFallback((filterGroupId) => {
           let q = supabase
             .from('predictions')
@@ -207,6 +223,15 @@ export default function Kesfet() {
           if (filterGroupId) q = q.is('group_id', null)
           return q
         }),
+        // real_world_events may not exist yet (see supabase/schema.sql) —
+        // the section just quietly doesn't render until the migration and
+        // Edge Function are both deployed.
+        supabase
+          .from('real_world_events')
+          .select('*')
+          .gte('event_date', new Date().toISOString())
+          .order('event_date', { ascending: true })
+          .limit(20),
       ])
 
       if (cancelled) return
@@ -243,6 +268,21 @@ export default function Kesfet() {
       setRecentPredictions((predictionsRes.data || []).slice(0, 6))
       setTrending(trendingList)
       setOpeningSoon(openingSoonRes.data || [])
+
+      // Personalized: an event in a category you've marked as an interest
+      // (Uygulama Ayarları) sorts first; soonest-first within each group.
+      // Not a filter — with only football fixtures live so far, hiding
+      // "spor" for anyone who hasn't picked it as an interest would leave
+      // this empty for most people instead of just deprioritized.
+      const interests = new Set((settings.content.interests || []).map((i) => i.toLowerCase()))
+      const events = eventsRes.error ? [] : eventsRes.data || []
+      const rankedEvents = [...events].sort((a, b) => {
+        const aMatch = interests.has(a.category) ? 0 : 1
+        const bMatch = interests.has(b.category) ? 0 : 1
+        if (aMatch !== bMatch) return aMatch - bMatch
+        return new Date(a.event_date) - new Date(b.event_date)
+      })
+      setUpcomingEvents(rankedEvents)
       setLoading(false)
     }
 
@@ -250,6 +290,10 @@ export default function Kesfet() {
     return () => {
       cancelled = true
     }
+    // settings.content.interests only affects client-side re-sorting, not
+    // what's fetched — omitted so changing it elsewhere doesn't re-run the
+    // whole page's data load, just the next natural visit.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [])
 
   return (
@@ -284,6 +328,65 @@ export default function Kesfet() {
           <p className="px-5 text-xs text-muted-foreground">Yükleniyor…</p>
         ) : (
           <>
+            {upcomingEvents.length > 0 && (
+              <section className="mb-8">
+                <div className="px-5">
+                  <h2 className="flex items-center gap-1.5 font-heading text-lg font-bold tracking-tight">
+                    <iconify-icon icon="lucide:radar" class="text-accent"></iconify-icon>
+                    Yaklaşan Etkinlikler
+                  </h2>
+                  <p className="mt-0.5 text-xs text-muted-foreground">
+                    Gerçek dünyadan — üzerine tahmin oluşturabileceğin yaklaşan maçlar
+                  </p>
+                </div>
+                <div className="mt-3 flex gap-3 overflow-x-auto px-5 pb-2">
+                  {upcomingEvents.map((ev) => {
+                    const meta = CATEGORY_META[ev.category] || { icon: 'lucide:tag', label: ev.category }
+                    return (
+                      <div
+                        key={ev.id}
+                        className="min-w-[220px] max-w-[220px] rounded-theme border border-border bg-card p-3.5 shadow-sm"
+                      >
+                        <div className="flex items-center justify-between">
+                          <span className="flex items-center gap-1 rounded-full bg-muted px-2 py-1 text-[10px] font-bold text-primary">
+                            <iconify-icon icon={meta.icon} class="text-xs"></iconify-icon>
+                            {meta.label}
+                          </span>
+                          <span className="flex items-center gap-1 text-[10px] font-bold text-accent">
+                            <iconify-icon icon="lucide:hourglass" class="text-xs"></iconify-icon>
+                            {formatTimeUntil(ev.event_date)}
+                          </span>
+                        </div>
+                        {ev.subtitle && (
+                          <p className="mt-2 truncate text-[10px] font-semibold text-muted-foreground">
+                            {ev.subtitle}
+                          </p>
+                        )}
+                        <p className="mt-1 text-sm font-bold leading-5">{ev.title}</p>
+                        <button
+                          onClick={() =>
+                            navigate('/tahmin-olustur', {
+                              state: {
+                                prefill: {
+                                  title: ev.title,
+                                  category: ev.category,
+                                  eventDate: ev.event_date.slice(0, 10),
+                                },
+                              },
+                            })
+                          }
+                          className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-theme bg-primary py-2 text-[11px] font-bold text-primary-foreground"
+                        >
+                          <iconify-icon icon="lucide:pen-line" class="text-xs"></iconify-icon>
+                          Tahmin oluştur
+                        </button>
+                      </div>
+                    )
+                  })}
+                </div>
+              </section>
+            )}
+
             {openingSoon.length > 0 && (
               <section className="mb-8">
                 <div className="px-5">

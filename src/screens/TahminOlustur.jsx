@@ -3,7 +3,7 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
-import { CATEGORIES } from '../lib/categories.js'
+import { CATEGORIES, CATEGORY_META } from '../lib/categories.js'
 import { checkPredictionText } from '../lib/predictionCheck.js'
 
 export default function TahminOlustur() {
@@ -17,11 +17,19 @@ export default function TahminOlustur() {
   // private personal record regardless of where it was created from.
   const groupId = location.state?.groupId || null
   const groupName = location.state?.groupName || ''
+  // Present when launched from a "Yaklaşan Etkinlikler" card (Keşfet) — a
+  // real-world event's own title/category/date, so starting a prediction
+  // from one doesn't mean retyping what it already told you. The sealed
+  // content itself is still left blank: that's the actual prediction, not
+  // something a fixture listing could ever fill in for you.
+  const prefill = location.state?.prefill || null
   const [mode, setMode] = useState('Tahmin')
-  const [category, setCategory] = useState('Spor')
-  const [title, setTitle] = useState('')
+  const [category, setCategory] = useState(() =>
+    prefill?.category ? CATEGORY_META[prefill.category]?.label || 'Spor' : 'Spor'
+  )
+  const [title, setTitle] = useState(prefill?.title || '')
   const [sealedContent, setSealedContent] = useState('')
-  const [eventDate, setEventDate] = useState('')
+  const [eventDate, setEventDate] = useState(prefill?.eventDate || '')
   const [isSensitive, setIsSensitive] = useState(false)
   const [mediaFile, setMediaFile] = useState(null)
   const [mediaPreview, setMediaPreview] = useState(null)
@@ -164,6 +172,15 @@ export default function TahminOlustur() {
                 <iconify-icon icon="lucide:archive" class="text-base"></iconify-icon>
                 Zaman kapsülü
               </button>
+            </div>
+          )}
+          {prefill && (
+            <div className="mt-3 flex items-center gap-2.5 rounded-theme border border-accent/30 bg-accent/10 px-3.5 py-3">
+              <iconify-icon icon="lucide:calendar-clock" class="shrink-0 text-lg text-accent"></iconify-icon>
+              <p className="text-xs leading-5 text-foreground">
+                <span className="font-semibold">Yaklaşan Etkinlikler</span>'den başlatıldı — başlık ve tarih
+                doldu, mühürlenecek tahmini sen yazacaksın.
+              </p>
             </div>
           )}
           <div className="mt-3 flex gap-3 rounded-theme border border-border bg-card p-3.5">
