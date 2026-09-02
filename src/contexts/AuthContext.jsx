@@ -102,6 +102,31 @@ export function AuthProvider({ children }) {
     return data
   }
 
+  // Redirects out to Google and back — there's no local session to return
+  // here, onAuthStateChange picks up the resulting session once the
+  // redirect completes. Requires the Google provider to be enabled (with a
+  // Google Cloud OAuth client id/secret) in the Supabase project's Auth
+  // settings; until then this call resolves but the redirect ends in an
+  // error page.
+  async function signInWithGoogle() {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'google',
+      options: { redirectTo: window.location.origin },
+    })
+    if (error) throw error
+  }
+
+  // Same redirect-based flow as Google. Requires the Apple provider to be
+  // enabled in Supabase's Auth settings (Services ID, Team ID, Key ID and
+  // private key from an Apple Developer account) before it actually works.
+  async function signInWithApple() {
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: 'apple',
+      options: { redirectTo: window.location.origin },
+    })
+    if (error) throw error
+  }
+
   async function signOut() {
     const { error } = await supabase.auth.signOut()
     if (error) throw error
@@ -118,6 +143,8 @@ export function AuthProvider({ children }) {
     loading,
     signUp,
     signIn,
+    signInWithGoogle,
+    signInWithApple,
     signOut,
     refreshProfile,
   }

@@ -4,18 +4,18 @@ import { useAuth } from '../contexts/AuthContext.jsx'
 import { supabase } from '../lib/supabase.js'
 import { IMG } from '../lib/images.js'
 
-// FireVibe-generated hero (regenerated this session, third attempt — the
-// project's original asset for this screen was completely mismatched, and
-// the first two regenerations kept inserting an unwanted robot mascot;
-// this one was downloaded and inspected pixel-by-pixel before use). The
-// login/signup form is the first thing every new user sees, so it's the
-// highest-leverage place for a real illustration.
-const LOGIN_HERO = IMG('d76337dd-bf81-4ef5-af58-fc919db6bf60')
+// FireVibe-generated hero, swapped 2026-09-02: the previous asset was a
+// recognizable Istanbul mosque skyline, which read as a Turkey-only app;
+// GTF is going after a global audience, so this is a deliberately
+// generic international night skyline instead (no landmark, no flag,
+// nothing that ties it to one country). Downloaded and inspected before
+// use, per this screen's usual practice.
+const LOGIN_HERO = IMG('2485f89f-ddd3-4c79-ba33-e9df27be46ef')
 
 export default function Giris() {
   const navigate = useNavigate()
   const location = useLocation()
-  const { signIn, signUp } = useAuth()
+  const { signIn, signUp, signInWithGoogle, signInWithApple } = useAuth()
   const [mode, setMode] = useState('signin') // 'signin' | 'signup'
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
@@ -29,6 +29,8 @@ export default function Giris() {
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [signupDone, setSignupDone] = useState(false)
+  const [googleBusy, setGoogleBusy] = useState(false)
+  const [appleBusy, setAppleBusy] = useState(false)
   // Set once a password sign-in succeeds but the account has TOTP enrolled
   // (Ayarlar > İki aşamalı doğrulama) — without this second step, 2FA would
   // be enrollable but never actually checked at login.
@@ -59,6 +61,30 @@ export default function Giris() {
       return
     }
     navigate('/', { replace: true })
+  }
+
+  async function handleGoogleSignIn() {
+    setError('')
+    setGoogleBusy(true)
+    try {
+      await signInWithGoogle()
+      // Browser is about to navigate away to Google; nothing else to do here.
+    } catch (err) {
+      setError(err.message || 'Google ile giriş başlatılamadı, tekrar deneyin.')
+      setGoogleBusy(false)
+    }
+  }
+
+  async function handleAppleSignIn() {
+    setError('')
+    setAppleBusy(true)
+    try {
+      await signInWithApple()
+      // Browser is about to navigate away to Apple; nothing else to do here.
+    } catch (err) {
+      setError(err.message || 'Apple ile giriş başlatılamadı, tekrar deneyin.')
+      setAppleBusy(false)
+    }
   }
 
   async function handleSubmit(e) {
@@ -168,7 +194,7 @@ export default function Giris() {
         <div className="absolute inset-0 bg-gradient-to-b from-background/10 via-background/45 to-background" />
       </div>
 
-      <div className="mx-auto -mt-10 w-full max-w-[360px] px-6 pb-10">
+      <div className="relative z-10 mx-auto -mt-10 w-full max-w-[360px] px-6 pb-10">
         <div className="flex flex-col items-center">
           <div className="flex h-14 w-14 items-center justify-center rounded-theme bg-primary font-heading text-lg font-extrabold tracking-[-0.08em] text-primary-foreground shadow-lg">
             GTF
@@ -276,6 +302,33 @@ export default function Giris() {
           >
             {busy ? 'Lütfen bekleyin…' : mode === 'signin' ? 'Giriş yap' : 'Hesap oluştur'}
           </button>
+
+          <div className="flex items-center gap-3 py-1">
+            <div className="h-px flex-1 bg-border" />
+            <span className="text-[11px] font-medium text-muted-foreground">veya</span>
+            <div className="h-px flex-1 bg-border" />
+          </div>
+
+          <div className="space-y-3">
+            <button
+              type="button"
+              onClick={handleGoogleSignIn}
+              disabled={googleBusy || appleBusy || busy}
+              className="flex h-12 w-full items-center justify-center gap-3 rounded-theme border border-border bg-card text-sm font-bold text-foreground shadow-sm disabled:opacity-60"
+            >
+              <iconify-icon icon="simple-icons:google" class="text-[18px]"></iconify-icon>
+              {googleBusy ? 'Yönlendiriliyor…' : 'Google ile devam et'}
+            </button>
+            <button
+              type="button"
+              onClick={handleAppleSignIn}
+              disabled={googleBusy || appleBusy || busy}
+              className="flex h-12 w-full items-center justify-center gap-3 rounded-theme border border-border bg-card text-sm font-bold text-foreground shadow-sm disabled:opacity-60"
+            >
+              <iconify-icon icon="simple-icons:apple" class="text-[19px]"></iconify-icon>
+              {appleBusy ? 'Yönlendiriliyor…' : 'Apple ile devam et'}
+            </button>
+          </div>
         </form>
       </div>
     </div>
