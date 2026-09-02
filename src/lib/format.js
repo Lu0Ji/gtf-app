@@ -24,6 +24,15 @@ export function formatDateLong(dateStr) {
   )
 }
 
+// Predictions can now seal to an exact minute (not just a day — see
+// TahminOlustur's DateTimePicker), so anywhere the app tells someone when a
+// sealed record opens needs the time-of-day alongside the date, not the
+// date alone.
+export function formatDateTimeLong(dateStr) {
+  if (!dateStr) return ''
+  return `${formatDateLong(dateStr)}, ${formatTime(dateStr)}`
+}
+
 // The inverse of timeAgo — a future date, phrased as a countdown ("3 saat
 // sonra" / "5 gün sonra"). This is the app's one real curiosity hook (sealed
 // content opening later), so the wording is shared verbatim everywhere a

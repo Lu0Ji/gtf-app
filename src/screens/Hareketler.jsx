@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useUserSettings } from '../hooks/useUserSettings.js'
-import { formatDateLong } from '../lib/format.js'
+import { formatDateLong, formatDateTimeLong } from '../lib/format.js'
 
 function dayLabel(dateStr) {
   const date = new Date(dateStr)
@@ -238,7 +238,7 @@ export default function Hareketler() {
                           <p className="mt-2 text-[12px] font-semibold leading-5">{event.data.title}</p>
                           {event.data.event_date && (
                             <p className="mt-1 text-[10px] text-muted-foreground">
-                              {formatDateLong(event.data.event_date)}'da açılacak
+                              {formatDateTimeLong(event.data.event_date)}'da açılacak
                             </p>
                           )}
                         </div>

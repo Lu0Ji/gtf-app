@@ -4,7 +4,7 @@ import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
-import { formatDateLong, formatTimeUntil, timeAgo } from '../lib/format.js'
+import { formatDateLong, formatDateTimeLong, formatTimeUntil, timeAgo } from '../lib/format.js'
 import { CATEGORY_META, GROUP_CATEGORIES } from '../lib/categories.js'
 import DifficultyChip from '../components/DifficultyChip.jsx'
 
@@ -128,7 +128,7 @@ function GroupPredictionCard({ prediction, onOpen }) {
             </span>
             <DifficultyChip tier={prediction.difficulty_tier} />
           </div>
-          <span>{formatDateLong(prediction.event_date)}'da açılacak</span>
+          <span>{formatDateTimeLong(prediction.event_date)}'da açılacak</span>
         </div>
       )}
     </button>

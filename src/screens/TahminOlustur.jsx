@@ -3,14 +3,21 @@ import { useLocation, useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
+import { useUserSettings } from '../hooks/useUserSettings.js'
 import { CATEGORIES, CATEGORY_META } from '../lib/categories.js'
 import { checkPredictionText } from '../lib/predictionCheck.js'
+import DateTimePicker from '../components/DateTimePicker.jsx'
+
+function isFutureDate(dateStr) {
+  return Boolean(dateStr) && new Date(dateStr).getTime() > Date.now()
+}
 
 export default function TahminOlustur() {
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuth()
   const { showToast } = useToast()
+  const { settings } = useUserSettings()
   // Present when launched from Grup Detayı's "Tahmin oluştur" — tags the
   // prediction to that group so it lands in the group's own feed instead of
   // the public one. Only applies to "Tahmin" mode: a Zaman kapsülü stays a
@@ -37,7 +44,8 @@ export default function TahminOlustur() {
   const [error, setError] = useState('')
   const mediaInputRef = useRef(null)
 
-  const canSubmit = title.trim().length > 0 && sealedContent.trim().length > 0 && eventDate
+  const eventDateIsFuture = isFutureDate(eventDate)
+  const canSubmit = title.trim().length > 0 && sealedContent.trim().length > 0 && eventDateIsFuture
 
   // Client-side check for fast feedback only — the storage bucket itself
   // enforces the real limit (see supabase/schema.sql's PREDICTION MEDIA —
@@ -358,18 +366,22 @@ export default function TahminOlustur() {
         </section>
 
         <section>
-          <h2 className="font-heading text-[16px] font-extrabold tracking-tight">Açılış tarihi</h2>
+          <h2 className="font-heading text-[16px] font-extrabold tracking-tight">Açılış tarihi ve saati</h2>
           <p className="mt-1 text-[11px] leading-4 text-muted-foreground">
-            Kayıt bu tarihe kadar mühürlü kalır, tarih geçince herkese açılır.
+            Kayıt bu ana kadar mühürlü kalır, an geçince herkese açılır — artık gün değil, dakikası dakikasına
+            seçebilirsin.
           </p>
-          <input
-            type="date"
-            required
+          <DateTimePicker
             value={eventDate}
-            onChange={(e) => setEventDate(e.target.value)}
-            min={new Date().toISOString().slice(0, 10)}
-            className="mt-3 w-full rounded-theme border border-border bg-input px-4 py-3 text-sm font-semibold text-foreground shadow-sm outline-none"
+            onChange={setEventDate}
+            timeFormat={settings.region.timeFormat}
           />
+          {eventDate && !eventDateIsFuture && (
+            <p className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold text-destructive">
+              <iconify-icon icon="lucide:circle-alert" class="text-sm"></iconify-icon>
+              Seçilen an artık geçmişte kaldı, lütfen ileri bir tarih/saat seç.
+            </p>
+          )}
         </section>
 
         <section className="flex gap-3 rounded-theme bg-muted p-4">

@@ -397,7 +397,7 @@ export default function Kesfet() {
                                 prefill: {
                                   title: ev.title,
                                   category: ev.category,
-                                  eventDate: ev.event_date.slice(0, 10),
+                                  eventDate: ev.event_date,
                                 },
                               },
                             })

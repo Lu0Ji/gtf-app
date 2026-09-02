@@ -4,7 +4,7 @@ import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
-import { formatDateLong, formatTime, timeAgo } from '../lib/format.js'
+import { formatDateLong, formatDateTimeLong, formatTime, timeAgo } from '../lib/format.js'
 
 
 function groupByDay(rows) {
@@ -149,7 +149,7 @@ export default function Begeniler() {
                           {isVerified ? `"${p.sealed_content}"` : p.title}
                         </p>
                         <div className="mt-3 flex items-center justify-between border-t border-border pt-3 text-[11px] font-medium text-muted-foreground">
-                          <span>{isVerified ? formatDateLong(p.verified_at) : `${formatDateLong(p.event_date)}'da açılacak`}</span>
+                          <span>{isVerified ? formatDateLong(p.verified_at) : `${formatDateTimeLong(p.event_date)}'da açılacak`}</span>
                           <span>{timeAgo(p.created_at)}</span>
                         </div>
                       </div>

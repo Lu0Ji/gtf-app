@@ -4,7 +4,7 @@ import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
-import { formatDateLong } from '../lib/format.js'
+import { formatDateLong, formatDateTimeLong } from '../lib/format.js'
 import { difficultyMeta } from '../lib/difficulty.js'
 
 const CORRECT_POINTS_REWARD = 50
@@ -567,7 +567,7 @@ export default function TahminKaydi() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/60">Açılış zamanı</p>
-                    <p className="mt-1 font-heading text-base font-bold">{formatDateLong(record.event_date)}</p>
+                    <p className="mt-1 font-heading text-base font-bold">{formatDateTimeLong(record.event_date)}</p>
                   </div>
                   <iconify-icon icon="lucide:calendar-clock" class="text-2xl text-white/75"></iconify-icon>
                 </div>
