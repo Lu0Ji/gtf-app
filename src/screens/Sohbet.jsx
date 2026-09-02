@@ -5,31 +5,13 @@ import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import { useOnlineUsers } from '../contexts/PresenceContext.jsx'
-import { formatTime, formatDateLong } from '../lib/format.js'
+import { formatTime } from '../lib/format.js'
+import { dayLabel, groupInfo } from '../lib/chatGrouping.js'
 
-// Consecutive messages from the same person, sent within this long a gap,
-// render as one visual "run" (single avatar, tight spacing, one timestamp)
-// instead of a full bubble-plus-avatar-plus-timestamp block per message —
-// the single most recognizable thing separating a real chat app from a
-// bare message list.
-const GROUP_GAP_MS = 5 * 60 * 1000
 // How long a single "typing" broadcast stays valid before the indicator
 // auto-hides — covers both a partner who stopped typing without sending
 // anything, and one whose device dropped the connection mid-type.
 const TYPING_TIMEOUT_MS = 3000
-
-function dayKey(dateStr) {
-  return new Date(dateStr).toDateString()
-}
-
-function dayLabel(dateStr) {
-  const today = new Date()
-  const yesterday = new Date()
-  yesterday.setDate(today.getDate() - 1)
-  if (dayKey(dateStr) === dayKey(today)) return 'Bugün'
-  if (dayKey(dateStr) === dayKey(yesterday)) return 'Dün'
-  return formatDateLong(dateStr)
-}
 
 export default function Sohbet() {
   const navigate = useNavigate()
@@ -268,19 +250,8 @@ export default function Sohbet() {
           ) : (
             <section aria-label="Sohbet mesajları">
               {messages.map((m, i) => {
-                const prev = messages[i - 1]
-                const next = messages[i + 1]
                 const isMine = m.sender_id === user.id
-                const newDay = !prev || dayKey(m.created_at) !== dayKey(prev.created_at)
-                const isFirstInGroup =
-                  newDay ||
-                  prev.sender_id !== m.sender_id ||
-                  new Date(m.created_at) - new Date(prev.created_at) > GROUP_GAP_MS
-                const isLastInGroup =
-                  !next ||
-                  dayKey(next.created_at) !== dayKey(m.created_at) ||
-                  next.sender_id !== m.sender_id ||
-                  new Date(next.created_at) - new Date(m.created_at) > GROUP_GAP_MS
+                const { newDay, isFirstInGroup, isLastInGroup } = groupInfo(messages, i)
                 const tailRadius = isLastInGroup ? (isMine ? 'rounded-br-sm' : 'rounded-bl-sm') : ''
 
                 return (

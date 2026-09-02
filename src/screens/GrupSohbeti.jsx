@@ -6,13 +6,19 @@ import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import { useOnlineUsers } from '../contexts/PresenceContext.jsx'
 import { formatTime } from '../lib/format.js'
+import { dayLabel, groupInfo } from '../lib/chatGrouping.js'
+
+// How long one person's "typing" broadcast stays valid before dropping out
+// of the indicator — see Sohbet.jsx's identical constant for why.
+const TYPING_TIMEOUT_MS = 3000
 
 // Live group chat — one thread per group, not per pair (see Sohbet.jsx for
 // 1:1 DMs, which this otherwise mirrors: same postgres_changes INSERT
-// subscribe-while-open pattern, just filtered by group_id). Members
-// currently online (PresenceContext, already shared app-wide) get a strip
-// of avatars up top so people can see who's actually here to talk right
-// now, not just who's a member on paper.
+// subscribe-while-open pattern, just filtered by group_id, plus the same
+// message-grouping and typing-indicator treatment). Members currently
+// online (PresenceContext, already shared app-wide) get a strip of avatars
+// up top so people can see who's actually here to talk right now, not just
+// who's a member on paper.
 export default function GrupSohbeti() {
   const navigate = useNavigate()
   const location = useLocation()
@@ -27,7 +33,12 @@ export default function GrupSohbeti() {
   const [draft, setDraft] = useState('')
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
+  // userId -> display name, for whoever has an active "typing" broadcast.
+  const [typingUsers, setTypingUsers] = useState({})
   const bottomRef = useRef(null)
+  const channelRef = useRef(null)
+  const typingSentAtRef = useRef(0)
+  const typingTimeoutsRef = useRef({})
 
   useEffect(() => {
     if (!groupId) {
@@ -62,28 +73,62 @@ export default function GrupSohbeti() {
     load()
 
     const channel = supabase
-      .channel(`grup-sohbet-${groupId}`)
+      .channel(`grup-sohbeti-${groupId}`)
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'group_messages', filter: `group_id=eq.${groupId}` },
         (payload) => {
+          // Whoever just sent a real message is done typing.
+          setTypingUsers((prev) => {
+            if (!(payload.new.sender_id in prev)) return prev
+            const next = { ...prev }
+            delete next[payload.new.sender_id]
+            return next
+          })
+          clearTimeout(typingTimeoutsRef.current[payload.new.sender_id])
           // Our own sends are already in state optimistically — a second
           // copy would double it up on the realtime echo.
           if (payload.new.sender_id === user.id) return
           setMessages((prev) => [...prev, payload.new])
         }
       )
+      .on('broadcast', { event: 'typing' }, ({ payload }) => {
+        if (!payload?.userId || payload.userId === user.id) return
+        setTypingUsers((prev) => ({ ...prev, [payload.userId]: payload.name || 'Biri' }))
+        clearTimeout(typingTimeoutsRef.current[payload.userId])
+        typingTimeoutsRef.current[payload.userId] = setTimeout(() => {
+          setTypingUsers((prev) => {
+            const next = { ...prev }
+            delete next[payload.userId]
+            return next
+          })
+        }, TYPING_TIMEOUT_MS)
+      })
       .subscribe()
+    channelRef.current = channel
 
     return () => {
       cancelled = true
+      for (const t of Object.values(typingTimeoutsRef.current)) clearTimeout(t)
+      typingTimeoutsRef.current = {}
+      channelRef.current = null
       supabase.removeChannel(channel)
     }
   }, [user, groupId])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+  }, [messages, typingUsers])
+
+  function handleDraftChange(value) {
+    setDraft(value)
+    const now = Date.now()
+    if (value.trim() && now - typingSentAtRef.current > 2000) {
+      typingSentAtRef.current = now
+      const myName = members.find((m) => m.id === user.id)?.display_name?.split(' ')[0] || 'Biri'
+      channelRef.current?.send({ type: 'broadcast', event: 'typing', payload: { userId: user.id, name: myName } })
+    }
+  }
 
   async function handleSend() {
     const content = draft.trim()
@@ -120,6 +165,15 @@ export default function GrupSohbeti() {
   if (!groupId) return null
 
   const onlineMembers = members.filter((m) => onlineIds.has(m.id))
+  const typingNames = Object.values(typingUsers)
+  const typingLabel =
+    typingNames.length === 0
+      ? null
+      : typingNames.length === 1
+        ? `${typingNames[0]} yazıyor…`
+        : typingNames.length === 2
+          ? `${typingNames[0]} ve ${typingNames[1]} yazıyor…`
+          : `${typingNames.length} kişi yazıyor…`
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-body">
@@ -136,9 +190,13 @@ export default function GrupSohbeti() {
             <div className="min-w-0 flex-1 px-3 text-center">
               <p className="truncate font-heading text-sm font-extrabold tracking-tight">{groupName}</p>
               <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
-                {onlineMembers.length > 0
-                  ? `${onlineMembers.length} kişi şu an çevrimiçi`
-                  : `${members.length} üye`}
+                {typingLabel ? (
+                  <span className="font-semibold text-primary">{typingLabel}</span>
+                ) : onlineMembers.length > 0 ? (
+                  `${onlineMembers.length} kişi şu an çevrimiçi`
+                ) : (
+                  `${members.length} üye`
+                )}
               </p>
             </div>
             <div className="h-10 w-10" />
@@ -173,46 +231,74 @@ export default function GrupSohbeti() {
               Henüz mesaj yok. Grupta ilk sözü sen al.
             </p>
           ) : (
-            <section className="space-y-5" aria-label="Grup sohbeti mesajları">
-              {messages.map((m) => {
+            <section aria-label="Grup sohbeti mesajları">
+              {messages.map((m, i) => {
                 const isMine = m.sender_id === user.id
                 const sender = m.profiles
+                const { newDay, isFirstInGroup, isLastInGroup } = groupInfo(messages, i)
+                const tailRadius = isLastInGroup ? (isMine ? 'rounded-br-sm' : 'rounded-bl-sm') : ''
+
                 return (
-                  <div key={m.id} className={`flex ${isMine ? 'justify-end' : 'items-end gap-2.5'}`}>
-                    {!isMine && (
-                      <button
-                        onClick={() => navigate(`/kullanici/${m.sender_id}`)}
-                        className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-muted"
-                      >
-                        <img
-                          src={sender?.avatar_url || fallbackAvatarFor(m.sender_id)}
-                          alt={sender?.display_name || 'Kullanıcı'}
-                          className="h-full w-full object-cover"
-                        />
-                      </button>
-                    )}
-                    <div className={isMine ? 'max-w-[286px]' : 'max-w-[268px]'}>
-                      {!isMine && (
-                        <p className="mb-1 px-1 text-[11px] font-bold text-muted-foreground">
-                          {sender?.display_name || 'Kullanıcı'}
-                        </p>
-                      )}
-                      <div
-                        className={
-                          isMine
-                            ? 'rounded-theme rounded-br-sm bg-primary px-4 py-3 text-primary-foreground shadow-sm'
-                            : 'rounded-theme rounded-bl-sm border border-border bg-card px-4 py-3 shadow-sm'
-                        }
-                      >
-                        <p className="text-sm leading-5">{m.content}</p>
+                  <div key={m.id}>
+                    {newDay && (
+                      <div className="my-4 flex items-center justify-center">
+                        <span className="rounded-full bg-muted px-3 py-1 text-[10px] font-bold text-muted-foreground">
+                          {dayLabel(m.created_at)}
+                        </span>
                       </div>
-                      <p className={`mt-1.5 px-1 text-[10px] text-muted-foreground ${isMine ? 'text-right' : ''}`}>
-                        {formatTime(m.created_at)}
-                      </p>
+                    )}
+                    <div
+                      className={`flex ${isMine ? 'justify-end' : 'items-end gap-2.5'} ${isFirstInGroup ? 'mt-4' : 'mt-1'}`}
+                    >
+                      {!isMine && (
+                        <div className="h-8 w-8 shrink-0 overflow-hidden rounded-full">
+                          {isLastInGroup && (
+                            <button onClick={() => navigate(`/kullanici/${m.sender_id}`)} className="block h-full w-full">
+                              <img
+                                src={sender?.avatar_url || fallbackAvatarFor(m.sender_id)}
+                                alt={sender?.display_name || 'Kullanıcı'}
+                                className="h-full w-full rounded-full bg-muted object-cover"
+                              />
+                            </button>
+                          )}
+                        </div>
+                      )}
+                      <div className={isMine ? 'max-w-[286px]' : 'max-w-[268px]'}>
+                        {!isMine && isFirstInGroup && (
+                          <p className="mb-1 px-1 text-[11px] font-bold text-muted-foreground">
+                            {sender?.display_name || 'Kullanıcı'}
+                          </p>
+                        )}
+                        <div
+                          className={
+                            isMine
+                              ? `rounded-theme ${tailRadius} bg-primary px-4 py-3 text-primary-foreground shadow-sm`
+                              : `rounded-theme ${tailRadius} border border-border bg-card px-4 py-3 shadow-sm`
+                          }
+                        >
+                          <p className="text-sm leading-5">{m.content}</p>
+                        </div>
+                        {isLastInGroup && (
+                          <p className={`mt-1.5 px-1 text-[10px] text-muted-foreground ${isMine ? 'text-right' : ''}`}>
+                            {formatTime(m.created_at)}
+                          </p>
+                        )}
+                      </div>
                     </div>
                   </div>
                 )
               })}
+
+              {typingNames.length > 0 && (
+                <div className="mt-4 flex items-end gap-2.5">
+                  <div className="h-8 w-8 shrink-0" />
+                  <div className="flex items-center gap-1 rounded-theme rounded-bl-sm border border-border bg-card px-4 py-3.5 shadow-sm">
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:0ms]" />
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:150ms]" />
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:300ms]" />
+                  </div>
+                </div>
+              )}
               <div ref={bottomRef} />
             </section>
           )}
@@ -223,7 +309,7 @@ export default function GrupSohbeti() {
             <div className="flex h-12 min-w-0 flex-1 items-center rounded-theme border border-border bg-input px-4 shadow-sm">
               <input
                 value={draft}
-                onChange={(e) => setDraft(e.target.value)}
+                onChange={(e) => handleDraftChange(e.target.value)}
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleSend()
                 }}
