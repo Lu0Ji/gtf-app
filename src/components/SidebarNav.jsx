@@ -1,6 +1,8 @@
 import { useLocation, useNavigate } from 'react-router-dom'
 import { NAV_TABS } from '../lib/navTabs.js'
 import { useUnreadMessages } from '../contexts/UnreadMessagesContext.jsx'
+import { useAuth } from '../contexts/AuthContext.jsx'
+import { fallbackAvatarFor } from '../lib/images.js'
 
 // Desktop only (md+) — the BottomNav equivalent once there's room for a
 // persistent left rail instead of a bottom bar (X/Threads/Instagram's own
@@ -11,6 +13,7 @@ export default function SidebarNav() {
   const location = useLocation()
   const navigate = useNavigate()
   const unreadCount = useUnreadMessages()
+  const { profile } = useAuth()
 
   return (
     <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col justify-between border-r border-border px-3 py-6 md:flex">
@@ -24,7 +27,46 @@ export default function SidebarNav() {
           </span>
         </div>
 
-        <nav className="mt-8 flex flex-col gap-1">
+        {profile && (
+          <button
+            onClick={() => navigate('/profil')}
+            className="mt-6 flex w-full items-center gap-2.5 rounded-theme border border-border bg-card p-3 text-left shadow-sm"
+          >
+            <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-muted">
+              <img
+                src={profile.avatar_url || fallbackAvatarFor(profile.id)}
+                alt={profile.display_name}
+                className="h-full w-full object-cover"
+              />
+            </div>
+            <div className="min-w-0 flex-1">
+              <p className="truncate text-sm font-bold text-foreground">{profile.display_name}</p>
+              <p className="truncate text-[11px] text-muted-foreground">@{profile.username}</p>
+            </div>
+          </button>
+        )}
+
+        {profile && (
+          <div className="mt-3 grid grid-cols-2 gap-2">
+            <div className="rounded-theme bg-muted px-3 py-2.5">
+              <p className="font-heading text-base font-extrabold tracking-[-0.03em] text-foreground">
+                {profile.points ?? 0}
+              </p>
+              <p className="text-[10px] font-medium text-muted-foreground">puan</p>
+            </div>
+            <div className="flex items-center gap-1.5 rounded-theme bg-muted px-3 py-2.5">
+              <iconify-icon icon="lucide:flame" class="text-base text-accent"></iconify-icon>
+              <div>
+                <p className="font-heading text-base font-extrabold leading-none tracking-[-0.03em] text-foreground">
+                  {profile.streak_count ?? 0}
+                </p>
+                <p className="mt-0.5 text-[10px] font-medium text-muted-foreground">gün seri</p>
+              </div>
+            </div>
+          </div>
+        )}
+
+        <nav className="mt-6 flex flex-col gap-1">
           {NAV_TABS.map((tab) => {
             const isActive = location.pathname === tab.path
             const showBadge = tab.path === '/mesajlar' && unreadCount > 0

@@ -775,7 +775,13 @@ export default function Anasayfa() {
           </div>
           <PredictionFeed category={activeCategory} />
         </section>
-        <SuggestedPeople />
+        {/* RightRail (AppShell) carries its own "Sana önerilen kişiler" at
+            xl+ — a standing widget beats these buried below a long feed,
+            so skip the duplicate there. FollowedGroups has no rail
+            equivalent yet, stays visible at every width. */}
+        <div className="xl:hidden">
+          <SuggestedPeople />
+        </div>
         <FollowedGroups />
       </main>
     </div>

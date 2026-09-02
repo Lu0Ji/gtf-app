@@ -4,22 +4,32 @@ import { supabase, queryWithGroupIdFallback } from '../lib/supabase.js'
 import { fallbackAvatarFor } from '../lib/images.js'
 import { formatTimeUntil } from '../lib/format.js'
 import { CATEGORY_META } from '../lib/categories.js'
+import { useAuth } from '../contexts/AuthContext.jsx'
+import { useToast } from '../contexts/ToastContext.jsx'
 
 // xl+ only (1280px) — a sidebar + a single ~600px column already fills a
 // laptop-width window reasonably; this is what fills a genuinely wide
 // desktop instead of leaving the whole right half of the screen blank.
 // Content mirrors what Keşfet/Liderlik Tablosu already compute, just the
-// top few of each as a standing widget, not a full duplicate screen.
+// top few of each as a standing widget, not a full duplicate screen. The
+// suggested-people widget specifically takes over from Anasayfa's own
+// "Sana önerilen kişiler" (hidden at this breakpoint, see Anasayfa.jsx) —
+// same idea, but a standing rail widget beats something buried below a
+// 15-card feed someone has to scroll past to ever see.
 export default function RightRail() {
   const navigate = useNavigate()
+  const { user } = useAuth()
+  const { showToast } = useToast()
   const [topRanked, setTopRanked] = useState([])
   const [openingSoon, setOpeningSoon] = useState([])
+  const [people, setPeople] = useState([])
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
+    if (!user) return
     let cancelled = false
     async function load() {
-      const [rankedRes, openingRes] = await Promise.all([
+      const [rankedRes, openingRes, followingRes, blockedRes] = await Promise.all([
         supabase.from('profiles').select('id, display_name, points, avatar_url').order('points', { ascending: false }).limit(3),
         queryWithGroupIdFallback((filterGroupId) => {
           let q = supabase
@@ -33,17 +43,41 @@ export default function RightRail() {
           if (filterGroupId) q = q.is('group_id', null)
           return q
         }),
+        supabase.from('follows').select('following_id').eq('follower_id', user.id),
+        supabase.rpc('blocked_user_ids'),
       ])
       if (cancelled) return
+
+      const excludeSet = new Set((followingRes.data || []).map((f) => f.following_id))
+      excludeSet.add(user.id)
+      for (const row of blockedRes.data || []) excludeSet.add(row.blocked_user_ids ?? row)
+      const { data: candidates } = await supabase
+        .from('profiles')
+        .select('id, display_name, username, avatar_url')
+        .order('created_at', { ascending: false })
+        .limit(20)
+      if (cancelled) return
+
       setTopRanked(rankedRes.data || [])
       setOpeningSoon(openingRes.data || [])
+      setPeople((candidates || []).filter((p) => !excludeSet.has(p.id)).slice(0, 3))
       setLoading(false)
     }
     load()
     return () => {
       cancelled = true
     }
-  }, [])
+  }, [user])
+
+  async function handleFollow(personId) {
+    const removed = people.find((p) => p.id === personId)
+    setPeople((prev) => prev.filter((p) => p.id !== personId))
+    const { error } = await supabase.from('follows').insert({ follower_id: user.id, following_id: personId })
+    if (error) {
+      setPeople((prev) => (removed ? [...prev, removed] : prev))
+      showToast('Takip edilemedi, tekrar dene.')
+    }
+  }
 
   if (loading) return <aside className="sticky top-6 hidden min-w-[300px] max-w-[420px] flex-1 xl:block" />
 
@@ -73,6 +107,40 @@ export default function RightRail() {
                 </button>
               )
             })}
+          </div>
+        </section>
+      )}
+
+      {people.length > 0 && (
+        <section className="rounded-theme border border-border bg-card p-4 shadow-sm">
+          <h2 className="text-sm font-bold text-foreground">Sana önerilen kişiler</h2>
+          <p className="mt-0.5 text-[11px] text-muted-foreground">GTF'e yeni katılanlar</p>
+          <div className="mt-3 flex flex-col gap-3">
+            {people.map((person) => (
+              <div key={person.id} className="flex items-center gap-2.5">
+                <button
+                  onClick={() => navigate(`/kullanici/${person.id}`)}
+                  className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
+                >
+                  <div className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-muted">
+                    <img
+                      src={person.avatar_url || fallbackAvatarFor(person.id)}
+                      alt={person.display_name}
+                      className="h-full w-full object-cover"
+                    />
+                  </div>
+                  <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-foreground">
+                    {person.display_name}
+                  </span>
+                </button>
+                <button
+                  onClick={() => handleFollow(person.id)}
+                  className="shrink-0 rounded-theme bg-secondary px-2.5 py-1.5 text-[11px] font-bold text-secondary-foreground"
+                >
+                  Takip et
+                </button>
+              </div>
+            ))}
           </div>
         </section>
       )}
