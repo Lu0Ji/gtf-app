@@ -1,8 +1,10 @@
-import { useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
+
+const CUSTOM_THEME_NAME = 'Özel renk'
 
 const THEME_COLORS = [
   { name: 'Uygulama varsayılanı', hex: null },
@@ -14,10 +16,30 @@ const THEME_COLORS = [
   { name: 'Koyu Bordo', hex: '#9D3B51' },
 ]
 
-function colorNameFor(hex) {
-  return THEME_COLORS.find((c) => c.hex === (hex || null))?.name || 'Uygulama varsayılanı'
+function normalizeHex(input) {
+  let v = (input || '').trim()
+  if (!v) return ''
+  if (!v.startsWith('#')) v = `#${v}`
+  if (/^#[0-9A-Fa-f]{3}$/.test(v)) {
+    v = `#${v[1]}${v[1]}${v[2]}${v[2]}${v[3]}${v[3]}`
+  }
+  return v
 }
 
+function isValidHex(v) {
+  return /^#[0-9A-Fa-f]{6}$/.test(v)
+}
+
+// A saved color that isn't one of the fixed presets means the person
+// already had a custom hex applied (from a previous visit here, or in
+// principle set some other way) — land them back in "Özel renk" mode with
+// their actual value prefilled instead of silently mislabeling it "varsayılan".
+function initialSelection(hex) {
+  if (!hex) return { theme: THEME_COLORS[0].name, customHex: '' }
+  const preset = THEME_COLORS.find((c) => c.hex && c.hex.toLowerCase() === hex.toLowerCase())
+  if (preset) return { theme: preset.name, customHex: '' }
+  return { theme: CUSTOM_THEME_NAME, customHex: hex }
+}
 
 export default function ProfilAyarlari() {
   const navigate = useNavigate()
@@ -25,7 +47,11 @@ export default function ProfilAyarlari() {
   const fileInputRef = useRef(null)
   const coverInputRef = useRef(null)
 
-  const [selectedTheme, setSelectedTheme] = useState(() => colorNameFor(profile?.profile_color))
+  const initialColor = initialSelection(profile?.profile_color)
+  const [selectedTheme, setSelectedTheme] = useState(initialColor.theme)
+  const [customHex, setCustomHex] = useState(initialColor.customHex || '#356A8A')
+  const customHexNormalized = normalizeHex(customHex)
+  const customHexValid = isValidHex(customHexNormalized)
   const [displayName, setDisplayName] = useState(profile?.display_name || '')
   const [username, setUsername] = useState(profile?.username || '')
   const [bio, setBio] = useState(profile?.bio || '')
@@ -39,6 +65,36 @@ export default function ProfilAyarlari() {
   const [uploading, setUploading] = useState(false)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+
+  // Live preview: reflect whatever's currently selected app-wide as you
+  // pick, before "Değişiklikleri kaydet" — same override AccentColor.jsx
+  // applies from the persisted profile, just anticipating the save. Every
+  // change (and unmount, e.g. hitting "Vazgeç") restores the real saved
+  // color first, so nothing lingers if the picks are never committed.
+  //
+  // The restore-on-cleanup step reads `profile.profile_color` through a
+  // ref, not the closure directly — this effect's own deps don't include
+  // `profile`, so a closure value would go stale the moment handleSave's
+  // refreshProfile() resolves (new color, same deps → effect doesn't
+  // re-run, but React still unmounts this screen a beat later on
+  // navigate(-1) and would run the OLD cleanup, clobbering the just-saved
+  // color with whatever it was before saving).
+  const profileColorRef = useRef(profile?.profile_color)
+  useEffect(() => {
+    profileColorRef.current = profile?.profile_color
+  }, [profile?.profile_color])
+
+  useEffect(() => {
+    const root = document.documentElement
+    const preset = THEME_COLORS.find((c) => c.name === selectedTheme)
+    const previewHex = selectedTheme === CUSTOM_THEME_NAME ? (customHexValid ? customHexNormalized : null) : preset?.hex ?? null
+    if (previewHex) root.style.setProperty('--color-primary', previewHex)
+    else root.style.removeProperty('--color-primary')
+    return () => {
+      if (profileColorRef.current) root.style.setProperty('--color-primary', profileColorRef.current)
+      else root.style.removeProperty('--color-primary')
+    }
+  }, [selectedTheme, customHexNormalized, customHexValid])
 
   function handlePickAvatar(e) {
     const file = e.target.files?.[0]
@@ -63,6 +119,10 @@ export default function ProfilAyarlari() {
 
   async function handleSave() {
     if (!user) return
+    if (selectedTheme === CUSTOM_THEME_NAME && !customHexValid) {
+      setError('Geçerli bir hex renk kodu gir (örn. #356A8A).')
+      return
+    }
     setSaving(true)
     setError('')
     try {
@@ -96,7 +156,10 @@ export default function ProfilAyarlari() {
       }
       setUploading(false)
 
-      const chosenColor = THEME_COLORS.find((c) => c.name === selectedTheme)
+      const finalColorHex =
+        selectedTheme === CUSTOM_THEME_NAME
+          ? customHexNormalized.toUpperCase()
+          : THEME_COLORS.find((c) => c.name === selectedTheme)?.hex ?? null
 
       const { error: updateError } = await supabase
         .from('profiles')
@@ -106,7 +169,7 @@ export default function ProfilAyarlari() {
           bio: bio.trim(),
           avatar_url: finalAvatarUrl,
           cover_photo_url: finalCoverUrl,
-          profile_color: chosenColor ? chosenColor.hex : null,
+          profile_color: finalColorHex,
         })
         .eq('id', user.id)
       if (updateError) throw updateError
@@ -265,7 +328,7 @@ export default function ProfilAyarlari() {
           </div>
 
           <div className="mt-4 overflow-hidden rounded-theme border border-border bg-card shadow-sm">
-            {THEME_COLORS.map((color, i) => {
+            {THEME_COLORS.map((color) => {
               const isSelected = color.name === selectedTheme
               const swatchStyle = color.hex
                 ? isSelected
@@ -278,9 +341,7 @@ export default function ProfilAyarlari() {
                 <button
                   key={color.name}
                   onClick={() => setSelectedTheme(color.name)}
-                  className={`flex w-full items-center gap-3 px-4 py-3.5 text-left ${
-                    i < THEME_COLORS.length - 1 ? 'border-b border-border' : ''
-                  }`}
+                  className="flex w-full items-center gap-3 border-b border-border px-4 py-3.5 text-left"
                 >
                   <span
                     className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-full ${
@@ -310,6 +371,72 @@ export default function ProfilAyarlari() {
                 </button>
               )
             })}
+
+            {/* Özel renk — same row pattern as the presets above, but tapping it
+                also expands an inline hex field instead of just selecting. The
+                swatch previews a conic "color wheel" until a color is actually
+                picked, then shows the live hex itself (or red once invalid). */}
+            <button
+              onClick={() => setSelectedTheme(CUSTOM_THEME_NAME)}
+              className="flex w-full items-center gap-3 px-4 py-3.5 text-left"
+            >
+              <span
+                className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white"
+                style={
+                  selectedTheme === CUSTOM_THEME_NAME
+                    ? {
+                        backgroundColor: customHexValid ? customHexNormalized : 'var(--color-destructive)',
+                        boxShadow: `0 0 0 2px var(--color-card), 0 0 0 4px ${customHexValid ? customHexNormalized : 'var(--color-destructive)'}`,
+                      }
+                    : { backgroundImage: 'conic-gradient(from 0deg, #e0554e, #e0a13f, #d8d94a, #4fae6c, #3f8fd6, #7a63c9, #c95aa8, #e0554e)' }
+                }
+              >
+                <iconify-icon
+                  icon={selectedTheme === CUSTOM_THEME_NAME ? (customHexValid ? 'lucide:check' : 'lucide:alert-triangle') : 'lucide:pipette'}
+                  class={selectedTheme === CUSTOM_THEME_NAME ? 'text-lg' : 'text-sm'}
+                ></iconify-icon>
+              </span>
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-bold">{CUSTOM_THEME_NAME}</span>
+                <span className="mt-0.5 block text-[10px] text-muted-foreground">Kendi hex kodunu gir</span>
+              </span>
+              {selectedTheme === CUSTOM_THEME_NAME ? (
+                <span className="flex items-center gap-1 text-[10px] font-bold text-primary">
+                  <iconify-icon icon="lucide:circle-check" class="text-sm"></iconify-icon>
+                  Seçili
+                </span>
+              ) : (
+                <iconify-icon icon="lucide:chevron-right" class="text-lg text-muted-foreground"></iconify-icon>
+              )}
+            </button>
+            {selectedTheme === CUSTOM_THEME_NAME && (
+              <div className="border-t border-border bg-muted/50 px-4 py-4">
+                <label className="mb-2 block text-xs font-bold text-foreground">Hex renk kodu</label>
+                <div className="flex items-center gap-2.5">
+                  <input
+                    type="color"
+                    aria-label="Renk seç"
+                    value={customHexValid ? customHexNormalized : '#356A8A'}
+                    onChange={(e) => setCustomHex(e.target.value)}
+                    className="h-11 w-11 shrink-0 cursor-pointer rounded-theme border border-border bg-input p-1"
+                  />
+                  <input
+                    value={customHex}
+                    onChange={(e) => setCustomHex(e.target.value)}
+                    placeholder="#356A8A"
+                    maxLength={7}
+                    className={`h-11 min-w-0 flex-1 rounded-theme border bg-input px-3.5 font-heading text-sm font-bold uppercase tracking-wide text-foreground shadow-sm outline-none ${
+                      customHexValid ? 'border-border' : 'border-destructive'
+                    }`}
+                  />
+                </div>
+                <p className={`mt-2 text-[11px] ${customHexValid ? 'text-muted-foreground' : 'font-semibold text-destructive'}`}>
+                  {customHexValid
+                    ? 'Renk çarkına dokun ya da 6 haneli hex kodunu elle yaz.'
+                    : 'Geçerli bir hex kod gir — örn. #356A8A ya da #35A.'}
+                </p>
+              </div>
+            )}
           </div>
         </section>
 
