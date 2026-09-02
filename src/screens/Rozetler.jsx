@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import { formatDateLong } from '../lib/format.js'
 import { TIERS, computeBadgeStats, evaluateBadges } from '../lib/badges.js'
+import BadgeMedallion from '../components/BadgeMedallion.jsx'
 
 const INITIAL_PER_TIER = 6
 
@@ -58,12 +59,7 @@ function BadgeCard({ badge, tier, earnedAt, showcased, editingShowcase, onToggle
         </button>
       )}
       <div className="flex items-start justify-between">
-        <span
-          className="flex h-9 w-9 items-center justify-center rounded-theme text-lg"
-          style={{ background: badge.earned ? tier.tint : 'var(--color-muted)', color: badge.earned ? tier.ink : 'var(--color-muted-foreground)' }}
-        >
-          <iconify-icon icon={badge.icon}></iconify-icon>
-        </span>
+        <BadgeMedallion icon={badge.icon} tier={tier} earned={badge.earned} size="sm" />
         {!editingShowcase && (
           <iconify-icon
             icon={badge.earned ? 'lucide:check-circle-2' : 'lucide:lock-keyhole'}
@@ -334,12 +330,7 @@ export default function Rozetler() {
                     return (
                       <article key={badge.slug} className="min-w-[202px] rounded-theme border border-border bg-card p-4 shadow-sm">
                         <div className="flex items-start justify-between">
-                          <div
-                            className="flex h-11 w-11 items-center justify-center rounded-theme"
-                            style={{ background: tier.tint, color: tier.ink }}
-                          >
-                            <iconify-icon icon={badge.icon} class="text-xl"></iconify-icon>
-                          </div>
+                          <BadgeMedallion icon={badge.icon} tier={tier} earned size="md" />
                           <button aria-label="Vitrinden kaldır" onClick={() => toggleShowcase(badge.slug)} className="text-muted-foreground">
                             <iconify-icon icon="lucide:x" class="text-base"></iconify-icon>
                           </button>

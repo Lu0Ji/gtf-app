@@ -1,5 +1,6 @@
 import { useNavigate } from 'react-router-dom'
 import { BADGES, TIERS } from '../lib/badges.js'
+import BadgeMedallion from './BadgeMedallion.jsx'
 
 // Glamorous badge showcase for a profile header — Rozetler.jsx already
 // guards `showcase_badges` so only a badge the owner has actually earned
@@ -34,12 +35,7 @@ export default function BadgeShowcase({ slugs, totalEarned, isOwn }) {
               className="flex flex-col items-center gap-1.5 rounded-theme p-2.5"
               style={{ background: TIERS.find((t) => t.key === badge.tier)?.tint }}
             >
-              <span
-                className="flex h-12 w-12 items-center justify-center rounded-full bg-card text-2xl shadow-sm ring-2"
-                style={{ color: TIERS.find((t) => t.key === badge.tier)?.ink, '--tw-ring-color': TIERS.find((t) => t.key === badge.tier)?.ink }}
-              >
-                <iconify-icon icon={badge.icon}></iconify-icon>
-              </span>
+              <BadgeMedallion icon={badge.icon} tier={TIERS.find((t) => t.key === badge.tier)} earned size="md" />
               <span
                 className="line-clamp-2 text-center text-[10px] font-bold leading-tight"
                 style={{ color: TIERS.find((t) => t.key === badge.tier)?.ink }}

@@ -18,12 +18,12 @@ const zeroCounts = {
 }
 
 describe('badge catalog', () => {
-  it('has exactly 120 badges, 30 per tier, no duplicate slugs', () => {
-    expect(BADGES).toHaveLength(120)
+  it('has exactly 160 badges, 40 per tier, no duplicate slugs', () => {
+    expect(BADGES).toHaveLength(160)
     const bySlug = new Set(BADGES.map((b) => b.slug))
-    expect(bySlug.size).toBe(120)
+    expect(bySlug.size).toBe(160)
     for (const tier of ['baslangic', 'istikrar', 'ustalik', 'efsane']) {
-      expect(BADGES.filter((b) => b.tier === tier)).toHaveLength(30)
+      expect(BADGES.filter((b) => b.tier === tier)).toHaveLength(40)
     }
   })
 

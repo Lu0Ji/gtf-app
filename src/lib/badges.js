@@ -48,6 +48,16 @@ export const BADGES = [
   { slug: 'gunluk-kayit', tier: 'baslangic', icon: 'lucide:sun', title: 'Günlük Kayıt', desc: '2 gün üst üste aktif ol.', metric: 'streakCount', target: 2 },
   { slug: 'acik-sayfa', tier: 'baslangic', icon: 'lucide:book-open', title: 'Açık Sayfa', desc: 'İkinci zaman kapsülünü oluştur.', metric: 'capsulesCreated', target: 2 },
   { slug: 'kucuk-adim', tier: 'baslangic', icon: 'lucide:footprints', title: 'Küçük Adım', desc: 'Hesabınla 7 gün geçir.', metric: 'accountAgeDays', target: 7 },
+  { slug: 'ilk-arkadas', tier: 'baslangic', icon: 'lucide:user-round-plus', title: 'İlk Arkadaş', desc: '5 kişiyi takip et.', metric: 'following', target: 5 },
+  { slug: 'goz-atma', tier: 'baslangic', icon: 'lucide:scroll', title: 'Göz Atma', desc: '5 tahmini kaydet.', metric: 'savesCount', target: 5 },
+  { slug: 'goruntu-notu', tier: 'baslangic', icon: 'lucide:camera', title: 'Görüntü Notu', desc: '3 tahmine görsel veya video ekle.', metric: 'mediaUsedCount', target: 3 },
+  { slug: 'hizli-cikis', tier: 'baslangic', icon: 'lucide:rocket', title: 'Hızlı Çıkış', desc: '3 gün içinde açılacak 3 tahmin oluştur.', metric: 'shortTermCount', target: 3 },
+  { slug: 'takim-ruhu', tier: 'baslangic', icon: 'lucide:handshake', title: 'Takım Ruhu', desc: 'Gruplarda 2 tahmin paylaş.', metric: 'groupPredictionsCount', target: 2 },
+  { slug: 'uc-halka', tier: 'baslangic', icon: 'lucide:link', title: 'Üç Halka', desc: '3 gruba katıl.', metric: 'groupsJoined', target: 3 },
+  { slug: 'geri-donus', tier: 'baslangic', icon: 'lucide:corner-up-left', title: 'Geri Dönüş', desc: 'Tahminlerine 2 yorum gelsin.', metric: 'commentsReceived', target: 2 },
+  { slug: 'davetiye', tier: 'baslangic', icon: 'lucide:mail-plus', title: 'Davetiye', desc: "GTF'e 1 kişi davet et.", metric: 'referralsCount', target: 1 },
+  { slug: 'genis-cevre', tier: 'baslangic', icon: 'lucide:users-round', title: 'Geniş Çevre', desc: '10 kişiyi takip et.', metric: 'following', target: 10 },
+  { slug: 'ay-isigi', tier: 'baslangic', icon: 'lucide:moon', title: 'Ay Işığı', desc: 'Hesabınla 30 gün geçir.', metric: 'accountAgeDays', target: 30 },
 
   // ── İSTİKRAR ───────────────────────────────────────────────────────
   { slug: 'duzenli-notlar', tier: 'istikrar', icon: 'lucide:notebook-pen', title: 'Düzenli Notlar', desc: '4 hafta üst üste aktif ol.', metric: 'streakCount', target: 28 },
@@ -80,6 +90,16 @@ export const BADGES = [
   { slug: 'ilk-sezon', tier: 'istikrar', icon: 'lucide:leaf', title: 'İlk Sezon', desc: 'Hesabınla 90 gün geçir.', metric: 'accountAgeDays', target: 90 },
   { slug: 'mevsim-notu', tier: 'istikrar', icon: 'lucide:cloud-sun', title: 'Mevsim Notu', desc: 'Hesabınla 180 gün geçir.', metric: 'accountAgeDays', target: 180 },
   { slug: 'yilin-baslangici', tier: 'istikrar', icon: 'lucide:flame', title: 'Yılın Başlangıcı', desc: '60 gün üst üste aktif ol.', metric: 'streakCount', target: 60 },
+  { slug: 'begeni-ustasi', tier: 'istikrar', icon: 'lucide:heart', title: 'Beğeni Ustası', desc: '15 tahmini beğen.', metric: 'likesGiven', target: 15 },
+  { slug: 'geri-bildirim', tier: 'istikrar', icon: 'lucide:message-square-heart', title: 'Geri Bildirim', desc: 'Tahminlerine 10 yorum gelsin.', metric: 'commentsReceived', target: 10 },
+  { slug: 'takip-agi', tier: 'istikrar', icon: 'lucide:network', title: 'Takip Ağı', desc: '25 kişiyi takip et.', metric: 'following', target: 25 },
+  { slug: 'sekiz-gozlem', tier: 'istikrar', icon: 'lucide:folder-open', title: 'Sekiz Gözlem', desc: '20 tahmin kaydet.', metric: 'savesCount', target: 20 },
+  { slug: 'genis-alan', tier: 'istikrar', icon: 'lucide:grid-3x3', title: 'Geniş Alan', desc: '7 farklı kategoride tahmin yaz.', metric: 'distinctCategories', target: 7 },
+  { slug: 'topluluk-sesi', tier: 'istikrar', icon: 'lucide:megaphone', title: 'Topluluk Sesi', desc: 'Gruplarda 7 tahmin paylaş.', metric: 'groupPredictionsCount', target: 7 },
+  { slug: 'orta-vade', tier: 'istikrar', icon: 'lucide:calendar-clock', title: 'Orta Vade', desc: '90 gün sonrası için 3 tahmin oluştur.', metric: 'longAheadCount', target: 3 },
+  { slug: 'ikinci-topluluk', tier: 'istikrar', icon: 'lucide:layers-2', title: 'İkinci Topluluk', desc: 'İkinci grubunu kur.', metric: 'groupsCreated', target: 2 },
+  { slug: 'genis-kanit', tier: 'istikrar', icon: 'lucide:file-search', title: 'Geniş Kanıt', desc: '25 sonucu kaynaklı doğrula.', metric: 'evidenceUsedCount', target: 25 },
+  { slug: 'yaz-kis', tier: 'istikrar', icon: 'lucide:sun-snow', title: 'Yaz Kış', desc: 'Hesabınla 270 gün geçir.', metric: 'accountAgeDays', target: 270 },
 
   // ── USTALIK ────────────────────────────────────────────────────────
   { slug: 'ucte-uc', tier: 'ustalik', icon: 'lucide:badge-check', title: 'Üçte Üç', desc: 'Arka arkaya 3 tahmini doğrula.', metric: 'bestStreak', target: 3 },
@@ -112,6 +132,16 @@ export const BADGES = [
   { slug: 'ufuk-bekcisi', tier: 'ustalik', icon: 'lucide:eye', title: 'Ufuk Bekçisi', desc: '90 gün sonrası için 5 tahmin oluştur.', metric: 'longAheadCount', target: 5 },
   { slug: 'bilgi-koprusu', tier: 'ustalik', icon: 'lucide:link-2', title: 'Bilgi Köprüsü', desc: '5 kez bir yorumda bahsedilmiş ol.', metric: 'mentionsReceived', target: 5 },
   { slug: 'kapsamli-not', tier: 'ustalik', icon: 'lucide:file-check-2', title: 'Kapsamlı Not', desc: '30 sonucu kaynaklı doğrula.', metric: 'evidenceUsedCount', target: 30 },
+  { slug: 'ilk-onay', tier: 'ustalik', icon: 'lucide:badge-check', title: 'İlk Onay', desc: 'En az 10 sonuçta %65+ doğruluk.', metric: 'predictionsCorrect', target: 10, minAccuracy: 65 },
+  { slug: 'iyi-cizgi', tier: 'ustalik', icon: 'lucide:trending-up', title: 'İyi Çizgi', desc: 'En az 35 sonuçta %75+ doğruluk.', metric: 'predictionsCorrect', target: 35, minAccuracy: 75 },
+  { slug: 'cift-haneli', tier: 'ustalik', icon: 'lucide:hash', title: 'Çift Haneli', desc: '60 doğru sonuç kaydet.', metric: 'predictionsCorrect', target: 60 },
+  { slug: 'genis-yelpaze', tier: 'ustalik', icon: 'lucide:palette', title: 'Geniş Yelpaze', desc: '9 kategoride isabet kaydet.', metric: 'distinctCategoriesCorrect', target: 9 },
+  { slug: 'derin-iz', tier: 'ustalik', icon: 'lucide:footprints', title: 'Derin İz', desc: 'Bir kategoride 30 isabet kaydet.', metric: 'maxCategoryCorrect', target: 30 },
+  { slug: 'guclu-seri', tier: 'ustalik', icon: 'lucide:flame', title: 'Güçlü Seri', desc: 'Arka arkaya 10 tahmini doğrula.', metric: 'bestStreak', target: 10 },
+  { slug: 'genis-agi', tier: 'ustalik', icon: 'lucide:heart-handshake', title: 'Geniş Ağı', desc: '50 tahmini beğen.', metric: 'likesGiven', target: 50 },
+  { slug: 'kanit-ustasi', tier: 'ustalik', icon: 'lucide:scale', title: 'Kanıt Ustası', desc: '40 sonucu kaynaklı doğrula.', metric: 'evidenceUsedCount', target: 40 },
+  { slug: 'takipci-halkasi', tier: 'ustalik', icon: 'lucide:users', title: 'Takipçi Halkası', desc: '50 takipçiye ulaş.', metric: 'followers', target: 50 },
+  { slug: 'bahsedilen', tier: 'ustalik', icon: 'lucide:at-sign', title: 'Bahsedilen', desc: '10 kez bir yorumda bahsedilmiş ol.', metric: 'mentionsReceived', target: 10 },
 
   // ── EFSANE ─────────────────────────────────────────────────────────
   { slug: 'zamanin-tanigi', tier: 'efsane', icon: 'lucide:clock-3', title: 'Zamanın Tanığı', desc: '1 yıl açık kalan tahmini doğrula.', metric: 'longestOpenDays', target: 365 },
@@ -144,6 +174,16 @@ export const BADGES = [
   { slug: 'ustalik-defteri', tier: 'efsane', icon: 'lucide:flame', title: 'Ustalık Defteri', desc: 'Arka arkaya 15 tahmini doğrula.', metric: 'bestStreak', target: 15 },
   { slug: 'sonsuz-takvim', tier: 'efsane', icon: 'lucide:infinity', title: 'Sonsuz Takvim', desc: '730 gün üst üste aktif ol.', metric: 'streakCount', target: 730 },
   { slug: 'kayit-bekcisi', tier: 'efsane', icon: 'lucide:shield', title: 'Kayıt Bekçisi', desc: '10 itiraz kaydı oluştur.', metric: 'disputesRaised', target: 10 },
+  { slug: 'zirve-oran', tier: 'efsane', icon: 'lucide:mountain-snow', title: 'Zirve Oran', desc: 'En az 55 sonuçta %92+ doğruluk.', metric: 'predictionsCorrect', target: 55, minAccuracy: 92 },
+  { slug: 'iki-yuz-kayit', tier: 'efsane', icon: 'lucide:layers', title: 'İki Yüz Kayıt', desc: '200 tahmin oluştur.', metric: 'predictionsCreated', target: 200 },
+  { slug: 'uc-yillik-sadakat', tier: 'efsane', icon: 'lucide:hourglass', title: 'Üç Yıllık Sadakat', desc: 'Hesabınla 3 yıl geçir.', metric: 'accountAgeDays', target: 1095 },
+  { slug: 'devasa-takipci', tier: 'efsane', icon: 'lucide:crown', title: 'Devasa Takipçi', desc: '1000 takipçiye ulaş.', metric: 'followers', target: 1000 },
+  { slug: 'buyuk-elci', tier: 'efsane', icon: 'lucide:send', title: 'Büyük Elçi', desc: "20 kişiyi GTF'e davet et.", metric: 'referralsCount', target: 20 },
+  { slug: 'sarsilmaz-seri', tier: 'efsane', icon: 'lucide:flame-kindling', title: 'Sarsılmaz Seri', desc: 'Arka arkaya 20 tahmini doğrula.', metric: 'bestStreak', target: 20 },
+  { slug: 'genis-begeni', tier: 'efsane', icon: 'lucide:heart', title: 'Geniş Beğeni', desc: 'Tahminlerine 200 beğeni topla.', metric: 'likesReceived', target: 200 },
+  { slug: 'derin-uzman', tier: 'efsane', icon: 'lucide:gem', title: 'Derin Uzman', desc: 'Bir kategoride 40 isabet kaydet.', metric: 'maxCategoryCorrect', target: 40 },
+  { slug: 'yuz-yorum', tier: 'efsane', icon: 'lucide:messages-square', title: 'Yüz Yorum', desc: 'Tahminlerine 50 yorum gelsin.', metric: 'commentsReceived', target: 50 },
+  { slug: 'cok-sesli-kurucu', tier: 'efsane', icon: 'lucide:building-2', title: 'Çok Sesli Kurucu', desc: '8 grup kur.', metric: 'groupsCreated', target: 8 },
 ]
 
 const MS_PER_DAY = 86400000
