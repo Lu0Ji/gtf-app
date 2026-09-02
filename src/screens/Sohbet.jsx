@@ -5,8 +5,31 @@ import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import { useOnlineUsers } from '../contexts/PresenceContext.jsx'
-import { formatTime } from '../lib/format.js'
+import { formatTime, formatDateLong } from '../lib/format.js'
 
+// Consecutive messages from the same person, sent within this long a gap,
+// render as one visual "run" (single avatar, tight spacing, one timestamp)
+// instead of a full bubble-plus-avatar-plus-timestamp block per message —
+// the single most recognizable thing separating a real chat app from a
+// bare message list.
+const GROUP_GAP_MS = 5 * 60 * 1000
+// How long a single "typing" broadcast stays valid before the indicator
+// auto-hides — covers both a partner who stopped typing without sending
+// anything, and one whose device dropped the connection mid-type.
+const TYPING_TIMEOUT_MS = 3000
+
+function dayKey(dateStr) {
+  return new Date(dateStr).toDateString()
+}
+
+function dayLabel(dateStr) {
+  const today = new Date()
+  const yesterday = new Date()
+  yesterday.setDate(today.getDate() - 1)
+  if (dayKey(dateStr) === dayKey(today)) return 'Bugün'
+  if (dayKey(dateStr) === dayKey(yesterday)) return 'Dün'
+  return formatDateLong(dateStr)
+}
 
 export default function Sohbet() {
   const navigate = useNavigate()
@@ -22,7 +45,11 @@ export default function Sohbet() {
   const [loading, setLoading] = useState(true)
   const [sending, setSending] = useState(false)
   const [blocked, setBlocked] = useState(false)
+  const [partnerTyping, setPartnerTyping] = useState(false)
   const bottomRef = useRef(null)
+  const channelRef = useRef(null)
+  const typingSentAtRef = useRef(0)
+  const partnerTypingTimeoutRef = useRef(null)
 
   // Arriving from a push notification deep link means there's no navigation
   // state to read the chat partner from — only ?userId=. Fetch the profile
@@ -83,28 +110,68 @@ export default function Sohbet() {
     }
     load()
 
+    // Canonical name (ids sorted) so both sides of the conversation join
+    // the same realtime topic — required for broadcast (typing) to reach
+    // the other person at all; postgres_changes doesn't care about the
+    // name, but sharing it here too keeps the two concerns on one channel.
+    const channelName = `chat-${[user.id, partner.id].sort().join('-')}`
     const channel = supabase
-      .channel(`chat-${user.id}-${partner.id}`)
+      .channel(channelName)
       .on(
         'postgres_changes',
         { event: 'INSERT', schema: 'public', table: 'messages', filter: `recipient_id=eq.${user.id}` },
         (payload) => {
           if (payload.new.sender_id === partner.id) {
             setMessages((prev) => [...prev, payload.new])
+            setPartnerTyping(false)
+            clearTimeout(partnerTypingTimeoutRef.current)
           }
         }
       )
+      .on(
+        // Flips a sent message's checkmark to "read" the moment the partner
+        // opens the chat — filtered to messages I sent (RLS already scopes
+        // this to my own rows); cross-conversation noise from other DMs is
+        // dropped by the recipient_id check below.
+        'postgres_changes',
+        { event: 'UPDATE', schema: 'public', table: 'messages', filter: `sender_id=eq.${user.id}` },
+        (payload) => {
+          if (payload.new.recipient_id !== partner.id) return
+          setMessages((prev) => prev.map((m) => (m.id === payload.new.id ? payload.new : m)))
+        }
+      )
+      .on('broadcast', { event: 'typing' }, ({ payload }) => {
+        if (payload?.userId !== partner.id) return
+        setPartnerTyping(true)
+        clearTimeout(partnerTypingTimeoutRef.current)
+        partnerTypingTimeoutRef.current = setTimeout(() => setPartnerTyping(false), TYPING_TIMEOUT_MS)
+      })
       .subscribe()
+    channelRef.current = channel
 
     return () => {
       cancelled = true
+      clearTimeout(partnerTypingTimeoutRef.current)
+      channelRef.current = null
       supabase.removeChannel(channel)
     }
   }, [user, partner])
 
   useEffect(() => {
     bottomRef.current?.scrollIntoView({ behavior: 'smooth' })
-  }, [messages])
+  }, [messages, partnerTyping])
+
+  function handleDraftChange(value) {
+    setDraft(value)
+    const now = Date.now()
+    // Throttled, not per-keystroke — a "typing" broadcast every 2s while
+    // someone's actively typing is plenty to keep the indicator alive on
+    // the other end without flooding the channel.
+    if (value.trim() && now - typingSentAtRef.current > 2000) {
+      typingSentAtRef.current = now
+      channelRef.current?.send({ type: 'broadcast', event: 'typing', payload: { userId: user.id } })
+    }
+  }
 
   async function handleSend() {
     const content = draft.trim()
@@ -117,6 +184,7 @@ export default function Sohbet() {
       recipient_id: partner.id,
       content,
       created_at: new Date().toISOString(),
+      read_at: null,
     }
     setMessages((prev) => [...prev, optimistic])
 
@@ -142,6 +210,8 @@ export default function Sohbet() {
   }
 
   if (!partner) return null
+
+  const lastMineIndex = messages.reduce((acc, m, i) => (m.sender_id === user.id ? i : acc), -1)
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-body">
@@ -173,7 +243,13 @@ export default function Sohbet() {
               <div className="min-w-0">
                 <p className="truncate font-heading text-sm font-extrabold tracking-tight">{partner.display_name}</p>
                 <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
-                  {partnerOnline ? 'Çevrimiçi' : `@${partner.username}`}
+                  {partnerTyping ? (
+                    <span className="font-semibold text-primary">yazıyor…</span>
+                  ) : partnerOnline ? (
+                    'Çevrimiçi'
+                  ) : (
+                    `@${partner.username}`
+                  )}
                 </p>
               </div>
             </button>
@@ -187,40 +263,94 @@ export default function Sohbet() {
             <p className="text-center text-xs text-muted-foreground">Yükleniyor…</p>
           ) : messages.length === 0 ? (
             <p className="text-center text-xs text-muted-foreground">
-              Henüz mesaj yok. İlk mesajı sen gönder.
+              Henüz mesaj yok. İlk mesajı sen göndererek sohbeti başlat.
             </p>
           ) : (
-            <section className="space-y-5" aria-label="Sohbet mesajları">
-              {messages.map((m) => {
+            <section aria-label="Sohbet mesajları">
+              {messages.map((m, i) => {
+                const prev = messages[i - 1]
+                const next = messages[i + 1]
                 const isMine = m.sender_id === user.id
+                const newDay = !prev || dayKey(m.created_at) !== dayKey(prev.created_at)
+                const isFirstInGroup =
+                  newDay ||
+                  prev.sender_id !== m.sender_id ||
+                  new Date(m.created_at) - new Date(prev.created_at) > GROUP_GAP_MS
+                const isLastInGroup =
+                  !next ||
+                  dayKey(next.created_at) !== dayKey(m.created_at) ||
+                  next.sender_id !== m.sender_id ||
+                  new Date(next.created_at) - new Date(m.created_at) > GROUP_GAP_MS
+                const tailRadius = isLastInGroup ? (isMine ? 'rounded-br-sm' : 'rounded-bl-sm') : ''
+
                 return (
-                  <div key={m.id} className={`flex ${isMine ? 'justify-end' : 'items-end gap-2.5'}`}>
-                    {!isMine && (
-                      <div className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-muted">
-                        <img
-                          src={partner.avatar_url || fallbackAvatarFor(partner.id)}
-                          alt={partner.display_name}
-                          className="h-full w-full object-cover"
-                        />
+                  <div key={m.id}>
+                    {newDay && (
+                      <div className="my-4 flex items-center justify-center">
+                        <span className="rounded-full bg-muted px-3 py-1 text-[10px] font-bold text-muted-foreground">
+                          {dayLabel(m.created_at)}
+                        </span>
                       </div>
                     )}
-                    <div className={isMine ? 'max-w-[286px]' : 'max-w-[268px]'}>
-                      <div
-                        className={
-                          isMine
-                            ? 'rounded-theme rounded-br-sm bg-primary px-4 py-3 text-primary-foreground shadow-sm'
-                            : 'rounded-theme rounded-bl-sm border border-border bg-card px-4 py-3 shadow-sm'
-                        }
-                      >
-                        <p className="text-sm leading-5">{m.content}</p>
+                    <div
+                      className={`flex ${isMine ? 'justify-end' : 'items-end gap-2.5'} ${isFirstInGroup ? 'mt-4' : 'mt-1'}`}
+                    >
+                      {!isMine && (
+                        <div className="h-8 w-8 shrink-0 overflow-hidden rounded-full">
+                          {isLastInGroup && (
+                            <img
+                              src={partner.avatar_url || fallbackAvatarFor(partner.id)}
+                              alt={partner.display_name}
+                              className="h-full w-full rounded-full bg-muted object-cover"
+                            />
+                          )}
+                        </div>
+                      )}
+                      <div className={isMine ? 'max-w-[286px]' : 'max-w-[268px]'}>
+                        <div
+                          className={
+                            isMine
+                              ? `rounded-theme ${tailRadius} bg-primary px-4 py-3 text-primary-foreground shadow-sm`
+                              : `rounded-theme ${tailRadius} border border-border bg-card px-4 py-3 shadow-sm`
+                          }
+                        >
+                          <p className="text-sm leading-5">{m.content}</p>
+                        </div>
+                        {isLastInGroup && (
+                          <p
+                            className={`mt-1.5 flex items-center gap-1 px-1 text-[10px] text-muted-foreground ${isMine ? 'justify-end' : ''}`}
+                          >
+                            {formatTime(m.created_at)}
+                            {isMine && i === lastMineIndex && (
+                              <iconify-icon
+                                icon={m.read_at ? 'lucide:check-check' : 'lucide:check'}
+                                class={`text-xs ${m.read_at ? 'text-primary' : ''}`}
+                              ></iconify-icon>
+                            )}
+                          </p>
+                        )}
                       </div>
-                      <p className={`mt-1.5 px-1 text-[10px] text-muted-foreground ${isMine ? 'text-right' : ''}`}>
-                        {formatTime(m.created_at)}
-                      </p>
                     </div>
                   </div>
                 )
               })}
+
+              {partnerTyping && (
+                <div className="mt-4 flex items-end gap-2.5">
+                  <div className="h-8 w-8 shrink-0 overflow-hidden rounded-full">
+                    <img
+                      src={partner.avatar_url || fallbackAvatarFor(partner.id)}
+                      alt={partner.display_name}
+                      className="h-full w-full rounded-full bg-muted object-cover"
+                    />
+                  </div>
+                  <div className="flex items-center gap-1 rounded-theme rounded-bl-sm border border-border bg-card px-4 py-3.5 shadow-sm">
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:0ms]" />
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:150ms]" />
+                    <span className="h-1.5 w-1.5 animate-bounce rounded-full bg-muted-foreground [animation-delay:300ms]" />
+                  </div>
+                </div>
+              )}
               <div ref={bottomRef} />
             </section>
           )}
@@ -237,7 +367,7 @@ export default function Sohbet() {
               <div className="flex h-12 min-w-0 flex-1 items-center rounded-theme border border-border bg-input px-4 shadow-sm">
                 <input
                   value={draft}
-                  onChange={(e) => setDraft(e.target.value)}
+                  onChange={(e) => handleDraftChange(e.target.value)}
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleSend()
                   }}
