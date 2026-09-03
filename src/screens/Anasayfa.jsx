@@ -8,6 +8,7 @@ import { useUserSettings } from '../hooks/useUserSettings.js'
 import { formatDateLong, formatDateTimeLong, timeAgo } from '../lib/format.js'
 import { CATEGORIES as PREDICTION_CATEGORIES } from '../lib/categories.js'
 import DifficultyChip from '../components/DifficultyChip.jsx'
+import StreakFlame from '../components/StreakFlame.jsx'
 import { rankFeed } from '../lib/feedRanking.js'
 
 const CATEGORIES = ['Tümü', ...PREDICTION_CATEGORIES]
@@ -37,7 +38,7 @@ function Header() {
               className="flex items-center gap-1 rounded-full bg-accent/10 px-2.5 py-1.5 text-xs font-bold text-accent"
               title={`${profile.streak_count} gündür üst üste aktifsin`}
             >
-              <iconify-icon icon="lucide:flame" class="text-sm"></iconify-icon>
+              <StreakFlame count={profile.streak_count} size="sm" />
               {profile.streak_count}
             </span>
           )}

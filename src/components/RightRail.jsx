@@ -79,28 +79,33 @@ export default function RightRail() {
     }
   }
 
-  if (loading) return <aside className="sticky top-6 hidden min-w-[300px] max-w-[420px] flex-1 xl:block" />
+  if (loading) return <aside className="sticky top-6 hidden min-w-[320px] max-w-[440px] flex-1 xl:block" />
 
   return (
-    <aside className="sticky top-6 hidden h-fit min-w-[300px] max-w-[420px] flex-1 flex-col gap-5 xl:flex">
+    <aside className="sticky top-6 hidden h-fit min-w-[320px] max-w-[440px] flex-1 flex-col gap-6 xl:flex">
       {openingSoon.length > 0 && (
-        <section className="rounded-theme border border-border bg-card p-4 shadow-sm">
-          <h2 className="text-sm font-bold text-foreground">Yaklaşan açılışlar</h2>
-          <div className="mt-3 flex flex-col gap-3">
+        <section className="rounded-theme border border-border bg-card p-5 shadow-sm">
+          <div className="flex items-center gap-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-theme bg-secondary text-primary">
+              <iconify-icon icon="lucide:hourglass" class="text-base"></iconify-icon>
+            </span>
+            <h2 className="text-base font-bold tracking-[-0.04em] text-foreground">Yaklaşan açılışlar</h2>
+          </div>
+          <div className="mt-4 flex flex-col gap-4">
             {openingSoon.map((p) => {
               const meta = CATEGORY_META[p.category] || { icon: 'lucide:tag', label: p.category }
               return (
                 <button
                   key={p.id}
                   onClick={() => navigate('/tahmin-kaydi', { state: { prediction: p } })}
-                  className="text-left"
+                  className="rounded-theme text-left transition-colors duration-150 active:bg-muted"
                 >
-                  <div className="flex items-center gap-1.5 text-[10px] font-bold text-accent">
+                  <div className="flex items-center gap-1.5 text-[11px] font-bold text-accent">
                     <iconify-icon icon="lucide:hourglass" class="text-xs"></iconify-icon>
                     {formatTimeUntil(p.event_date)}
                   </div>
-                  <p className="mt-1 truncate text-[13px] font-semibold leading-5 text-foreground">{p.title}</p>
-                  <span className="mt-1 inline-flex items-center gap-1 rounded-full bg-muted px-2 py-0.5 text-[10px] font-bold text-primary">
+                  <p className="mt-1.5 truncate text-sm font-semibold leading-5 text-foreground">{p.title}</p>
+                  <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-[10px] font-bold text-primary">
                     <iconify-icon icon={meta.icon} class="text-[10px]"></iconify-icon>
                     {meta.label}
                   </span>
@@ -112,30 +117,37 @@ export default function RightRail() {
       )}
 
       {people.length > 0 && (
-        <section className="rounded-theme border border-border bg-card p-4 shadow-sm">
-          <h2 className="text-sm font-bold text-foreground">Sana önerilen kişiler</h2>
-          <p className="mt-0.5 text-[11px] text-muted-foreground">GTF'e yeni katılanlar</p>
-          <div className="mt-3 flex flex-col gap-3">
+        <section className="rounded-theme border border-border bg-card p-5 shadow-sm">
+          <div className="flex items-center gap-2">
+            <span className="flex h-8 w-8 items-center justify-center rounded-theme bg-secondary text-primary">
+              <iconify-icon icon="lucide:user-plus" class="text-base"></iconify-icon>
+            </span>
+            <div>
+              <h2 className="text-base font-bold tracking-[-0.04em] text-foreground">Sana önerilen kişiler</h2>
+              <p className="text-[11px] text-muted-foreground">GTF'e yeni katılanlar</p>
+            </div>
+          </div>
+          <div className="mt-4 flex flex-col gap-3.5">
             {people.map((person) => (
-              <div key={person.id} className="flex items-center gap-2.5">
+              <div key={person.id} className="flex items-center gap-3">
                 <button
                   onClick={() => navigate(`/kullanici/${person.id}`)}
-                  className="flex min-w-0 flex-1 items-center gap-2.5 text-left"
+                  className="flex min-w-0 flex-1 items-center gap-3 text-left"
                 >
-                  <div className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-muted">
+                  <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-muted">
                     <img
                       src={person.avatar_url || fallbackAvatarFor(person.id)}
                       alt={person.display_name}
                       className="h-full w-full object-cover"
                     />
                   </div>
-                  <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-foreground">
+                  <span className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">
                     {person.display_name}
                   </span>
                 </button>
                 <button
                   onClick={() => handleFollow(person.id)}
-                  className="shrink-0 rounded-theme bg-secondary px-2.5 py-1.5 text-[11px] font-bold text-secondary-foreground"
+                  className="shrink-0 rounded-theme bg-secondary px-3 py-2 text-xs font-bold text-secondary-foreground transition-transform duration-150 active:scale-95"
                 >
                   Takip et
                 </button>
@@ -146,32 +158,39 @@ export default function RightRail() {
       )}
 
       {topRanked.length > 0 && (
-        <section className="rounded-theme border border-border bg-card p-4 shadow-sm">
+        <section className="rounded-theme border border-border bg-card p-5 shadow-sm">
           <div className="flex items-center justify-between">
-            <h2 className="text-sm font-bold text-foreground">Liderlik tablosu</h2>
-            <button onClick={() => navigate('/liderlik-tablosu')} className="text-[11px] font-bold text-primary">
+            <div className="flex items-center gap-2">
+              <span className="flex h-8 w-8 items-center justify-center rounded-theme bg-secondary text-primary">
+                <iconify-icon icon="lucide:medal" class="text-base"></iconify-icon>
+              </span>
+              <h2 className="text-base font-bold tracking-[-0.04em] text-foreground">Liderlik tablosu</h2>
+            </div>
+            <button onClick={() => navigate('/liderlik-tablosu')} className="text-xs font-bold text-primary">
               Tümü
             </button>
           </div>
-          <div className="mt-3 flex flex-col gap-3">
+          <div className="mt-4 flex flex-col gap-3.5">
             {topRanked.map((p, i) => (
               <button
                 key={p.id}
                 onClick={() => navigate(`/kullanici/${p.id}`)}
-                className="flex w-full items-center gap-2.5 text-left"
+                className="flex w-full items-center gap-3 rounded-theme text-left transition-colors duration-150 active:bg-muted"
               >
-                <span className="w-4 shrink-0 text-xs font-bold text-muted-foreground">{i + 1}</span>
-                <div className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-muted">
+                <span className={`w-5 shrink-0 font-heading text-sm font-extrabold ${i === 0 ? 'text-accent' : 'text-muted-foreground'}`}>
+                  {i + 1}
+                </span>
+                <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-muted">
                   <img
                     src={p.avatar_url || fallbackAvatarFor(p.id)}
                     alt={p.display_name}
                     className="h-full w-full object-cover"
                   />
                 </div>
-                <span className="min-w-0 flex-1 truncate text-[13px] font-semibold text-foreground">
+                <span className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">
                   {p.display_name}
                 </span>
-                <span className="shrink-0 text-[11px] font-bold text-muted-foreground">{p.points} puan</span>
+                <span className="shrink-0 text-xs font-bold text-muted-foreground">{p.points} puan</span>
               </button>
             ))}
           </div>

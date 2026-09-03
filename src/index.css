@@ -87,3 +87,30 @@ body {
   transition-duration: 0.001ms !important;
   scroll-behavior: auto !important;
 }
+
+/* Streak flame — see src/components/StreakFlame.jsx and DESIGN.md §7. A
+   running streak is one of the app's earned "ceremonial" moments: it should
+   visibly catch and keep burning every time someone opens the app, not sit
+   as a flat icon. Two independent keyframes (wobble + glow breathing) driven
+   by per-tier CSS custom properties set inline by the component, so one
+   class covers every tier. */
+@keyframes flame-flicker {
+  0%, 100% { transform: scale(1) rotate(-3deg); }
+  30% { transform: scale(1.07) rotate(3deg); }
+  55% { transform: scale(0.94) rotate(-2deg); }
+  80% { transform: scale(1.04) rotate(2deg); }
+}
+
+@keyframes flame-glow {
+  0%, 100% { filter: drop-shadow(0 0 2px var(--flame-glow, transparent)); }
+  50% { filter: drop-shadow(0 0 7px var(--flame-glow, transparent)); }
+}
+
+.streak-flame-lit {
+  display: inline-flex;
+  color: var(--flame-color);
+  transform-origin: 50% 90%;
+  animation:
+    flame-flicker var(--flame-speed, 2.2s) ease-in-out infinite,
+    flame-glow var(--flame-speed, 2.2s) ease-in-out infinite;
+}
