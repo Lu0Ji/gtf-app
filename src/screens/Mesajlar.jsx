@@ -103,21 +103,29 @@ export default function Mesajlar() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const [conversations, setConversations] = useState([])
+  const [unreadCounts, setUnreadCounts] = useState(new Map())
   const [loading, setLoading] = useState(true)
   const [showNewChat, setShowNewChat] = useState(false)
+  const [query, setQuery] = useState('')
 
   useEffect(() => {
     if (!user) return
     let cancelled = false
 
     async function load() {
-      const { data, error } = await supabase
-        .from('messages')
-        .select(
-          'id, content, created_at, sender_id, recipient_id, sender:sender_id(id, display_name, username, avatar_url), recipient:recipient_id(id, display_name, username, avatar_url)'
-        )
-        .or(`sender_id.eq.${user.id},recipient_id.eq.${user.id}`)
-        .order('created_at', { ascending: false })
+      const [{ data, error }, { data: unreadRows }] = await Promise.all([
+        supabase
+          .from('messages')
+          .select(
+            'id, content, created_at, sender_id, recipient_id, read_at, sender:sender_id(id, display_name, username, avatar_url), recipient:recipient_id(id, display_name, username, avatar_url)'
+          )
+          .or(`sender_id.eq.${user.id},recipient_id.eq.${user.id}`)
+          .order('created_at', { ascending: false }),
+        // Per-conversation unread badge — the global count already lives in
+        // UnreadMessagesContext for the nav dot, this is the same rows just
+        // tallied per sender instead of summed to one number.
+        supabase.from('messages').select('sender_id').eq('recipient_id', user.id).is('read_at', null),
+      ])
 
       if (cancelled) return
       if (error) {
@@ -133,7 +141,12 @@ export default function Mesajlar() {
           byPartner.set(partner.id, { partner, lastMessage: msg })
         }
       }
+      const counts = new Map()
+      for (const row of unreadRows || []) {
+        counts.set(row.sender_id, (counts.get(row.sender_id) || 0) + 1)
+      }
       setConversations(Array.from(byPartner.values()))
+      setUnreadCounts(counts)
       setLoading(false)
     }
 
@@ -159,6 +172,15 @@ export default function Mesajlar() {
     navigate('/sohbet', { state: { partner } })
   }
 
+  const term = query.trim().toLowerCase()
+  const filteredConversations = term
+    ? conversations.filter(
+        ({ partner }) =>
+          partner.display_name?.toLowerCase().includes(term) || partner.username?.toLowerCase().includes(term)
+      )
+    : conversations
+  const totalUnread = Array.from(unreadCounts.values()).reduce((a, b) => a + b, 0)
+
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-body pb-28">
       <header className="px-5 pt-12">
@@ -167,7 +189,9 @@ export default function Mesajlar() {
             <h1 className="font-heading text-[26px] font-extrabold tracking-[-0.06em] text-primary">
               Mesajlar
             </h1>
-            <p className="mt-1 text-xs text-muted-foreground">Tahminlerin etrafındaki sohbetler</p>
+            <p className="mt-1 text-xs text-muted-foreground">
+              {totalUnread > 0 ? `${totalUnread} okunmamış mesaj` : 'Tahminlerin etrafındaki sohbetler'}
+            </p>
           </div>
           <button
             aria-label="Yeni mesaj oluştur"
@@ -177,13 +201,32 @@ export default function Mesajlar() {
             <iconify-icon icon="lucide:pen-square" class="text-xl"></iconify-icon>
           </button>
         </div>
+
+        {conversations.length > 0 && (
+          <div className="mt-4 flex items-center gap-2 rounded-theme border border-border bg-card px-4 py-2.5 shadow-sm">
+            <iconify-icon icon="lucide:search" class="text-base text-muted-foreground"></iconify-icon>
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Sohbetlerde ara…"
+              className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+            />
+            {query && (
+              <button aria-label="Aramayı temizle" onClick={() => setQuery('')} className="text-muted-foreground">
+                <iconify-icon icon="lucide:x" class="text-lg"></iconify-icon>
+              </button>
+            )}
+          </div>
+        )}
       </header>
 
       <main>
         <section className="mt-6">
-          <div className="flex items-center justify-between px-5">
-            <h2 className="font-heading text-lg font-bold tracking-tight">Sohbetler</h2>
-          </div>
+          {conversations.length > 0 && (
+            <div className="flex items-center justify-between px-5">
+              <h2 className="font-heading text-lg font-bold tracking-tight">Sohbetler</h2>
+            </div>
+          )}
 
           {loading ? (
             <p className="mt-4 px-5 text-xs text-muted-foreground">Yükleniyor…</p>
@@ -204,35 +247,74 @@ export default function Mesajlar() {
                 Kişi bul
               </button>
             </section>
+          ) : filteredConversations.length === 0 ? (
+            <p className="mx-5 mt-4 rounded-theme border border-dashed border-border bg-muted/60 p-4 text-center text-xs text-muted-foreground">
+              "{query}" için sonuç bulunamadı.
+            </p>
           ) : (
             <div className="mt-3 border-y border-border bg-card">
-              {conversations.map(({ partner, lastMessage }) => (
-                <button
-                  key={partner.id}
-                  onClick={() => openChat(partner)}
-                  className="flex w-full items-center gap-3 border-b border-border px-5 py-4 text-left last:border-b-0"
-                >
-                  <div className="h-14 w-14 shrink-0 overflow-hidden rounded-full bg-muted">
-                    <img
-                      src={partner.avatar_url || fallbackAvatarFor(partner.id)}
-                      alt={partner.display_name}
-                      className="h-full w-full object-cover"
-                    />
-                  </div>
-                  <div className="min-w-0 flex-1">
-                    <div className="flex items-baseline justify-between gap-3">
-                      <p className="truncate text-sm font-bold">{partner.display_name}</p>
-                      <time className="shrink-0 text-[11px] font-semibold text-muted-foreground">
-                        {timeAgo(lastMessage.created_at)}
-                      </time>
+              {filteredConversations.map(({ partner, lastMessage }) => {
+                const unread = unreadCounts.get(partner.id) || 0
+                const isMine = lastMessage.sender_id === user.id
+                return (
+                  <button
+                    key={partner.id}
+                    onClick={() => openChat(partner)}
+                    className="flex w-full items-center gap-3 border-b border-border px-5 py-4 text-left last:border-b-0"
+                  >
+                    <div className="relative shrink-0">
+                      <div
+                        className={`h-14 w-14 overflow-hidden rounded-full bg-muted ${
+                          unread > 0 ? 'ring-2 ring-primary ring-offset-2 ring-offset-card' : ''
+                        }`}
+                      >
+                        <img
+                          src={partner.avatar_url || fallbackAvatarFor(partner.id)}
+                          alt={partner.display_name}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
                     </div>
-                    <p className="mt-1 truncate text-xs font-medium text-foreground">
-                      {lastMessage.sender_id === user.id ? 'Sen: ' : ''}
-                      {lastMessage.content}
-                    </p>
-                  </div>
-                </button>
-              ))}
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-baseline justify-between gap-3">
+                        <p className={`truncate text-sm ${unread > 0 ? 'font-extrabold text-foreground' : 'font-bold text-foreground'}`}>
+                          {partner.display_name}
+                        </p>
+                        <time
+                          className={`shrink-0 text-[11px] font-semibold ${
+                            unread > 0 ? 'text-primary' : 'text-muted-foreground'
+                          }`}
+                        >
+                          {timeAgo(lastMessage.created_at)}
+                        </time>
+                      </div>
+                      <div className="mt-1 flex items-center justify-between gap-2">
+                        <p
+                          className={`flex min-w-0 flex-1 items-center gap-1 truncate text-xs ${
+                            unread > 0 ? 'font-bold text-foreground' : 'font-medium text-muted-foreground'
+                          }`}
+                        >
+                          {isMine && (
+                            <iconify-icon
+                              icon={lastMessage.read_at ? 'lucide:check-check' : 'lucide:check'}
+                              class={`shrink-0 text-sm ${lastMessage.read_at ? 'text-primary' : ''}`}
+                            ></iconify-icon>
+                          )}
+                          <span className="truncate">
+                            {isMine ? 'Sen: ' : ''}
+                            {lastMessage.content}
+                          </span>
+                        </p>
+                        {unread > 0 && (
+                          <span className="flex h-5 min-w-5 shrink-0 items-center justify-center rounded-full bg-primary px-1.5 text-[10px] font-bold text-primary-foreground">
+                            {unread > 9 ? '9+' : unread}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </button>
+                )
+              })}
             </div>
           )}
         </section>
