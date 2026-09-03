@@ -7,6 +7,7 @@ import { useToast } from '../contexts/ToastContext.jsx'
 import { formatDateLong, sealLabel, timeAgo } from '../lib/format.js'
 import BadgeShowcase from '../components/BadgeShowcase.jsx'
 import DifficultyChip from '../components/DifficultyChip.jsx'
+import DetailHeader from '../components/ui/DetailHeader.jsx'
 
 
 const CATEGORY_ICONS = {
@@ -256,28 +257,23 @@ export default function KullaniciProfili() {
 
   return (
     <div className="min-h-screen w-full bg-background pb-28 text-foreground font-body">
-      <header className="relative flex items-center gap-3 px-5 pt-12">
-        <button
-          aria-label="Geri dön"
-          onClick={() => navigate(-1)}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-theme border border-border bg-card text-foreground shadow-sm"
-        >
-          <iconify-icon icon="lucide:arrow-left" class="text-[19px]"></iconify-icon>
-        </button>
-        <h1 className="min-w-0 flex-1 truncate font-heading text-lg font-extrabold tracking-tight">
-          {profile.display_name}
-        </h1>
-        <button
-          aria-label="Seçenekler"
-          onClick={() => setShowMenu((v) => !v)}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-theme border border-border bg-card text-foreground shadow-sm"
-        >
-          <iconify-icon icon="lucide:ellipsis" class="text-[19px]"></iconify-icon>
-        </button>
+      <div className="relative">
+        <DetailHeader
+          title={profile.display_name}
+          action={
+            <button
+              aria-label="Seçenekler"
+              onClick={() => setShowMenu((v) => !v)}
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-theme border border-border bg-card text-foreground shadow-sm"
+            >
+              <iconify-icon icon="lucide:ellipsis" class="text-[19px]"></iconify-icon>
+            </button>
+          }
+        />
         {showMenu && (
           <>
             <div className="fixed inset-0 z-30" onClick={() => setShowMenu(false)} />
-            <div className="absolute right-5 top-24 z-40 w-48 overflow-hidden rounded-theme border border-border bg-card shadow-lg">
+            <div className="absolute right-5 top-[92px] z-40 w-48 overflow-hidden rounded-theme border border-border bg-card shadow-lg">
               <button
                 onClick={handleToggleBlock}
                 disabled={blockBusy}
@@ -289,7 +285,7 @@ export default function KullaniciProfili() {
             </div>
           </>
         )}
-      </header>
+      </div>
 
       {isBlocked ? (
         <div className="flex flex-1 flex-col items-center justify-center gap-3 px-8 pt-16 text-center">

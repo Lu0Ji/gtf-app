@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useUserSettings } from '../hooks/useUserSettings.js'
 import { formatDateLong, sealLabel } from '../lib/format.js'
+import DetailHeader from '../components/ui/DetailHeader.jsx'
 
 function dayLabel(dateStr) {
   const date = new Date(dateStr)
@@ -182,22 +183,7 @@ export default function Hareketler() {
 
   return (
     <div className="min-h-screen w-full bg-background pb-10 text-foreground font-body">
-      <header className="border-b border-border bg-background px-5 pt-12 pb-4">
-        <div className="flex items-center justify-between">
-          <button
-            aria-label="Geri dön"
-            onClick={() => navigate(-1)}
-            className="flex h-10 w-10 items-center justify-center rounded-theme border border-border bg-card text-foreground shadow-sm"
-          >
-            <iconify-icon icon="lucide:arrow-left" class="text-[19px]"></iconify-icon>
-          </button>
-          <div className="text-center">
-            <h1 className="font-heading text-xl font-extrabold tracking-[-0.05em]">Hareketler</h1>
-            <p className="mt-0.5 text-[10px] font-medium text-muted-foreground">Kalıcı etkinlik kaydın</p>
-          </div>
-          <div className="h-10 w-10" />
-        </div>
-      </header>
+      <DetailHeader title="Hareketler" subtitle="Kalıcı etkinlik kaydın" centered />
 
       <main>
         {loading ? (

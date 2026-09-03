@@ -5,6 +5,7 @@ import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import { formatDateLong, formatTime, sealLabel, timeAgo } from '../lib/format.js'
+import DetailHeader from '../components/ui/DetailHeader.jsx'
 
 
 function groupByDay(rows) {
@@ -61,23 +62,10 @@ export default function Begeniler() {
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-body">
-      <header className="sticky top-0 z-20 border-b border-border bg-background/95 px-5 pb-3 pt-12 backdrop-blur-md">
-        <div className="flex items-center justify-between">
-          <button
-            aria-label="Geri dön"
-            onClick={() => navigate(-1)}
-            className="flex h-10 w-10 items-center justify-center rounded-theme border border-border bg-card text-foreground shadow-sm"
-          >
-            <iconify-icon icon="lucide:arrow-left" class="text-[19px]"></iconify-icon>
-          </button>
-          <div className="text-center">
-            <p className="font-heading text-lg font-extrabold tracking-[-0.04em]">Beğeniler</p>
-            <p className="mt-0.5 text-[10px] font-medium text-muted-foreground">Beğendiğin tahminler</p>
-          </div>
-          <div className="h-10 w-10" />
-        </div>
+      <div className="sticky top-0 z-20 border-b border-border bg-background/95 pb-3 backdrop-blur-md">
+        <DetailHeader title="Beğeniler" subtitle="Beğendiğin tahminler" centered sticky={false} />
 
-        <div className="mt-4 flex h-11 items-center rounded-theme border border-border bg-input px-3">
+        <div className="mx-5 mt-4 flex h-11 items-center rounded-theme border border-border bg-input px-3">
           <iconify-icon icon="lucide:search" class="mr-2 text-[18px] text-muted-foreground"></iconify-icon>
           <input
             type="search"
@@ -88,7 +76,7 @@ export default function Begeniler() {
             className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
           />
         </div>
-      </header>
+      </div>
 
       <main className="px-5 pb-10 pt-5">
         {loading ? (

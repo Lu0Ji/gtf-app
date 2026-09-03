@@ -2,12 +2,19 @@ import { useNavigate } from 'react-router-dom'
 
 // See DESIGN.md §8/§9 — the back-button header for every drill-down/detail/
 // settings screen (27 screens already share this shape, more than any other
-// header pattern in the app). Two layouts, chosen automatically:
-//   - no subtitle/action → centered title, back button + balancing spacer
-//     (the settings-screen shape: EpostaVeTelefon, MesajIstekleri, ...)
-//   - subtitle and/or action → left-aligned title next to the back button,
-//     action trailing (the content-detail shape: LiderlikTablosu, GrupDetayi, ...)
-export default function DetailHeader({ title, subtitle, eyebrow, onBack, action, sticky = true }) {
+// header pattern in the app). Two layouts:
+//   - left-aligned (the default once there's a subtitle/eyebrow/action) —
+//     title(+subtitle) grows next to the back button, action trailing at any
+//     width (the content-detail shape: LiderlikTablosu, KullaniciProfili, ...)
+//   - centered (`centered` prop, or no subtitle/eyebrow/action at all) — back
+//     button + balancing element, title(+subtitle) truly centered between
+//     them. `trailing` swaps the balancing spacer for a same-size icon button
+//     (Rozetler's help button, Tahmin Kaydı's share) without breaking the
+//     centering the way a growing `action` would. `centered` opts a
+//     subtitle-bearing header into this layout instead of the left-aligned
+//     default (Hareketler, Begeniler — a centered subtitle read as intentional
+//     there, not left-aligned drift).
+export default function DetailHeader({ title, subtitle, eyebrow, onBack, action, trailing, centered = false, sticky = true }) {
   const navigate = useNavigate()
   const handleBack = onBack || (() => navigate(-1))
   const wrapperClass = `border-b border-border/80 px-5 pb-4 pt-12 ${
@@ -23,7 +30,7 @@ export default function DetailHeader({ title, subtitle, eyebrow, onBack, action,
     </button>
   )
 
-  if (subtitle || action || eyebrow) {
+  if (!centered && (eyebrow || action || subtitle)) {
     return (
       <header className={wrapperClass}>
         <div className="flex items-center gap-3">
@@ -45,8 +52,11 @@ export default function DetailHeader({ title, subtitle, eyebrow, onBack, action,
     <header className={wrapperClass}>
       <div className="flex items-center justify-between">
         {backButton}
-        <h1 className="font-heading text-[17px] font-extrabold tracking-[-0.035em]">{title}</h1>
-        <div className="h-10 w-10" />
+        <div className="text-center">
+          <h1 className="font-heading text-[17px] font-extrabold tracking-[-0.035em]">{title}</h1>
+          {subtitle && <p className="mt-0.5 text-[11px] font-medium text-muted-foreground">{subtitle}</p>}
+        </div>
+        {trailing || <div className="h-10 w-10 shrink-0" />}
       </div>
     </header>
   )

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
+import DetailHeader from '../components/ui/DetailHeader.jsx'
 
 const CUSTOM_THEME_NAME = 'Özel renk'
 
@@ -189,21 +190,7 @@ export default function ProfilAyarlari() {
 
   return (
     <div className="min-h-screen w-full bg-background pb-28 text-foreground font-body">
-      <header className="flex items-center justify-between px-5 pt-12">
-        <div className="flex items-center gap-3">
-          <button
-            aria-label="Geri dön"
-            onClick={() => navigate(-1)}
-            className="flex h-10 w-10 items-center justify-center rounded-theme border border-border bg-card text-foreground shadow-sm"
-          >
-            <iconify-icon icon="lucide:arrow-left" class="text-[19px]"></iconify-icon>
-          </button>
-          <div>
-            <h1 className="font-heading text-[20px] font-extrabold tracking-[-0.05em]">Profil ayarları</h1>
-            <p className="mt-0.5 text-[11px] text-muted-foreground">Görünümünü kişiselleştir</p>
-          </div>
-        </div>
-      </header>
+      <DetailHeader title="Profil ayarları" subtitle="Görünümünü kişiselleştir" />
 
       <main className="pt-6">
         <section className="px-5">

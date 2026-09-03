@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import { formatDateLong, formatDateTimeLong } from '../lib/format.js'
 import { difficultyMeta } from '../lib/difficulty.js'
+import DetailHeader from '../components/ui/DetailHeader.jsx'
 
 const CORRECT_POINTS_REWARD = 50
 // Marking a sealed prediction is self-reported (honor system — there's no
@@ -369,23 +370,19 @@ export default function TahminKaydi() {
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-body pb-28">
-      <header className="flex items-center justify-between px-5 pt-12 pb-5">
-        <button
-          aria-label="Geri dön"
-          onClick={() => navigate(-1)}
-          className="flex h-10 w-10 items-center justify-center rounded-theme border border-border bg-card text-foreground shadow-sm"
-        >
-          <iconify-icon icon="lucide:arrow-left" class="text-xl"></iconify-icon>
-        </button>
-        <p className="font-heading text-sm font-bold tracking-tight">Tahmin Kaydı</p>
-        <button
-          aria-label="Kaydı paylaş"
-          onClick={handleShare}
-          className="flex h-10 w-10 items-center justify-center rounded-theme border border-border bg-card text-foreground shadow-sm"
-        >
-          <iconify-icon icon={copied ? 'lucide:check' : 'lucide:share-2'} class="text-[18px]"></iconify-icon>
-        </button>
-      </header>
+      <DetailHeader
+        title="Tahmin Kaydı"
+        centered
+        trailing={
+          <button
+            aria-label="Kaydı paylaş"
+            onClick={handleShare}
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-theme border border-border bg-card text-foreground shadow-sm"
+          >
+            <iconify-icon icon={copied ? 'lucide:check' : 'lucide:share-2'} class="text-[18px]"></iconify-icon>
+          </button>
+        }
+      />
 
       <main>
         <section className="px-5">

@@ -7,6 +7,7 @@ import { useUserSettings } from '../hooks/useUserSettings.js'
 import { CATEGORIES, CATEGORY_META } from '../lib/categories.js'
 import { checkPredictionText } from '../lib/predictionCheck.js'
 import DateTimePicker from '../components/DateTimePicker.jsx'
+import DetailHeader from '../components/ui/DetailHeader.jsx'
 
 function isFutureDate(dateStr) {
   return Boolean(dateStr) && new Date(dateStr).getTime() > Date.now()
@@ -162,21 +163,7 @@ export default function TahminOlustur() {
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-body pb-28">
-      <header className="flex items-center gap-3 px-5 pt-12 pb-5">
-        <button
-          aria-label="Geri dön"
-          onClick={() => navigate(-1)}
-          className="flex h-10 w-10 shrink-0 items-center justify-center rounded-theme border border-border bg-card text-foreground shadow-sm"
-        >
-          <iconify-icon icon="lucide:arrow-left" class="text-[20px]"></iconify-icon>
-        </button>
-        <div className="min-w-0">
-          <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-            {groupId ? groupName || 'Grup kaydı' : 'Yeni kayıt'}
-          </p>
-          <h1 className="font-heading text-[21px] font-extrabold tracking-tight text-primary">Tahmin oluştur</h1>
-        </div>
-      </header>
+      <DetailHeader eyebrow={groupId ? groupName || 'Grup kaydı' : 'Yeni kayıt'} title="Tahmin oluştur" />
 
       <main className="space-y-7 px-5">
         <section>

@@ -1,11 +1,11 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import { formatDateLong } from '../lib/format.js'
 import { TIERS, computeBadgeStats, evaluateBadges } from '../lib/badges.js'
 import BadgeMedallion from '../components/BadgeMedallion.jsx'
+import DetailHeader from '../components/ui/DetailHeader.jsx'
 
 const INITIAL_PER_TIER = 6
 
@@ -91,7 +91,6 @@ function BadgeCard({ badge, tier, earnedAt, showcased, editingShowcase, onToggle
 }
 
 export default function Rozetler() {
-  const navigate = useNavigate()
   const { user, profile, refreshProfile } = useAuth()
   const { showToast } = useToast()
   const [badges, setBadges] = useState([])
@@ -247,19 +246,11 @@ export default function Rozetler() {
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-body">
       <div className="pb-28">
-        <header className="sticky top-0 z-30 border-b border-border bg-background/95 px-5 pb-4 pt-12 backdrop-blur-md">
-          <div className="flex items-center justify-between">
-            <button
-              aria-label="Geri dön"
-              onClick={() => navigate(-1)}
-              className="flex h-10 w-10 items-center justify-center rounded-theme border border-border bg-card text-foreground shadow-sm"
-            >
-              <iconify-icon icon="lucide:arrow-left" class="text-[19px]"></iconify-icon>
-            </button>
-            <div className="text-center">
-              <p className="font-heading text-lg font-extrabold tracking-[-0.04em]">Rozetler</p>
-              <p className="text-[10px] font-medium text-muted-foreground">Kayıtlı başarı koleksiyonun</p>
-            </div>
+        <DetailHeader
+          title="Rozetler"
+          subtitle="Kayıtlı başarı koleksiyonun"
+          centered
+          trailing={
             <button
               aria-label="Rozetler hakkında yardım"
               onClick={() =>
@@ -267,12 +258,12 @@ export default function Rozetler() {
                   '4 seviye var: Başlangıç (ilk adımlar), İstikrar (düzenli kullanım), Ustalık (isabet ve derinlik), Efsane (uzun vadeli, nadir başarılar). Hepsi gerçek etkinliğinden hesaplanır.'
                 )
               }
-              className="flex h-10 w-10 items-center justify-center rounded-theme border border-border bg-card text-muted-foreground shadow-sm"
+              className="flex h-10 w-10 shrink-0 items-center justify-center rounded-theme border border-border bg-card text-muted-foreground shadow-sm"
             >
               <iconify-icon icon="lucide:circle-help" class="text-[19px]"></iconify-icon>
             </button>
-          </div>
-        </header>
+          }
+        />
 
         {loading ? (
           <p className="px-5 py-6 text-xs text-muted-foreground">Yükleniyor…</p>
