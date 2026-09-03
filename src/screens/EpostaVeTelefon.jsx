@@ -1,11 +1,10 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
+import DetailHeader from '../components/ui/DetailHeader.jsx'
 
 export default function EpostaVeTelefon() {
-  const navigate = useNavigate()
   const { user, profile, refreshProfile } = useAuth()
   const { showToast } = useToast()
   const [editingEmail, setEditingEmail] = useState(false)
@@ -46,17 +45,7 @@ export default function EpostaVeTelefon() {
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-body pb-10">
-      <header className="flex items-center justify-between px-5 pt-12">
-        <button
-          aria-label="Geri dön"
-          onClick={() => navigate(-1)}
-          className="flex h-10 w-10 items-center justify-center rounded-theme border border-border bg-card text-foreground shadow-sm"
-        >
-          <iconify-icon icon="lucide:arrow-left" class="text-[19px]"></iconify-icon>
-        </button>
-        <p className="font-heading text-base font-extrabold tracking-[-0.035em]">E-posta ve Telefon</p>
-        <div className="h-10 w-10" />
-      </header>
+      <DetailHeader title="E-posta ve Telefon" />
 
       <main className="px-5 pt-7">
         <section>
