@@ -1,9 +1,8 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { useToast } from '../contexts/ToastContext.jsx'
+import DetailHeader from '../components/ui/DetailHeader.jsx'
 
 export default function TopluluKurallari() {
-  const navigate = useNavigate()
   const { showToast } = useToast()
   const [copied, setCopied] = useState(false)
 
@@ -20,27 +19,21 @@ export default function TopluluKurallari() {
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-body">
-      <div className="fixed inset-x-0 top-0 z-20 border-b border-border bg-background/95 backdrop-blur-md">
-        <header className="flex h-[76px] items-end justify-between px-5 pb-3">
-          <button
-            aria-label="Geri dön"
-            onClick={() => navigate(-1)}
-            className="flex h-10 w-10 items-center justify-center rounded-theme border border-border bg-card text-foreground shadow-sm"
-          >
-            <iconify-icon icon="lucide:arrow-left" class="text-[19px]"></iconify-icon>
-          </button>
-          <p className="font-heading text-sm font-extrabold tracking-[-0.02em]">Topluluk Kuralları</p>
+      <DetailHeader
+        title="Topluluk Kuralları"
+        centered
+        trailing={
           <button
             aria-label="Kuralları paylaş"
             onClick={handleShare}
-            className="flex h-10 w-10 items-center justify-center rounded-theme text-muted-foreground"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-theme text-muted-foreground"
           >
             <iconify-icon icon={copied ? 'lucide:check' : 'lucide:share-2'} class="text-[18px]"></iconify-icon>
           </button>
-        </header>
-      </div>
+        }
+      />
 
-      <main className="px-5 pb-28 pt-[104px]">
+      <main className="px-5 pb-28 pt-6">
         <section>
           <div className="flex items-center gap-2">
             <span className="flex h-7 w-7 items-center justify-center rounded-full bg-secondary text-primary">

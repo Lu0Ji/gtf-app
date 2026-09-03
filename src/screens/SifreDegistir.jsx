@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
+import DetailHeader from '../components/ui/DetailHeader.jsx'
 
 const CRITERIA = [
   { key: 'length', label: 'En az 10 karakter', test: (v) => v.length >= 10 },
@@ -62,19 +63,7 @@ export default function SifreDegistir() {
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-body pb-32">
-      <header className="border-b border-border bg-background px-5 pb-5 pt-12">
-        <div className="flex items-center justify-between">
-          <button
-            aria-label="Geri dön"
-            onClick={() => navigate(-1)}
-            className="flex h-10 w-10 items-center justify-center rounded-theme border border-border bg-card text-foreground shadow-sm"
-          >
-            <iconify-icon icon="lucide:arrow-left" class="text-[19px]"></iconify-icon>
-          </button>
-          <p className="font-heading text-[17px] font-extrabold tracking-[-0.04em]">Güvenlik</p>
-          <div className="h-10 w-10" />
-        </div>
-      </header>
+      <DetailHeader title="Güvenlik" />
 
       <main className="px-5 pt-7">
         <section>
