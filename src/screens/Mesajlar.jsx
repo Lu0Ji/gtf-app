@@ -4,6 +4,11 @@ import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { timeAgo } from '../lib/format.js'
+import Sheet from '../components/ui/Sheet.jsx'
+import ScreenHeader from '../components/ui/ScreenHeader.jsx'
+import SectionHeader from '../components/ui/SectionHeader.jsx'
+import EmptyState from '../components/ui/EmptyState.jsx'
+import Button from '../components/ui/Button.jsx'
 
 
 function NewChatModal({ onClose, onPick }) {
@@ -47,41 +52,37 @@ function NewChatModal({ onClose, onPick }) {
   }, [user, query])
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end bg-black/40" onClick={onClose}>
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="flex max-h-[70vh] w-full flex-col overflow-hidden rounded-t-theme bg-background pb-8"
-      >
-        <div className="sticky top-0 border-b border-border bg-background px-5 py-4">
-          <div className="flex items-center justify-between">
-            <h2 className="font-heading text-lg font-bold">Yeni mesaj</h2>
-            <button onClick={onClose} aria-label="Kapat" className="text-muted-foreground">
-              <iconify-icon icon="lucide:x" class="text-xl"></iconify-icon>
-            </button>
-          </div>
-          <div className="mt-3 flex items-center gap-2 rounded-theme border border-border bg-card px-3.5 py-2.5">
-            <iconify-icon icon="lucide:search" class="text-base text-muted-foreground"></iconify-icon>
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Kullanıcı ara…"
-              className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
-            />
-          </div>
+    <Sheet onClose={onClose} className="flex max-h-[70vh] flex-col overflow-hidden pb-8">
+      <div className="sticky top-0 border-b border-border bg-background px-5 py-4">
+        <div className="flex items-center justify-between">
+          <h2 className="font-heading text-lg font-bold tracking-[-0.04em]">Yeni mesaj</h2>
+          <button onClick={onClose} aria-label="Kapat" className="text-muted-foreground">
+            <iconify-icon icon="lucide:x" class="text-xl"></iconify-icon>
+          </button>
         </div>
-        <div className="overflow-y-auto">
-          {loading ? (
-            <p className="px-5 py-6 text-xs text-muted-foreground">Yükleniyor…</p>
-          ) : people.length === 0 ? (
-            <p className="px-5 py-6 text-xs text-muted-foreground">
-              {query.trim() ? 'Kimse bulunamadı.' : 'Takip ettiğin kimse yok. Aramak için yaz.'}
-            </p>
-          ) : (
-            people.map((p) => (
+        <div className="mt-3 flex items-center gap-2 rounded-theme border border-border bg-card px-3.5 py-2.5">
+          <iconify-icon icon="lucide:search" class="text-base text-muted-foreground"></iconify-icon>
+          <input
+            value={query}
+            onChange={(e) => setQuery(e.target.value)}
+            placeholder="Kullanıcı ara…"
+            className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
+          />
+        </div>
+      </div>
+      <div className="overflow-y-auto">
+        {loading ? (
+          <p className="px-5 py-6 text-xs text-muted-foreground">Yükleniyor…</p>
+        ) : people.length === 0 ? (
+          <p className="px-5 py-6 text-xs text-muted-foreground">
+            {query.trim() ? 'Kimse bulunamadı.' : 'Takip ettiğin kimse yok. Aramak için yaz.'}
+          </p>
+        ) : (
+          people.map((p) => (
             <button
               key={p.id}
               onClick={() => onPick(p)}
-              className="flex w-full items-center gap-3 border-b border-border px-5 py-3.5 text-left"
+              className="flex w-full items-center gap-3 border-b border-border px-5 py-3.5 text-left transition-colors duration-150 active:bg-muted"
             >
               <div className="h-11 w-11 shrink-0 overflow-hidden rounded-full bg-muted">
                 <img src={p.avatar_url || fallbackAvatarFor(p.id)} alt={p.display_name} className="h-full w-full object-cover" />
@@ -91,11 +92,10 @@ function NewChatModal({ onClose, onPick }) {
                 <p className="truncate text-xs text-muted-foreground">@{p.username}</p>
               </div>
             </button>
-            ))
-          )}
-        </div>
+          ))
+        )}
       </div>
-    </div>
+    </Sheet>
   )
 }
 
@@ -183,27 +183,25 @@ export default function Mesajlar() {
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-body pb-28">
-      <header className="px-5 pt-12">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="font-heading text-[26px] font-extrabold tracking-[-0.06em] text-primary">
-              Mesajlar
-            </h1>
-            <p className="mt-1 text-xs text-muted-foreground">
-              {totalUnread > 0 ? `${totalUnread} okunmamış mesaj` : 'Tahminlerin etrafındaki sohbetler'}
-            </p>
-          </div>
-          <button
+      <ScreenHeader
+        title="Mesajlar"
+        subtitle={totalUnread > 0 ? `${totalUnread} okunmamış mesaj` : 'Tahminlerin etrafındaki sohbetler'}
+        action={
+          <Button
+            variant="primary"
             aria-label="Yeni mesaj oluştur"
             onClick={() => setShowNewChat(true)}
-            className="flex h-11 w-11 items-center justify-center rounded-theme bg-primary text-primary-foreground shadow-sm"
+            className="h-11 w-11 shrink-0 rounded-theme p-0"
           >
             <iconify-icon icon="lucide:pen-square" class="text-xl"></iconify-icon>
-          </button>
-        </div>
+          </Button>
+        }
+        className="pb-0"
+      />
 
-        {conversations.length > 0 && (
-          <div className="mt-4 flex items-center gap-2 rounded-theme border border-border bg-card px-4 py-2.5 shadow-sm">
+      {conversations.length > 0 && (
+        <div className="px-5 pb-5 pt-4">
+          <div className="flex items-center gap-2 rounded-theme border border-border bg-card px-4 py-2.5 shadow-sm">
             <iconify-icon icon="lucide:search" class="text-base text-muted-foreground"></iconify-icon>
             <input
               value={query}
@@ -217,36 +215,28 @@ export default function Mesajlar() {
               </button>
             )}
           </div>
-        )}
-      </header>
+        </div>
+      )}
 
       <main>
         <section className="mt-6">
-          {conversations.length > 0 && (
-            <div className="flex items-center justify-between px-5">
-              <h2 className="font-heading text-lg font-bold tracking-tight">Sohbetler</h2>
-            </div>
-          )}
+          {conversations.length > 0 && <SectionHeader title="Sohbetler" />}
 
           {loading ? (
             <p className="mt-4 px-5 text-xs text-muted-foreground">Yükleniyor…</p>
           ) : conversations.length === 0 ? (
-            <section className="mx-5 mt-4 rounded-theme border border-dashed border-border bg-muted/60 px-5 py-6 text-center">
-              <div className="mx-auto flex h-10 w-10 items-center justify-center rounded-full bg-card text-primary shadow-sm">
-                <iconify-icon icon="lucide:message-circle" class="text-lg"></iconify-icon>
-              </div>
-              <h2 className="mt-3 font-heading text-sm font-bold">Yeni bir sohbet başlat</h2>
-              <p className="mx-auto mt-1 max-w-[250px] text-xs leading-5 text-muted-foreground">
-                Henüz kimseyle mesajlaşmadın. Bir kullanıcı seçip ilk mesajını gönder.
-              </p>
-              <button
-                onClick={() => setShowNewChat(true)}
-                className="mt-4 inline-flex items-center gap-2 rounded-theme bg-secondary px-4 py-2.5 text-xs font-bold text-secondary-foreground"
-              >
-                <iconify-icon icon="lucide:user-plus" class="text-sm"></iconify-icon>
-                Kişi bul
-              </button>
-            </section>
+            <div className="mx-5 mt-4">
+              <EmptyState
+                icon="lucide:message-circle"
+                title="Yeni bir sohbet başlat"
+                description="Henüz kimseyle mesajlaşmadın. Bir kullanıcı seçip ilk mesajını gönder."
+                action={
+                  <Button variant="secondary" icon="lucide:user-plus" iconClass="text-sm" onClick={() => setShowNewChat(true)} className="px-4 py-2.5 text-xs">
+                    Kişi bul
+                  </Button>
+                }
+              />
+            </div>
           ) : filteredConversations.length === 0 ? (
             <p className="mx-5 mt-4 rounded-theme border border-dashed border-border bg-muted/60 p-4 text-center text-xs text-muted-foreground">
               "{query}" için sonuç bulunamadı.
@@ -260,7 +250,7 @@ export default function Mesajlar() {
                   <button
                     key={partner.id}
                     onClick={() => openChat(partner)}
-                    className="flex w-full items-center gap-3 border-b border-border px-5 py-4 text-left last:border-b-0"
+                    className="flex w-full items-center gap-3 border-b border-border px-5 py-4 text-left transition-colors duration-150 active:bg-muted last:border-b-0"
                   >
                     <div className="relative shrink-0">
                       <div

@@ -3,6 +3,8 @@ import { useNavigate } from 'react-router-dom'
 import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
+import DetailHeader from '../components/ui/DetailHeader.jsx'
+import SectionHeader from '../components/ui/SectionHeader.jsx'
 
 const PODIUM_ACCENTS = ['#9A5C14', '#B87935', '#C18B57']
 
@@ -57,21 +59,7 @@ export default function LiderlikTablosu() {
 
   return (
     <div className="min-h-screen w-full bg-background pb-28 text-foreground font-body">
-      <header className="border-b border-border bg-background px-5 pb-4 pt-12">
-        <div className="flex items-center gap-3">
-          <button
-            aria-label="Geri dön"
-            onClick={() => navigate(-1)}
-            className="flex h-10 w-10 items-center justify-center rounded-theme border border-border bg-card text-foreground shadow-sm"
-          >
-            <iconify-icon icon="lucide:arrow-left" class="text-lg"></iconify-icon>
-          </button>
-          <div className="min-w-0 flex-1">
-            <h1 className="font-heading text-xl font-extrabold tracking-tight">Liderlik Tablosu</h1>
-            <p className="mt-0.5 text-xs text-muted-foreground">Puana göre genel sıralama</p>
-          </div>
-        </div>
-      </header>
+      <DetailHeader title="Liderlik Tablosu" subtitle="Puana göre genel sıralama" />
 
       <main>
         <section className="px-5 pb-5 pt-5">
@@ -95,7 +83,7 @@ export default function LiderlikTablosu() {
                     </div>
                     <button
                       onClick={() => navigate(`/kullanici/${p.id}`)}
-                      className={`flex w-full flex-col items-center rounded-theme bg-card px-2 pb-3 shadow-sm ${
+                      className={`flex w-full flex-col items-center rounded-theme bg-card px-2 pb-3 shadow-sm transition-transform duration-150 active:scale-[0.97] ${
                         isFirst ? 'border-2 pb-4 pt-10' : 'border border-border pt-9'
                       }`}
                       style={isFirst ? { borderColor: accent } : undefined}
@@ -120,17 +108,17 @@ export default function LiderlikTablosu() {
         </section>
 
         {rest.length > 0 && (
-          <section className="border-t border-border px-5 pb-8 pt-5">
-            <h2 className="font-heading text-base font-bold tracking-tight">Sıralama</h2>
+          <section className="border-t border-border pb-8 pt-5">
+            <SectionHeader title="Sıralama" />
 
-            <div className="mt-4 overflow-hidden rounded-theme border border-border bg-card shadow-sm">
+            <div className="mx-5 mt-4 overflow-hidden rounded-theme border border-border bg-card shadow-sm">
               {rest.map((r, i) => {
                 const rank = i + 4
                 return (
                   <button
                     key={r.id}
                     onClick={() => navigate(`/kullanici/${r.id}`)}
-                    className={`flex w-full items-center gap-3 px-3 py-3.5 text-left ${
+                    className={`flex w-full items-center gap-3 px-3 py-3.5 text-left transition-colors duration-150 active:bg-muted ${
                       i < rest.length - 1 ? 'border-b border-border' : ''
                     } ${r.id === user?.id ? 'bg-secondary/40' : ''}`}
                   >
@@ -161,7 +149,7 @@ export default function LiderlikTablosu() {
         <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-border bg-background/95 px-5 pb-5 pt-3 backdrop-blur-md">
           <button
             onClick={() => navigate('/profil')}
-            className="mx-auto flex w-full max-w-[393px] items-center gap-3 rounded-theme border border-primary bg-card px-3 py-3 text-left"
+            className="mx-auto flex w-full max-w-[393px] items-center gap-3 rounded-theme border border-primary bg-card px-3 py-3 text-left transition-transform duration-150 active:scale-[0.98]"
           >
             <div className="flex h-9 w-9 items-center justify-center rounded-full bg-primary text-sm font-extrabold text-primary-foreground">
               {myIndex + 1}
