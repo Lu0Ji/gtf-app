@@ -22,7 +22,7 @@ import RightRail from '../components/RightRail.jsx'
 // column. It's what makes ~40 screens work here with zero per-screen edits.
 export default function AppShell() {
   return (
-    <div className="mx-auto flex w-full justify-center gap-6 md:max-w-[900px] xl:max-w-none xl:gap-10 xl:px-10">
+    <div className="mx-auto flex w-full justify-center gap-6 md:max-w-[900px] xl:max-w-none xl:gap-6 xl:px-6">
       <SidebarNav />
       <div className="min-w-0 flex-1 md:max-w-[680px]" style={{ transform: 'translateZ(0)' }}>
         <Outlet />

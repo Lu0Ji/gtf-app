@@ -18,7 +18,7 @@ export default function SidebarNav() {
   const streakColor = streakTierColor(profile?.streak_count ?? 0)
 
   return (
-    <aside className="sticky top-0 hidden h-screen w-64 shrink-0 flex-col justify-between border-r border-border px-4 py-7 md:flex">
+    <aside className="sticky top-0 hidden h-screen w-60 shrink-0 flex-col justify-between border-r border-border px-3.5 py-7 md:flex">
       <div>
         <div className="flex items-center gap-2.5 px-2">
           <span className="flex h-10 w-10 items-center justify-center rounded-theme bg-primary font-heading text-base font-extrabold text-primary-foreground">

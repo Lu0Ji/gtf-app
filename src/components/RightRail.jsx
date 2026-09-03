@@ -79,10 +79,10 @@ export default function RightRail() {
     }
   }
 
-  if (loading) return <aside className="sticky top-6 hidden min-w-[320px] max-w-[440px] flex-1 xl:block" />
+  if (loading) return <aside className="sticky top-6 hidden min-w-[300px] max-w-[420px] flex-1 xl:block" />
 
   return (
-    <aside className="sticky top-6 hidden h-fit min-w-[320px] max-w-[440px] flex-1 flex-col gap-6 xl:flex">
+    <aside className="sticky top-6 hidden h-fit min-w-[300px] max-w-[420px] flex-1 flex-col gap-6 xl:flex">
       {openingSoon.length > 0 && (
         <section className="rounded-theme border border-border bg-card p-5 shadow-sm">
           <div className="flex items-center gap-2">
