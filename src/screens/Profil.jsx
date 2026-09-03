@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext.jsx'
 import { formatDateLong, sealLabel, timeAgo } from '../lib/format.js'
 import BadgeShowcase from '../components/BadgeShowcase.jsx'
 import DifficultyChip from '../components/DifficultyChip.jsx'
+import ScreenHeader from '../components/ui/ScreenHeader.jsx'
 
 
 const CATEGORY_ICONS = {
@@ -216,23 +217,19 @@ export default function Profil() {
 
   return (
     <div className="min-h-screen w-full bg-background pb-28 text-foreground font-body">
-      <header className="px-5 pt-12">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.16em] text-muted-foreground">Profil</p>
-            <h1 className="mt-1 font-heading text-[25px] font-extrabold tracking-[-0.06em] text-primary">
-              Kayıt defterin
-            </h1>
-          </div>
+      <ScreenHeader
+        eyebrow="Profil"
+        title="Kayıt defterin"
+        action={
           <button
             aria-label="Uygulama ayarları"
             onClick={() => navigate('/uygulama-ayarlari')}
-            className="flex h-10 w-10 items-center justify-center rounded-theme border border-border bg-card text-foreground shadow-sm"
+            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-theme border border-border bg-card text-foreground shadow-sm"
           >
             <iconify-icon icon="lucide:settings-2" class="text-[19px]"></iconify-icon>
           </button>
-        </div>
-      </header>
+        }
+      />
 
       {profile?.cover_photo_url && (
         <div className="mt-4 h-32 w-full overflow-hidden">

@@ -5,6 +5,7 @@ import { useToast } from '../contexts/ToastContext.jsx'
 import { supabase } from '../lib/supabase.js'
 import { formatTimeUntil } from '../lib/format.js'
 import { CATEGORY_META, GROUP_CATEGORIES as CATEGORIES } from '../lib/categories.js'
+import ScreenHeader from '../components/ui/ScreenHeader.jsx'
 
 function CreateGroupModal({ onClose, onCreated }) {
   const { user } = useAuth()
@@ -383,17 +384,9 @@ export default function Gruplar() {
 
   return (
     <div className="min-h-screen w-full bg-background pb-28 text-foreground font-body">
-      <header className="px-5 pt-12">
-        <div className="flex items-center justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.12em] text-muted-foreground">Topluluklar</p>
-            <h1 className="mt-1 font-heading text-[25px] font-extrabold tracking-[-0.055em] text-primary">
-              Gruplar
-            </h1>
-          </div>
-        </div>
-
-        <div className="relative mt-5">
+      <ScreenHeader eyebrow="Topluluklar" title="Gruplar" className="pb-0" />
+      <div className="px-5 pb-5 pt-5">
+        <div className="relative">
           <iconify-icon
             icon="lucide:search"
             class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-lg text-muted-foreground"
@@ -415,7 +408,7 @@ export default function Gruplar() {
           <iconify-icon icon="lucide:plus" class="text-lg"></iconify-icon>
           Yeni grup kur
         </button>
-      </header>
+      </div>
 
       <main className="pt-6">
         {loading ? (

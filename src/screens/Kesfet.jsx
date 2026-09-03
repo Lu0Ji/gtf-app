@@ -7,6 +7,7 @@ import { CATEGORY_META } from '../lib/categories.js'
 import { addSearchHistoryEntry } from '../lib/searchHistory.js'
 import DifficultyChip from '../components/DifficultyChip.jsx'
 import { useUserSettings } from '../hooks/useUserSettings.js'
+import ScreenHeader from '../components/ui/ScreenHeader.jsx'
 
 const SEARCH_PAGE_SIZE = 15
 
@@ -325,14 +326,9 @@ export default function Kesfet() {
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-body pb-28">
-      <header className="px-5 pt-12 pb-5">
-        <div>
-          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-muted-foreground">Keşfet</p>
-          <h1 className="mt-1 font-heading text-[27px] font-extrabold tracking-[-0.06em] text-primary">
-            Geleceğin izinde
-          </h1>
-        </div>
-        <div className="mt-4 flex items-center gap-2 rounded-theme border border-border bg-card px-4 py-3 shadow-sm">
+      <ScreenHeader eyebrow="Keşfet" title="Geleceğin izinde" className="pb-0" />
+      <div className="px-5 pb-5 pt-4">
+        <div className="flex items-center gap-2 rounded-theme border border-border bg-card px-4 py-3 shadow-sm">
           <iconify-icon icon="lucide:search" class="text-lg text-muted-foreground"></iconify-icon>
           <input
             value={query}
@@ -346,7 +342,7 @@ export default function Kesfet() {
             </button>
           )}
         </div>
-      </header>
+      </div>
 
       <main>
         {query.trim() ? (
