@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
+import DetailHeader from '../components/ui/DetailHeader.jsx'
 
 const OPTIONS = [
   { value: 'everyone', icon: 'lucide:users', title: 'Herkes', desc: 'Takip etmediğin kişiler de mesaj gönderebilir' },
@@ -35,19 +36,7 @@ export default function MesajIstekleri() {
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-body pb-28">
-      <header className="sticky top-0 z-20 border-b border-border/80 bg-background/95 px-5 pb-4 pt-12 backdrop-blur-md">
-        <div className="flex items-center justify-between">
-          <button
-            aria-label="Geri dön"
-            onClick={() => navigate(-1)}
-            className="flex h-10 w-10 items-center justify-center rounded-theme border border-border bg-card text-foreground shadow-sm"
-          >
-            <iconify-icon icon="lucide:arrow-left" class="text-[19px]"></iconify-icon>
-          </button>
-          <h1 className="font-heading text-[17px] font-extrabold tracking-[-0.035em]">Mesaj İstekleri</h1>
-          <div className="h-10 w-10" />
-        </div>
-      </header>
+      <DetailHeader title="Mesaj İstekleri" />
 
       <main className="px-5 pt-6">
         <section>

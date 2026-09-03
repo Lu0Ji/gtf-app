@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import { formatDateLong } from '../lib/format.js'
+import DetailHeader from '../components/ui/DetailHeader.jsx'
 
 const DURATIONS = [
   { days: 7, label: '7 gün', note: 'Kısa ara' },
@@ -58,21 +59,7 @@ export default function HesabiDondur() {
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-body pb-28">
-      <header className="sticky top-0 z-20 border-b border-border/70 bg-background/95 px-5 pb-3 pt-12 backdrop-blur-md">
-        <div className="flex items-center gap-3">
-          <button
-            aria-label="Geri dön"
-            onClick={() => navigate(-1)}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-theme border border-border bg-card text-foreground shadow-sm"
-          >
-            <iconify-icon icon="lucide:arrow-left" class="text-[19px]"></iconify-icon>
-          </button>
-          <div>
-            <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-muted-foreground">Hesap ayarları</p>
-            <h1 className="font-heading text-xl font-extrabold tracking-[-0.04em]">Hesabı dondur</h1>
-          </div>
-        </div>
-      </header>
+      <DetailHeader eyebrow="Hesap ayarları" title="Hesabı dondur" />
 
       <main className="px-5 pb-8 pt-6">
         <section>

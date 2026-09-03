@@ -1,10 +1,9 @@
 import { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase.js'
 import { useToast } from '../contexts/ToastContext.jsx'
+import DetailHeader from '../components/ui/DetailHeader.jsx'
 
 export default function IkiAsamaliDogrulama() {
-  const navigate = useNavigate()
   const { showToast } = useToast()
   const [factor, setFactor] = useState(null) // verified TOTP factor, or null
   const [loading, setLoading] = useState(true)
@@ -97,17 +96,7 @@ export default function IkiAsamaliDogrulama() {
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-body pb-10">
-      <header className="flex items-center justify-between px-5 pt-12">
-        <button
-          aria-label="Geri dön"
-          onClick={() => navigate(-1)}
-          className="flex h-10 w-10 items-center justify-center rounded-theme border border-border bg-card text-foreground shadow-sm"
-        >
-          <iconify-icon icon="lucide:arrow-left" class="text-[19px]"></iconify-icon>
-        </button>
-        <h1 className="font-heading text-base font-extrabold tracking-[-0.035em]">Hesap güvenliği</h1>
-        <div className="h-10 w-10" />
-      </header>
+      <DetailHeader title="Hesap güvenliği" />
 
       <main className="px-5 pt-8">
         <section>

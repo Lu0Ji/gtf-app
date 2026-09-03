@@ -196,7 +196,7 @@ you import instead of re-deriving:
 - `Button.jsx` — `primary` / `secondary` / `ghost` variants, tap feedback built in.
 - `Card.jsx` — the card shape, as a wrapper (or `as="button"` for a tap target).
 - `ScreenHeader.jsx` — eyebrow + Display title + optional trailing action.
-- `DetailHeader.jsx` — back-button header, centered or left-aligned (see §8).
+- `DetailHeader.jsx` — back-button header, centered or left-aligned, optional eyebrow above the title (see §8).
 - `SectionHeader.jsx` — Heading title + optional subtitle + optional trailing link.
 - `EmptyState.jsx` — icon + title + helper text + optional CTA.
 - `Chip.jsx` — neutral/success/destructive/accent pill.

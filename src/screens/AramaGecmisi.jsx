@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { getSearchHistory, removeSearchHistoryEntry, clearSearchHistory } from '../lib/searchHistory.js'
 import { formatTime, formatDateLong } from '../lib/format.js'
+import DetailHeader from '../components/ui/DetailHeader.jsx'
 
 function groupByDay(entries) {
   const todayKey = new Date().toDateString()
@@ -36,27 +37,20 @@ export default function AramaGecmisi() {
 
   return (
     <div className="relative min-h-screen w-full bg-background text-foreground font-body pb-8">
-      <header className="flex items-center justify-between px-5 pt-12">
-        <button
-          aria-label="Geri dön"
-          onClick={() => navigate(-1)}
-          className="flex h-10 w-10 items-center justify-center rounded-theme border border-border bg-card text-foreground shadow-sm"
-        >
-          <iconify-icon icon="lucide:arrow-left" class="text-[19px]"></iconify-icon>
-        </button>
-        <h1 className="font-heading text-[18px] font-extrabold tracking-[-0.04em]">Arama geçmişi</h1>
-        {entries.length > 0 ? (
-          <button
-            onClick={() => setShowClearConfirm(true)}
-            className="flex h-10 items-center gap-1.5 rounded-theme px-2 text-xs font-bold text-destructive"
-          >
-            <iconify-icon icon="lucide:trash-2" class="text-[17px]"></iconify-icon>
-            Temizle
-          </button>
-        ) : (
-          <div className="h-10 w-10" />
-        )}
-      </header>
+      <DetailHeader
+        title="Arama geçmişi"
+        action={
+          entries.length > 0 && (
+            <button
+              onClick={() => setShowClearConfirm(true)}
+              className="flex h-10 shrink-0 items-center gap-1.5 rounded-theme px-2 text-xs font-bold text-destructive"
+            >
+              <iconify-icon icon="lucide:trash-2" class="text-[17px]"></iconify-icon>
+              Temizle
+            </button>
+          )
+        }
+      />
 
       <main className="px-5 pt-6">
         <section className="rounded-theme border border-border bg-card p-4 shadow-sm">

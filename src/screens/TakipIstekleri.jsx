@@ -4,6 +4,7 @@ import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
+import DetailHeader from '../components/ui/DetailHeader.jsx'
 
 
 export default function TakipIstekleri() {
@@ -66,23 +67,10 @@ export default function TakipIstekleri() {
 
   return (
     <div className="min-h-screen w-full bg-background pb-10 text-foreground font-body">
-      <header className="sticky top-0 z-20 border-b border-border bg-background/95 px-5 pb-4 pt-12 backdrop-blur-md">
-        <div className="flex items-center gap-3">
-          <button
-            aria-label="Geri dön"
-            onClick={() => navigate(-1)}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-theme border border-border bg-card text-foreground shadow-sm"
-          >
-            <iconify-icon icon="lucide:arrow-left" class="text-[19px]"></iconify-icon>
-          </button>
-          <div className="min-w-0">
-            <h1 className="font-heading text-xl font-extrabold tracking-[-0.05em]">Takip istekleri</h1>
-            <p className="mt-0.5 text-[11px] text-muted-foreground">
-              {requests.length === 0 ? 'Bekleyen istek yok' : `${requests.length} bekleyen istek`}
-            </p>
-          </div>
-        </div>
-      </header>
+      <DetailHeader
+        title="Takip istekleri"
+        subtitle={requests.length === 0 ? 'Bekleyen istek yok' : `${requests.length} bekleyen istek`}
+      />
 
       <main className="px-5 pt-6">
         {loading ? (

@@ -6,6 +6,7 @@ import { useTheme } from '../contexts/ThemeContext.jsx'
 import { useUserSettings } from '../hooks/useUserSettings.js'
 import { supabase } from '../lib/supabase.js'
 import { getPushSubscriptionState, subscribeToPush, unsubscribeFromPush } from '../lib/pushNotifications.js'
+import DetailHeader from '../components/ui/DetailHeader.jsx'
 
 const THEME_OPTIONS = [
   { value: 'system', label: 'Sistem ayarı', desc: 'Cihazının temasını takip eder', icon: 'lucide:smartphone' },
@@ -460,21 +461,7 @@ export default function UygulamaAyarlari() {
 
   return (
     <div className="min-h-screen w-full bg-background pb-10 text-foreground font-body">
-      <header className="sticky top-0 z-20 border-b border-border bg-background/95 px-5 pb-4 pt-12 backdrop-blur-md">
-        <div className="flex items-center gap-3">
-          <button
-            aria-label="Geri dön"
-            onClick={() => navigate(-1)}
-            className="flex h-10 w-10 shrink-0 items-center justify-center rounded-theme border border-border bg-card text-foreground shadow-sm"
-          >
-            <iconify-icon icon="lucide:arrow-left" class="text-[19px]"></iconify-icon>
-          </button>
-          <div className="min-w-0">
-            <h1 className="font-heading text-xl font-extrabold tracking-[-0.05em]">Uygulama ayarları</h1>
-            <p className="mt-0.5 text-[11px] text-muted-foreground">Hesabın, deneyimin ve verilerin senin kontrolünde.</p>
-          </div>
-        </div>
-      </header>
+      <DetailHeader title="Uygulama ayarları" subtitle="Hesabın, deneyimin ve verilerin senin kontrolünde." />
 
       <main className="px-5 pb-8 pt-6">
         <section className="rounded-theme border-2 border-accent bg-accent/10 p-4 shadow-sm">

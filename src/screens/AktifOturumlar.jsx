@@ -1,10 +1,9 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase.js'
 import { useToast } from '../contexts/ToastContext.jsx'
+import DetailHeader from '../components/ui/DetailHeader.jsx'
 
 export default function AktifOturumlar() {
-  const navigate = useNavigate()
   const { showToast } = useToast()
   const [signingOut, setSigningOut] = useState(false)
 
@@ -22,17 +21,7 @@ export default function AktifOturumlar() {
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-body pb-28">
-      <header className="flex items-center justify-between px-5 pt-12">
-        <button
-          aria-label="Geri dön"
-          onClick={() => navigate(-1)}
-          className="flex h-10 w-10 items-center justify-center rounded-theme border border-border bg-card text-foreground shadow-sm"
-        >
-          <iconify-icon icon="lucide:arrow-left" class="text-[19px]"></iconify-icon>
-        </button>
-        <h1 className="font-heading text-[17px] font-extrabold tracking-[-0.035em]">Aktif oturumlar</h1>
-        <div className="h-10 w-10" />
-      </header>
+      <DetailHeader title="Aktif oturumlar" />
 
       <main className="px-5 pt-7">
         <section>

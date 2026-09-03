@@ -1,27 +1,14 @@
-import { useNavigate } from 'react-router-dom'
 import { useUserSettings } from '../hooks/useUserSettings.js'
 import { formatTime } from '../lib/format.js'
+import DetailHeader from '../components/ui/DetailHeader.jsx'
 
 export default function BolgeVeTarihBicimi() {
-  const navigate = useNavigate()
   const { settings, update } = useUserSettings()
   const now = new Date().toISOString()
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-body pb-10">
-      <header className="sticky top-0 z-20 border-b border-border bg-background/95 px-5 pt-12 backdrop-blur-md">
-        <div className="flex h-12 items-center justify-between">
-          <button
-            aria-label="Geri dön"
-            onClick={() => navigate(-1)}
-            className="flex h-10 w-10 items-center justify-center rounded-theme border border-border bg-card text-foreground shadow-sm"
-          >
-            <iconify-icon icon="lucide:arrow-left" class="text-[19px]"></iconify-icon>
-          </button>
-          <h1 className="font-heading text-[17px] font-extrabold tracking-[-0.035em]">Bölge ve Tarih Biçimi</h1>
-          <div className="h-10 w-10" />
-        </div>
-      </header>
+      <DetailHeader title="Bölge ve Tarih Biçimi" />
 
       <main className="px-5 pt-6">
         <section>
