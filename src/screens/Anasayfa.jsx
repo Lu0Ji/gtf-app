@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase, queryWithGroupIdFallback } from '../lib/supabase.js'
@@ -515,6 +515,29 @@ function PredictionFeed({ category }) {
     setLoadingMore(false)
   }
 
+  // Infinite scroll: a sentinel div at the bottom of the list triggers the
+  // same handleLoadMore a manual button used to. Kept in a ref (updated every
+  // render) rather than as an effect dependency — handleLoadMore closes over
+  // page/hasMore/loadingMore, and re-creating the observer on every one of
+  // those changes would be wasteful when just reading the latest one works.
+  // A *callback* ref (not a plain useRef + effect) is what re-attaches the
+  // observer correctly when the sentinel itself unmounts/remounts — e.g.
+  // hasMore flips false→true across a category switch's own reload.
+  const loadMoreRef = useRef(handleLoadMore)
+  loadMoreRef.current = handleLoadMore
+  const observerRef = useRef(null)
+  const sentinelCallbackRef = useCallback((node) => {
+    if (observerRef.current) observerRef.current.disconnect()
+    if (!node) return
+    observerRef.current = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) loadMoreRef.current()
+      },
+      { rootMargin: '600px 0px' }
+    )
+    observerRef.current.observe(node)
+  }, [])
+
   async function handleToggleLike(predictionId) {
     if (!user) return
     const current = socialById[predictionId] || EMPTY_SOCIAL
@@ -571,13 +594,14 @@ function PredictionFeed({ category }) {
         />
       ))}
       {hasMore && (
-        <button
-          onClick={handleLoadMore}
-          disabled={loadingMore}
-          className="mx-5 mt-4 flex h-11 w-[calc(100%-40px)] items-center justify-center gap-2 rounded-theme border border-border bg-card text-xs font-bold text-foreground shadow-sm disabled:opacity-60"
-        >
-          {loadingMore ? 'Yükleniyor…' : 'Daha fazla göster'}
-        </button>
+        <div ref={sentinelCallbackRef} className="mx-5 mt-4 flex h-11 items-center justify-center">
+          {loadingMore && (
+            <span className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
+              <iconify-icon icon="lucide:loader-2" class="animate-spin text-base"></iconify-icon>
+              Yükleniyor…
+            </span>
+          )}
+        </div>
       )}
     </>
   )
