@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useUserSettings } from '../hooks/useUserSettings.js'
-import { formatDateLong, formatDateTimeLong } from '../lib/format.js'
+import { formatDateLong, sealLabel } from '../lib/format.js'
 
 function dayLabel(dateStr) {
   const date = new Date(dateStr)
@@ -236,11 +236,7 @@ export default function Hareketler() {
                             )}
                           </div>
                           <p className="mt-2 text-[12px] font-semibold leading-5">{event.data.title}</p>
-                          {event.data.event_date && (
-                            <p className="mt-1 text-[10px] text-muted-foreground">
-                              {formatDateTimeLong(event.data.event_date)}'da açılacak
-                            </p>
-                          )}
+                          <p className="mt-1 text-[10px] text-muted-foreground">{sealLabel(event.data.event_date)}</p>
                         </div>
                       </EventRow>
                     )

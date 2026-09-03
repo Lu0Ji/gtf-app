@@ -37,6 +37,12 @@ export default function TahminOlustur() {
   const [title, setTitle] = useState(prefill?.title || '')
   const [sealedContent, setSealedContent] = useState('')
   const [eventDate, setEventDate] = useState(prefill?.eventDate || '')
+  // 'scheduled' (default, unchanged behaviour) — a chosen minute unlocks it
+  // for everyone. 'manual' — no date at all; only the author can open it,
+  // whenever they decide to, from Tahmin Kaydı. Once opened it's permanent —
+  // enforced server-side by verify_prediction()'s own state machine (sealed
+  // → verified_*, one-way), not by anything client-side.
+  const [unlockMode, setUnlockMode] = useState('scheduled')
   const [isSensitive, setIsSensitive] = useState(false)
   const [mediaFile, setMediaFile] = useState(null)
   const [mediaPreview, setMediaPreview] = useState(null)
@@ -45,7 +51,8 @@ export default function TahminOlustur() {
   const mediaInputRef = useRef(null)
 
   const eventDateIsFuture = isFutureDate(eventDate)
-  const canSubmit = title.trim().length > 0 && sealedContent.trim().length > 0 && eventDateIsFuture
+  const canSubmit =
+    title.trim().length > 0 && sealedContent.trim().length > 0 && (unlockMode === 'manual' || eventDateIsFuture)
 
   // Client-side check for fast feedback only — the storage bucket itself
   // enforces the real limit (see supabase/schema.sql's PREDICTION MEDIA —
@@ -100,7 +107,7 @@ export default function TahminOlustur() {
         sealed_content: sealedContent.trim(),
         status: 'sealed',
         is_private: isCapsule,
-        event_date: new Date(eventDate).toISOString(),
+        event_date: unlockMode === 'manual' ? null : new Date(eventDate).toISOString(),
         sealed_at: new Date().toISOString(),
       }
 
@@ -366,21 +373,57 @@ export default function TahminOlustur() {
         </section>
 
         <section>
-          <h2 className="font-heading text-[16px] font-extrabold tracking-tight">Açılış tarihi ve saati</h2>
+          <h2 className="font-heading text-[16px] font-extrabold tracking-tight">Açılış nasıl olsun?</h2>
           <p className="mt-1 text-[11px] leading-4 text-muted-foreground">
-            Kayıt bu ana kadar mühürlü kalır, an geçince herkese açılır — artık gün değil, dakikası dakikasına
-            seçebilirsin.
+            Bir an seç, o an gelince herkese açılsın — ya da tarih verme, tamamen sana bağlı kalsın.
           </p>
-          <DateTimePicker
-            value={eventDate}
-            onChange={setEventDate}
-            timeFormat={settings.region.timeFormat}
-          />
-          {eventDate && !eventDateIsFuture && (
-            <p className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold text-destructive">
-              <iconify-icon icon="lucide:circle-alert" class="text-sm"></iconify-icon>
-              Seçilen an artık geçmişte kaldı, lütfen ileri bir tarih/saat seç.
-            </p>
+          <div className="mt-3 flex rounded-theme bg-secondary p-1">
+            <button
+              type="button"
+              onClick={() => setUnlockMode('scheduled')}
+              className={`flex flex-1 items-center justify-center gap-2 rounded-[10px] px-3 py-3 text-sm font-bold ${
+                unlockMode === 'scheduled' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-secondary-foreground'
+              }`}
+            >
+              <iconify-icon icon="lucide:calendar-clock" class="text-base"></iconify-icon>
+              Bir an seç
+            </button>
+            <button
+              type="button"
+              onClick={() => setUnlockMode('manual')}
+              className={`flex flex-1 items-center justify-center gap-2 rounded-[10px] px-3 py-3 text-sm font-bold ${
+                unlockMode === 'manual' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-secondary-foreground'
+              }`}
+            >
+              <iconify-icon icon="lucide:hand" class="text-base"></iconify-icon>
+              Ben açarım
+            </button>
+          </div>
+
+          {unlockMode === 'scheduled' ? (
+            <>
+              <DateTimePicker
+                value={eventDate}
+                onChange={setEventDate}
+                timeFormat={settings.region.timeFormat}
+              />
+              {eventDate && !eventDateIsFuture && (
+                <p className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold text-destructive">
+                  <iconify-icon icon="lucide:circle-alert" class="text-sm"></iconify-icon>
+                  Seçilen an artık geçmişte kaldı, lütfen ileri bir tarih/saat seç.
+                </p>
+              )}
+            </>
+          ) : (
+            <div className="mt-3 flex gap-3 rounded-theme border border-dashed border-border bg-muted/60 p-4">
+              <iconify-icon icon="lucide:lock-keyhole" class="mt-0.5 shrink-0 text-lg text-primary"></iconify-icon>
+              <p className="text-xs leading-5 text-muted-foreground">
+                Bu kayıt kendiliğinden hiç açılmaz. Kayıt sayfasına gidip{' '}
+                <span className="font-semibold text-foreground">istediğin an</span> açabilirsin — 5 dakika sonra da
+                olur, bir yıl sonra da. Ama dikkat:{' '}
+                <span className="font-semibold text-foreground">bir kere açtığında geri mühürleyemezsin.</span>
+              </p>
+            </div>
           )}
         </section>
 

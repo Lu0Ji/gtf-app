@@ -5,7 +5,7 @@ import { supabase, queryWithGroupIdFallback } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import { useUserSettings } from '../hooks/useUserSettings.js'
-import { formatDateLong, formatDateTimeLong, timeAgo } from '../lib/format.js'
+import { formatDateLong, sealLabel, timeAgo } from '../lib/format.js'
 import { CATEGORIES as PREDICTION_CATEGORIES } from '../lib/categories.js'
 import DifficultyChip from '../components/DifficultyChip.jsx'
 import StreakFlame from '../components/StreakFlame.jsx'
@@ -326,7 +326,7 @@ function PredictionCard({ prediction, social, onToggleLike, onToggleSave }) {
                   <iconify-icon icon="lucide:calendar-days" class="text-base"></iconify-icon>
                 </div>
                 <div>
-                  <p className="text-xs font-bold">{formatDateTimeLong(prediction.event_date)}'da açılacak</p>
+                  <p className="text-xs font-bold">{sealLabel(prediction.event_date)}</p>
                   <p className="mt-0.5 text-[10px] text-muted-foreground">
                     Kayıt sabit; içerik açılana kadar gizli.
                   </p>

@@ -44,6 +44,14 @@ export function formatTimeUntil(dateStr) {
   return hoursLeft < 24 ? `${hoursLeft} saat sonra` : `${Math.round(hoursLeft / 24)} gün sonra`
 }
 
+// A sealed prediction's opening line, wherever a feed/list card shows one —
+// covers both unlock mechanics (see TahminOlustur's "Açılış nasıl olsun?"):
+// a scheduled event_date, or a manual seal (event_date null) that only opens
+// when its author decides to.
+export function sealLabel(eventDate) {
+  return eventDate ? `${formatDateTimeLong(eventDate)}'da açılacak` : 'Yazarı açana kadar mühürlü'
+}
+
 export function timeAgo(dateStr) {
   if (!dateStr) return ''
   const diffMs = Date.now() - new Date(dateStr).getTime()

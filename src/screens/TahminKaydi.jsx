@@ -136,11 +136,19 @@ export default function TahminKaydi() {
   const isVerified = record.status === 'verified_correct' || record.status === 'verified_incorrect'
   const isCorrect = record.status === 'verified_correct'
   const isOwner = user?.id === record.author_id
+  // No event_date at all → this was sealed in "Ben açarım" mode (see
+  // TahminOlustur.jsx): nothing opens it but the author's own choice, on
+  // no schedule. countdown.isPast is always true for these (useCountdown's
+  // epoch fallback above) — that's what makes canVerify available to the
+  // author immediately, at any time they choose.
+  const isManualSeal = !record.event_date
   const canVerify = isOwner && record.status === 'sealed' && countdown.isPast
-  // Anyone but the author, once the seal has opened — whether the author
-  // already resolved it (a vote against that is a dispute) or never
-  // showed up (a vote here is what resolves it in the first place).
-  const canVote = !isOwner && user && countdown.isPast && record.status !== 'open'
+  // Anyone but the author: once a result exists, disputing it is always
+  // fair game. While still sealed, a "the author's gone quiet, we'll vote
+  // instead" pressure-vote only makes sense when a real scheduled moment
+  // has actually passed — a manual seal has no such moment, so nobody but
+  // the author can move it out of "sealed" before they choose to.
+  const canVote = !isOwner && user && record.status !== 'open' && (isVerified || (!isManualSeal && countdown.isPast))
   const tierMeta = difficultyMeta(record.difficulty_tier)
 
   async function handleShare() {
@@ -559,27 +567,41 @@ export default function TahminKaydi() {
                   </div>
                 </div>
                 <span className="rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-bold">
-                  {countdown.isPast ? 'AÇILDI · SONUÇ BEKLENİYOR' : 'AÇILMADI'}
+                  {isManualSeal ? 'SANA BAĞLI' : countdown.isPast ? 'AÇILDI · SONUÇ BEKLENİYOR' : 'AÇILMADI'}
                 </span>
               </div>
 
               <div className="relative mt-6 rounded-theme border border-white/15 bg-white/10 p-4">
                 <div className="flex items-center justify-between">
                   <div>
-                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/60">Açılış zamanı</p>
-                    <p className="mt-1 font-heading text-base font-bold">{formatDateTimeLong(record.event_date)}</p>
+                    <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/60">
+                      {isManualSeal ? 'Açılış' : 'Açılış zamanı'}
+                    </p>
+                    <p className="mt-1 font-heading text-base font-bold">
+                      {isManualSeal ? 'Yazarı açana kadar mühürlü' : formatDateTimeLong(record.event_date)}
+                    </p>
                   </div>
-                  <iconify-icon icon="lucide:calendar-clock" class="text-2xl text-white/75"></iconify-icon>
+                  <iconify-icon
+                    icon={isManualSeal ? 'lucide:hand' : 'lucide:calendar-clock'}
+                    class="text-2xl text-white/75"
+                  ></iconify-icon>
                 </div>
                 <div className="mt-4 h-px bg-white/15" />
                 <div className="mt-4 flex items-center gap-2 text-xs text-white/75">
-                  <iconify-icon icon={countdown.isPast ? 'lucide:eye' : 'lucide:eye-off'} class="text-base"></iconify-icon>
+                  <iconify-icon
+                    icon={isManualSeal ? (isOwner ? 'lucide:eye' : 'lucide:eye-off') : countdown.isPast ? 'lucide:eye' : 'lucide:eye-off'}
+                    class="text-base"
+                  ></iconify-icon>
                   <span>
-                    {countdown.isPast
+                    {isManualSeal
                       ? isOwner
-                        ? 'Süre doldu. Sonucu aşağıdan işaretleyebilirsin.'
-                        : 'Süre doldu, yazar sonucu henüz işaretlemedi — aşağıdan sen oy verebilirsin.'
-                      : 'Tahmin metni açılışa kadar görüntülenemez.'}
+                        ? 'Ne zaman istersen sonucu aşağıdan işaretleyebilirsin — bir kere açtığında kayıt kalıcı olarak açık kalır.'
+                        : 'Bu kayıt yazarı açana kadar mühürlü kalacak. Ne zaman açılacağına yalnızca yazar karar verebilir.'
+                      : countdown.isPast
+                        ? isOwner
+                          ? 'Süre doldu. Sonucu aşağıdan işaretleyebilirsin.'
+                          : 'Süre doldu, yazar sonucu henüz işaretlemedi — aşağıdan sen oy verebilirsin.'
+                        : 'Tahmin metni açılışa kadar görüntülenemez.'}
                   </span>
                 </div>
               </div>
@@ -696,20 +718,22 @@ export default function TahminKaydi() {
                 </div>
               )}
 
-              <div className="relative mt-5 grid grid-cols-3 gap-2">
-                <div className="rounded-theme bg-white/10 px-2 py-3 text-center">
-                  <p className="font-heading text-lg font-extrabold">{countdown.isPast ? 0 : countdown.days}</p>
-                  <p className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/65">Gün</p>
+              {!isManualSeal && (
+                <div className="relative mt-5 grid grid-cols-3 gap-2">
+                  <div className="rounded-theme bg-white/10 px-2 py-3 text-center">
+                    <p className="font-heading text-lg font-extrabold">{countdown.isPast ? 0 : countdown.days}</p>
+                    <p className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/65">Gün</p>
+                  </div>
+                  <div className="rounded-theme bg-white/10 px-2 py-3 text-center">
+                    <p className="font-heading text-lg font-extrabold">{countdown.isPast ? 0 : countdown.hours}</p>
+                    <p className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/65">Saat</p>
+                  </div>
+                  <div className="rounded-theme bg-white/10 px-2 py-3 text-center">
+                    <p className="font-heading text-lg font-extrabold">{countdown.isPast ? 0 : countdown.minutes}</p>
+                    <p className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/65">Dakika</p>
+                  </div>
                 </div>
-                <div className="rounded-theme bg-white/10 px-2 py-3 text-center">
-                  <p className="font-heading text-lg font-extrabold">{countdown.isPast ? 0 : countdown.hours}</p>
-                  <p className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/65">Saat</p>
-                </div>
-                <div className="rounded-theme bg-white/10 px-2 py-3 text-center">
-                  <p className="font-heading text-lg font-extrabold">{countdown.isPast ? 0 : countdown.minutes}</p>
-                  <p className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/65">Dakika</p>
-                </div>
-              </div>
+              )}
             </div>
 
             <div className="border-t border-white/15 bg-black/10 px-5 py-3">

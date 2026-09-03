@@ -4,7 +4,7 @@ import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
-import { formatDateLong, formatDateTimeLong, timeAgo } from '../lib/format.js'
+import { formatDateLong, sealLabel, timeAgo } from '../lib/format.js'
 import BadgeShowcase from '../components/BadgeShowcase.jsx'
 import DifficultyChip from '../components/DifficultyChip.jsx'
 
@@ -75,7 +75,7 @@ function PredictionCard({ prediction }) {
       <div className="mt-3 flex items-center justify-between rounded-theme bg-muted px-3 py-2.5">
         <div className="flex items-center gap-2">
           <iconify-icon icon="lucide:calendar-days" class="text-base text-primary"></iconify-icon>
-          <span className="text-[11px] font-semibold">{formatDateTimeLong(prediction.event_date)}'da açılacak</span>
+          <span className="text-[11px] font-semibold">{sealLabel(prediction.event_date)}</span>
         </div>
         <span className="text-[10px] text-muted-foreground">{timeAgo(prediction.created_at)}</span>
       </div>
