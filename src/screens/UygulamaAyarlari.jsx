@@ -44,7 +44,7 @@ function Row({ icon, iconTone = 'bg-muted text-primary', title, subtitle, right,
   return (
     <Comp
       onClick={onClick}
-      className={`flex w-full items-center gap-3 p-4 text-left ${last ? '' : 'border-b border-border'}`}
+      className={`flex w-full items-center gap-3 p-4 text-left ${onClick ? 'transition-colors duration-150 active:bg-muted' : ''} ${last ? '' : 'border-b border-border'}`}
     >
       <span className={`flex h-10 w-10 shrink-0 items-center justify-center rounded-theme ${iconTone}`}>
         <iconify-icon icon={icon} class="text-lg"></iconify-icon>
@@ -693,7 +693,7 @@ export default function UygulamaAyarlari() {
                 <Comp
                   key={row.title}
                   onClick={onClick}
-                  className={`flex w-full items-center gap-3 p-4 text-left ${i < SUPPORT_ROWS.length - 1 ? 'border-b border-border' : ''}`}
+                  className={`flex w-full items-center gap-3 p-4 text-left ${isInteractive ? 'transition-colors duration-150 active:bg-muted' : ''} ${i < SUPPORT_ROWS.length - 1 ? 'border-b border-border' : ''}`}
                 >
                   <span className="flex h-10 w-10 items-center justify-center rounded-theme bg-muted text-primary">
                     <iconify-icon icon={row.icon} class="text-lg"></iconify-icon>

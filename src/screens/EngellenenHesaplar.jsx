@@ -91,7 +91,7 @@ export default function EngellenenHesaplar() {
                 <button
                   onClick={() => handleUnblock(row.blocked_id)}
                   disabled={busyId === row.blocked_id}
-                  className="shrink-0 rounded-theme border border-border bg-card px-3 py-2 text-xs font-bold text-foreground disabled:opacity-60"
+                  className="shrink-0 rounded-theme border border-border bg-card px-3 py-2 text-xs font-bold text-foreground transition-transform duration-150 active:scale-95 disabled:opacity-60 disabled:active:scale-100"
                 >
                   Engeli kaldır
                 </button>

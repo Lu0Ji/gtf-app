@@ -110,14 +110,14 @@ export default function TakipIstekleri() {
                   <button
                     onClick={() => handleDecline(row.follower_id)}
                     disabled={busyId === row.follower_id}
-                    className="rounded-theme border border-border bg-card px-3 py-2 text-xs font-bold text-foreground disabled:opacity-60"
+                    className="rounded-theme border border-border bg-card px-3 py-2 text-xs font-bold text-foreground transition-transform duration-150 active:scale-95 disabled:opacity-60 disabled:active:scale-100"
                   >
                     Reddet
                   </button>
                   <button
                     onClick={() => handleAccept(row.follower_id)}
                     disabled={busyId === row.follower_id}
-                    className="rounded-theme bg-primary px-3 py-2 text-xs font-bold text-primary-foreground disabled:opacity-60"
+                    className="rounded-theme bg-primary px-3 py-2 text-xs font-bold text-primary-foreground transition-transform duration-150 active:scale-95 disabled:opacity-60 disabled:active:scale-100"
                   >
                     Onayla
                   </button>

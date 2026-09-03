@@ -86,7 +86,7 @@ function SearchResults({ query, navigate }) {
               <button
                 key={p.id}
                 onClick={() => navigate(`/kullanici/${p.id}`)}
-                className={`flex w-full items-center gap-3 p-4 text-left ${i < profiles.length - 1 ? 'border-b border-border' : ''}`}
+                className={`flex w-full items-center gap-3 p-4 text-left transition-colors duration-150 active:bg-muted ${i < profiles.length - 1 ? 'border-b border-border' : ''}`}
               >
                 <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-muted">
                   <img src={p.avatar_url || fallbackAvatarFor(p.id)} alt={p.display_name} className="h-full w-full object-cover" />
