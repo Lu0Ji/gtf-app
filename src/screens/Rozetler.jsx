@@ -470,7 +470,7 @@ export default function Rozetler() {
       <div className="fixed inset-x-0 bottom-0 z-40 border-t border-border bg-card/95 px-5 py-3 backdrop-blur-md">
         <button
           onClick={() => setEditingShowcase(true)}
-          className="flex h-12 w-full items-center justify-center gap-2 rounded-theme bg-primary text-sm font-bold text-primary-foreground shadow-sm"
+          className="flex h-12 w-full items-center justify-center gap-2 rounded-theme bg-primary text-sm font-bold text-primary-foreground shadow-sm transition-transform duration-150 active:scale-[0.98]"
         >
           <iconify-icon icon="lucide:sliders-horizontal" class="text-lg"></iconify-icon>
           Rozet görünümünü düzenle

@@ -814,7 +814,7 @@ export default function TahminKaydi() {
         <div className="mx-auto max-w-[393px]">
           <button
             onClick={handleShare}
-            className="flex w-full items-center justify-center gap-2 rounded-theme bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-sm"
+            className="flex w-full items-center justify-center gap-2 rounded-theme bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-sm transition-transform duration-150 active:scale-[0.98]"
           >
             <iconify-icon icon={copied ? 'lucide:check' : 'lucide:share-2'} class="text-base"></iconify-icon>
             {copied ? 'Kopyalandı' : 'Başlığı kopyala'}

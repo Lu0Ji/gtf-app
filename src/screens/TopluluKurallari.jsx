@@ -186,7 +186,7 @@ export default function TopluluKurallari() {
       <div className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-background/95 px-5 pb-5 pt-3 backdrop-blur-md">
         <a
           href="mailto:aliyusufbusiness1@gmail.com?subject=GTF%20%C4%B0hlal%20Bildirimi"
-          className="flex h-12 w-full items-center justify-center gap-2 rounded-theme bg-primary text-sm font-bold text-primary-foreground shadow-sm"
+          className="flex h-12 w-full items-center justify-center gap-2 rounded-theme bg-primary text-sm font-bold text-primary-foreground shadow-sm transition-transform duration-150 active:scale-[0.98]"
         >
           <iconify-icon icon="lucide:flag" class="text-base"></iconify-icon>
           İhlal bildir

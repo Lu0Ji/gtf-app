@@ -447,14 +447,14 @@ export default function ProfilAyarlari() {
           <div className="flex gap-3">
             <button
               onClick={() => navigate(-1)}
-              className="flex h-12 flex-1 items-center justify-center rounded-theme border border-border bg-card text-sm font-bold text-secondary-foreground"
+              className="flex h-12 flex-1 items-center justify-center rounded-theme border border-border bg-card text-sm font-bold text-secondary-foreground transition-transform duration-150 active:scale-[0.98]"
             >
               Vazgeç
             </button>
             <button
               onClick={handleSave}
               disabled={saving}
-              className="flex h-12 flex-[1.45] items-center justify-center gap-2 rounded-theme bg-primary text-sm font-bold text-primary-foreground shadow-sm disabled:opacity-60"
+              className="flex h-12 flex-[1.45] items-center justify-center gap-2 rounded-theme bg-primary text-sm font-bold text-primary-foreground shadow-sm transition-transform duration-150 active:scale-[0.98] disabled:opacity-60 disabled:active:scale-100"
             >
               <iconify-icon icon="lucide:check" class="text-lg"></iconify-icon>
               {saving ? 'Kaydediliyor…' : 'Değişiklikleri kaydet'}

@@ -138,7 +138,7 @@ export default function EtiketlemeVeBahsetmeler() {
         <button
           onClick={handleSave}
           disabled={saving}
-          className="flex h-12 w-full items-center justify-center gap-2 rounded-theme bg-primary text-sm font-bold text-primary-foreground shadow-sm disabled:opacity-60"
+          className="flex h-12 w-full items-center justify-center gap-2 rounded-theme bg-primary text-sm font-bold text-primary-foreground shadow-sm transition-transform duration-150 active:scale-[0.98] disabled:opacity-60 disabled:active:scale-100"
         >
           <iconify-icon icon="lucide:check" class="text-[18px]"></iconify-icon>
           {saving ? 'Kaydediliyor…' : 'Değişiklikleri kaydet'}

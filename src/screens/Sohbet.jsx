@@ -350,7 +350,7 @@ export default function Sohbet() {
                 aria-label="Mesaj gönder"
                 onClick={handleSend}
                 disabled={!draft.trim() || sending}
-                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-theme bg-primary text-primary-foreground shadow-sm disabled:opacity-50"
+                className="flex h-12 w-12 shrink-0 items-center justify-center rounded-theme bg-primary text-primary-foreground shadow-sm transition-transform duration-150 active:scale-90 disabled:opacity-50 disabled:active:scale-100"
               >
                 <iconify-icon icon="lucide:send" class="text-xl"></iconify-icon>
               </button>

@@ -249,7 +249,7 @@ export default function SifreDegistir() {
         <button
           onClick={handleSubmit}
           disabled={!canSubmit || submitting}
-          className="flex h-12 w-full items-center justify-center gap-2 rounded-theme bg-primary text-sm font-bold text-primary-foreground shadow-sm disabled:opacity-50"
+          className="flex h-12 w-full items-center justify-center gap-2 rounded-theme bg-primary text-sm font-bold text-primary-foreground shadow-sm transition-transform duration-150 active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
         >
           <iconify-icon icon="lucide:shield-check" class="text-[18px]"></iconify-icon>
           {submitting ? 'Güncelleniyor…' : 'Şifreyi güncelle'}
