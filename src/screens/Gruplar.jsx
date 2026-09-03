@@ -6,6 +6,7 @@ import { supabase } from '../lib/supabase.js'
 import { formatTimeUntil } from '../lib/format.js'
 import { CATEGORY_META, GROUP_CATEGORIES as CATEGORIES } from '../lib/categories.js'
 import ScreenHeader from '../components/ui/ScreenHeader.jsx'
+import EmptyState from '../components/ui/EmptyState.jsx'
 
 function CreateGroupModal({ onClose, onCreated }) {
   const { user } = useAuth()
@@ -161,18 +162,6 @@ function CreateGroupModal({ onClose, onCreated }) {
 // A flat line of muted text reads as "nothing here" rather than "come back
 // once there's something" — an icon + a two-line pitch does more to make an
 // empty list feel like an invitation instead of a dead end.
-function EmptyState({ icon, title, subtitle }) {
-  return (
-    <div className="mx-5 mt-4 flex flex-col items-center gap-2 rounded-theme border border-dashed border-border bg-muted/60 p-6 text-center">
-      <div className="flex h-11 w-11 items-center justify-center rounded-full bg-card text-primary shadow-sm">
-        <iconify-icon icon={icon} class="text-xl"></iconify-icon>
-      </div>
-      <p className="text-sm font-bold text-foreground">{title}</p>
-      {subtitle && <p className="text-xs leading-5 text-muted-foreground">{subtitle}</p>}
-    </div>
-  )
-}
-
 function categoryTint(ink) {
   return `color-mix(in srgb, ${ink} 14%, white)`
 }
@@ -424,9 +413,10 @@ export default function Gruplar() {
               </div>
               {myGroups.length === 0 ? (
                 <EmptyState
+                  className="mx-5 mt-4"
                   icon={trimmedQuery ? 'lucide:search-x' : 'lucide:users-round'}
                   title={trimmedQuery ? 'Eşleşen bir grubun yok.' : 'Henüz bir gruba katılmadın.'}
-                  subtitle={
+                  description={
                     trimmedQuery
                       ? null
                       : otherGroups.length > 0
@@ -450,9 +440,10 @@ export default function Gruplar() {
               </div>
               {otherGroups.length === 0 ? (
                 <EmptyState
+                  className="mx-5 mt-4"
                   icon={trimmedQuery ? 'lucide:search-x' : 'lucide:compass'}
                   title={trimmedQuery ? 'Eşleşen bir grup yok.' : 'Henüz keşfedilecek başka grup yok.'}
-                  subtitle={trimmedQuery ? null : 'İlk grubu sen kur, herkes senin peşinden gelsin.'}
+                  description={trimmedQuery ? null : 'İlk grubu sen kur, herkes senin peşinden gelsin.'}
                 />
               ) : (
                 otherGroups.map((g) => (

@@ -8,6 +8,7 @@ import { formatDateLong, sealLabel, timeAgo } from '../lib/format.js'
 import BadgeShowcase from '../components/BadgeShowcase.jsx'
 import DifficultyChip from '../components/DifficultyChip.jsx'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
+import EmptyState from '../components/ui/EmptyState.jsx'
 
 
 const CATEGORY_ICONS = {
@@ -430,17 +431,14 @@ export default function KullaniciProfili() {
           </div>
 
           {profile.is_private && !isFollowing ? (
-            <div className="mx-5 mt-4 rounded-theme border border-dashed border-border bg-muted/60 p-6 text-center">
-              <iconify-icon icon="lucide:lock" class="mx-auto block text-2xl text-muted-foreground"></iconify-icon>
-              <p className="mt-3 text-sm font-bold text-foreground">Bu hesap gizli</p>
-              <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                Tahminlerini görmek için takip isteği gönder.
-              </p>
-            </div>
+            <EmptyState
+              className="mx-5 mt-4"
+              icon="lucide:lock"
+              title="Bu hesap gizli"
+              description="Tahminlerini görmek için takip isteği gönder."
+            />
           ) : predictions.length === 0 ? (
-            <div className="mx-5 mt-4 rounded-theme border border-dashed border-border bg-muted/60 p-6 text-center">
-              <p className="text-sm font-bold text-foreground">Henüz tahmini yok</p>
-            </div>
+            <EmptyState className="mx-5 mt-4" title="Henüz tahmini yok" />
           ) : (
             predictions.map((p) => <PredictionCard key={p.id} prediction={p} />)
           )}

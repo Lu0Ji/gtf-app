@@ -7,6 +7,7 @@ import { formatDateLong, sealLabel, timeAgo } from '../lib/format.js'
 import BadgeShowcase from '../components/BadgeShowcase.jsx'
 import DifficultyChip from '../components/DifficultyChip.jsx'
 import ScreenHeader from '../components/ui/ScreenHeader.jsx'
+import EmptyState from '../components/ui/EmptyState.jsx'
 
 
 const CATEGORY_ICONS = {
@@ -420,18 +421,20 @@ export default function Profil() {
             <p className="mx-5 mt-4 text-xs text-muted-foreground">Yükleniyor…</p>
           ) : activeTab === 'Tahminlerin' ? (
             predictions.length === 0 ? (
-              <div className="mx-5 mt-4 rounded-theme border border-dashed border-border bg-muted/60 p-6 text-center">
-                <p className="text-sm font-bold text-foreground">Henüz tahminin yok</p>
-                <p className="mt-1 text-xs text-muted-foreground">İlk tahminini oluştur, buradan takip et.</p>
-              </div>
+              <EmptyState
+                className="mx-5 mt-4"
+                title="Henüz tahminin yok"
+                description="İlk tahminini oluştur, buradan takip et."
+              />
             ) : (
               predictions.map((p) => <OwnPredictionCard key={p.id} prediction={p} />)
             )
           ) : savedPredictions.length === 0 ? (
-            <div className="mx-5 mt-4 rounded-theme border border-dashed border-border bg-muted/60 p-6 text-center">
-              <p className="text-sm font-bold text-foreground">Henüz kaydettiğin bir kayıt yok</p>
-              <p className="mt-1 text-xs text-muted-foreground">Beğendiğin tahminleri kaydet, buradan bul.</p>
-            </div>
+            <EmptyState
+              className="mx-5 mt-4"
+              title="Henüz kaydettiğin bir kayıt yok"
+              description="Beğendiğin tahminleri kaydet, buradan bul."
+            />
           ) : (
             savedPredictions.map((p) => <SavedPredictionCard key={p.id} prediction={p} />)
           )}
