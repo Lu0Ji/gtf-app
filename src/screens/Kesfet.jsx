@@ -7,6 +7,7 @@ import { CATEGORY_META } from '../lib/categories.js'
 import { addSearchHistoryEntry } from '../lib/searchHistory.js'
 import DifficultyChip from '../components/DifficultyChip.jsx'
 import Chip from '../components/ui/Chip.jsx'
+import Card from '../components/ui/Card.jsx'
 import { useUserSettings } from '../hooks/useUserSettings.js'
 import ScreenHeader from '../components/ui/ScreenHeader.jsx'
 
@@ -552,7 +553,7 @@ export default function Kesfet() {
               )}
             </section>
 
-            <section className="mx-5 mb-8 rounded-theme border border-border bg-card p-4 shadow-sm">
+            <Card as="section" className="mx-5 mb-8">
               <div className="flex items-start justify-between">
                 <div>
                   <div className="flex items-center gap-2">
@@ -596,7 +597,7 @@ export default function Kesfet() {
                   ))}
                 </div>
               )}
-            </section>
+            </Card>
 
             <section className="mb-5">
               <div className="flex items-end justify-between px-5">

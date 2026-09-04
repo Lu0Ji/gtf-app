@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import { formatDateLong } from '../lib/format.js'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
+import Card from '../components/ui/Card.jsx'
 
 const DURATIONS = [
   { days: 7, label: '7 gün', note: 'Kısa ara' },
@@ -79,7 +80,7 @@ export default function HesabiDondur() {
           </div>
         </section>
 
-        <section className="mt-6 rounded-theme border border-border bg-card p-4 shadow-sm">
+        <Card as="section" className="mt-6">
           <div className="flex items-center gap-2">
             <iconify-icon icon="lucide:info" class="text-lg text-primary"></iconify-icon>
             <h2 className="font-heading text-[15px] font-bold tracking-[-0.02em]">Dondurunca ne olur?</h2>
@@ -110,7 +111,7 @@ export default function HesabiDondur() {
               </div>
             </div>
           </div>
-        </section>
+        </Card>
 
         <section className="mt-7">
           <h2 className="font-heading text-[17px] font-bold tracking-[-0.03em]">Dondurma süresi</h2>
@@ -171,7 +172,7 @@ export default function HesabiDondur() {
           </div>
         </section>
 
-        <section className="mt-7 rounded-theme border border-border bg-card p-4 shadow-sm">
+        <Card as="section" className="mt-7">
           <div className="flex items-center gap-2">
             <iconify-icon icon="lucide:shield-check" class="text-lg text-success"></iconify-icon>
             <h2 className="font-heading text-[15px] font-bold tracking-[-0.02em]">Kimliğini doğrula</h2>
@@ -190,7 +191,7 @@ export default function HesabiDondur() {
             />
           </div>
           {error && <p className="mt-2 text-[11px] font-semibold text-destructive">{error}</p>}
-        </section>
+        </Card>
 
         <p className="mt-5 px-1 text-center text-[11px] leading-4 text-muted-foreground">
           Dondurma işlemini onayladığında, GTF hesabının seçtiğin süre boyunca geçici olarak devre dışı

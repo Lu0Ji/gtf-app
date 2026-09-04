@@ -4,6 +4,7 @@ import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
+import Card from '../components/ui/Card.jsx'
 
 const CRITERIA = [
   { key: 'length', label: 'En az 10 karakter', test: (v) => v.length >= 10 },
@@ -81,7 +82,7 @@ export default function SifreDegistir() {
           </div>
         </section>
 
-        <section className="mt-7 rounded-theme border border-border bg-card p-4 shadow-sm">
+        <Card as="section" className="mt-7">
           <div>
             <label className="mb-2 block text-xs font-bold text-foreground">Mevcut şifre</label>
             <div
@@ -184,7 +185,7 @@ export default function SifreDegistir() {
               </p>
             )}
           </div>
-        </section>
+        </Card>
 
         <section className="mt-5 rounded-theme bg-muted p-4">
           <div className="flex items-center gap-2">
@@ -207,7 +208,7 @@ export default function SifreDegistir() {
           </div>
         </section>
 
-        <section className="mt-5 rounded-theme border border-border bg-card p-4 shadow-sm">
+        <Card as="section" className="mt-5">
           <div className="flex items-start gap-3">
             <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-secondary text-primary">
               <iconify-icon icon="lucide:monitor-smartphone" class="text-[17px]"></iconify-icon>
@@ -232,7 +233,7 @@ export default function SifreDegistir() {
               />
             </button>
           </div>
-        </section>
+        </Card>
 
         <section className="mt-5 flex items-start gap-3 rounded-theme border border-success/30 bg-success/10 px-4 py-3">
           <iconify-icon icon="lucide:badge-check" class="mt-0.5 text-[18px] text-success"></iconify-icon>

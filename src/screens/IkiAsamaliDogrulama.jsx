@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { supabase } from '../lib/supabase.js'
 import { useToast } from '../contexts/ToastContext.jsx'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
+import Card from '../components/ui/Card.jsx'
 
 export default function IkiAsamaliDogrulama() {
   const { showToast } = useToast()
@@ -117,7 +118,7 @@ export default function IkiAsamaliDogrulama() {
         </section>
 
         {enrolling ? (
-          <section className="mt-7 rounded-theme border border-border bg-card p-4 shadow-sm">
+          <Card as="section" className="mt-7">
             <h2 className="font-heading text-[15px] font-bold">Doğrulayıcı uygulamayla bağla</h2>
             <p className="mt-1 text-xs leading-5 text-muted-foreground">
               Google Authenticator, Authy gibi bir uygulamayla aşağıdaki kodu tara.
@@ -154,7 +155,7 @@ export default function IkiAsamaliDogrulama() {
                 {busy ? 'Doğrulanıyor…' : 'Etkinleştir'}
               </button>
             </div>
-          </section>
+          </Card>
         ) : (
           <>
             <section className="mt-7 overflow-hidden rounded-theme border border-border bg-card shadow-sm">

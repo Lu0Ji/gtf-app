@@ -9,6 +9,7 @@ import { formatDateLong, sealLabel, timeAgo } from '../lib/format.js'
 import { CATEGORIES as PREDICTION_CATEGORIES } from '../lib/categories.js'
 import DifficultyChip from '../components/DifficultyChip.jsx'
 import Chip from '../components/ui/Chip.jsx'
+import Card from '../components/ui/Card.jsx'
 import StreakFlame from '../components/StreakFlame.jsx'
 import { rankFeed } from '../lib/feedRanking.js'
 
@@ -57,7 +58,7 @@ function ComposeCard() {
   const { profile } = useAuth()
 
   return (
-    <section className="mx-5 rounded-theme border border-border bg-card p-4 shadow-sm">
+    <Card as="section" className="mx-5">
       <div className="flex items-center gap-3">
         <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full">
           <img src={profile?.avatar_url || fallbackAvatarFor(profile?.id)} alt="Profilin" className="h-full w-full object-cover" />
@@ -94,7 +95,7 @@ function ComposeCard() {
           <iconify-icon icon="lucide:plus" class="text-lg"></iconify-icon>
         </button>
       </div>
-    </section>
+    </Card>
   )
 }
 
@@ -206,7 +207,7 @@ function StatsBanner() {
   if (!stats || (stats.sealed === 0 && stats.verified === 0)) return null
 
   return (
-    <section className="mx-5 mt-5 rounded-theme border border-border bg-card p-4 shadow-sm">
+    <Card as="section" className="mx-5 mt-5">
       <div className="flex items-center gap-3">
         <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-theme bg-secondary text-primary">
           <iconify-icon icon="lucide:activity" class="text-lg"></iconify-icon>
@@ -219,7 +220,7 @@ function StatsBanner() {
           </p>
         </div>
       </div>
-    </section>
+    </Card>
   )
 }
 
@@ -231,9 +232,10 @@ function PredictionCard({ prediction, social, onToggleLike, onToggleSave }) {
   const { liked, likeCount, saved, commentCount } = social
 
   return (
-    <article
+    <Card
+      as="article"
       onClick={() => navigate('/tahmin-kaydi', { state: { prediction } })}
-      className="mx-5 mt-4 cursor-pointer rounded-theme border border-border bg-card p-4 shadow-sm"
+      className="mx-5 mt-4 cursor-pointer"
     >
       <div className="flex items-start gap-3">
         <button
@@ -374,7 +376,7 @@ function PredictionCard({ prediction, social, onToggleLike, onToggleSave }) {
           </div>
         </div>
       </div>
-    </article>
+    </Card>
   )
 }
 

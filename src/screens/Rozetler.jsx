@@ -6,6 +6,7 @@ import { formatDateLong } from '../lib/format.js'
 import { TIERS, computeBadgeStats, evaluateBadges } from '../lib/badges.js'
 import BadgeMedallion from '../components/BadgeMedallion.jsx'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
+import Card from '../components/ui/Card.jsx'
 
 const INITIAL_PER_TIER = 6
 
@@ -270,7 +271,7 @@ export default function Rozetler() {
         ) : (
           <main className="px-5">
             <section className="pt-5">
-              <div className="rounded-theme border border-border bg-card p-4 shadow-sm">
+              <Card>
                 <div className="flex items-start justify-between">
                   <div>
                     <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">Koleksiyon özeti</p>
@@ -297,7 +298,7 @@ export default function Rozetler() {
                     <p className="text-[10px] font-medium text-muted-foreground">Bu ay</p>
                   </div>
                 </div>
-              </div>
+              </Card>
             </section>
 
             <section className="mt-6">
@@ -319,7 +320,7 @@ export default function Rozetler() {
                   {showcaseBadges.map((badge) => {
                     const tier = TIERS.find((t) => t.key === badge.tier)
                     return (
-                      <article key={badge.slug} className="min-w-[202px] rounded-theme border border-border bg-card p-4 shadow-sm">
+                      <Card as="article" key={badge.slug} className="min-w-[202px]">
                         <div className="flex items-start justify-between">
                           <BadgeMedallion icon={badge.icon} tier={tier} earned size="md" />
                           <button aria-label="Vitrinden kaldır" onClick={() => toggleShowcase(badge.slug)} className="text-muted-foreground">
@@ -330,7 +331,7 @@ export default function Rozetler() {
                         <p className="mt-1 text-[10px] font-bold" style={{ color: tier.ink }}>
                           {tier.label}
                         </p>
-                      </article>
+                      </Card>
                     )
                   })}
                 </div>

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { getSearchHistory, removeSearchHistoryEntry, clearSearchHistory } from '../lib/searchHistory.js'
 import { formatTime, formatDateLong } from '../lib/format.js'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
+import Card from '../components/ui/Card.jsx'
 
 function groupByDay(entries) {
   const todayKey = new Date().toDateString()
@@ -53,7 +54,7 @@ export default function AramaGecmisi() {
       />
 
       <main className="px-5 pt-6">
-        <section className="rounded-theme border border-border bg-card p-4 shadow-sm">
+        <Card as="section">
           <div className="flex items-start gap-3">
             <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-theme bg-secondary text-primary">
               <iconify-icon icon="lucide:history" class="text-xl"></iconify-icon>
@@ -65,7 +66,7 @@ export default function AramaGecmisi() {
               </p>
             </div>
           </div>
-        </section>
+        </Card>
 
         {grouped.length === 0 ? (
           <p className="mt-8 text-center text-xs text-muted-foreground">Henüz bir arama geçmişin yok.</p>

@@ -7,6 +7,7 @@ import { formatDateLong, sealLabel, timeAgo } from '../lib/format.js'
 import BadgeShowcase from '../components/BadgeShowcase.jsx'
 import DifficultyChip from '../components/DifficultyChip.jsx'
 import Chip from '../components/ui/Chip.jsx'
+import Card from '../components/ui/Card.jsx'
 import ScreenHeader from '../components/ui/ScreenHeader.jsx'
 import EmptyState from '../components/ui/EmptyState.jsx'
 
@@ -57,7 +58,7 @@ function OwnPredictionCard({ prediction }) {
   }
 
   return (
-    <div className="mx-5 mt-3 rounded-theme border border-border bg-card p-4 shadow-sm">
+    <Card className="mx-5 mt-3">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5">
           <Chip>{prediction.category?.toUpperCase()}</Chip>
@@ -76,7 +77,7 @@ function OwnPredictionCard({ prediction }) {
         </div>
         <span className="text-[10px] text-muted-foreground">{timeAgo(prediction.created_at)}</span>
       </div>
-    </div>
+    </Card>
   )
 }
 
@@ -335,7 +336,7 @@ export default function Profil() {
         </section>
 
         {hasWeeklyActivity && (
-          <section className="mx-5 mt-4 rounded-theme border border-border bg-card p-4 shadow-sm">
+          <Card as="section" className="mx-5 mt-4">
             <div className="flex items-center gap-2">
               <span className="flex h-8 w-8 items-center justify-center rounded-theme bg-secondary text-primary">
                 <iconify-icon icon="lucide:calendar-clock" class="text-base"></iconify-icon>
@@ -362,7 +363,7 @@ export default function Profil() {
                 <p className="mt-0.5 text-[10px] text-muted-foreground">Açılan</p>
               </div>
             </div>
-          </section>
+          </Card>
         )}
 
         {categoryAccuracy.length > 0 && (

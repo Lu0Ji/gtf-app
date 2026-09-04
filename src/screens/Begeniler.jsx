@@ -4,6 +4,7 @@ import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
+import Card from '../components/ui/Card.jsx'
 import { formatDateLong, formatTime, sealLabel, timeAgo } from '../lib/format.js'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
 
@@ -97,10 +98,11 @@ export default function Begeniler() {
                 const author = p.profiles
                 const isVerified = p.status === 'verified_correct' || p.status === 'verified_incorrect'
                 return (
-                  <article
+                  <Card
+                    as="article"
                     key={p.id}
                     onClick={() => navigate('/tahmin-kaydi', { state: { prediction: p } })}
-                    className="mt-3 cursor-pointer rounded-theme border border-border bg-card p-4 shadow-sm"
+                    className="mt-3 cursor-pointer"
                   >
                     <div className="flex items-start gap-3">
                       <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-secondary">
@@ -142,7 +144,7 @@ export default function Begeniler() {
                         </div>
                       </div>
                     </div>
-                  </article>
+                  </Card>
                 )
               })}
             </section>

@@ -4,6 +4,7 @@ import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
+import Card from '../components/ui/Card.jsx'
 
 const CUSTOM_THEME_NAME = 'Özel renk'
 
@@ -197,7 +198,7 @@ export default function ProfilAyarlari() {
           <h2 className="font-heading text-lg font-bold tracking-[-0.04em]">Temel bilgiler</h2>
           <p className="mt-1 text-xs text-muted-foreground">Adın, kullanıcı adın ve biyografin</p>
 
-          <div className="mt-4 space-y-4 rounded-theme border border-border bg-card p-4 shadow-sm">
+          <Card className="mt-4 space-y-4">
             <div>
               <label className="mb-2 block text-sm font-bold text-foreground">Görünen ad</label>
               <input
@@ -227,7 +228,7 @@ export default function ProfilAyarlari() {
                 className="w-full resize-none rounded-theme border border-border bg-input px-4 py-3 text-sm leading-5 text-foreground shadow-sm outline-none"
               />
             </div>
-          </div>
+          </Card>
         </section>
 
         <section className="mt-7 px-5">
@@ -279,7 +280,7 @@ export default function ProfilAyarlari() {
           <h2 className="font-heading text-lg font-bold tracking-[-0.04em]">Profil fotoğrafı</h2>
           <p className="mt-1 text-xs text-muted-foreground">Tanıdıkların seni daha kolay bulsun</p>
 
-          <div className="mt-4 flex items-center gap-4 rounded-theme border border-border bg-card p-4 shadow-sm">
+          <Card className="mt-4 flex items-center gap-4">
             <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full border-2 border-secondary">
               <img src={previewAvatar} alt={displayName || 'Profil fotoğrafı'} className="h-full w-full object-cover" />
             </div>
@@ -303,7 +304,7 @@ export default function ProfilAyarlari() {
             >
               <iconify-icon icon="lucide:camera" class="text-lg"></iconify-icon>
             </button>
-          </div>
+          </Card>
         </section>
 
         <section className="mt-7 px-5">

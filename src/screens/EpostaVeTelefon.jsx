@@ -3,6 +3,7 @@ import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
+import Card from '../components/ui/Card.jsx'
 
 export default function EpostaVeTelefon() {
   const { user, profile, refreshProfile } = useAuth()
@@ -59,7 +60,7 @@ export default function EpostaVeTelefon() {
         </section>
 
         <section className="mt-7 space-y-4">
-          <article className="rounded-theme border border-border bg-card p-4 shadow-sm">
+          <Card as="article">
             <div className="flex items-start justify-between gap-3">
               <div className="flex min-w-0 gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-theme bg-secondary text-secondary-foreground">
@@ -107,9 +108,9 @@ export default function EpostaVeTelefon() {
                 </button>
               </div>
             )}
-          </article>
+          </Card>
 
-          <article className="rounded-theme border border-border bg-card p-4 shadow-sm">
+          <Card as="article">
             <div className="flex items-start justify-between gap-3">
               <div className="flex min-w-0 gap-3">
                 <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-theme bg-muted text-secondary-foreground">
@@ -151,7 +152,7 @@ export default function EpostaVeTelefon() {
                 </button>
               </div>
             )}
-          </article>
+          </Card>
         </section>
 
         <section className="mt-5 rounded-theme bg-muted px-4 py-3.5">
