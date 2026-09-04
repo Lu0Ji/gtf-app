@@ -1,17 +1,18 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
 
-const OPTIONS = [
-  { value: 'everyone', icon: 'lucide:users', title: 'Herkes', desc: 'Takip etmediğin kişiler de mesaj gönderebilir' },
-  { value: 'following', icon: 'lucide:user-check', title: 'Yalnızca takip ettiklerim', desc: 'Sadece takip ettiğin kişiler yazabilir' },
-  { value: 'none', icon: 'lucide:ban', title: 'Hiç kimse', desc: 'Yeni mesajları kapat' },
-]
-
 export default function MesajIstekleri() {
+  const { t } = useTranslation()
+  const OPTIONS = [
+    { value: 'everyone', icon: 'lucide:users', title: t('settings.messageRequests.everyone'), desc: t('settings.messageRequests.everyoneDesc') },
+    { value: 'following', icon: 'lucide:user-check', title: t('settings.messageRequests.onlyFollowing'), desc: t('settings.messageRequests.onlyFollowingDesc') },
+    { value: 'none', icon: 'lucide:ban', title: t('settings.messageRequests.noOne'), desc: t('settings.messageRequests.noOneDesc') },
+  ]
   const navigate = useNavigate()
   const { user, profile, refreshProfile } = useAuth()
   const { showToast } = useToast()
@@ -24,19 +25,17 @@ export default function MesajIstekleri() {
     const { error } = await supabase.from('profiles').update({ message_permission: permission }).eq('id', user.id)
     setSaving(false)
     if (error) {
-      showToast(
-        error.code === '42703' ? 'Bu özellik henüz etkin değil.' : 'Kaydedilemedi, tekrar dene.'
-      )
+      showToast(error.code === '42703' ? t('common.featureNotEnabledYet') : t('common.saveFailedGeneric'))
       return
     }
     await refreshProfile()
-    showToast('Mesaj tercihini kaydettik.', 'success')
+    showToast(t('settings.messageRequests.saveSuccess'), 'success')
     navigate(-1)
   }
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-body pb-28">
-      <DetailHeader title="Mesaj İstekleri" />
+      <DetailHeader title={t('settings.messageRequests.title')} />
 
       <main className="px-5 pt-6">
         <section>
@@ -45,13 +44,11 @@ export default function MesajIstekleri() {
               <iconify-icon icon="lucide:mail-check" class="text-[22px]"></iconify-icon>
             </div>
             <div className="pt-0.5">
-              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">Gizlilik</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">{t('settings.messageRequests.eyebrow')}</p>
               <h2 className="mt-1 font-heading text-[23px] font-extrabold leading-7 tracking-[-0.05em]">
-                Kim sana mesaj atabilir
+                {t('settings.messageRequests.heading')}
               </h2>
-              <p className="mt-2 text-[13px] leading-5 text-muted-foreground">
-                Bu tercih dışındaki biri sana mesaj göndermeye çalıştığında, mesajı gönderemez.
-              </p>
+              <p className="mt-2 text-[13px] leading-5 text-muted-foreground">{t('settings.messageRequests.body')}</p>
             </div>
           </div>
         </section>
@@ -94,10 +91,7 @@ export default function MesajIstekleri() {
             <div className="flex h-7 w-7 shrink-0 items-center justify-center rounded-full bg-card text-primary shadow-sm">
               <iconify-icon icon="lucide:lock-keyhole" class="text-sm"></iconify-icon>
             </div>
-            <p className="pt-0.5 text-[11px] leading-4 text-muted-foreground">
-              Spam filtreleme, ayrı istek klasörü ve otomatik silme gibi ek kontroller henüz yok — bu tercih
-              şu an yalnızca kimin sana mesaj gönderebileceğini belirler.
-            </p>
+            <p className="pt-0.5 text-[11px] leading-4 text-muted-foreground">{t('settings.messageRequests.footerNote')}</p>
           </div>
         </section>
       </main>
@@ -109,7 +103,7 @@ export default function MesajIstekleri() {
           className="flex h-12 w-full items-center justify-center gap-2 rounded-theme bg-primary text-sm font-bold text-primary-foreground shadow-sm transition-transform duration-150 active:scale-[0.98] disabled:opacity-60 disabled:active:scale-100"
         >
           <iconify-icon icon="lucide:check" class="text-[18px]"></iconify-icon>
-          {saving ? 'Kaydediliyor…' : 'Değişiklikleri kaydet'}
+          {saving ? t('common.saving') : t('common.saveChanges')}
         </button>
       </div>
     </div>

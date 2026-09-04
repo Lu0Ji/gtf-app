@@ -1,18 +1,19 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import { useUserSettings } from '../hooks/useUserSettings.js'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
 
-const OPTIONS = [
-  { value: 'everyone', icon: 'lucide:globe-2', title: 'Herkes', desc: "GTF'deki tüm kullanıcılar" },
-  { value: 'following', icon: 'lucide:users-round', title: 'Yalnızca takip ettiklerim', desc: 'Takip ettiğin kişiler' },
-  { value: 'none', icon: 'lucide:user-round-x', title: 'Hiç kimse', desc: 'İsmin yorumlarda @bahsedilemez' },
-]
-
 export default function EtiketlemeVeBahsetmeler() {
+  const { t } = useTranslation()
+  const OPTIONS = [
+    { value: 'everyone', icon: 'lucide:globe-2', title: t('settings.mentions.everyone'), desc: t('settings.mentions.everyoneDesc') },
+    { value: 'following', icon: 'lucide:users-round', title: t('settings.mentions.onlyFollowing'), desc: t('settings.mentions.onlyFollowingDesc') },
+    { value: 'none', icon: 'lucide:user-round-x', title: t('settings.mentions.noOne'), desc: t('settings.mentions.noOneDesc') },
+  ]
   const navigate = useNavigate()
   const { user, profile, refreshProfile } = useAuth()
   const { showToast } = useToast()
@@ -26,17 +27,17 @@ export default function EtiketlemeVeBahsetmeler() {
     const { error } = await supabase.from('profiles').update({ mention_permission: permission }).eq('id', user.id)
     setSaving(false)
     if (error) {
-      showToast(error.code === '42703' ? 'Bu özellik henüz etkin değil.' : 'Kaydedilemedi, tekrar dene.')
+      showToast(error.code === '42703' ? t('common.featureNotEnabledYet') : t('common.saveFailedGeneric'))
       return
     }
     await refreshProfile()
-    showToast('Bahsetme tercihini kaydettik.', 'success')
+    showToast(t('settings.mentions.saveSuccess'), 'success')
     navigate(-1)
   }
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-body pb-28">
-      <DetailHeader title="Etiketleme ve Bahsetmeler" />
+      <DetailHeader title={t('settings.mentions.title')} />
 
       <main className="px-5 pt-6">
         <section>
@@ -45,20 +46,18 @@ export default function EtiketlemeVeBahsetmeler() {
               <iconify-icon icon="lucide:at-sign" class="text-[23px]"></iconify-icon>
             </div>
             <div>
-              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">Gizlilik</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">{t('settings.mentions.eyebrow')}</p>
               <h2 className="mt-1 font-heading text-[23px] font-extrabold leading-7 tracking-[-0.05em]">
-                İsmin nerede görünsün?
+                {t('settings.mentions.heading')}
               </h2>
-              <p className="mt-2 max-w-[310px] text-[13px] leading-5 text-muted-foreground">
-                Yorumlarda @kullaniciadi yazarak kimlerin seni bahsedebileceğini seç.
-              </p>
+              <p className="mt-2 max-w-[310px] text-[13px] leading-5 text-muted-foreground">{t('settings.mentions.body')}</p>
             </div>
           </div>
         </section>
 
         <section className="mt-7">
           <div className="mb-3 flex items-center justify-between">
-            <h3 className="font-heading text-[15px] font-bold tracking-[-0.025em]">Kimler seni bahsedebilir?</h3>
+            <h3 className="font-heading text-[15px] font-bold tracking-[-0.025em]">{t('settings.mentions.whoCanMentionTitle')}</h3>
           </div>
 
           <div className="overflow-hidden rounded-theme border border-border bg-card shadow-sm">
@@ -94,7 +93,7 @@ export default function EtiketlemeVeBahsetmeler() {
         </section>
 
         <section className="mt-7">
-          <h3 className="mb-3 font-heading text-[15px] font-bold tracking-[-0.025em]">Kontrol seçenekleri</h3>
+          <h3 className="mb-3 font-heading text-[15px] font-bold tracking-[-0.025em]">{t('settings.mentions.controlOptionsTitle')}</h3>
 
           <div className="overflow-hidden rounded-theme border border-border bg-card shadow-sm">
             <div className="flex items-start gap-3 px-4 py-4">
@@ -102,10 +101,8 @@ export default function EtiketlemeVeBahsetmeler() {
                 <iconify-icon icon="lucide:bell-ring" class="text-[18px]"></iconify-icon>
               </div>
               <div className="min-w-0 flex-1 pr-2">
-                <h4 className="text-sm font-bold text-foreground">Bahsetme bildirimleri</h4>
-                <p className="mt-1 text-[11px] leading-4 text-muted-foreground">
-                  Bir yorumda ismin @ ile geçtiğinde Hareketler'de haber ver.
-                </p>
+                <h4 className="text-sm font-bold text-foreground">{t('settings.mentions.notifTitle')}</h4>
+                <p className="mt-1 text-[11px] leading-4 text-muted-foreground">{t('settings.mentions.notifBody')}</p>
               </div>
               <button
                 onClick={() => updateSettings('notifications', { mentions: !settings.notifications.mentions })}
@@ -126,10 +123,7 @@ export default function EtiketlemeVeBahsetmeler() {
         <section className="mt-6 rounded-theme bg-muted px-4 py-3">
           <div className="flex items-start gap-3">
             <iconify-icon icon="lucide:info" class="mt-0.5 text-[18px] text-primary"></iconify-icon>
-            <p className="text-[11px] leading-4 text-muted-foreground">
-              Şu an yalnızca yorumlarda @bahsetme destekleniyor. Tahmin metinlerinde ve grup içeriklerinde
-              bahsetme, geçmiş etiketleri gözden geçirme ve etiket onayı henüz yok.
-            </p>
+            <p className="text-[11px] leading-4 text-muted-foreground">{t('settings.mentions.footerNote')}</p>
           </div>
         </section>
       </main>
@@ -141,7 +135,7 @@ export default function EtiketlemeVeBahsetmeler() {
           className="flex h-12 w-full items-center justify-center gap-2 rounded-theme bg-primary text-sm font-bold text-primary-foreground shadow-sm transition-transform duration-150 active:scale-[0.98] disabled:opacity-60 disabled:active:scale-100"
         >
           <iconify-icon icon="lucide:check" class="text-[18px]"></iconify-icon>
-          {saving ? 'Kaydediliyor…' : 'Değişiklikleri kaydet'}
+          {saving ? t('common.saving') : t('common.saveChanges')}
         </button>
       </div>
     </div>

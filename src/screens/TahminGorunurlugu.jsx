@@ -1,11 +1,13 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
 
 export default function TahminGorunurlugu() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { user, profile, refreshProfile } = useAuth()
   const { showToast } = useToast()
@@ -23,34 +25,31 @@ export default function TahminGorunurlugu() {
     const { error } = await supabase.from('profiles').update({ is_private: isPrivate }).eq('id', user.id)
     setSaving(false)
     if (error) {
-      showToast('Kaydedilemedi, tekrar dene.')
+      showToast(t('common.saveFailedGeneric'))
       return
     }
     await refreshProfile()
-    showToast('Görünürlük tercihini kaydettik.', 'success')
+    showToast(t('settings.predictionVisibility.saveSuccess'), 'success')
     navigate(-1)
   }
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-body pb-28">
-      <DetailHeader title="Gizlilik" />
+      <DetailHeader title={t('settings.predictionVisibility.title')} />
 
       <main className="px-5 pt-7">
         <section>
-          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">Tahmin tercihleri</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.16em] text-primary">{t('settings.predictionVisibility.eyebrow')}</p>
           <h1 className="mt-2 font-heading text-[27px] font-extrabold leading-[1.1] tracking-[-0.055em]">
-            Tahmin görünürlüğü
+            {t('settings.predictionVisibility.heading')}
           </h1>
-          <p className="mt-3 max-w-[345px] text-[13px] leading-5 text-muted-foreground">
-            Herkese açık tahminlerinin kimler tarafından görülebileceğini seç. Grup içine gönderdiğin tahminler
-            her zaman o grubun üyeleriyle sınırlıdır.
-          </p>
+          <p className="mt-3 max-w-[345px] text-[13px] leading-5 text-muted-foreground">{t('settings.predictionVisibility.body')}</p>
         </section>
 
         <section className="mt-7 overflow-hidden rounded-theme border border-border bg-card shadow-sm">
           <div className="border-b border-border px-4 py-4">
-            <h2 className="font-heading text-base font-bold tracking-[-0.03em]">Kim görebilir</h2>
-            <p className="mt-1 text-[11px] leading-4 text-muted-foreground">Hesabının genel görünürlüğü</p>
+            <h2 className="font-heading text-base font-bold tracking-[-0.03em]">{t('settings.predictionVisibility.whoCanSeeTitle')}</h2>
+            <p className="mt-1 text-[11px] leading-4 text-muted-foreground">{t('settings.predictionVisibility.whoCanSeeSubtitle')}</p>
           </div>
 
           <div className="px-4">
@@ -62,9 +61,9 @@ export default function TahminGorunurlugu() {
                 <iconify-icon icon="lucide:globe-2" class="text-[20px]"></iconify-icon>
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-sm font-bold">Herkese açık</span>
+                <span className="block text-sm font-bold">{t('settings.predictionVisibility.public')}</span>
                 <span className="mt-0.5 block text-[11px] leading-4 text-muted-foreground">
-                  GTF'deki herkes profilinde görebilir.
+                  {t('settings.predictionVisibility.publicDesc')}
                 </span>
               </span>
               <span
@@ -84,9 +83,9 @@ export default function TahminGorunurlugu() {
                 <iconify-icon icon="lucide:users-round" class="text-[20px]"></iconify-icon>
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-sm font-bold">Yalnızca takipçilerim</span>
+                <span className="block text-sm font-bold">{t('settings.predictionVisibility.followersOnly')}</span>
                 <span className="mt-0.5 block text-[11px] leading-4 text-muted-foreground">
-                  Onayladığın takipçiler tahminlerini görür (Gizli hesap).
+                  {t('settings.predictionVisibility.followersOnlyDesc')}
                 </span>
               </span>
               <span
@@ -106,11 +105,8 @@ export default function TahminGorunurlugu() {
               <iconify-icon icon="lucide:archive" class="text-[18px]"></iconify-icon>
             </div>
             <div>
-              <h2 className="text-sm font-bold text-foreground">Tek bir tahmini kimseyle paylaşmak istemiyorsan</h2>
-              <p className="mt-1.5 text-[11px] leading-[1.55] text-muted-foreground">
-                Yeni tahmin oluştururken "Zaman kapsülü" modunu seç — bu hesap görünürlüğünden bağımsız,
-                tamamen kişisel kalır.
-              </p>
+              <h2 className="text-sm font-bold text-foreground">{t('settings.predictionVisibility.capsuleNoteTitle')}</h2>
+              <p className="mt-1.5 text-[11px] leading-[1.55] text-muted-foreground">{t('settings.predictionVisibility.capsuleNoteBody')}</p>
             </div>
           </div>
         </section>
@@ -121,21 +117,15 @@ export default function TahminGorunurlugu() {
               <iconify-icon icon="lucide:stamp" class="text-[18px]"></iconify-icon>
             </div>
             <div>
-              <h2 className="text-sm font-bold text-foreground">Mühürlü kayıtlar korunur</h2>
-              <p className="mt-1.5 text-[11px] leading-[1.55] text-muted-foreground">
-                Görünürlük seçimin ne olursa olsun, mühürlü tahmininin içeriği açılış tarihine kadar kimse
-                tarafından okunamaz.
-              </p>
+              <h2 className="text-sm font-bold text-foreground">{t('settings.predictionVisibility.sealedNoteTitle')}</h2>
+              <p className="mt-1.5 text-[11px] leading-[1.55] text-muted-foreground">{t('settings.predictionVisibility.sealedNoteBody')}</p>
             </div>
           </div>
         </section>
 
         <section className="mt-6 flex items-start gap-2.5 px-1">
           <iconify-icon icon="lucide:info" class="mt-0.5 shrink-0 text-base text-muted-foreground"></iconify-icon>
-          <p className="text-[11px] leading-[1.55] text-muted-foreground">
-            Bu tercih, "Gizlilik → Gizli hesap" ayarınla aynı anahtarı kullanır — ikisinden birini değiştirmek
-            diğerini de günceller.
-          </p>
+          <p className="text-[11px] leading-[1.55] text-muted-foreground">{t('settings.predictionVisibility.footerNote')}</p>
         </section>
       </main>
 
@@ -146,7 +136,7 @@ export default function TahminGorunurlugu() {
           className="flex h-12 w-full items-center justify-center gap-2 rounded-theme bg-primary text-sm font-bold text-primary-foreground shadow-sm transition-transform duration-150 active:scale-[0.98] disabled:opacity-60 disabled:active:scale-100"
         >
           <iconify-icon icon="lucide:check" class="text-[18px]"></iconify-icon>
-          {saving ? 'Kaydediliyor…' : 'Değişiklikleri kaydet'}
+          {saving ? t('common.saving') : t('common.saveChanges')}
         </button>
       </div>
     </div>
