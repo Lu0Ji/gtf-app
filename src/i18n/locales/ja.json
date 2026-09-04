@@ -626,6 +626,22 @@
     "noSavedBody": "気に入った予測を保存すると、ここで見つけられます。",
     "sealedShort": "封印済み"
   },
+  "userProfile": {
+    "optionsAria": "オプション",
+    "block": "ブロック",
+    "unblock": "ブロック解除",
+    "userNotFound": "ユーザーが見つかりません",
+    "actionFailed": "操作に失敗しました。もう一度お試しください。",
+    "blockedTitle": "{{name}}をブロックしました",
+    "blockedBody": "このアカウントの予測は見られず、お互いにメッセージのやり取りもできません。",
+    "following": "フォロー中",
+    "requestSent": "リクエスト送信済み",
+    "message": "メッセージ",
+    "predictionsTitle": "予測",
+    "privateAccountTitle": "このアカウントは非公開です",
+    "privateAccountBody": "予測を見るにはフォローリクエストを送ってください。",
+    "noPredictionsTitle": "まだ予測がありません"
+  },
   "languages": {
     "tr": "トルコ語",
     "en": "英語",

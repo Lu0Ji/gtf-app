@@ -631,6 +631,22 @@
     "noSavedBody": "احفظ التوقعات التي تعجبك لتجدها هنا.",
     "sealedShort": "مختوم"
   },
+  "userProfile": {
+    "optionsAria": "خيارات",
+    "block": "حظر",
+    "unblock": "إلغاء الحظر",
+    "userNotFound": "المستخدم غير موجود",
+    "actionFailed": "فشل الإجراء، حاول مرة أخرى.",
+    "blockedTitle": "لقد حظرت {{name}}",
+    "blockedBody": "لن تتمكن من رؤية توقعات هذا الحساب، ولن يتمكن أي منكما من مراسلة الآخر.",
+    "following": "متابَع",
+    "requestSent": "تم إرسال الطلب",
+    "message": "رسالة",
+    "predictionsTitle": "التوقعات",
+    "privateAccountTitle": "هذا الحساب خاص",
+    "privateAccountBody": "أرسل طلب متابعة لرؤية توقعاته.",
+    "noPredictionsTitle": "لا توجد توقعات بعد"
+  },
   "languages": {
     "tr": "التركية",
     "en": "الإنجليزية",

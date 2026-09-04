@@ -627,6 +627,22 @@
     "noSavedBody": "Speichere Vorhersagen, die dir gefallen, und finde sie hier wieder.",
     "sealedShort": "Versiegelt"
   },
+  "userProfile": {
+    "optionsAria": "Optionen",
+    "block": "Blockieren",
+    "unblock": "Blockierung aufheben",
+    "userNotFound": "Nutzer nicht gefunden",
+    "actionFailed": "Aktion fehlgeschlagen, versuch es erneut.",
+    "blockedTitle": "Du hast {{name}} blockiert",
+    "blockedBody": "Du kannst die Vorhersagen dieses Kontos nicht sehen, und keiner von euch kann dem anderen schreiben.",
+    "following": "Gefolgt",
+    "requestSent": "Anfrage gesendet",
+    "message": "Nachricht",
+    "predictionsTitle": "Vorhersagen",
+    "privateAccountTitle": "Dieses Konto ist privat",
+    "privateAccountBody": "Sende eine Folgeanfrage, um die Vorhersagen zu sehen.",
+    "noPredictionsTitle": "Noch keine Vorhersagen"
+  },
   "languages": {
     "tr": "Türkisch",
     "en": "Englisch",

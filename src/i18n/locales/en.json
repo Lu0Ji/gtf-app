@@ -627,6 +627,22 @@
     "noSavedBody": "Save predictions you like, then find them here.",
     "sealedShort": "Sealed"
   },
+  "userProfile": {
+    "optionsAria": "Options",
+    "block": "Block",
+    "unblock": "Unblock",
+    "userNotFound": "User not found",
+    "actionFailed": "The action failed, try again.",
+    "blockedTitle": "You blocked {{name}}",
+    "blockedBody": "You can't see this account's predictions, and neither of you can message the other.",
+    "following": "Following",
+    "requestSent": "Request sent",
+    "message": "Message",
+    "predictionsTitle": "Predictions",
+    "privateAccountTitle": "This account is private",
+    "privateAccountBody": "Send a follow request to see their predictions.",
+    "noPredictionsTitle": "No predictions yet"
+  },
   "languages": {
     "tr": "Turkish",
     "en": "English",

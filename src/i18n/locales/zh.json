@@ -626,6 +626,22 @@
     "noSavedBody": "收藏你喜欢的预测，随后可在这里查看。",
     "sealedShort": "已封存"
   },
+  "userProfile": {
+    "optionsAria": "更多选项",
+    "block": "屏蔽",
+    "unblock": "取消屏蔽",
+    "userNotFound": "找不到该用户",
+    "actionFailed": "操作失败，请重试。",
+    "blockedTitle": "你已屏蔽 {{name}}",
+    "blockedBody": "你将无法看到该账户的预测，双方也都无法互发消息。",
+    "following": "已关注",
+    "requestSent": "请求已发送",
+    "message": "私信",
+    "predictionsTitle": "预测",
+    "privateAccountTitle": "该账户为私密账户",
+    "privateAccountBody": "发送关注请求以查看其预测。",
+    "noPredictionsTitle": "还没有预测"
+  },
   "languages": {
     "tr": "土耳其语",
     "en": "英语",

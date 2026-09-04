@@ -627,6 +627,22 @@
     "noSavedBody": "Beğendiğin tahminleri kaydet, buradan bul.",
     "sealedShort": "Mühürlü"
   },
+  "userProfile": {
+    "optionsAria": "Seçenekler",
+    "block": "Engelle",
+    "unblock": "Engeli kaldır",
+    "userNotFound": "Kullanıcı bulunamadı",
+    "actionFailed": "İşlem başarısız oldu, tekrar dene.",
+    "blockedTitle": "{{name}} adlı hesabı engelledin",
+    "blockedBody": "Bu hesabın tahminlerini göremez, mesaj alamaz ve gönderemezsin.",
+    "following": "Takipte",
+    "requestSent": "İstek gönderildi",
+    "message": "Mesaj",
+    "predictionsTitle": "Tahminleri",
+    "privateAccountTitle": "Bu hesap gizli",
+    "privateAccountBody": "Tahminlerini görmek için takip isteği gönder.",
+    "noPredictionsTitle": "Henüz tahmini yok"
+  },
   "languages": {
     "tr": "Türkçe",
     "en": "İngilizce",

@@ -627,6 +627,22 @@
     "noSavedBody": "Guarda las predicciones que te gusten y encuéntralas aquí.",
     "sealedShort": "Sellado"
   },
+  "userProfile": {
+    "optionsAria": "Opciones",
+    "block": "Bloquear",
+    "unblock": "Desbloquear",
+    "userNotFound": "Usuario no encontrado",
+    "actionFailed": "La acción falló, inténtalo de nuevo.",
+    "blockedTitle": "Bloqueaste a {{name}}",
+    "blockedBody": "No puedes ver las predicciones de esta cuenta, y ninguno de los dos puede enviarle mensajes al otro.",
+    "following": "Siguiendo",
+    "requestSent": "Solicitud enviada",
+    "message": "Mensaje",
+    "predictionsTitle": "Predicciones",
+    "privateAccountTitle": "Esta cuenta es privada",
+    "privateAccountBody": "Envía una solicitud de seguimiento para ver sus predicciones.",
+    "noPredictionsTitle": "Aún no hay predicciones"
+  },
   "languages": {
     "tr": "Turco",
     "en": "Inglés",

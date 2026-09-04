@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import { formatDateLong, sealLabel, timeAgo } from '../lib/format.js'
+import { CATEGORY_META } from '../lib/categories.js'
 import BadgeShowcase from '../components/BadgeShowcase.jsx'
 import DifficultyChip from '../components/DifficultyChip.jsx'
 import Chip from '../components/ui/Chip.jsx'
@@ -23,6 +25,7 @@ const CATEGORY_ICONS = {
 }
 
 function PredictionCard({ prediction }) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const isVerified = prediction.status === 'verified_correct' || prediction.status === 'verified_incorrect'
   const isCorrect = prediction.status === 'verified_correct'
@@ -40,7 +43,7 @@ function PredictionCard({ prediction }) {
         >
           <span className="flex items-center gap-1.5">
             <iconify-icon icon={isCorrect ? 'lucide:badge-check' : 'lucide:x-circle'} class="text-sm"></iconify-icon>
-            {isCorrect ? 'Doğrulandı' : 'Gerçekleşmedi'}
+            {isCorrect ? t('home.verified') : t('home.notRealized')}
           </span>
           <span>{formatDateLong(prediction.verified_at)}</span>
         </div>
@@ -67,7 +70,7 @@ function PredictionCard({ prediction }) {
         </div>
         <span className="flex items-center gap-1 text-[10px] font-semibold text-accent">
           <iconify-icon icon="lucide:clock-3" class="text-xs"></iconify-icon>
-          Mühürlü
+          {t('profile.sealedShort')}
         </span>
       </div>
       <p className="mt-3 text-[15px] font-semibold leading-6">{prediction.title}</p>
@@ -83,6 +86,7 @@ function PredictionCard({ prediction }) {
 }
 
 export default function KullaniciProfili() {
+  const { t } = useTranslation()
   const { userId } = useParams()
   const navigate = useNavigate()
   const { user: currentUser } = useAuth()
@@ -161,14 +165,14 @@ export default function KullaniciProfili() {
       if (error) {
         setIsFollowing(true)
         setFollowerCount((c) => (c ?? 0) + 1)
-        showToast('İşlem başarısız oldu, tekrar dene.')
+        showToast(t('userProfile.actionFailed'))
       }
     } else if (followPending) {
       setFollowPending(false)
       const { error } = await supabase.from('follows').delete().eq('follower_id', currentUser.id).eq('following_id', userId)
       if (error) {
         setFollowPending(true)
-        showToast('İşlem başarısız oldu, tekrar dene.')
+        showToast(t('userProfile.actionFailed'))
       }
     } else {
       // Private accounts get force-set to 'pending' server-side by a
@@ -186,7 +190,7 @@ export default function KullaniciProfili() {
           setIsFollowing(false)
           setFollowerCount((c) => (c ?? 0) - 1)
         }
-        showToast('İşlem başarısız oldu, tekrar dene.')
+        showToast(t('userProfile.actionFailed'))
       }
     }
 
@@ -202,7 +206,7 @@ export default function KullaniciProfili() {
       ? await supabase.from('blocks').insert({ blocker_id: currentUser.id, blocked_id: userId })
       : await supabase.from('blocks').delete().eq('blocker_id', currentUser.id).eq('blocked_id', userId)
     if (error) {
-      showToast('İşlem başarısız oldu, tekrar dene.')
+      showToast(t('userProfile.actionFailed'))
       setBlockBusy(false)
       return
     }
@@ -217,7 +221,7 @@ export default function KullaniciProfili() {
   if (loading) {
     return (
       <div className="flex min-h-screen w-full items-center justify-center bg-background font-body text-foreground">
-        <p className="text-xs text-muted-foreground">Yükleniyor…</p>
+        <p className="text-xs text-muted-foreground">{t('common.loading')}</p>
       </div>
     )
   }
@@ -225,9 +229,9 @@ export default function KullaniciProfili() {
   if (!profile) {
     return (
       <div className="flex min-h-screen w-full flex-col items-center justify-center gap-3 bg-background px-8 text-center font-body text-foreground">
-        <p className="text-sm font-bold">Kullanıcı bulunamadı</p>
+        <p className="text-sm font-bold">{t('userProfile.userNotFound')}</p>
         <button onClick={() => navigate(-1)} className="rounded-theme bg-primary px-4 py-2.5 text-sm font-bold text-primary-foreground">
-          Geri dön
+          {t('common.backAria')}
         </button>
       </div>
     )
@@ -260,7 +264,7 @@ export default function KullaniciProfili() {
           title={profile.display_name}
           action={
             <button
-              aria-label="Seçenekler"
+              aria-label={t('userProfile.optionsAria')}
               onClick={() => setShowMenu((v) => !v)}
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-theme border border-border bg-card text-foreground shadow-sm"
             >
@@ -278,7 +282,7 @@ export default function KullaniciProfili() {
                 className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-semibold text-destructive disabled:opacity-60"
               >
                 <iconify-icon icon="lucide:ban" class="text-base"></iconify-icon>
-                {isBlocked ? 'Engeli kaldır' : 'Engelle'}
+                {isBlocked ? t('userProfile.unblock') : t('userProfile.block')}
               </button>
             </div>
           </>
@@ -290,23 +294,21 @@ export default function KullaniciProfili() {
           <div className="flex h-14 w-14 items-center justify-center rounded-theme bg-destructive/10 text-destructive">
             <iconify-icon icon="lucide:ban" class="text-2xl"></iconify-icon>
           </div>
-          <p className="text-sm font-bold">{profile.display_name} adlı hesabı engelledin</p>
-          <p className="text-xs leading-5 text-muted-foreground">
-            Bu hesabın tahminlerini göremez, mesaj alamaz ve gönderemezsin.
-          </p>
+          <p className="text-sm font-bold">{t('userProfile.blockedTitle', { name: profile.display_name })}</p>
+          <p className="text-xs leading-5 text-muted-foreground">{t('userProfile.blockedBody')}</p>
           <button
             onClick={handleToggleBlock}
             disabled={blockBusy}
             className="mt-2 rounded-theme border border-border bg-card px-4 py-2.5 text-xs font-bold text-foreground disabled:opacity-60"
           >
-            Engeli kaldır
+            {t('userProfile.unblock')}
           </button>
         </div>
       ) : (
         <>
       {profile.cover_photo_url && (
         <div className="mt-4 h-32 w-full overflow-hidden">
-          <img src={profile.cover_photo_url} alt="Kapak fotoğrafı" className="h-full w-full object-cover" />
+          <img src={profile.cover_photo_url} alt={t('profile.coverAlt')} className="h-full w-full object-cover" />
         </div>
       )}
 
@@ -330,7 +332,7 @@ export default function KullaniciProfili() {
                   <iconify-icon icon="lucide:lock" class="shrink-0 text-sm text-muted-foreground"></iconify-icon>
                 )}
                 <span className="rounded-full bg-secondary px-2 py-1 text-[10px] font-bold text-secondary-foreground">
-                  {profile.points ?? 0} puan
+                  {profile.points ?? 0} {t('nav.points')}
                 </span>
               </div>
               <p className="mt-1 text-[13px] text-muted-foreground">@{profile.username}</p>
@@ -342,37 +344,37 @@ export default function KullaniciProfili() {
                     isFollowing || followPending ? 'bg-secondary text-secondary-foreground' : 'bg-primary text-primary-foreground'
                   }`}
                 >
-                  {isFollowing ? 'Takipte' : followPending ? 'İstek gönderildi' : 'Takip et'}
+                  {isFollowing ? t('userProfile.following') : followPending ? t('userProfile.requestSent') : t('home.followAction')}
                 </button>
                 <button
                   onClick={() => navigate('/sohbet', { state: { partner: profile } })}
                   className="flex items-center gap-1.5 rounded-theme border border-border bg-card px-4 py-2 text-xs font-bold text-foreground shadow-sm"
                 >
                   <iconify-icon icon="lucide:send" class="text-sm"></iconify-icon>
-                  Mesaj
+                  {t('userProfile.message')}
                 </button>
               </div>
             </div>
           </div>
 
           <p className="mt-4 max-w-[340px] text-[14px] leading-5 text-foreground">
-            {profile.bio || 'Henüz bir biyografi eklenmedi.'}
+            {profile.bio || t('profile.noBio')}
           </p>
 
           <div className="mt-5 flex items-center gap-5">
             <div>
               <p className="font-heading text-lg font-extrabold tracking-[-0.05em]">{followerCount ?? '—'}</p>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">Takipçi</p>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">{t('profile.followers')}</p>
             </div>
             <div className="h-8 w-px bg-border" />
             <div>
               <p className="font-heading text-lg font-extrabold tracking-[-0.05em]">{followingCount ?? '—'}</p>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">Takip edilen</p>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">{t('profile.following')}</p>
             </div>
             <div className="h-8 w-px bg-border" />
             <div>
               <p className="font-heading text-lg font-extrabold tracking-[-0.05em]">{predictions.length}</p>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">Tahmin</p>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">{t('profile.predictionsCount')}</p>
             </div>
           </div>
         </section>
@@ -384,13 +386,13 @@ export default function KullaniciProfili() {
             <div className="flex items-center justify-between px-5 py-5">
               <div>
                 <p className="text-[11px] font-semibold uppercase tracking-[0.13em] text-primary-foreground/75">
-                  Kalıcı performans
+                  {t('profile.permanentPerformance')}
                 </p>
                 <div className="mt-1 flex items-end gap-2">
                   <span className="font-heading text-[42px] font-extrabold leading-none tracking-[-0.08em]">
                     %{accuracyPct}
                   </span>
-                  <span className="mb-1 text-xs font-semibold text-primary-foreground/80">isabet oranı</span>
+                  <span className="mb-1 text-xs font-semibold text-primary-foreground/80">{t('profile.accuracyRate')}</span>
                 </div>
               </div>
               <div className="flex h-11 w-11 items-center justify-center rounded-full border border-primary-foreground/25 bg-primary-foreground/10">
@@ -403,7 +405,7 @@ export default function KullaniciProfili() {
         {categoryAccuracy.length > 0 && (
           <section className="mt-7">
             <div className="flex items-end justify-between px-5">
-              <h2 className="font-heading text-lg font-bold tracking-[-0.04em]">Kategori doğruluğu</h2>
+              <h2 className="font-heading text-lg font-bold tracking-[-0.04em]">{t('profile.categoryAccuracyTitle')}</h2>
             </div>
             <div className="mt-4 flex gap-3 overflow-x-auto px-5 pb-1">
               {categoryAccuracy.map((cat) => (
@@ -414,8 +416,8 @@ export default function KullaniciProfili() {
                     </span>
                     <span className="text-xs font-bold text-success">%{cat.pct}</span>
                   </div>
-                  <p className="mt-4 text-sm font-bold capitalize">{cat.category}</p>
-                  <p className="mt-1 text-[10px] text-muted-foreground">{cat.total} sonuçlanan kayıt</p>
+                  <p className="mt-4 text-sm font-bold capitalize">{CATEGORY_META[cat.category] ? t(CATEGORY_META[cat.category].labelKey) : cat.category}</p>
+                  <p className="mt-1 text-[10px] text-muted-foreground">{t('profile.resolvedRecords', { count: cat.total })}</p>
                 </article>
               ))}
             </div>
@@ -424,18 +426,18 @@ export default function KullaniciProfili() {
 
         <section className="mt-7">
           <div className="border-b border-border px-5 pb-3">
-            <h2 className="font-heading text-lg font-bold tracking-[-0.04em]">Tahminleri</h2>
+            <h2 className="font-heading text-lg font-bold tracking-[-0.04em]">{t('userProfile.predictionsTitle')}</h2>
           </div>
 
           {profile.is_private && !isFollowing ? (
             <EmptyState
               className="mx-5 mt-4"
               icon="lucide:lock"
-              title="Bu hesap gizli"
-              description="Tahminlerini görmek için takip isteği gönder."
+              title={t('userProfile.privateAccountTitle')}
+              description={t('userProfile.privateAccountBody')}
             />
           ) : predictions.length === 0 ? (
-            <EmptyState className="mx-5 mt-4" title="Henüz tahmini yok" />
+            <EmptyState className="mx-5 mt-4" title={t('userProfile.noPredictionsTitle')} />
           ) : (
             predictions.map((p) => <PredictionCard key={p.id} prediction={p} />)
           )}
