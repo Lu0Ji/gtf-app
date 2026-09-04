@@ -1,9 +1,11 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { formatDateLong, sealLabel, timeAgo } from '../lib/format.js'
+import { CATEGORY_META } from '../lib/categories.js'
 import BadgeShowcase from '../components/BadgeShowcase.jsx'
 import DifficultyChip from '../components/DifficultyChip.jsx'
 import Chip from '../components/ui/Chip.jsx'
@@ -11,7 +13,10 @@ import Card from '../components/ui/Card.jsx'
 import ScreenHeader from '../components/ui/ScreenHeader.jsx'
 import EmptyState from '../components/ui/EmptyState.jsx'
 
-
+// Icon-only lookup now (labels come from CATEGORY_META's labelKey via
+// t() below) — 'genel' isn't a real prediction category (see
+// categories.js) but a verified/correct prediction could in principle
+// still carry it from old data, so the fallback tag icon stays.
 const CATEGORY_ICONS = {
   spor: 'lucide:trophy',
   teknoloji: 'lucide:cpu',
@@ -23,6 +28,7 @@ const CATEGORY_ICONS = {
 }
 
 function OwnPredictionCard({ prediction }) {
+  const { t } = useTranslation()
   const isVerified = prediction.status === 'verified_correct' || prediction.status === 'verified_incorrect'
   const isCorrect = prediction.status === 'verified_correct'
 
@@ -36,7 +42,7 @@ function OwnPredictionCard({ prediction }) {
         >
           <span className="flex items-center gap-1.5">
             <iconify-icon icon={isCorrect ? 'lucide:badge-check' : 'lucide:x-circle'} class="text-sm"></iconify-icon>
-            {isCorrect ? 'Doğrulandı' : 'Gerçekleşmedi'}
+            {isCorrect ? t('home.verified') : t('home.notRealized')}
           </span>
           <span>{formatDateLong(prediction.verified_at)}</span>
         </div>
@@ -47,7 +53,7 @@ function OwnPredictionCard({ prediction }) {
             {prediction.is_private && (
               <span className="flex items-center gap-1 text-[10px] font-semibold text-accent">
                 <iconify-icon icon="lucide:archive" class="text-xs"></iconify-icon>
-                Zaman kapsülü
+                {t('home.tabCapsule')}
               </span>
             )}
           </div>
@@ -66,7 +72,7 @@ function OwnPredictionCard({ prediction }) {
         </div>
         <span className="flex items-center gap-1 text-[10px] font-semibold text-accent">
           <iconify-icon icon={prediction.is_private ? 'lucide:archive' : 'lucide:clock-3'} class="text-xs"></iconify-icon>
-          {prediction.is_private ? 'Zaman kapsülü' : 'Mühürlü'}
+          {prediction.is_private ? t('home.tabCapsule') : t('profile.sealedShort')}
         </span>
       </div>
       <p className="mt-3 text-[15px] font-semibold leading-6">{prediction.title}</p>
@@ -82,6 +88,7 @@ function OwnPredictionCard({ prediction }) {
 }
 
 function SavedPredictionCard({ prediction }) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const author = prediction.profiles
   const isVerified = prediction.status === 'verified_correct' || prediction.status === 'verified_incorrect'
@@ -96,7 +103,7 @@ function SavedPredictionCard({ prediction }) {
         <img src={author?.avatar_url || fallbackAvatarFor(prediction.author_id)} alt={author?.display_name} className="h-full w-full object-cover" />
       </div>
       <div className="min-w-0 flex-1">
-        <p className="text-[11px] text-muted-foreground">{author?.display_name || 'Kullanıcı'}</p>
+        <p className="text-[11px] text-muted-foreground">{author?.display_name || t('common.unknownUser')}</p>
         <p className="mt-1 text-sm font-semibold leading-5">{prediction.title}</p>
         <div className="mt-2 flex items-center gap-2">
           <span className="rounded-full bg-secondary px-2 py-0.5 text-[9px] font-bold text-secondary-foreground">
@@ -104,7 +111,7 @@ function SavedPredictionCard({ prediction }) {
           </span>
           {isVerified && (
             <span className={`text-[10px] font-semibold ${isCorrect ? 'text-success' : 'text-destructive'}`}>
-              {isCorrect ? 'Doğrulandı' : 'Gerçekleşmedi'}
+              {isCorrect ? t('home.verified') : t('home.notRealized')}
             </span>
           )}
         </div>
@@ -113,22 +120,25 @@ function SavedPredictionCard({ prediction }) {
   )
 }
 
-// Header shortcuts, as one coherent grid instead of 5 wrapping inline text
-// links crammed together (the "dağınık" complaint) — "Uygulama Ayarları" is
-// dropped here since the header gear icon already opens the same screen.
-const PROFILE_SHORTCUTS = [
-  { label: 'Profil Ayarları', icon: 'lucide:user-cog', route: '/profil-ayarlari' },
-  { label: 'Hareketler', icon: 'lucide:activity', route: '/hareketler' },
-  { label: 'Rozetler', icon: 'lucide:award', route: '/rozetler' },
-  { label: 'Beğeniler', icon: 'lucide:heart', route: '/begeniler' },
-]
-
-const PROFILE_TABS = ['Tahminlerin', 'Kaydedilenler']
-
 export default function Profil() {
+  const { t } = useTranslation()
+  // Header shortcuts, as one coherent grid instead of 5 wrapping inline
+  // text links crammed together (the "dağınık" complaint) — "Uygulama
+  // Ayarları" is dropped here since the header gear icon already opens
+  // the same screen.
+  const PROFILE_SHORTCUTS = [
+    { label: t('profile.shortcutSettings'), icon: 'lucide:user-cog', route: '/profil-ayarlari' },
+    { label: t('profile.shortcutActivity'), icon: 'lucide:activity', route: '/hareketler' },
+    { label: t('profile.shortcutBadges'), icon: 'lucide:award', route: '/rozetler' },
+    { label: t('profile.shortcutLikes'), icon: 'lucide:heart', route: '/begeniler' },
+  ]
+  const PROFILE_TABS = [
+    { key: 'predictions', label: t('profile.tabPredictions') },
+    { key: 'saved', label: t('profile.tabSaved') },
+  ]
   const navigate = useNavigate()
   const { profile, user } = useAuth()
-  const [activeTab, setActiveTab] = useState('Tahminlerin')
+  const [activeTab, setActiveTab] = useState('predictions')
   const [predictions, setPredictions] = useState([])
   const [savedPredictions, setSavedPredictions] = useState([])
   const [followerCount, setFollowerCount] = useState(null)
@@ -217,11 +227,11 @@ export default function Profil() {
   return (
     <div className="min-h-screen w-full bg-background pb-28 text-foreground font-body">
       <ScreenHeader
-        eyebrow="Profil"
-        title="Kayıt defterin"
+        eyebrow={t('profile.eyebrow')}
+        title={t('profile.title')}
         action={
           <button
-            aria-label="Uygulama ayarları"
+            aria-label={t('profile.settingsAria')}
             onClick={() => navigate('/uygulama-ayarlari')}
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-theme border border-border bg-card text-foreground shadow-sm"
           >
@@ -232,7 +242,7 @@ export default function Profil() {
 
       {profile?.cover_photo_url && (
         <div className="mt-4 h-32 w-full overflow-hidden">
-          <img src={profile.cover_photo_url} alt="Kapak fotoğrafı" className="h-full w-full object-cover" />
+          <img src={profile.cover_photo_url} alt={t('profile.coverAlt')} className="h-full w-full object-cover" />
         </div>
       )}
 
@@ -243,7 +253,7 @@ export default function Profil() {
               <div className="h-[86px] w-[86px] overflow-hidden rounded-full border-4 border-card bg-muted shadow-md">
                 <img
                   src={profile?.avatar_url || fallbackAvatarFor(profile?.id)}
-                  alt={profile?.display_name || 'Profil'}
+                  alt={profile?.display_name || t('profile.avatarAlt')}
                   className="h-full w-full object-cover"
                 />
               </div>
@@ -254,10 +264,10 @@ export default function Profil() {
             <div className="min-w-0 flex-1 pt-1">
               <div className="flex items-center gap-2">
                 <h2 className="truncate font-heading text-[21px] font-extrabold tracking-[-0.05em]">
-                  {profile?.display_name || 'Yükleniyor…'}
+                  {profile?.display_name || t('common.loading')}
                 </h2>
                 <span className="rounded-full bg-secondary px-2 py-1 text-[10px] font-bold text-secondary-foreground">
-                  {profile?.points ?? 0} puan
+                  {profile?.points ?? 0} {t('nav.points')}
                 </span>
               </div>
               <p className="mt-1 text-[13px] text-muted-foreground">@{profile?.username}</p>
@@ -265,23 +275,23 @@ export default function Profil() {
           </div>
 
           <p className="mt-4 max-w-[340px] text-[14px] leading-5 text-foreground">
-            {profile?.bio || 'Henüz bir biyografi eklenmedi.'}
+            {profile?.bio || t('profile.noBio')}
           </p>
 
           <div className="mt-5 flex items-center gap-5">
             <div>
               <p className="font-heading text-lg font-extrabold tracking-[-0.05em]">{followerCount ?? '—'}</p>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">Takipçi</p>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">{t('profile.followers')}</p>
             </div>
             <div className="h-8 w-px bg-border" />
             <div>
               <p className="font-heading text-lg font-extrabold tracking-[-0.05em]">{followingCount ?? '—'}</p>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">Takip edilen</p>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">{t('profile.following')}</p>
             </div>
             <div className="h-8 w-px bg-border" />
             <div>
               <p className="font-heading text-lg font-extrabold tracking-[-0.05em]">{predictions.length}</p>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">Tahmin</p>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">{t('profile.predictionsCount')}</p>
             </div>
           </div>
 
@@ -305,13 +315,13 @@ export default function Profil() {
           <div className="flex items-start justify-between px-5 pt-5">
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-[0.13em] text-primary-foreground/75">
-                Kalıcı performans
+                {t('profile.permanentPerformance')}
               </p>
               <div className="mt-1 flex items-end gap-2">
                 <span className="font-heading text-[42px] font-extrabold leading-none tracking-[-0.08em]">
                   {accuracyPct !== null ? `%${accuracyPct}` : '—'}
                 </span>
-                <span className="mb-1 text-xs font-semibold text-primary-foreground/80">isabet oranı</span>
+                <span className="mb-1 text-xs font-semibold text-primary-foreground/80">{t('profile.accuracyRate')}</span>
               </div>
             </div>
             <div className="flex h-11 w-11 items-center justify-center rounded-full border border-primary-foreground/25 bg-primary-foreground/10">
@@ -321,16 +331,16 @@ export default function Profil() {
           <div className="mx-5 mt-5 h-px bg-primary-foreground/20" />
           <div className="grid grid-cols-3 gap-2 px-5 py-4">
             <div>
-              <p className="text-[10px] font-medium text-primary-foreground/70">Açık kayıt</p>
+              <p className="text-[10px] font-medium text-primary-foreground/70">{t('profile.openRecord')}</p>
               <p className="mt-1 text-sm font-bold">{sealedCount}</p>
             </div>
             <div>
-              <p className="text-[10px] font-medium text-primary-foreground/70">Doğrulanan</p>
+              <p className="text-[10px] font-medium text-primary-foreground/70">{t('profile.verifiedLabel')}</p>
               <p className="mt-1 text-sm font-bold">{verifiedTotal}</p>
             </div>
             <div>
-              <p className="text-[10px] font-medium text-primary-foreground/70">Ort. süre</p>
-              <p className="mt-1 text-sm font-bold">{avgDurationDays !== null ? `${avgDurationDays} gün` : '—'}</p>
+              <p className="text-[10px] font-medium text-primary-foreground/70">{t('profile.avgDuration')}</p>
+              <p className="mt-1 text-sm font-bold">{avgDurationDays !== null ? t('profile.days', { count: avgDurationDays }) : '—'}</p>
             </div>
           </div>
         </section>
@@ -341,26 +351,26 @@ export default function Profil() {
               <span className="flex h-8 w-8 items-center justify-center rounded-theme bg-secondary text-primary">
                 <iconify-icon icon="lucide:calendar-clock" class="text-base"></iconify-icon>
               </span>
-              <h2 className="text-sm font-bold text-foreground">Bu hafta</h2>
+              <h2 className="text-sm font-bold text-foreground">{t('profile.thisWeek')}</h2>
             </div>
             <div className="mt-3 grid grid-cols-3 gap-2">
               <div>
                 <p className="font-heading text-lg font-extrabold tracking-[-0.03em] text-primary">
                   {newFollowerCount}
                 </p>
-                <p className="mt-0.5 text-[10px] text-muted-foreground">Yeni takipçi</p>
+                <p className="mt-0.5 text-[10px] text-muted-foreground">{t('profile.newFollowers')}</p>
               </div>
               <div>
                 <p className="font-heading text-lg font-extrabold tracking-[-0.03em] text-primary">
                   {sealedThisWeek}
                 </p>
-                <p className="mt-0.5 text-[10px] text-muted-foreground">Mühürlenen</p>
+                <p className="mt-0.5 text-[10px] text-muted-foreground">{t('profile.sealedLabel')}</p>
               </div>
               <div>
                 <p className="font-heading text-lg font-extrabold tracking-[-0.03em] text-primary">
                   {verifiedThisWeek}
                 </p>
-                <p className="mt-0.5 text-[10px] text-muted-foreground">Açılan</p>
+                <p className="mt-0.5 text-[10px] text-muted-foreground">{t('profile.openedLabel')}</p>
               </div>
             </div>
           </Card>
@@ -370,8 +380,8 @@ export default function Profil() {
           <section className="mt-7">
             <div className="flex items-end justify-between px-5">
               <div>
-                <h2 className="font-heading text-lg font-bold tracking-[-0.04em]">Kategori doğruluğu</h2>
-                <p className="mt-1 text-xs text-muted-foreground">Sonuçlanan kayıtlara göre</p>
+                <h2 className="font-heading text-lg font-bold tracking-[-0.04em]">{t('profile.categoryAccuracyTitle')}</h2>
+                <p className="mt-1 text-xs text-muted-foreground">{t('profile.categoryAccuracySubtitle')}</p>
               </div>
             </div>
 
@@ -384,8 +394,8 @@ export default function Profil() {
                     </span>
                     <span className="text-xs font-bold text-success">%{cat.pct}</span>
                   </div>
-                  <p className="mt-4 text-sm font-bold capitalize">{cat.category}</p>
-                  <p className="mt-1 text-[10px] text-muted-foreground">{cat.total} sonuçlanan kayıt</p>
+                  <p className="mt-4 text-sm font-bold capitalize">{CATEGORY_META[cat.category] ? t(CATEGORY_META[cat.category].labelKey) : cat.category}</p>
+                  <p className="mt-1 text-[10px] text-muted-foreground">{t('profile.resolvedRecords', { count: cat.total })}</p>
                   <div className="mt-3 h-1.5 overflow-hidden rounded-full bg-muted">
                     <div className="h-full rounded-full bg-primary" style={{ width: `${cat.pct}%` }} />
                   </div>
@@ -399,16 +409,16 @@ export default function Profil() {
           <div className="border-b border-border px-5">
             <div className="flex items-center gap-6">
               {PROFILE_TABS.map((tab) => {
-                const isActive = tab === activeTab
+                const isActive = tab.key === activeTab
                 return (
                   <button
-                    key={tab}
-                    onClick={() => setActiveTab(tab)}
+                    key={tab.key}
+                    onClick={() => setActiveTab(tab.key)}
                     className={`pb-3 text-sm ${
                       isActive ? 'border-b-2 border-primary font-bold text-primary' : 'font-semibold text-muted-foreground'
                     }`}
                   >
-                    {tab}
+                    {tab.label}
                   </button>
                 )
               })}
@@ -416,13 +426,13 @@ export default function Profil() {
           </div>
 
           {loading ? (
-            <p className="mx-5 mt-4 text-xs text-muted-foreground">Yükleniyor…</p>
-          ) : activeTab === 'Tahminlerin' ? (
+            <p className="mx-5 mt-4 text-xs text-muted-foreground">{t('common.loading')}</p>
+          ) : activeTab === 'predictions' ? (
             predictions.length === 0 ? (
               <EmptyState
                 className="mx-5 mt-4"
-                title="Henüz tahminin yok"
-                description="İlk tahminini oluştur, buradan takip et."
+                title={t('profile.noPredictionsTitle')}
+                description={t('profile.noPredictionsBody')}
               />
             ) : (
               predictions.map((p) => <OwnPredictionCard key={p.id} prediction={p} />)
@@ -430,8 +440,8 @@ export default function Profil() {
           ) : savedPredictions.length === 0 ? (
             <EmptyState
               className="mx-5 mt-4"
-              title="Henüz kaydettiğin bir kayıt yok"
-              description="Beğendiğin tahminleri kaydet, buradan bul."
+              title={t('profile.noSavedTitle')}
+              description={t('profile.noSavedBody')}
             />
           ) : (
             savedPredictions.map((p) => <SavedPredictionCard key={p.id} prediction={p} />)
