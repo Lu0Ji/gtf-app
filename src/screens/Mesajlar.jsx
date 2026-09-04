@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
@@ -12,6 +13,7 @@ import Button from '../components/ui/Button.jsx'
 
 
 function NewChatModal({ onClose, onPick }) {
+  const { t } = useTranslation()
   const { user } = useAuth()
   const [query, setQuery] = useState('')
   const [people, setPeople] = useState([])
@@ -55,8 +57,8 @@ function NewChatModal({ onClose, onPick }) {
     <Sheet onClose={onClose} className="flex max-h-[70vh] flex-col overflow-hidden pb-8">
       <div className="sticky top-0 border-b border-border bg-background px-5 py-4">
         <div className="flex items-center justify-between">
-          <h2 className="font-heading text-lg font-bold tracking-[-0.04em]">Yeni mesaj</h2>
-          <button onClick={onClose} aria-label="Kapat" className="text-muted-foreground">
+          <h2 className="font-heading text-lg font-bold tracking-[-0.04em]">{t('messages.newChatTitle')}</h2>
+          <button onClick={onClose} aria-label={t('common.close')} className="text-muted-foreground">
             <iconify-icon icon="lucide:x" class="text-xl"></iconify-icon>
           </button>
         </div>
@@ -65,17 +67,17 @@ function NewChatModal({ onClose, onPick }) {
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Kullanıcı ara…"
+            placeholder={t('messages.searchUsersPlaceholder')}
             className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
           />
         </div>
       </div>
       <div className="overflow-y-auto">
         {loading ? (
-          <p className="px-5 py-6 text-xs text-muted-foreground">Yükleniyor…</p>
+          <p className="px-5 py-6 text-xs text-muted-foreground">{t('common.loading')}</p>
         ) : people.length === 0 ? (
           <p className="px-5 py-6 text-xs text-muted-foreground">
-            {query.trim() ? 'Kimse bulunamadı.' : 'Takip ettiğin kimse yok. Aramak için yaz.'}
+            {query.trim() ? t('messages.noOneFound') : t('messages.noFollowingYet')}
           </p>
         ) : (
           people.map((p) => (
@@ -100,6 +102,7 @@ function NewChatModal({ onClose, onPick }) {
 }
 
 export default function Mesajlar() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { user } = useAuth()
   const [conversations, setConversations] = useState([])
@@ -184,12 +187,12 @@ export default function Mesajlar() {
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-body pb-28">
       <ScreenHeader
-        title="Mesajlar"
-        subtitle={totalUnread > 0 ? `${totalUnread} okunmamış mesaj` : 'Tahminlerin etrafındaki sohbetler'}
+        title={t('nav.messages')}
+        subtitle={totalUnread > 0 ? t('messages.unreadSubtitle', { count: totalUnread }) : t('messages.defaultSubtitle')}
         action={
           <Button
             variant="primary"
-            aria-label="Yeni mesaj oluştur"
+            aria-label={t('messages.newMessageAria')}
             onClick={() => setShowNewChat(true)}
             className="h-11 w-11 shrink-0 rounded-theme p-0"
           >
@@ -206,11 +209,11 @@ export default function Mesajlar() {
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Sohbetlerde ara…"
+              placeholder={t('messages.searchConversationsPlaceholder')}
               className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
             />
             {query && (
-              <button aria-label="Aramayı temizle" onClick={() => setQuery('')} className="text-muted-foreground">
+              <button aria-label={t('discover.clearSearchAria')} onClick={() => setQuery('')} className="text-muted-foreground">
                 <iconify-icon icon="lucide:x" class="text-lg"></iconify-icon>
               </button>
             )}
@@ -220,26 +223,26 @@ export default function Mesajlar() {
 
       <main>
         <section className="mt-6">
-          {conversations.length > 0 && <SectionHeader title="Sohbetler" />}
+          {conversations.length > 0 && <SectionHeader title={t('messages.conversationsHeading')} />}
 
           {loading ? (
-            <p className="mt-4 px-5 text-xs text-muted-foreground">Yükleniyor…</p>
+            <p className="mt-4 px-5 text-xs text-muted-foreground">{t('common.loading')}</p>
           ) : conversations.length === 0 ? (
             <div className="mx-5 mt-4">
               <EmptyState
                 icon="lucide:message-circle"
-                title="Yeni bir sohbet başlat"
-                description="Henüz kimseyle mesajlaşmadın. Bir kullanıcı seçip ilk mesajını gönder."
+                title={t('messages.emptyTitle')}
+                description={t('messages.emptyDesc')}
                 action={
                   <Button variant="secondary" icon="lucide:user-plus" iconClass="text-sm" onClick={() => setShowNewChat(true)} className="px-4 py-2.5 text-xs">
-                    Kişi bul
+                    {t('messages.findPersonCta')}
                   </Button>
                 }
               />
             </div>
           ) : filteredConversations.length === 0 ? (
             <p className="mx-5 mt-4 rounded-theme border border-dashed border-border bg-muted/60 p-4 text-center text-xs text-muted-foreground">
-              "{query}" için sonuç bulunamadı.
+              {t('discover.noResults', { query })}
             </p>
           ) : (
             <div className="mt-3 border-y border-border bg-card">
@@ -291,7 +294,7 @@ export default function Mesajlar() {
                             ></iconify-icon>
                           )}
                           <span className="truncate">
-                            {isMine ? 'Sen: ' : ''}
+                            {isMine ? t('messages.youPrefix') : ''}
                             {lastMessage.content}
                           </span>
                         </p>

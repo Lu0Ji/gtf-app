@@ -810,6 +810,21 @@
     "recentSubtitle": "The newest records",
     "noRecordsYet": "No records yet."
   },
+  "messages": {
+    "newChatTitle": "New message",
+    "searchUsersPlaceholder": "Search users…",
+    "noOneFound": "No one found.",
+    "noFollowingYet": "You're not following anyone. Type to search.",
+    "unreadSubtitle": "{{count}} unread messages",
+    "defaultSubtitle": "Conversations around your predictions",
+    "newMessageAria": "Start a new message",
+    "searchConversationsPlaceholder": "Search conversations…",
+    "conversationsHeading": "Conversations",
+    "emptyTitle": "Start a new conversation",
+    "emptyDesc": "You haven't messaged anyone yet. Pick a user and send your first message.",
+    "findPersonCta": "Find someone",
+    "youPrefix": "You: "
+  },
   "languages": {
     "tr": "Turkish",
     "en": "English",

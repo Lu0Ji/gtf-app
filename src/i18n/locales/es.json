@@ -810,6 +810,21 @@
     "recentSubtitle": "Los registros más nuevos",
     "noRecordsYet": "Todavía no hay registros."
   },
+  "messages": {
+    "newChatTitle": "Nuevo mensaje",
+    "searchUsersPlaceholder": "Buscar usuarios…",
+    "noOneFound": "No se encontró a nadie.",
+    "noFollowingYet": "No sigues a nadie. Escribe para buscar.",
+    "unreadSubtitle": "{{count}} mensajes sin leer",
+    "defaultSubtitle": "Conversaciones en torno a tus predicciones",
+    "newMessageAria": "Crear un mensaje nuevo",
+    "searchConversationsPlaceholder": "Buscar en las conversaciones…",
+    "conversationsHeading": "Conversaciones",
+    "emptyTitle": "Inicia una nueva conversación",
+    "emptyDesc": "Todavía no has hablado con nadie. Elige un usuario y envía tu primer mensaje.",
+    "findPersonCta": "Buscar a alguien",
+    "youPrefix": "Tú: "
+  },
   "languages": {
     "tr": "Turco",
     "en": "Inglés",

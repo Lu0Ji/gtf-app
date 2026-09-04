@@ -809,6 +809,21 @@
     "recentSubtitle": "最新の記録",
     "noRecordsYet": "まだ記録がありません。"
   },
+  "messages": {
+    "newChatTitle": "新しいメッセージ",
+    "searchUsersPlaceholder": "ユーザーを検索…",
+    "noOneFound": "見つかりませんでした。",
+    "noFollowingYet": "まだ誰もフォローしていません。入力して検索してください。",
+    "unreadSubtitle": "未読メッセージ{{count}}件",
+    "defaultSubtitle": "あなたの予測をめぐる会話",
+    "newMessageAria": "新しいメッセージを作成",
+    "searchConversationsPlaceholder": "会話を検索…",
+    "conversationsHeading": "会話",
+    "emptyTitle": "新しい会話を始めよう",
+    "emptyDesc": "まだ誰ともメッセージをやり取りしていません。ユーザーを選んで最初のメッセージを送りましょう。",
+    "findPersonCta": "相手を探す",
+    "youPrefix": "自分："
+  },
   "languages": {
     "tr": "トルコ語",
     "en": "英語",

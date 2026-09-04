@@ -810,6 +810,21 @@
     "recentSubtitle": "Die neuesten Einträge",
     "noRecordsYet": "Noch keine Einträge."
   },
+  "messages": {
+    "newChatTitle": "Neue Nachricht",
+    "searchUsersPlaceholder": "Nutzer suchen…",
+    "noOneFound": "Niemand gefunden.",
+    "noFollowingYet": "Du folgst noch niemandem. Zum Suchen tippen.",
+    "unreadSubtitle": "{{count}} ungelesene Nachrichten",
+    "defaultSubtitle": "Unterhaltungen rund um deine Vorhersagen",
+    "newMessageAria": "Neue Nachricht erstellen",
+    "searchConversationsPlaceholder": "Unterhaltungen durchsuchen…",
+    "conversationsHeading": "Unterhaltungen",
+    "emptyTitle": "Starte eine neue Unterhaltung",
+    "emptyDesc": "Du hast noch niemandem geschrieben. Wähle einen Nutzer und sende deine erste Nachricht.",
+    "findPersonCta": "Person finden",
+    "youPrefix": "Du: "
+  },
   "languages": {
     "tr": "Türkisch",
     "en": "Englisch",

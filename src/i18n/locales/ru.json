@@ -812,6 +812,21 @@
     "recentSubtitle": "Самые новые записи",
     "noRecordsYet": "Записей пока нет."
   },
+  "messages": {
+    "newChatTitle": "Новое сообщение",
+    "searchUsersPlaceholder": "Поиск пользователей…",
+    "noOneFound": "Никого не найдено.",
+    "noFollowingYet": "Ты пока ни на кого не подписан. Начни вводить, чтобы найти.",
+    "unreadSubtitle": "{{count}} непрочитанных сообщений",
+    "defaultSubtitle": "Разговоры вокруг твоих прогнозов",
+    "newMessageAria": "Создать новое сообщение",
+    "searchConversationsPlaceholder": "Поиск по разговорам…",
+    "conversationsHeading": "Разговоры",
+    "emptyTitle": "Начни новый разговор",
+    "emptyDesc": "Ты пока никому не писал. Выбери пользователя и отправь первое сообщение.",
+    "findPersonCta": "Найти человека",
+    "youPrefix": "Ты: "
+  },
   "languages": {
     "tr": "Турецкий",
     "en": "Английский",

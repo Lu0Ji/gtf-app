@@ -810,6 +810,21 @@
     "recentSubtitle": "En yeni kayıtlar",
     "noRecordsYet": "Henüz kayıt yok."
   },
+  "messages": {
+    "newChatTitle": "Yeni mesaj",
+    "searchUsersPlaceholder": "Kullanıcı ara…",
+    "noOneFound": "Kimse bulunamadı.",
+    "noFollowingYet": "Takip ettiğin kimse yok. Aramak için yaz.",
+    "unreadSubtitle": "{{count}} okunmamış mesaj",
+    "defaultSubtitle": "Tahminlerin etrafındaki sohbetler",
+    "newMessageAria": "Yeni mesaj oluştur",
+    "searchConversationsPlaceholder": "Sohbetlerde ara…",
+    "conversationsHeading": "Sohbetler",
+    "emptyTitle": "Yeni bir sohbet başlat",
+    "emptyDesc": "Henüz kimseyle mesajlaşmadın. Bir kullanıcı seçip ilk mesajını gönder.",
+    "findPersonCta": "Kişi bul",
+    "youPrefix": "Sen: "
+  },
   "languages": {
     "tr": "Türkçe",
     "en": "İngilizce",

@@ -814,6 +814,21 @@
     "recentSubtitle": "أحدث السجلات",
     "noRecordsYet": "لا توجد سجلات بعد."
   },
+  "messages": {
+    "newChatTitle": "رسالة جديدة",
+    "searchUsersPlaceholder": "البحث عن مستخدمين…",
+    "noOneFound": "لم يُعثر على أحد.",
+    "noFollowingYet": "أنت لا تتابع أحدًا. اكتب للبحث.",
+    "unreadSubtitle": "{{count}} رسالة غير مقروءة",
+    "defaultSubtitle": "محادثات حول توقعاتك",
+    "newMessageAria": "إنشاء رسالة جديدة",
+    "searchConversationsPlaceholder": "البحث في المحادثات…",
+    "conversationsHeading": "المحادثات",
+    "emptyTitle": "ابدأ محادثة جديدة",
+    "emptyDesc": "لم تراسل أحدًا بعد. اختر مستخدمًا وأرسل رسالتك الأولى.",
+    "findPersonCta": "ابحث عن شخص",
+    "youPrefix": "أنت: "
+  },
   "languages": {
     "tr": "التركية",
     "en": "الإنجليزية",

@@ -809,6 +809,21 @@
     "recentSubtitle": "最新记录",
     "noRecordsYet": "暂无记录。"
   },
+  "messages": {
+    "newChatTitle": "新消息",
+    "searchUsersPlaceholder": "搜索用户…",
+    "noOneFound": "未找到任何人。",
+    "noFollowingYet": "你还没有关注任何人。输入以搜索。",
+    "unreadSubtitle": "{{count}} 条未读消息",
+    "defaultSubtitle": "围绕你的预测展开的对话",
+    "newMessageAria": "发起新消息",
+    "searchConversationsPlaceholder": "在对话中搜索…",
+    "conversationsHeading": "对话",
+    "emptyTitle": "开始一段新对话",
+    "emptyDesc": "你还没有和任何人聊过天。选择一位用户，发送你的第一条消息。",
+    "findPersonCta": "查找联系人",
+    "youPrefix": "你："
+  },
   "languages": {
     "tr": "土耳其语",
     "en": "英语",
