@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
@@ -18,6 +19,7 @@ function initials(name) {
 }
 
 export default function LiderlikTablosu() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { user } = useAuth()
   const [rankings, setRankings] = useState([])
@@ -44,7 +46,7 @@ export default function LiderlikTablosu() {
   if (loading) {
     return (
       <div className="flex min-h-screen w-full items-center justify-center bg-background font-body text-foreground">
-        <p className="text-xs text-muted-foreground">Yükleniyor…</p>
+        <p className="text-xs text-muted-foreground">{t('common.loading')}</p>
       </div>
     )
   }
@@ -59,12 +61,12 @@ export default function LiderlikTablosu() {
 
   return (
     <div className="min-h-screen w-full bg-background pb-28 text-foreground font-body">
-      <DetailHeader title="Liderlik Tablosu" subtitle="Puana göre genel sıralama" />
+      <DetailHeader title={t('leaderboard.title')} subtitle={t('leaderboard.subtitle')} />
 
       <main>
         <section className="px-5 pb-5 pt-5">
           {podiumOrdered.length === 0 ? (
-            <p className="text-center text-xs text-muted-foreground">Henüz sıralanacak kullanıcı yok.</p>
+            <p className="text-center text-xs text-muted-foreground">{t('leaderboard.noUsersYet')}</p>
           ) : (
             <div className="grid grid-cols-3 items-end gap-2">
               {podiumOrdered.map((p) => {
@@ -98,7 +100,7 @@ export default function LiderlikTablosu() {
                       <p className={`mt-1 font-heading font-extrabold text-primary ${isFirst ? 'text-lg' : 'text-base'}`}>
                         {p.points}
                       </p>
-                      <p className="mt-0.5 text-[10px] text-muted-foreground">puan</p>
+                      <p className="mt-0.5 text-[10px] text-muted-foreground">{t('nav.points')}</p>
                     </button>
                   </article>
                 )
@@ -109,7 +111,7 @@ export default function LiderlikTablosu() {
 
         {rest.length > 0 && (
           <section className="border-t border-border pb-8 pt-5">
-            <SectionHeader title="Sıralama" />
+            <SectionHeader title={t('leaderboard.rankingSectionTitle')} />
 
             <div className="mx-5 mt-4 overflow-hidden rounded-theme border border-border bg-card shadow-sm">
               {rest.map((r, i) => {
@@ -155,7 +157,7 @@ export default function LiderlikTablosu() {
               {myIndex + 1}
             </div>
             <div className="min-w-0 flex-1">
-              <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">Senin sıran</p>
+              <p className="text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">{t('leaderboard.yourRank')}</p>
               <p className="mt-0.5 text-sm font-bold">{me.display_name}</p>
             </div>
             <p className="font-heading text-base font-extrabold text-primary">{me.points}</p>

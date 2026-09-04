@@ -574,6 +574,24 @@
     "fallbackSomeone": "Jemand",
     "fallbackAUser": "einem Nutzer"
   },
+  "likes": {
+    "title": "Gefällt mir",
+    "subtitle": "Vorhersagen, die dir gefallen",
+    "searchPlaceholder": "In deinen Likes suchen",
+    "searchAria": "In deinen Likes suchen",
+    "likeCount": "{{count}} Likes",
+    "noMatches": "Keine passenden Likes.",
+    "emptyBody": "Du hast noch keine Vorhersage geliked.",
+    "unlikeAria": "Like rückgängig machen",
+    "unlikeFailed": "Like konnte nicht rückgängig gemacht werden, versuch es erneut."
+  },
+  "leaderboard": {
+    "title": "Bestenliste",
+    "subtitle": "Gesamtrangliste nach Punkten",
+    "noUsersYet": "Noch niemand zum Ranken.",
+    "rankingSectionTitle": "Rangliste",
+    "yourRank": "Dein Rang"
+  },
   "languages": {
     "tr": "Türkisch",
     "en": "Englisch",

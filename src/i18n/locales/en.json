@@ -574,6 +574,24 @@
     "fallbackSomeone": "Someone",
     "fallbackAUser": "a user"
   },
+  "likes": {
+    "title": "Likes",
+    "subtitle": "Predictions you liked",
+    "searchPlaceholder": "Search your likes",
+    "searchAria": "Search your likes",
+    "likeCount": "{{count}} likes",
+    "noMatches": "No matching likes.",
+    "emptyBody": "You haven't liked a prediction yet.",
+    "unlikeAria": "Undo like",
+    "unlikeFailed": "Couldn't undo the like, try again."
+  },
+  "leaderboard": {
+    "title": "Leaderboard",
+    "subtitle": "Overall ranking by points",
+    "noUsersYet": "No one to rank yet.",
+    "rankingSectionTitle": "Ranking",
+    "yourRank": "Your rank"
+  },
   "languages": {
     "tr": "Turkish",
     "en": "English",

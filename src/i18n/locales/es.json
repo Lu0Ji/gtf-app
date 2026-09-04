@@ -574,6 +574,24 @@
     "fallbackSomeone": "Alguien",
     "fallbackAUser": "un usuario"
   },
+  "likes": {
+    "title": "Me gusta",
+    "subtitle": "Predicciones que te gustaron",
+    "searchPlaceholder": "Buscar en tus me gusta",
+    "searchAria": "Buscar en tus me gusta",
+    "likeCount": "{{count}} me gusta",
+    "noMatches": "No hay coincidencias.",
+    "emptyBody": "Aún no le diste me gusta a ninguna predicción.",
+    "unlikeAria": "Deshacer me gusta",
+    "unlikeFailed": "No se pudo deshacer el me gusta, inténtalo de nuevo."
+  },
+  "leaderboard": {
+    "title": "Clasificación",
+    "subtitle": "Clasificación general por puntos",
+    "noUsersYet": "Aún no hay nadie que clasificar.",
+    "rankingSectionTitle": "Clasificación",
+    "yourRank": "Tu posición"
+  },
   "languages": {
     "tr": "Turco",
     "en": "Inglés",

@@ -573,6 +573,24 @@
     "fallbackSomeone": "誰か",
     "fallbackAUser": "あるユーザー"
   },
+  "likes": {
+    "title": "いいね",
+    "subtitle": "いいねした予測",
+    "searchPlaceholder": "いいねを検索",
+    "searchAria": "いいねを検索",
+    "likeCount": "{{count}}件のいいね",
+    "noMatches": "一致するいいねがありません。",
+    "emptyBody": "まだ予測にいいねしていません。",
+    "unlikeAria": "いいねを取り消す",
+    "unlikeFailed": "いいねを取り消せませんでした。もう一度お試しください。"
+  },
+  "leaderboard": {
+    "title": "ランキング",
+    "subtitle": "ポイントによる総合ランキング",
+    "noUsersYet": "まだランキングできるユーザーがいません。",
+    "rankingSectionTitle": "ランキング",
+    "yourRank": "あなたの順位"
+  },
   "languages": {
     "tr": "トルコ語",
     "en": "英語",

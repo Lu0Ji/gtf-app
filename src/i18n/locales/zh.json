@@ -573,6 +573,24 @@
     "fallbackSomeone": "有人",
     "fallbackAUser": "一位用户"
   },
+  "likes": {
+    "title": "喜欢",
+    "subtitle": "你点赞的预测",
+    "searchPlaceholder": "在你的点赞中搜索",
+    "searchAria": "在点赞中搜索",
+    "likeCount": "{{count}} 个赞",
+    "noMatches": "没有匹配的点赞。",
+    "emptyBody": "你还没有点赞过任何预测。",
+    "unlikeAria": "取消点赞",
+    "unlikeFailed": "取消点赞失败，请重试。"
+  },
+  "leaderboard": {
+    "title": "排行榜",
+    "subtitle": "按积分排列的总排名",
+    "noUsersYet": "暂无可排名的用户。",
+    "rankingSectionTitle": "排名",
+    "yourRank": "你的排名"
+  },
   "languages": {
     "tr": "土耳其语",
     "en": "英语",

@@ -574,6 +574,24 @@
     "fallbackSomeone": "Biri",
     "fallbackAUser": "Bir kullanıcının"
   },
+  "likes": {
+    "title": "Beğeniler",
+    "subtitle": "Beğendiğin tahminler",
+    "searchPlaceholder": "Beğenilerinde ara",
+    "searchAria": "Beğenilerde ara",
+    "likeCount": "{{count}} beğeni",
+    "noMatches": "Eşleşen bir beğeni yok.",
+    "emptyBody": "Henüz bir tahmin beğenmedin.",
+    "unlikeAria": "Beğeniyi geri al",
+    "unlikeFailed": "Beğeni geri alınamadı, tekrar dene."
+  },
+  "leaderboard": {
+    "title": "Liderlik Tablosu",
+    "subtitle": "Puana göre genel sıralama",
+    "noUsersYet": "Henüz sıralanacak kullanıcı yok.",
+    "rankingSectionTitle": "Sıralama",
+    "yourRank": "Senin sıran"
+  },
   "languages": {
     "tr": "Türkçe",
     "en": "İngilizce",

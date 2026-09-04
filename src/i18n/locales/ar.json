@@ -578,6 +578,24 @@
     "fallbackSomeone": "أحدهم",
     "fallbackAUser": "مستخدم"
   },
+  "likes": {
+    "title": "الإعجابات",
+    "subtitle": "التوقعات التي أعجبتك",
+    "searchPlaceholder": "ابحث في إعجاباتك",
+    "searchAria": "البحث في الإعجابات",
+    "likeCount": "{{count}} إعجاب",
+    "noMatches": "لا توجد إعجابات مطابقة.",
+    "emptyBody": "لم تُعجب بأي توقع بعد.",
+    "unlikeAria": "التراجع عن الإعجاب",
+    "unlikeFailed": "تعذّر التراجع عن الإعجاب، حاول مرة أخرى."
+  },
+  "leaderboard": {
+    "title": "لوحة المتصدرين",
+    "subtitle": "الترتيب العام حسب النقاط",
+    "noUsersYet": "لا يوجد أحد للترتيب بعد.",
+    "rankingSectionTitle": "الترتيب",
+    "yourRank": "ترتيبك"
+  },
   "languages": {
     "tr": "التركية",
     "en": "الإنجليزية",
