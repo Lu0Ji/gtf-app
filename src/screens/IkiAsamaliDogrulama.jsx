@@ -1,10 +1,12 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase.js'
 import { useToast } from '../contexts/ToastContext.jsx'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
 import Card from '../components/ui/Card.jsx'
 
 export default function IkiAsamaliDogrulama() {
+  const { t } = useTranslation()
   const { showToast } = useToast()
   const [factor, setFactor] = useState(null) // verified TOTP factor, or null
   const [loading, setLoading] = useState(true)
@@ -31,7 +33,7 @@ export default function IkiAsamaliDogrulama() {
     const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' })
     setBusy(false)
     if (error) {
-      showToast(error.message || 'Doğrulayıcı eklenemedi, tekrar dene.')
+      showToast(error.message || t('settings.twoFactor.enrollFailed'))
       return
     }
     setEnrollData({ id: data.id, qrCode: data.totp.qr_code, secret: data.totp.secret })
@@ -45,7 +47,7 @@ export default function IkiAsamaliDogrulama() {
       factorId: enrollData.id,
     })
     if (challengeError) {
-      showToast(challengeError.message || 'Kod doğrulanamadı, tekrar dene.')
+      showToast(challengeError.message || t('settings.twoFactor.verifyChallengeFailed'))
       setBusy(false)
       return
     }
@@ -56,10 +58,10 @@ export default function IkiAsamaliDogrulama() {
     })
     setBusy(false)
     if (verifyError) {
-      showToast('Kod yanlış, tekrar dene.')
+      showToast(t('settings.twoFactor.codeWrong'))
       return
     }
-    showToast('İki aşamalı doğrulama etkinleştirildi.', 'success')
+    showToast(t('settings.twoFactor.enrollSuccess'), 'success')
     setEnrolling(false)
     setEnrollData(null)
     setCode('')
@@ -80,24 +82,24 @@ export default function IkiAsamaliDogrulama() {
     setBusy(false)
     setShowDisableConfirm(false)
     if (error) {
-      showToast(error.message || 'Kapatılamadı, tekrar dene.')
+      showToast(error.message || t('settings.twoFactor.disableFailed'))
       return
     }
-    showToast('İki aşamalı doğrulama kapatıldı.', 'success')
+    showToast(t('settings.twoFactor.disableSuccess'), 'success')
     await loadFactors()
   }
 
   if (loading) {
     return (
       <div className="flex min-h-screen w-full items-center justify-center bg-background font-body text-foreground">
-        <p className="text-xs text-muted-foreground">Yükleniyor…</p>
+        <p className="text-xs text-muted-foreground">{t('common.loading')}</p>
       </div>
     )
   }
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-body pb-10">
-      <DetailHeader title="Hesap güvenliği" />
+      <DetailHeader title={t('settings.twoFactor.title')} />
 
       <main className="px-5 pt-8">
         <section>
@@ -106,23 +108,19 @@ export default function IkiAsamaliDogrulama() {
               <iconify-icon icon="lucide:shield-check" class="text-[25px]"></iconify-icon>
             </div>
             <div className="pt-0.5">
-              <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-primary">Güvenlik katmanı</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-primary">{t('settings.twoFactor.eyebrow')}</p>
               <h2 className="mt-1 font-heading text-[25px] font-extrabold leading-8 tracking-[-0.05em]">
-                İki aşamalı doğrulama
+                {t('settings.twoFactor.heading')}
               </h2>
-              <p className="mt-2 max-w-[295px] text-[13px] leading-5 text-muted-foreground">
-                Girişlerde şifrene ek olarak, bir doğrulayıcı uygulamadan altı haneli bir kod istenir.
-              </p>
+              <p className="mt-2 max-w-[295px] text-[13px] leading-5 text-muted-foreground">{t('settings.twoFactor.body')}</p>
             </div>
           </div>
         </section>
 
         {enrolling ? (
           <Card as="section" className="mt-7">
-            <h2 className="font-heading text-[15px] font-bold">Doğrulayıcı uygulamayla bağla</h2>
-            <p className="mt-1 text-xs leading-5 text-muted-foreground">
-              Google Authenticator, Authy gibi bir uygulamayla aşağıdaki kodu tara.
-            </p>
+            <h2 className="font-heading text-[15px] font-bold">{t('settings.twoFactor.connectAppTitle')}</h2>
+            <p className="mt-1 text-xs leading-5 text-muted-foreground">{t('settings.twoFactor.connectAppBody')}</p>
             {enrollData?.qrCode && (
               <div
                 className="mx-auto mt-4 h-48 w-48 rounded-theme border border-border bg-white p-2"
@@ -132,7 +130,7 @@ export default function IkiAsamaliDogrulama() {
             <p className="mt-3 break-all rounded-theme bg-muted px-3 py-2 text-center text-[11px] font-mono text-muted-foreground">
               {enrollData?.secret}
             </p>
-            <label className="mb-2 mt-4 block text-xs font-bold text-foreground">Doğrulayıcıdaki 6 haneli kod</label>
+            <label className="mb-2 mt-4 block text-xs font-bold text-foreground">{t('settings.twoFactor.codeLabel')}</label>
             <input
               value={code}
               onChange={(e) => setCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
@@ -145,14 +143,14 @@ export default function IkiAsamaliDogrulama() {
                 onClick={handleCancelEnroll}
                 className="flex-1 rounded-theme bg-muted py-2.5 text-xs font-bold text-muted-foreground"
               >
-                Vazgeç
+                {t('common.cancel')}
               </button>
               <button
                 onClick={handleVerifyEnroll}
                 disabled={code.length !== 6 || busy}
                 className="flex-1 rounded-theme bg-primary py-2.5 text-xs font-bold text-primary-foreground disabled:opacity-60"
               >
-                {busy ? 'Doğrulanıyor…' : 'Etkinleştir'}
+                {busy ? t('settings.twoFactor.verifying') : t('settings.twoFactor.activate')}
               </button>
             </div>
           </Card>
@@ -163,9 +161,9 @@ export default function IkiAsamaliDogrulama() {
                 <div className={`absolute inset-x-0 top-0 h-1 ${factor ? 'bg-success' : 'bg-muted'}`} />
                 <div className="flex items-center justify-between pt-1">
                   <div>
-                    <p className="text-sm font-bold text-foreground">{factor ? 'Koruma etkin' : 'Koruma kapalı'}</p>
+                    <p className="text-sm font-bold text-foreground">{factor ? t('settings.twoFactor.protectionOn') : t('settings.twoFactor.protectionOff')}</p>
                     <p className="mt-1 text-xs text-muted-foreground">
-                      {factor ? 'Doğrulayıcı uygulama bağlı' : 'Henüz bir doğrulayıcı bağlamadın'}
+                      {factor ? t('settings.twoFactor.appConnected') : t('settings.twoFactor.notConnectedYet')}
                     </p>
                   </div>
                   <div
@@ -174,7 +172,7 @@ export default function IkiAsamaliDogrulama() {
                     }`}
                   >
                     <iconify-icon icon={factor ? 'lucide:check' : 'lucide:x'} class="text-base"></iconify-icon>
-                    {factor ? 'Açık' : 'Kapalı'}
+                    {factor ? t('settings.twoFactor.on') : t('settings.twoFactor.off')}
                   </div>
                 </div>
               </div>
@@ -191,8 +189,8 @@ export default function IkiAsamaliDogrulama() {
                     <iconify-icon icon="lucide:smartphone" class="text-xl"></iconify-icon>
                   </div>
                   <div className="flex-1">
-                    <p className="text-sm font-bold text-foreground">Doğrulayıcı uygulama ekle</p>
-                    <p className="mt-0.5 text-xs text-muted-foreground">Google Authenticator, Authy, vb.</p>
+                    <p className="text-sm font-bold text-foreground">{t('settings.twoFactor.addAppTitle')}</p>
+                    <p className="mt-0.5 text-xs text-muted-foreground">{t('settings.twoFactor.addAppBody')}</p>
                   </div>
                   <iconify-icon icon="lucide:plus" class="text-lg text-primary"></iconify-icon>
                 </button>
@@ -202,10 +200,7 @@ export default function IkiAsamaliDogrulama() {
             <section className="mt-7 rounded-theme border border-border bg-muted px-4 py-3.5">
               <div className="flex items-start gap-3">
                 <iconify-icon icon="lucide:info" class="mt-0.5 shrink-0 text-[18px] text-primary"></iconify-icon>
-                <p className="text-[11px] leading-4 text-muted-foreground">
-                  Şu an yalnızca doğrulayıcı uygulama (TOTP) destekleniyor. SMS ile yedek kod ve kurtarma kodları
-                  henüz yok.
-                </p>
+                <p className="text-[11px] leading-4 text-muted-foreground">{t('settings.twoFactor.infoNote')}</p>
               </div>
             </section>
 
@@ -213,23 +208,21 @@ export default function IkiAsamaliDogrulama() {
               <section className="mt-7 border-t border-border pt-5">
                 {showDisableConfirm ? (
                   <div className="rounded-theme border border-destructive/30 bg-destructive/10 p-3.5">
-                    <p className="text-xs font-bold text-foreground">Emin misin?</p>
-                    <p className="mt-1 text-[11px] leading-4 text-muted-foreground">
-                      İki aşamalı doğrulama kapanacak, hesabın yalnızca şifreyle korunacak.
-                    </p>
+                    <p className="text-xs font-bold text-foreground">{t('settings.twoFactor.confirmTitle')}</p>
+                    <p className="mt-1 text-[11px] leading-4 text-muted-foreground">{t('settings.twoFactor.confirmBody')}</p>
                     <div className="mt-3 flex gap-2">
                       <button
                         onClick={() => setShowDisableConfirm(false)}
                         className="flex-1 rounded-theme bg-muted py-2 text-xs font-bold text-muted-foreground"
                       >
-                        Vazgeç
+                        {t('common.cancel')}
                       </button>
                       <button
                         onClick={handleDisable}
                         disabled={busy}
                         className="flex-1 rounded-theme bg-destructive py-2 text-xs font-bold text-destructive-foreground disabled:opacity-60"
                       >
-                        {busy ? 'Kapatılıyor…' : 'Evet, kapat'}
+                        {busy ? t('settings.twoFactor.disabling') : t('settings.twoFactor.yesDisable')}
                       </button>
                     </div>
                   </div>
@@ -239,7 +232,7 @@ export default function IkiAsamaliDogrulama() {
                     className="flex items-center gap-2 text-xs font-bold text-destructive"
                   >
                     <iconify-icon icon="lucide:shield-off" class="text-base"></iconify-icon>
-                    İki aşamalı doğrulamayı kapat
+                    {t('settings.twoFactor.disableCta')}
                   </button>
                 )}
               </section>

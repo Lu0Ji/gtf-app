@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
@@ -8,6 +9,7 @@ import DetailHeader from '../components/ui/DetailHeader.jsx'
 
 
 export default function EngellenenHesaplar() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { user } = useAuth()
   const { showToast } = useToast()
@@ -42,7 +44,7 @@ export default function EngellenenHesaplar() {
     const { error } = await supabase.from('blocks').delete().eq('blocker_id', user.id).eq('blocked_id', blockedId)
     if (error) {
       setBlocked((prev) => (removed ? [removed, ...prev] : prev))
-      showToast('Engel kaldırılamadı, tekrar dene.')
+      showToast(t('settings.blockedAccounts.unblockFailed'))
     }
     setBusyId(null)
   }
@@ -50,22 +52,20 @@ export default function EngellenenHesaplar() {
   return (
     <div className="min-h-screen w-full bg-background pb-10 text-foreground font-body">
       <DetailHeader
-        title="Engellenen hesaplar"
-        subtitle={blocked.length === 0 ? 'Engellediğin kimse yok' : `${blocked.length} hesap engellendi`}
+        title={t('settings.blockedAccounts.title')}
+        subtitle={blocked.length === 0 ? t('settings.blockedAccounts.noneSubtitle') : t('settings.blockedAccounts.countSubtitle', { count: blocked.length })}
       />
 
       <main className="px-5 pt-6">
         {loading ? (
-          <p className="text-center text-xs text-muted-foreground">Yükleniyor…</p>
+          <p className="text-center text-xs text-muted-foreground">{t('common.loading')}</p>
         ) : blocked.length === 0 ? (
           <div className="mx-auto mt-8 max-w-[280px] text-center">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-theme bg-muted text-muted-foreground">
               <iconify-icon icon="lucide:ban" class="text-2xl"></iconify-icon>
             </div>
-            <p className="mt-4 text-sm font-bold">Engellenen hesap yok</p>
-            <p className="mt-1 text-xs leading-5 text-muted-foreground">
-              Bir profildeki "···" menüsünden birini engellersen burada listelenir.
-            </p>
+            <p className="mt-4 text-sm font-bold">{t('settings.blockedAccounts.emptyTitle')}</p>
+            <p className="mt-1 text-xs leading-5 text-muted-foreground">{t('settings.blockedAccounts.emptyBody')}</p>
           </div>
         ) : (
           <div className="overflow-hidden rounded-theme border border-border bg-card shadow-sm">
@@ -93,7 +93,7 @@ export default function EngellenenHesaplar() {
                   disabled={busyId === row.blocked_id}
                   className="shrink-0 rounded-theme border border-border bg-card px-3 py-2 text-xs font-bold text-foreground transition-transform duration-150 active:scale-95 disabled:opacity-60 disabled:active:scale-100"
                 >
-                  Engeli kaldır
+                  {t('settings.blockedAccounts.unblock')}
                 </button>
               </div>
             ))}

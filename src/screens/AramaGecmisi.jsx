@@ -1,17 +1,19 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { getSearchHistory, removeSearchHistoryEntry, clearSearchHistory } from '../lib/searchHistory.js'
 import { formatTime, formatDateLong } from '../lib/format.js'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
 import Card from '../components/ui/Card.jsx'
 
-function groupByDay(entries) {
+function groupByDay(entries, t) {
   const todayKey = new Date().toDateString()
   const yesterdayKey = new Date(Date.now() - 86400000).toDateString()
   const groups = new Map()
   for (const entry of entries) {
     const dayKey = new Date(entry.created_at).toDateString()
-    const label = dayKey === todayKey ? 'Bugün' : dayKey === yesterdayKey ? 'Dün' : formatDateLong(entry.created_at)
+    const label =
+      dayKey === todayKey ? t('settings.searchHistory.today') : dayKey === yesterdayKey ? t('settings.searchHistory.yesterday') : formatDateLong(entry.created_at)
     if (!groups.has(label)) groups.set(label, [])
     groups.get(label).push(entry)
   }
@@ -19,6 +21,7 @@ function groupByDay(entries) {
 }
 
 export default function AramaGecmisi() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const [entries, setEntries] = useState(() => getSearchHistory())
   const [showClearConfirm, setShowClearConfirm] = useState(false)
@@ -34,12 +37,12 @@ export default function AramaGecmisi() {
     setShowClearConfirm(false)
   }
 
-  const grouped = groupByDay(entries)
+  const grouped = groupByDay(entries, t)
 
   return (
     <div className="relative min-h-screen w-full bg-background text-foreground font-body pb-8">
       <DetailHeader
-        title="Arama geçmişi"
+        title={t('settings.searchHistory.title')}
         action={
           entries.length > 0 && (
             <button
@@ -47,7 +50,7 @@ export default function AramaGecmisi() {
               className="flex h-10 shrink-0 items-center gap-1.5 rounded-theme px-2 text-xs font-bold text-destructive"
             >
               <iconify-icon icon="lucide:trash-2" class="text-[17px]"></iconify-icon>
-              Temizle
+              {t('settings.searchHistory.clear')}
             </button>
           )
         }
@@ -60,22 +63,20 @@ export default function AramaGecmisi() {
               <iconify-icon icon="lucide:history" class="text-xl"></iconify-icon>
             </div>
             <div>
-              <h2 className="font-heading text-sm font-extrabold tracking-[-0.025em]">Bu cihaza özel</h2>
-              <p className="mt-1 max-w-[240px] text-[11px] leading-4 text-muted-foreground">
-                Arama geçmişin yalnızca bu cihazda saklanır, hiçbir sunucuya gönderilmez.
-              </p>
+              <h2 className="font-heading text-sm font-extrabold tracking-[-0.025em]">{t('settings.searchHistory.deviceOnlyTitle')}</h2>
+              <p className="mt-1 max-w-[240px] text-[11px] leading-4 text-muted-foreground">{t('settings.searchHistory.deviceOnlyBody')}</p>
             </div>
           </div>
         </Card>
 
         {grouped.length === 0 ? (
-          <p className="mt-8 text-center text-xs text-muted-foreground">Henüz bir arama geçmişin yok.</p>
+          <p className="mt-8 text-center text-xs text-muted-foreground">{t('settings.searchHistory.empty')}</p>
         ) : (
           grouped.map(([label, group]) => (
             <section key={label} className="mt-7">
               <div className="mb-3 flex items-center justify-between">
                 <p className="text-[11px] font-bold uppercase tracking-[0.12em] text-muted-foreground">{label}</p>
-                <span className="text-[11px] font-medium text-muted-foreground">{group.length} arama</span>
+                <span className="text-[11px] font-medium text-muted-foreground">{t('settings.searchHistory.searchCount', { count: group.length })}</span>
               </div>
               <div className="overflow-hidden rounded-theme border border-border bg-card shadow-sm">
                 {group.map((entry, i) => (
@@ -92,7 +93,7 @@ export default function AramaGecmisi() {
                         <p className="mt-0.5 text-[11px] text-muted-foreground">{formatTime(entry.created_at)}</p>
                       </button>
                       <button
-                        aria-label={`${entry.query} aramasını sil`}
+                        aria-label={t('settings.searchHistory.removeAria', { query: entry.query })}
                         onClick={() => handleRemove(entry.query)}
                         className="flex h-9 w-9 items-center justify-center rounded-full text-muted-foreground"
                       >
@@ -119,10 +120,10 @@ export default function AramaGecmisi() {
                 </div>
                 <div>
                   <h2 className="font-heading text-[17px] font-extrabold tracking-[-0.035em]">
-                    Arama geçmişi temizlensin mi?
+                    {t('settings.searchHistory.clearConfirmTitle')}
                   </h2>
                   <p className="mt-1.5 text-[12px] leading-5 text-muted-foreground">
-                    Kaydedilmiş {entries.length} arama bu cihazdan kaldırılacak. Bu işlem geri alınamaz.
+                    {t('settings.searchHistory.clearConfirmBody', { count: entries.length })}
                   </p>
                 </div>
               </div>
@@ -131,13 +132,13 @@ export default function AramaGecmisi() {
                   onClick={() => setShowClearConfirm(false)}
                   className="flex h-11 flex-1 items-center justify-center rounded-theme border border-border bg-card text-sm font-bold text-foreground"
                 >
-                  Vazgeç
+                  {t('common.cancel')}
                 </button>
                 <button
                   onClick={handleClear}
                   className="flex h-11 flex-1 items-center justify-center rounded-theme bg-destructive text-sm font-bold text-destructive-foreground shadow-sm"
                 >
-                  Geçmişi temizle
+                  {t('settings.searchHistory.clearCta')}
                 </button>
               </div>
             </section>

@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
@@ -6,6 +7,7 @@ import DetailHeader from '../components/ui/DetailHeader.jsx'
 import Card from '../components/ui/Card.jsx'
 
 export default function EpostaVeTelefon() {
+  const { t } = useTranslation()
   const { user, profile, refreshProfile } = useAuth()
   const { showToast } = useToast()
   const [editingEmail, setEditingEmail] = useState(false)
@@ -22,10 +24,10 @@ export default function EpostaVeTelefon() {
     const { error } = await supabase.auth.updateUser({ email: newEmail.trim() })
     setBusy(false)
     if (error) {
-      showToast(error.message || 'E-posta güncellenemedi, tekrar dene.')
+      showToast(error.message || t('settings.emailPhone.emailUpdateFailed'))
       return
     }
-    showToast('Onay linki her iki adresine de gönderildi, tıklayınca değişiklik tamamlanır.', 'success')
+    showToast(t('settings.emailPhone.emailUpdateSuccess'), 'success')
     setEditingEmail(false)
     setNewEmail('')
   }
@@ -36,27 +38,25 @@ export default function EpostaVeTelefon() {
     const { error } = await supabase.from('profiles').update({ phone: phone.trim() || null }).eq('id', user.id)
     setBusy(false)
     if (error) {
-      showToast('Telefon numarası kaydedilemedi, tekrar dene.')
+      showToast(t('settings.emailPhone.phoneUpdateFailed'))
       return
     }
     await refreshProfile()
-    showToast('Telefon numaran kaydedildi.', 'success')
+    showToast(t('settings.emailPhone.phoneUpdateSuccess'), 'success')
     setEditingPhone(false)
   }
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-body pb-10">
-      <DetailHeader title="E-posta ve Telefon" />
+      <DetailHeader title={t('settings.emailPhone.title')} />
 
       <main className="px-5 pt-7">
         <section>
-          <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-primary">Hesap güvenliği</p>
+          <p className="text-[11px] font-bold uppercase tracking-[0.15em] text-primary">{t('settings.emailPhone.eyebrow')}</p>
           <h1 className="mt-2 font-heading text-[26px] font-extrabold leading-tight tracking-[-0.05em]">
-            İletişim bilgilerin
+            {t('settings.emailPhone.heading')}
           </h1>
-          <p className="mt-2 max-w-[345px] text-[13px] leading-5 text-muted-foreground">
-            Giriş ve hesap kurtarma için kullanılan bilgilerini buradan yönet.
-          </p>
+          <p className="mt-2 max-w-[345px] text-[13px] leading-5 text-muted-foreground">{t('settings.emailPhone.body')}</p>
         </section>
 
         <section className="mt-7 space-y-4">
@@ -67,7 +67,7 @@ export default function EpostaVeTelefon() {
                   <iconify-icon icon="lucide:mail" class="text-[19px]"></iconify-icon>
                 </div>
                 <div className="min-w-0">
-                  <h2 className="font-heading text-[15px] font-bold tracking-[-0.025em]">E-posta adresi</h2>
+                  <h2 className="font-heading text-[15px] font-bold tracking-[-0.025em]">{t('settings.emailPhone.emailTitle')}</h2>
                   <p className="mt-1 truncate text-sm font-semibold text-foreground">{user?.email}</p>
                   <div
                     className={`mt-2 flex items-center gap-1.5 text-[11px] font-semibold ${
@@ -75,7 +75,7 @@ export default function EpostaVeTelefon() {
                     }`}
                   >
                     <iconify-icon icon={emailVerified ? 'lucide:badge-check' : 'lucide:circle-dashed'} class="text-[15px]"></iconify-icon>
-                    {emailVerified ? 'Doğrulandı' : 'Doğrulanmadı'}
+                    {emailVerified ? t('settings.emailPhone.verified') : t('settings.emailPhone.notVerified')}
                   </div>
                 </div>
               </div>
@@ -83,12 +83,12 @@ export default function EpostaVeTelefon() {
                 onClick={() => setEditingEmail((v) => !v)}
                 className="shrink-0 rounded-theme bg-secondary px-3 py-2 text-xs font-bold text-secondary-foreground"
               >
-                Değiştir
+                {t('settings.emailPhone.changeAction')}
               </button>
             </div>
             {editingEmail && (
               <div className="mt-4 border-t border-border pt-4">
-                <label className="mb-2 block text-xs font-bold text-foreground">Yeni e-posta adresi</label>
+                <label className="mb-2 block text-xs font-bold text-foreground">{t('settings.emailPhone.newEmailLabel')}</label>
                 <input
                   type="email"
                   value={newEmail}
@@ -96,15 +96,13 @@ export default function EpostaVeTelefon() {
                   placeholder="yeni@eposta.com"
                   className="w-full rounded-theme border border-border bg-input px-4 py-3 text-sm text-foreground outline-none"
                 />
-                <p className="mt-2 text-[11px] leading-4 text-muted-foreground">
-                  Değişikliği onaylamak için hem eski hem yeni adresine bir link gönderilir.
-                </p>
+                <p className="mt-2 text-[11px] leading-4 text-muted-foreground">{t('settings.emailPhone.confirmLinkHint')}</p>
                 <button
                   onClick={handleUpdateEmail}
                   disabled={busy || !newEmail.trim()}
                   className="mt-3 w-full rounded-theme bg-primary py-2.5 text-xs font-bold text-primary-foreground disabled:opacity-60"
                 >
-                  Onay linki gönder
+                  {t('settings.emailPhone.sendConfirmLink')}
                 </button>
               </div>
             )}
@@ -117,25 +115,23 @@ export default function EpostaVeTelefon() {
                   <iconify-icon icon="lucide:smartphone" class="text-[19px]"></iconify-icon>
                 </div>
                 <div className="min-w-0">
-                  <h2 className="font-heading text-[15px] font-bold tracking-[-0.025em]">Telefon numarası</h2>
+                  <h2 className="font-heading text-[15px] font-bold tracking-[-0.025em]">{t('settings.emailPhone.phoneTitle')}</h2>
                   <p className="mt-1 text-sm font-semibold text-foreground">
-                    {profile?.phone || 'Henüz eklenmedi'}
+                    {profile?.phone || t('settings.emailPhone.notAddedYet')}
                   </p>
-                  <p className="mt-2 text-[11px] leading-4 text-muted-foreground">
-                    Sadece hesap kurtarma amaçlı — SMS ile doğrulama şu an yok.
-                  </p>
+                  <p className="mt-2 text-[11px] leading-4 text-muted-foreground">{t('settings.emailPhone.phoneHint')}</p>
                 </div>
               </div>
               <button
                 onClick={() => setEditingPhone((v) => !v)}
                 className="shrink-0 rounded-theme bg-secondary px-3 py-2 text-xs font-bold text-secondary-foreground"
               >
-                {profile?.phone ? 'Değiştir' : 'Ekle'}
+                {profile?.phone ? t('settings.emailPhone.changeAction') : t('settings.emailPhone.addAction')}
               </button>
             </div>
             {editingPhone && (
               <div className="mt-4 border-t border-border pt-4">
-                <label className="mb-2 block text-xs font-bold text-foreground">Telefon numarası</label>
+                <label className="mb-2 block text-xs font-bold text-foreground">{t('settings.emailPhone.phoneLabel')}</label>
                 <input
                   type="tel"
                   value={phone}
@@ -148,7 +144,7 @@ export default function EpostaVeTelefon() {
                   disabled={busy}
                   className="mt-3 w-full rounded-theme bg-primary py-2.5 text-xs font-bold text-primary-foreground disabled:opacity-60"
                 >
-                  Kaydet
+                  {t('settings.emailPhone.save')}
                 </button>
               </div>
             )}
@@ -161,10 +157,8 @@ export default function EpostaVeTelefon() {
               <iconify-icon icon="lucide:shield-check" class="text-[16px]"></iconify-icon>
             </div>
             <div>
-              <h2 className="text-xs font-bold text-foreground">Bilgilerin koruma altında</h2>
-              <p className="mt-1 text-[11px] leading-4 text-muted-foreground">
-                İletişim bilgisi değişiklikleri her zaman e-posta onayı gerektirir.
-              </p>
+              <h2 className="text-xs font-bold text-foreground">{t('settings.emailPhone.protectedTitle')}</h2>
+              <p className="mt-1 text-[11px] leading-4 text-muted-foreground">{t('settings.emailPhone.protectedBody')}</p>
             </div>
           </div>
         </section>

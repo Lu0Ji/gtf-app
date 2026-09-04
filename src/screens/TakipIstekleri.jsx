@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
@@ -8,6 +9,7 @@ import DetailHeader from '../components/ui/DetailHeader.jsx'
 
 
 export default function TakipIstekleri() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { user } = useAuth()
   const { showToast } = useToast()
@@ -44,7 +46,7 @@ export default function TakipIstekleri() {
       .eq('follower_id', followerId)
       .eq('following_id', user.id)
     if (error) {
-      showToast('İstek kabul edilemedi, tekrar dene.')
+      showToast(t('settings.followRequests.acceptFailed'))
       setBusyId(null)
       return
     }
@@ -57,7 +59,7 @@ export default function TakipIstekleri() {
     setBusyId(followerId)
     const { error } = await supabase.from('follows').delete().eq('follower_id', followerId).eq('following_id', user.id)
     if (error) {
-      showToast('İstek reddedilemedi, tekrar dene.')
+      showToast(t('settings.followRequests.declineFailed'))
       setBusyId(null)
       return
     }
@@ -68,22 +70,20 @@ export default function TakipIstekleri() {
   return (
     <div className="min-h-screen w-full bg-background pb-10 text-foreground font-body">
       <DetailHeader
-        title="Takip istekleri"
-        subtitle={requests.length === 0 ? 'Bekleyen istek yok' : `${requests.length} bekleyen istek`}
+        title={t('settings.followRequests.title')}
+        subtitle={requests.length === 0 ? t('settings.followRequests.noneSubtitle') : t('settings.followRequests.countSubtitle', { count: requests.length })}
       />
 
       <main className="px-5 pt-6">
         {loading ? (
-          <p className="text-center text-xs text-muted-foreground">Yükleniyor…</p>
+          <p className="text-center text-xs text-muted-foreground">{t('common.loading')}</p>
         ) : requests.length === 0 ? (
           <div className="mx-auto mt-8 max-w-[280px] text-center">
             <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-theme bg-muted text-muted-foreground">
               <iconify-icon icon="lucide:user-round-check" class="text-2xl"></iconify-icon>
             </div>
-            <p className="mt-4 text-sm font-bold">Bekleyen istek yok</p>
-            <p className="mt-1 text-xs leading-5 text-muted-foreground">
-              Hesabın gizliyken seni takip etmek isteyenler burada listelenir.
-            </p>
+            <p className="mt-4 text-sm font-bold">{t('settings.followRequests.emptyTitle')}</p>
+            <p className="mt-1 text-xs leading-5 text-muted-foreground">{t('settings.followRequests.emptyBody')}</p>
           </div>
         ) : (
           <div className="overflow-hidden rounded-theme border border-border bg-card shadow-sm">
@@ -112,14 +112,14 @@ export default function TakipIstekleri() {
                     disabled={busyId === row.follower_id}
                     className="rounded-theme border border-border bg-card px-3 py-2 text-xs font-bold text-foreground transition-transform duration-150 active:scale-95 disabled:opacity-60 disabled:active:scale-100"
                   >
-                    Reddet
+                    {t('settings.followRequests.decline')}
                   </button>
                   <button
                     onClick={() => handleAccept(row.follower_id)}
                     disabled={busyId === row.follower_id}
                     className="rounded-theme bg-primary px-3 py-2 text-xs font-bold text-primary-foreground transition-transform duration-150 active:scale-95 disabled:opacity-60 disabled:active:scale-100"
                   >
-                    Onayla
+                    {t('settings.followRequests.approve')}
                   </button>
                 </div>
               </div>
