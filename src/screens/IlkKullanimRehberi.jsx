@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { IMG } from '../lib/images.js'
 
@@ -17,6 +18,7 @@ const HERO_SEAL = IMG('8c0404fb-2a59-4367-90e2-58f36918ff00')
 const HERO_COMMUNITY = IMG('11c937cd-c7a7-459d-b773-3e8ec2d78981')
 
 export default function IlkKullanimRehberi() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { profile } = useAuth()
   const [step, setStep] = useState(0)
@@ -29,50 +31,50 @@ export default function IlkKullanimRehberi() {
   const SLIDES = [
     {
       icon: 'lucide:hand-heart',
-      eyebrow: 'Hoş geldin',
-      title: firstName ? `Hoş geldin, ${firstName}!` : 'Hoş geldin!',
-      desc: 'GTF, tahminlerini güvenle sakladığımız kişisel bir kayıt defteri. Nasıl çalıştığını kısaca gösterelim, sonra tamamen sana kalsın.',
+      eyebrow: t('onboarding.welcomeEyebrow'),
+      title: firstName ? t('onboarding.welcomeTitleNamed', { name: firstName }) : t('onboarding.welcomeTitle'),
+      desc: t('onboarding.welcomeDesc'),
       hero: HERO_WELCOME,
       note: {
         icon: 'lucide:heart-handshake',
-        title: 'Tamamen senin hızında',
-        desc: 'İstediğin an başla, istediğin an geri dön — burada acele eden yok.',
+        title: t('onboarding.welcomeNoteTitle'),
+        desc: t('onboarding.welcomeNoteDesc'),
       },
     },
     {
       icon: 'lucide:circle-plus',
-      eyebrow: 'Başlangıç',
-      title: 'Tahminini oluştur',
-      desc: 'Aklından geçeni yaz, bir kategori seç ve ne zaman açılacağına sen karar ver — gerisini bize bırak.',
+      eyebrow: t('onboarding.createEyebrow'),
+      title: t('onboarding.createTitle'),
+      desc: t('onboarding.createDesc'),
       hero: HERO_CREATE,
       note: {
         icon: 'lucide:folder-kanban',
-        title: 'Konuya yer aç',
-        desc: 'Spor, teknoloji, ekonomi ve daha fazlası — seni en çok heyecanlandıran konuyla başla.',
+        title: t('onboarding.createNoteTitle'),
+        desc: t('onboarding.createNoteDesc'),
       },
     },
     {
       icon: 'lucide:lock-keyhole',
-      eyebrow: 'Mühürleme',
-      title: 'Sözün açılana kadar sır gibi saklanır',
-      desc: 'Mühürlediğin anda güvenceye alınır. Başlığın görünür ama içeriği — sana bile — açılış anına kadar kimseye görünmez.',
+      eyebrow: t('onboarding.sealEyebrow'),
+      title: t('onboarding.sealTitle'),
+      desc: t('onboarding.sealDesc'),
       hero: HERO_SEAL,
       note: {
         icon: 'lucide:badge-check',
-        title: 'Sonucu sen işaretlersin',
-        desc: 'Açılış anı geldiğinde "Doğru çıktı" ya da "Yanlış çıktı" dersin, dürüstlük sana kalır.',
+        title: t('onboarding.sealNoteTitle'),
+        desc: t('onboarding.sealNoteDesc'),
       },
     },
     {
       icon: 'lucide:users-round',
-      eyebrow: 'Topluluk',
-      title: 'Yalnız tahmin etme',
-      desc: 'İlgi alanına yakın insanları bul, aynı grupta tahmin biriktirin — orada paylaştıkların sadece aranızda kalır.',
+      eyebrow: t('onboarding.communityEyebrow'),
+      title: t('onboarding.communityTitle'),
+      desc: t('onboarding.communityDesc'),
       hero: HERO_COMMUNITY,
       note: {
         icon: 'lucide:award',
-        title: 'Rozet ve puan kazan',
-        desc: 'Her doğru tahmin, her beğeni, her yeni takipçi seni bir adım ileri taşır.',
+        title: t('onboarding.communityNoteTitle'),
+        desc: t('onboarding.communityNoteDesc'),
       },
     },
   ]
@@ -96,7 +98,7 @@ export default function IlkKullanimRehberi() {
 
       <header className="relative z-10 flex items-center justify-between px-5 pt-12">
         <button
-          aria-label="Geri dön"
+          aria-label={t('common.backAria')}
           onClick={() => (step === 0 ? finish() : setStep((s) => s - 1))}
           className="flex h-10 w-10 items-center justify-center rounded-theme border border-border bg-card text-foreground shadow-sm"
         >
@@ -110,12 +112,12 @@ export default function IlkKullanimRehberi() {
         </div>
 
         <button onClick={finish} className="min-w-10 text-right text-sm font-bold text-primary">
-          Atla
+          {t('onboarding.skip')}
         </button>
       </header>
 
       <main className="relative z-10 flex flex-1 flex-col px-5 pb-44 pt-7">
-        <div className="flex items-center gap-2" aria-label="Rehber ilerlemesi">
+        <div className="flex items-center gap-2" aria-label={t('onboarding.progressAria')}>
           {SLIDES.map((_, i) => (
             <div key={i} className={`h-1.5 flex-1 rounded-full ${i <= step ? 'bg-primary' : 'bg-border'}`} />
           ))}
@@ -156,7 +158,7 @@ export default function IlkKullanimRehberi() {
           onClick={() => (isLast ? finish() : setStep((s) => s + 1))}
           className="flex h-12 w-full items-center justify-center gap-2 rounded-theme bg-primary text-sm font-bold text-primary-foreground shadow-sm transition-transform duration-150 active:scale-[0.98]"
         >
-          {isLast ? 'Başlayalım' : 'İleri'}
+          {isLast ? t('onboarding.letsGo') : t('onboarding.next')}
           {!isLast && <iconify-icon icon="lucide:arrow-right" class="text-[18px]"></iconify-icon>}
         </button>
         {step > 0 && (
@@ -164,7 +166,7 @@ export default function IlkKullanimRehberi() {
             onClick={() => setStep((s) => s - 1)}
             className="mt-3 flex h-8 w-full items-center justify-center text-sm font-bold text-muted-foreground"
           >
-            Geri
+            {t('onboarding.back')}
           </button>
         )}
       </footer>
