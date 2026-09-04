@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
@@ -36,6 +37,7 @@ function useCountdown(targetDate) {
 }
 
 export default function TahminKaydi() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const { user, profile, refreshProfile } = useAuth()
@@ -202,7 +204,7 @@ export default function TahminKaydi() {
     }
 
     if (rpcError.code !== 'PGRST202') {
-      showToast('Sonuç işaretlenemedi, tekrar dene.')
+      showToast(t('record.verifyFailed'))
       setVerifying(false)
       return
     }
@@ -217,7 +219,7 @@ export default function TahminKaydi() {
     let evidenceSaved = fullPayload !== basePayload
     let { error } = await supabase.from('predictions').update(fullPayload).eq('id', record.id)
     if (error?.code === 'PGRST204' && fullPayload !== basePayload) {
-      showToast('Kaynak henüz kaydedilemiyor, sonuç kaynaksız işaretlendi.')
+      showToast(t('record.evidenceNotSavedYet'))
       evidenceSaved = false
       ;({ error } = await supabase.from('predictions').update(basePayload).eq('id', record.id))
     }
@@ -230,7 +232,7 @@ export default function TahminKaydi() {
           .update({ points: profile.points + reward })
           .eq('id', user.id)
         if (pointsError) {
-          showToast('Sonuç kaydedildi ama puan eklenemedi.')
+          showToast(t('record.pointsAddFailed'))
         } else {
           await refreshProfile()
         }
@@ -243,7 +245,7 @@ export default function TahminKaydi() {
       }))
       setPendingResult(null)
     } else {
-      showToast('Sonuç işaretlenemedi, tekrar dene.')
+      showToast(t('record.verifyFailed'))
     }
     setVerifying(false)
   }
@@ -272,8 +274,8 @@ export default function TahminKaydi() {
       setIncorrectVotes((c) => c - (vote === 'incorrect' ? 1 : 0) + (prevVote === 'incorrect' ? 1 : 0))
       showToast(
         error.code === 'PGRST202' || error.code === 'PGRST205' || error.code === '42883'
-          ? 'Topluluk oylaması özelliği henüz etkin değil.'
-          : error.message || 'Oy kaydedilemedi, tekrar dene.'
+          ? t('record.votingDisabled')
+          : error.message || t('record.voteFailed')
       )
       setVoting(false)
       return
@@ -302,7 +304,7 @@ export default function TahminKaydi() {
     if (error) {
       setLiked(!nextLiked)
       setLikeCount((c) => c + (nextLiked ? -1 : 1))
-      showToast('Beğeni kaydedilemedi, tekrar dene.')
+      showToast(t('home.likeFailedToast'))
     }
   }
 
@@ -315,7 +317,7 @@ export default function TahminKaydi() {
       : await supabase.from('prediction_saves').delete().eq('user_id', user.id).eq('prediction_id', record.id)
     if (error) {
       setSaved(!nextSaved)
-      showToast('Kaydetme işlemi başarısız oldu, tekrar dene.')
+      showToast(t('home.saveFailedToast'))
     }
   }
 
@@ -364,7 +366,7 @@ export default function TahminKaydi() {
       setCommentDraft('')
       createMentions(content, data.id)
     } else {
-      showToast('Yorum gönderilemedi, tekrar dene.')
+      showToast(t('record.commentFailed'))
     }
     setPostingComment(false)
   }
@@ -372,11 +374,11 @@ export default function TahminKaydi() {
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-body pb-28">
       <DetailHeader
-        title="Tahmin Kaydı"
+        title={t('record.headerTitle')}
         centered
         trailing={
           <button
-            aria-label="Kaydı paylaş"
+            aria-label={t('record.shareAria')}
             onClick={handleShare}
             className="flex h-10 w-10 shrink-0 items-center justify-center rounded-theme border border-border bg-card text-foreground shadow-sm"
           >
@@ -395,17 +397,17 @@ export default function TahminKaydi() {
               >
                 <img
                   src={author?.avatar_url || fallbackAvatarFor(record.author_id)}
-                  alt={author?.display_name || 'Kullanıcı'}
+                  alt={author?.display_name || t('common.unknownUser')}
                   className="h-full w-full object-cover"
                 />
               </button>
               <button onClick={() => navigate(`/kullanici/${record.author_id}`)} className="min-w-0 flex-1 text-left">
                 <div className="flex items-center gap-2">
-                  <p className="text-sm font-bold">{author?.display_name || 'Kullanıcı'}</p>
+                  <p className="text-sm font-bold">{author?.display_name || t('common.unknownUser')}</p>
                   <iconify-icon icon="lucide:badge-check" class="text-base text-primary"></iconify-icon>
                 </div>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  Mühürlü kayıt · {formatDateLong(record.created_at)}
+                  {t('record.sealedRecord')} · {formatDateLong(record.created_at)}
                 </p>
               </button>
               <div className="flex shrink-0 flex-col items-end gap-1.5">
@@ -416,13 +418,13 @@ export default function TahminKaydi() {
                     style={{ background: tierMeta.tint, color: tierMeta.ink }}
                   >
                     <iconify-icon icon={tierMeta.icon} class="text-xs"></iconify-icon>
-                    {tierMeta.label}
+                    {t(tierMeta.labelKey)}
                   </span>
                 )}
                 {record.is_private && (
                   <span className="flex items-center gap-1 text-[10px] font-semibold text-accent">
                     <iconify-icon icon="lucide:archive" class="text-xs"></iconify-icon>
-                    Zaman kapsülü
+                    {t('home.tabCapsule')}
                   </span>
                 )}
               </div>
@@ -447,11 +449,11 @@ export default function TahminKaydi() {
             <div className="mt-5 flex items-center justify-between border-t border-border pt-4">
               <div className="flex items-center gap-2 text-[11px] text-muted-foreground">
                 <iconify-icon icon="lucide:shield-check" class="text-base text-success"></iconify-icon>
-                <span>İçerik kaydedildi ve değiştirilemez.</span>
+                <span>{t('record.contentLockedNote')}</span>
               </div>
               <div className="flex items-center gap-4 text-muted-foreground">
                 <button
-                  aria-label="Beğen"
+                  aria-label={t('home.likeAria')}
                   onClick={handleToggleLike}
                   className={`flex items-center gap-1.5 text-xs font-semibold ${liked ? 'text-destructive' : ''}`}
                 >
@@ -459,7 +461,7 @@ export default function TahminKaydi() {
                   {likeCount}
                 </button>
                 <button
-                  aria-label="Kaydet"
+                  aria-label={t('home.saveAria')}
                   onClick={handleToggleSave}
                   className={saved ? 'text-primary' : 'text-muted-foreground'}
                 >
@@ -479,16 +481,16 @@ export default function TahminKaydi() {
             >
               <span className="flex items-center gap-2">
                 <iconify-icon icon={isCorrect ? 'lucide:badge-check' : 'lucide:x-circle'} class="text-lg"></iconify-icon>
-                {isCorrect ? 'Doğrulandı' : 'Gerçekleşmedi'}
+                {isCorrect ? t('home.verified') : t('home.notRealized')}
                 {record.disputed && (
-                  <span className="rounded-full bg-black/15 px-2 py-0.5 text-[9px] font-bold">TARTIŞMALI</span>
+                  <span className="rounded-full bg-black/15 px-2 py-0.5 text-[9px] font-bold">{t('record.disputedTag')}</span>
                 )}
               </span>
               <span className="text-xs font-semibold">{formatDateLong(record.verified_at)}</span>
             </div>
             <div className="p-5">
               <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                Mühürlü tahmin
+                {t('home.sealedPrediction')}
               </p>
               <p className="mt-2 font-heading text-lg font-bold leading-6">
                 &ldquo;{record.sealed_content}&rdquo;
@@ -497,7 +499,7 @@ export default function TahminKaydi() {
                 <div className="mt-3 rounded-theme border border-dashed border-border bg-muted/60 p-3">
                   <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">
                     <iconify-icon icon="lucide:link" class="text-xs"></iconify-icon>
-                    Yazarın eklediği kaynak
+                    {t('record.authorEvidenceLabel')}
                   </p>
                   {record.evidence_note && (
                     <p className="mt-1.5 text-xs leading-5 text-foreground">{record.evidence_note}</p>
@@ -518,10 +520,8 @@ export default function TahminKaydi() {
             </div>
             {canVote && (
               <div className="border-t border-border px-5 py-4">
-                <p className="text-xs font-semibold text-foreground">Bu sonuca katılıyor musun?</p>
-                <p className="mt-0.5 text-[11px] leading-4 text-muted-foreground">
-                  Topluluk yeterince katılmazsa sonuç değişebilir — yazarın kaydı tek başına son söz değil.
-                </p>
+                <p className="text-xs font-semibold text-foreground">{t('record.agreeQuestion')}</p>
+                <p className="mt-0.5 text-[11px] leading-4 text-muted-foreground">{t('record.communityMayChange')}</p>
                 <div className="mt-3 flex items-center gap-2">
                   <button
                     onClick={() => handleVote('correct')}
@@ -531,7 +531,7 @@ export default function TahminKaydi() {
                     }`}
                   >
                     <iconify-icon icon="lucide:thumbs-up" class="text-sm"></iconify-icon>
-                    Katılıyorum · {correctVotes}
+                    {t('record.agreeCta', { count: correctVotes })}
                   </button>
                   <button
                     onClick={() => handleVote('incorrect')}
@@ -541,7 +541,7 @@ export default function TahminKaydi() {
                     }`}
                   >
                     <iconify-icon icon="lucide:thumbs-down" class="text-sm"></iconify-icon>
-                    Katılmıyorum · {incorrectVotes}
+                    {t('record.disagreeCta', { count: incorrectVotes })}
                   </button>
                 </div>
               </div>
@@ -558,12 +558,12 @@ export default function TahminKaydi() {
                     <iconify-icon icon="lucide:lock-keyhole" class="text-lg"></iconify-icon>
                   </span>
                   <div>
-                    <p className="font-heading text-xl font-extrabold tracking-tight">Mühürlü</p>
-                    <p className="text-[11px] text-white/65">Kayıt güvenle saklanıyor</p>
+                    <p className="font-heading text-xl font-extrabold tracking-tight">{t('profile.sealedShort')}</p>
+                    <p className="text-[11px] text-white/65">{t('record.savedSecurely')}</p>
                   </div>
                 </div>
                 <span className="rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-bold">
-                  {isManualSeal ? 'SANA BAĞLI' : countdown.isPast ? 'AÇILDI · SONUÇ BEKLENİYOR' : 'AÇILMADI'}
+                  {isManualSeal ? t('record.upToYouTag') : countdown.isPast ? t('record.openedAwaitingTag') : t('record.notOpenedTag')}
                 </span>
               </div>
 
@@ -571,10 +571,10 @@ export default function TahminKaydi() {
                 <div className="flex items-center justify-between">
                   <div>
                     <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/60">
-                      {isManualSeal ? 'Açılış' : 'Açılış zamanı'}
+                      {isManualSeal ? t('record.openingLabel') : t('record.openingTimeLabel')}
                     </p>
                     <p className="mt-1 font-heading text-base font-bold">
-                      {isManualSeal ? 'Yazarı açana kadar mühürlü' : formatDateTimeLong(record.event_date)}
+                      {isManualSeal ? t('time.sealedUntilAuthorOpens') : formatDateTimeLong(record.event_date)}
                     </p>
                   </div>
                   <iconify-icon
@@ -591,13 +591,13 @@ export default function TahminKaydi() {
                   <span>
                     {isManualSeal
                       ? isOwner
-                        ? 'Ne zaman istersen sonucu aşağıdan işaretleyebilirsin — bir kere açtığında kayıt kalıcı olarak açık kalır.'
-                        : 'Bu kayıt yazarı açana kadar mühürlü kalacak. Ne zaman açılacağına yalnızca yazar karar verebilir.'
+                        ? t('record.ownerManualHint')
+                        : t('record.viewerManualHint')
                       : countdown.isPast
                         ? isOwner
-                          ? 'Süre doldu. Sonucu aşağıdan işaretleyebilirsin.'
-                          : 'Süre doldu, yazar sonucu henüz işaretlemedi — aşağıdan sen oy verebilirsin.'
-                        : 'Tahmin metni açılışa kadar görüntülenemez.'}
+                          ? t('record.ownerPastDueHint')
+                          : t('record.viewerPastDueHint')
+                        : t('record.hiddenUntilOpenHint')}
                   </span>
                 </div>
               </div>
@@ -605,7 +605,7 @@ export default function TahminKaydi() {
               {canVerify && pendingResult === null && (
                 <div className="relative mt-4 rounded-theme border border-white/15 bg-white/10 p-4">
                   <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/60">
-                    Bu tahmin gerçekleşti mi?
+                    {t('record.didItHappenQuestion')}
                   </p>
                   <div className="mt-3 flex gap-2">
                     <button
@@ -614,7 +614,7 @@ export default function TahminKaydi() {
                       className="flex flex-1 items-center justify-center gap-1.5 rounded-theme bg-success py-2.5 text-xs font-bold text-success-foreground disabled:opacity-60"
                     >
                       <iconify-icon icon="lucide:check-circle-2" class="text-sm"></iconify-icon>
-                      Doğru çıktı
+                      {t('record.correctCta')}
                     </button>
                     <button
                       onClick={() => setPendingResult('incorrect')}
@@ -622,12 +622,11 @@ export default function TahminKaydi() {
                       className="flex flex-1 items-center justify-center gap-1.5 rounded-theme bg-destructive py-2.5 text-xs font-bold text-destructive-foreground disabled:opacity-60"
                     >
                       <iconify-icon icon="lucide:x-circle" class="text-sm"></iconify-icon>
-                      Yanlış çıktı
+                      {t('record.incorrectCta')}
                     </button>
                   </div>
                   <p className="mt-2 text-[10px] text-white/60">
-                    Doğru çıktıysa +{CORRECT_POINTS_REWARD}, yanlış çıktıysa dürüstçe kapattığın için +
-                    {HONEST_CLOSE_REWARD} puan kazanırsın.
+                    {t('record.rewardHint', { correct: CORRECT_POINTS_REWARD, honest: HONEST_CLOSE_REWARD })}
                   </p>
                 </div>
               )}
@@ -635,23 +634,20 @@ export default function TahminKaydi() {
               {canVerify && pendingResult !== null && (
                 <div className="relative mt-4 rounded-theme border border-white/15 bg-white/10 p-4">
                   <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/60">
-                    Kaynak ekle (isteğe bağlı)
+                    {t('record.addEvidenceTitle')}
                   </p>
-                  <p className="mt-1.5 text-[11px] leading-4 text-white/70">
-                    Sonuç hâlâ beyana dayalı, ama bir kaynak eklersen itiraz edenler ve diğer kullanıcılar
-                    kontrol edebilir.
-                  </p>
+                  <p className="mt-1.5 text-[11px] leading-4 text-white/70">{t('record.evidenceHint')}</p>
                   <textarea
                     value={evidenceNote}
                     onChange={(e) => setEvidenceNote(e.target.value)}
                     rows={2}
-                    placeholder="Kısa not (opsiyonel)"
+                    placeholder={t('record.evidenceNotePlaceholder')}
                     className="mt-3 w-full resize-none rounded-theme border border-white/20 bg-white/10 px-3 py-2.5 text-xs leading-5 text-white outline-none placeholder:text-white/50"
                   />
                   <input
                     value={evidenceUrl}
                     onChange={(e) => setEvidenceUrl(e.target.value)}
-                    placeholder="Kaynak bağlantısı (opsiyonel)"
+                    placeholder={t('record.evidenceUrlPlaceholder')}
                     className="mt-2 w-full rounded-theme border border-white/20 bg-white/10 px-3 py-2.5 text-xs text-white outline-none placeholder:text-white/50"
                   />
                   <div className="mt-3 flex gap-2">
@@ -664,7 +660,7 @@ export default function TahminKaydi() {
                       disabled={verifying}
                       className="flex-1 rounded-theme bg-white/10 py-2.5 text-xs font-bold text-white disabled:opacity-60"
                     >
-                      Vazgeç
+                      {t('common.cancel')}
                     </button>
                     <button
                       onClick={() => handleVerify(pendingResult)}
@@ -675,7 +671,7 @@ export default function TahminKaydi() {
                           : 'bg-destructive text-destructive-foreground'
                       }`}
                     >
-                      {verifying ? 'Kaydediliyor…' : 'Sonucu onayla'}
+                      {verifying ? t('common.saving') : t('record.confirmResult')}
                     </button>
                   </div>
                 </div>
@@ -684,7 +680,7 @@ export default function TahminKaydi() {
               {canVote && (
                 <div className="relative mt-4 rounded-theme border border-white/15 bg-white/10 p-4">
                   <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/60">
-                    Yazar henüz işaretlemedi — sen ne düşünüyorsun?
+                    {t('record.authorNotMarkedYet')}
                   </p>
                   <div className="mt-3 flex gap-2">
                     <button
@@ -695,7 +691,7 @@ export default function TahminKaydi() {
                       }`}
                     >
                       <iconify-icon icon="lucide:check-circle-2" class="text-sm"></iconify-icon>
-                      Doğru · {correctVotes}
+                      {t('record.correctVoteCta', { count: correctVotes })}
                     </button>
                     <button
                       onClick={() => handleVote('incorrect')}
@@ -705,12 +701,10 @@ export default function TahminKaydi() {
                       }`}
                     >
                       <iconify-icon icon="lucide:x-circle" class="text-sm"></iconify-icon>
-                      Yanlış · {incorrectVotes}
+                      {t('record.incorrectVoteCta', { count: incorrectVotes })}
                     </button>
                   </div>
-                  <p className="mt-2 text-[10px] text-white/60">
-                    Yeterince kişi katılırsa, yazar hiç işaretlemese bile sonuç topluluğun oyuna göre belirlenir.
-                  </p>
+                  <p className="mt-2 text-[10px] text-white/60">{t('record.communityCanResolve')}</p>
                 </div>
               )}
 
@@ -718,15 +712,15 @@ export default function TahminKaydi() {
                 <div className="relative mt-5 grid grid-cols-3 gap-2">
                   <div className="rounded-theme bg-white/10 px-2 py-3 text-center">
                     <p className="font-heading text-lg font-extrabold">{countdown.isPast ? 0 : countdown.days}</p>
-                    <p className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/65">Gün</p>
+                    <p className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/65">{t('record.day')}</p>
                   </div>
                   <div className="rounded-theme bg-white/10 px-2 py-3 text-center">
                     <p className="font-heading text-lg font-extrabold">{countdown.isPast ? 0 : countdown.hours}</p>
-                    <p className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/65">Saat</p>
+                    <p className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/65">{t('record.hour')}</p>
                   </div>
                   <div className="rounded-theme bg-white/10 px-2 py-3 text-center">
                     <p className="font-heading text-lg font-extrabold">{countdown.isPast ? 0 : countdown.minutes}</p>
-                    <p className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/65">Dakika</p>
+                    <p className="mt-0.5 text-[9px] font-semibold uppercase tracking-wide text-white/65">{t('record.minute')}</p>
                   </div>
                 </div>
               )}
@@ -735,14 +729,14 @@ export default function TahminKaydi() {
             <div className="border-t border-white/15 bg-black/10 px-5 py-3">
               <div className="flex items-center gap-2">
                 <iconify-icon icon="lucide:circle-check" class="text-base text-white/75"></iconify-icon>
-                <p className="text-xs text-white/75">Mühür sonrası içerik kopyalanamaz, düzenlenemez veya silinemez.</p>
+                <p className="text-xs text-white/75">{t('record.cannotBeCopiedNote')}</p>
               </div>
             </div>
           </section>
         )}
 
         <section className="mx-5 mt-7">
-          <h2 className="font-heading text-base font-bold tracking-tight">Açıldığında</h2>
+          <h2 className="font-heading text-base font-bold tracking-tight">{t('record.whenOpenedTitle')}</h2>
           <div className="mt-3 rounded-theme border border-dashed border-border bg-muted/60 p-4">
             <div className="flex items-start gap-3">
               <div className="flex h-9 w-9 shrink-0 items-center justify-center rounded-theme bg-card text-primary shadow-sm">
@@ -750,21 +744,19 @@ export default function TahminKaydi() {
               </div>
               <div>
                 <p className="text-sm font-bold">
-                  {isVerified ? 'Sonuçla birlikte değerlendirildi' : 'Sonuçla birlikte değerlendirilecek'}
+                  {isVerified ? t('record.evaluatedTitle') : t('record.willBeEvaluatedTitle')}
                 </p>
-                <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                  Orijinal tahmin, resmi sonuç ve doğruluk değerlendirmesi aynı kayıtta görünür.
-                </p>
+                <p className="mt-1 text-xs leading-5 text-muted-foreground">{t('record.evaluatedBody')}</p>
               </div>
             </div>
           </div>
         </section>
 
         <section className="mx-5 mt-7">
-          <h2 className="font-heading text-base font-bold tracking-tight">Yorumlar ({comments.length})</h2>
+          <h2 className="font-heading text-base font-bold tracking-tight">{t('record.commentsTitle', { count: comments.length })}</h2>
 
           {comments.length === 0 ? (
-            <p className="mt-3 text-xs text-muted-foreground">Henüz yorum yok. İlk yorumu sen yaz.</p>
+            <p className="mt-3 text-xs text-muted-foreground">{t('record.noCommentsYet')}</p>
           ) : (
             <div className="mt-3 space-y-3">
               {comments.map((c) => (
@@ -772,12 +764,12 @@ export default function TahminKaydi() {
                   <div className="h-8 w-8 shrink-0 overflow-hidden rounded-full bg-muted">
                     <img
                       src={c.profiles?.avatar_url || fallbackAvatarFor(c.author_id)}
-                      alt={c.profiles?.display_name || 'Kullanıcı'}
+                      alt={c.profiles?.display_name || t('common.unknownUser')}
                       className="h-full w-full object-cover"
                     />
                   </div>
                   <div className="min-w-0 flex-1 rounded-theme border border-border bg-card px-3 py-2.5 shadow-sm">
-                    <p className="text-xs font-bold">{c.profiles?.display_name || 'Kullanıcı'}</p>
+                    <p className="text-xs font-bold">{c.profiles?.display_name || t('common.unknownUser')}</p>
                     <p className="mt-1 text-[13px] leading-5 text-foreground">{c.content}</p>
                   </div>
                 </div>
@@ -793,13 +785,13 @@ export default function TahminKaydi() {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handlePostComment()
                 }}
-                placeholder="Yorum yaz…"
+                placeholder={t('record.commentPlaceholder')}
                 className="h-11 flex-1 rounded-theme border border-border bg-input px-4 text-sm text-foreground outline-none placeholder:text-muted-foreground"
               />
               <button
                 onClick={handlePostComment}
                 disabled={!commentDraft.trim() || postingComment}
-                aria-label="Yorumu gönder"
+                aria-label={t('record.sendCommentAria')}
                 className="flex h-11 w-11 shrink-0 items-center justify-center rounded-theme bg-primary text-primary-foreground disabled:opacity-50"
               >
                 <iconify-icon icon="lucide:send" class="text-lg"></iconify-icon>
@@ -816,7 +808,7 @@ export default function TahminKaydi() {
             className="flex w-full items-center justify-center gap-2 rounded-theme bg-primary px-4 py-3 text-sm font-bold text-primary-foreground shadow-sm transition-transform duration-150 active:scale-[0.98]"
           >
             <iconify-icon icon={copied ? 'lucide:check' : 'lucide:share-2'} class="text-base"></iconify-icon>
-            {copied ? 'Kopyalandı' : 'Başlığı kopyala'}
+            {copied ? t('record.copiedLabel') : t('record.copyTitleCta')}
           </button>
         </div>
       </div>
