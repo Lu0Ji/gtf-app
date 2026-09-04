@@ -446,6 +446,81 @@
       "yesterday": "Dün"
     }
   },
+  "help": {
+    "eyebrow": "GTF DESTEK",
+    "title": "Yardım Merkezi",
+    "subtitle": "Tahmin kayıtların ve topluluğunla ilgili cevaplara hızlıca ulaş.",
+    "searchPlaceholder": "Bir konu ara",
+    "searchAria": "Yardım konularında ara",
+    "topicsTitle": "Konular",
+    "topicsSubtitle": "Bir konuya dokunarak ilgili soruları gör",
+    "seeAllTopics": "Tümünü gör",
+    "topics": {
+      "hesap": { "title": "Hesabın", "desc": "Erişim ve güvenlik" },
+      "tahmin": { "title": "Tahminler", "desc": "Oluşturma ve düzenleme" },
+      "muhur": { "title": "Mühürlü kayıtlar", "desc": "Zaman damgası ve açılma" },
+      "dogrulama": { "title": "Doğrulama", "desc": "Sonuç ve itiraz" },
+      "grup": { "title": "Gruplar", "desc": "Katılım ve kurallar" },
+      "mesaj": { "title": "Mesajlar", "desc": "İstekler ve sohbetler" }
+    },
+    "faqTitle": "Sık sorulanlar",
+    "noMatches": "Eşleşen bir soru bulunamadı.",
+    "faqs": [
+      { "topic": "muhur", "q": "Tahminimi ne zaman açabilirim?", "a": "Belirlediğin açılış tarihi geçtiğinde, mühürlü kaydına gidip \"Doğru çıktı\" veya \"Yanlış çıktı\" diyerek sonucu sen işaretlersin. Tarih gelmeden içerik kimseye — sana bile — görünmez." },
+      { "topic": "dogrulama", "q": "Bir sonucu nasıl doğrulatırım?", "a": "Şu an doğrulama tamamen beyana dayalı: yalnızca tahminin sahibi işaretler, bağımsız bir denetim yok. Başkası bir sonuca şüpheyle yaklaşırsa, kayıtta \"İtiraz et\" diyebilir; itiraz sayısı herkese açık şekilde gösterilir." },
+      { "topic": "tahmin", "q": "Tahminimi kimler görebilir?", "a": "Ayarlar → Gizlilik → Tahmin görünürlüğü'nden \"Herkese açık\" veya \"Yalnızca takipçilerim\" seçebilirsin. Bir tahmini kimseyle paylaşmak istemiyorsan, oluştururken \"Zaman kapsülü\" modunu seç." },
+      { "topic": "tahmin", "q": "Zaman kapsülü ile mühürlü tahmin arasındaki fark ne?", "a": "Zaman kapsülü tamamen kişiseldir, hiç kimseyle paylaşılmaz ve kalıcı başarı istatistiklerini etkilemez. Mühürlü tahmin ise görünürlük tercihine göre başkalarıyla paylaşılır ve doğruluk oranına dahil olur." },
+      { "topic": "tahmin", "q": "Puanlarım nasıl hesaplanıyor?", "a": "Doğru çıkan bir tahmin +50 puan kazandırır, yanlış çıkan ama dürüstçe kapatılan bir tahmin +5 puan kazandırır. Doğru bir davet koduyla katılan biri hem kendine hem seni davet edene +100 puan kazandırır." },
+      { "topic": "hesap", "q": "Rozetleri nasıl kazanırım?", "a": "Rozetler; tahmin sayın, doğruluk oranın, takipçi sayın, aldığın beğeni, yorum sayın ve grup etkinliğine göre otomatik hesaplanır. Profil → Rozetler'den ilerlemeni görebilirsin." },
+      { "topic": "hesap", "q": "Hesabımı nasıl silerim?", "a": "Uygulama Ayarları → Tehlikeli bölge → Hesabımı sil yoluyla, hiçbir onay beklemeden, anında ve kalıcı olarak hesabını silebilirsin. Bunun yerine geçici bir ara vermek istersen, \"Hesabı geçici olarak dondur\" seçeneğini kullanabilirsin." },
+      { "topic": "grup", "q": "Bir grup nasıl kurulur?", "a": "Gruplar sekmesinden \"Yeni grup kur\"a dokun, ad/açıklama/kategori gir. Grup içinden oluşturduğun tahminler yalnızca o grubun üyelerine görünür, herkese açık akışta yer almaz." },
+      { "topic": "mesaj", "q": "Kim bana mesaj gönderebilir?", "a": "Ayarlar → Gizlilik → Mesaj istekleri'nden \"Herkes\", \"Yalnızca takip ettiklerim\" veya \"Hiç kimse\" seçebilirsin. Bu tercih dışındaki biri sana mesaj gönderemez." }
+    ],
+    "stillNeedHelpTitle": "Aradığın cevabı bulamadın mı?",
+    "stillNeedHelpBody": "Bize doğrudan e-posta at, en kısa sürede döneriz.",
+    "createTicketCta": "Destek talebi oluştur"
+  },
+  "community": {
+    "title": "Topluluk Kuralları",
+    "shareAria": "Kuralları paylaş",
+    "shareSuccess": "Bağlantı kopyalandı, dilediğin yere yapıştır.",
+    "shareFailed": "Kopyalanamadı.",
+    "eyebrow": "GTF topluluğu",
+    "heading1": "Açık fikirler,",
+    "heading2": "adil bir kayıt",
+    "intro": "GTF, geleceğe dair fikirlerin zaman damgalı ve saygılı biçimde paylaşıldığı bir topluluktur. Buradaki kurallar, herkese güvenli bir alan sağlamak içindir.",
+    "lastUpdated": "Son güncelleme: 30 Ağustos 2026",
+    "version": "v1.0",
+    "s1Title": "Tahmin dürüstlüğü",
+    "s1Intro": "Tahminler, gelecekte doğrulanabilir bir olay hakkında kendi gerçek görüşünü yansıtmalıdır.",
+    "s1Rules": [
+      "Mühürlenmiş bir tahminin içeriğini açılmadan önce değiştirmeye, silmeye veya başkasının tahminini kendininmiş gibi göstermeye çalışma.",
+      "Kesin bilgi gibi sunulan tahminlerde kaynak, bağlam ve belirsizlikleri açıkça belirt.",
+      "Sonuç değerlendirmesinde kanıtlanabilir kaynaklara dayan; anlaşmazlıkları nazikçe ve gerekçeyle ele al. Şüphelendiğin bir sonuca itiraz edebilirsin."
+    ],
+    "s2Title": "Saygılı iletişim",
+    "s2Body": "Fikir ayrılığı GTF'nin doğal parçasıdır; kişilere yönelik saldırılar değildir. Herkesin güvenle katkı verebildiği bir dil kullan.",
+    "s2Warning": "Taciz, tehdit, hedef gösterme, nefret söylemi ve korunan özelliklere dayalı aşağılayıcı içerik GTF'de kabul edilmez.",
+    "s3Title": "Spam ve yanıltıcı içerik",
+    "s3Rules": [
+      "Tekrarlayan paylaşımlar, ilgisiz bağlantılar ve takipçi kazanmak için otomatik etkileşim oluşturma.",
+      "Başkasını yanıltacak biçimde düzenlenmiş veri, sahte kaynak veya bağlamından koparılmış içerik.",
+      "Maddi kayıp riski taşıyan yatırım, bahis ya da sağlık tavsiyelerini kesin sonuç olarak sunmak."
+    ],
+    "s4Title": "Gizlilik ve telif",
+    "s4Body1": "Kendine veya başkalarına ait özel bilgileri izinsiz paylaşma. Telefon numarası, adres, kimlik bilgisi, özel yazışma ve benzeri veriler toplulukta yer alamaz.",
+    "s4Body2": "Paylaştığın görsel, metin ve bağlantılar için gerekli kullanım hakkına sahip olmalısın.",
+    "s5Title": "Grup davranışı",
+    "s5Body": "Her grubun konusu ve ek ilkeleri olabilir. Grup kurucusunun ve yöneticilerinin, bu kurallarla çelişmediği sürece kendi alanlarında aldığı kararlara saygı göster.",
+    "s5Note": "Bir tartışma geriliyorsa yanıt vermeden önce dur, bağlamı yeniden oku ve gerekirse bildir.",
+    "s6Title": "Yaptırımlar",
+    "s6Body": "İhlalin niteliğine ve tekrarına göre içeriğin kaldırılması, özelliklerin geçici olarak sınırlandırılması, grup erişiminin kaldırılması veya hesabın askıya alınması uygulanabilir.",
+    "appealTitle": "Kararlara itiraz edebilirsin",
+    "appealBody": "Bir işlem hakkında ek bilgi veya yeniden inceleme isteği için Yardım Merkezi'nden bize ulaş.",
+    "violationTitle": "Bir ihlal mi gördün?",
+    "violationBody": "Bildirimler gizli incelenir. Acil tehlike durumlarında yerel acil yardım hizmetleriyle iletişime geç.",
+    "reportCta": "İhlal bildir"
+  },
   "languages": {
     "tr": "Türkçe",
     "en": "İngilizce",

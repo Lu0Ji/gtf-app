@@ -446,6 +446,81 @@
       "yesterday": "Yesterday"
     }
   },
+  "help": {
+    "eyebrow": "GTF SUPPORT",
+    "title": "Help Center",
+    "subtitle": "Get quick answers about your prediction records and the community.",
+    "searchPlaceholder": "Search a topic",
+    "searchAria": "Search help topics",
+    "topicsTitle": "Topics",
+    "topicsSubtitle": "Tap a topic to see related questions",
+    "seeAllTopics": "See all",
+    "topics": {
+      "hesap": { "title": "Your account", "desc": "Access and security" },
+      "tahmin": { "title": "Predictions", "desc": "Creating and editing" },
+      "muhur": { "title": "Sealed records", "desc": "Timestamp and opening" },
+      "dogrulama": { "title": "Verification", "desc": "Outcome and appeal" },
+      "grup": { "title": "Groups", "desc": "Joining and rules" },
+      "mesaj": { "title": "Messages", "desc": "Requests and chats" }
+    },
+    "faqTitle": "Frequently asked",
+    "noMatches": "No matching question found.",
+    "faqs": [
+      { "topic": "muhur", "q": "When can I open my prediction?", "a": "Once the opening date you set has passed, go to your sealed record and mark the outcome yourself with \"Turned out right\" or \"Turned out wrong.\" Before that date, the content is invisible to everyone — including you." },
+      { "topic": "dogrulama", "q": "How do I get a result verified?", "a": "Verification is currently entirely self-reported: only the prediction's author marks it, there's no independent review. If someone doubts an outcome, they can hit \"Dispute\" on the record; the dispute count is shown publicly." },
+      { "topic": "tahmin", "q": "Who can see my prediction?", "a": "Choose \"Public\" or \"Followers only\" under Settings → Privacy → Prediction visibility. If you don't want to share a specific prediction with anyone, pick \"Time capsule\" mode when creating it." },
+      { "topic": "tahmin", "q": "What's the difference between a time capsule and a sealed prediction?", "a": "A time capsule is entirely personal, never shared with anyone, and doesn't affect your permanent stats. A sealed prediction is shared with others per your visibility choice and counts toward your accuracy rate." },
+      { "topic": "tahmin", "q": "How are my points calculated?", "a": "A prediction that turns out right earns +50 points; one that turns out wrong but is closed honestly earns +5 points. Someone who joins with a valid invite code earns +100 points, and so does whoever invited them." },
+      { "topic": "hesap", "q": "How do I earn badges?", "a": "Badges are calculated automatically from your prediction count, accuracy rate, follower count, likes received, comment count, and group activity. See your progress under Profile → Badges." },
+      { "topic": "hesap", "q": "How do I delete my account?", "a": "Go to App Settings → Danger zone → Delete my account to delete it instantly and permanently, with no further confirmation. If you'd rather take a temporary break instead, use \"Temporarily freeze account.\"" },
+      { "topic": "grup", "q": "How do I start a group?", "a": "Tap \"Start a new group\" from the Groups tab, and enter a name/description/category. Predictions you create from inside a group are only visible to that group's members, not the public feed." },
+      { "topic": "mesaj", "q": "Who can send me a message?", "a": "Choose \"Everyone,\" \"Only people I follow,\" or \"No one\" under Settings → Privacy → Message requests. Anyone outside this preference can't send you a message." }
+    ],
+    "stillNeedHelpTitle": "Couldn't find the answer you're looking for?",
+    "stillNeedHelpBody": "Email us directly and we'll get back to you as soon as we can.",
+    "createTicketCta": "Open a support request"
+  },
+  "community": {
+    "title": "Community Guidelines",
+    "shareAria": "Share the guidelines",
+    "shareSuccess": "Link copied, paste it wherever you like.",
+    "shareFailed": "Couldn't copy.",
+    "eyebrow": "The GTF community",
+    "heading1": "Open ideas,",
+    "heading2": "a fair record",
+    "intro": "GTF is a community where ideas about the future are shared timestamped and respectfully. The rules here exist to keep this a safe space for everyone.",
+    "lastUpdated": "Last updated: August 30, 2026",
+    "version": "v1.0",
+    "s1Title": "Prediction honesty",
+    "s1Intro": "Predictions should reflect your genuine view about a future, verifiable event.",
+    "s1Rules": [
+      "Don't try to change or delete a sealed prediction's content before it opens, or pass off someone else's prediction as your own.",
+      "For predictions presented as certain, be clear about your sources, context, and uncertainty.",
+      "Base outcome judgments on verifiable sources; handle disagreements with courtesy and reasoning. You can dispute an outcome you doubt."
+    ],
+    "s2Title": "Respectful communication",
+    "s2Body": "Disagreement is a natural part of GTF; personal attacks aren't. Use language everyone can safely contribute alongside.",
+    "s2Warning": "Harassment, threats, targeting, hate speech, and demeaning content based on protected characteristics aren't accepted on GTF.",
+    "s3Title": "Spam and misleading content",
+    "s3Rules": [
+      "Repetitive posts, unrelated links, and automated engagement to gain followers.",
+      "Data edited to mislead others, fake sources, or content taken out of context.",
+      "Presenting investment, betting, or health advice carrying real financial risk as a certain outcome."
+    ],
+    "s4Title": "Privacy and copyright",
+    "s4Body1": "Don't share private information about yourself or others without consent. Phone numbers, addresses, ID info, private correspondence, and similar data don't belong in the community.",
+    "s4Body2": "You must hold the rights needed to use any image, text, or link you share.",
+    "s5Title": "Group conduct",
+    "s5Body": "Every group can have its own topic and additional principles. Respect a group founder's and moderators' calls within their own space, as long as they don't conflict with these guidelines.",
+    "s5Note": "If a discussion is heating up, pause before replying, re-read the context, and report it if needed.",
+    "s6Title": "Enforcement",
+    "s6Body": "Depending on the nature and repetition of a violation, content removal, temporary feature restrictions, loss of group access, or account suspension can apply.",
+    "appealTitle": "You can appeal decisions",
+    "appealBody": "For more information about an action or a request for re-review, reach us through the Help Center.",
+    "violationTitle": "Spotted a violation?",
+    "violationBody": "Reports are reviewed confidentially. In an emergency, contact your local emergency services.",
+    "reportCta": "Report a violation"
+  },
   "languages": {
     "tr": "Turkish",
     "en": "English",

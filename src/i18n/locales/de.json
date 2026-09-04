@@ -446,6 +446,81 @@
       "yesterday": "Gestern"
     }
   },
+  "help": {
+    "eyebrow": "GTF SUPPORT",
+    "title": "Hilfe-Center",
+    "subtitle": "Schnelle Antworten zu deinen Vorhersage-Einträgen und der Community.",
+    "searchPlaceholder": "Ein Thema suchen",
+    "searchAria": "Hilfethemen durchsuchen",
+    "topicsTitle": "Themen",
+    "topicsSubtitle": "Tippe auf ein Thema, um verwandte Fragen zu sehen",
+    "seeAllTopics": "Alle anzeigen",
+    "topics": {
+      "hesap": { "title": "Dein Konto", "desc": "Zugriff und Sicherheit" },
+      "tahmin": { "title": "Vorhersagen", "desc": "Erstellen und bearbeiten" },
+      "muhur": { "title": "Versiegelte Einträge", "desc": "Zeitstempel und Öffnung" },
+      "dogrulama": { "title": "Verifizierung", "desc": "Ergebnis und Einspruch" },
+      "grup": { "title": "Gruppen", "desc": "Beitritt und Regeln" },
+      "mesaj": { "title": "Nachrichten", "desc": "Anfragen und Chats" }
+    },
+    "faqTitle": "Häufige Fragen",
+    "noMatches": "Keine passende Frage gefunden.",
+    "faqs": [
+      { "topic": "muhur", "q": "Wann kann ich meine Vorhersage öffnen?", "a": "Sobald das von dir festgelegte Öffnungsdatum vergangen ist, gehst du zu deinem versiegelten Eintrag und markierst das Ergebnis selbst mit „Ist eingetroffen“ oder „Ist nicht eingetroffen“. Vor diesem Datum ist der Inhalt für niemanden sichtbar — auch nicht für dich." },
+      { "topic": "dogrulama", "q": "Wie lasse ich ein Ergebnis bestätigen?", "a": "Die Verifizierung basiert derzeit vollständig auf Selbstauskunft: Nur der Autor der Vorhersage markiert sie, es gibt keine unabhängige Prüfung. Zweifelt jemand an einem Ergebnis, kann er im Eintrag „Anfechten“ auswählen; die Anzahl der Einsprüche wird öffentlich angezeigt." },
+      { "topic": "tahmin", "q": "Wer kann meine Vorhersage sehen?", "a": "Wähle unter Einstellungen → Datenschutz → Sichtbarkeit von Vorhersagen „Öffentlich“ oder „Nur Follower“. Möchtest du eine bestimmte Vorhersage mit niemandem teilen, wähle beim Erstellen den Modus „Zeitkapsel“." },
+      { "topic": "tahmin", "q": "Was ist der Unterschied zwischen einer Zeitkapsel und einer versiegelten Vorhersage?", "a": "Eine Zeitkapsel ist völlig privat, wird mit niemandem geteilt und beeinflusst deine dauerhaften Statistiken nicht. Eine versiegelte Vorhersage wird je nach Sichtbarkeitswahl mit anderen geteilt und zählt zu deiner Trefferquote." },
+      { "topic": "tahmin", "q": "Wie werden meine Punkte berechnet?", "a": "Eine eingetroffene Vorhersage bringt +50 Punkte, eine nicht eingetroffene, aber ehrlich abgeschlossene Vorhersage bringt +5 Punkte. Wer mit einem gültigen Einladungscode beitritt, erhält +100 Punkte — genauso wie die einladende Person." },
+      { "topic": "hesap", "q": "Wie verdiene ich Abzeichen?", "a": "Abzeichen werden automatisch anhand deiner Vorhersagenanzahl, Trefferquote, Followerzahl, erhaltenen Likes, Kommentaranzahl und Gruppenaktivität berechnet. Deinen Fortschritt siehst du unter Profil → Abzeichen." },
+      { "topic": "hesap", "q": "Wie lösche ich mein Konto?", "a": "Über App-Einstellungen → Gefahrenzone → Mein Konto löschen kannst du dein Konto sofort und dauerhaft löschen, ohne weitere Bestätigung. Möchtest du stattdessen nur eine Pause einlegen, nutze „Konto vorübergehend einfrieren“." },
+      { "topic": "grup", "q": "Wie gründe ich eine Gruppe?", "a": "Tippe im Tab Gruppen auf „Neue Gruppe gründen“ und gib Name/Beschreibung/Kategorie ein. Vorhersagen, die du innerhalb einer Gruppe erstellst, sind nur für deren Mitglieder sichtbar, nicht im öffentlichen Feed." },
+      { "topic": "mesaj", "q": "Wer kann mir Nachrichten senden?", "a": "Wähle unter Einstellungen → Datenschutz → Nachrichtenanfragen „Alle“, „Nur Personen, denen ich folge“ oder „Niemand“. Wer außerhalb dieser Einstellung liegt, kann dir keine Nachricht senden." }
+    ],
+    "stillNeedHelpTitle": "Die gesuchte Antwort nicht gefunden?",
+    "stillNeedHelpBody": "Schreib uns direkt eine E-Mail, wir melden uns so schnell wie möglich.",
+    "createTicketCta": "Support-Anfrage erstellen"
+  },
+  "community": {
+    "title": "Community-Richtlinien",
+    "shareAria": "Richtlinien teilen",
+    "shareSuccess": "Link kopiert, füge ihn ein, wo du möchtest.",
+    "shareFailed": "Konnte nicht kopiert werden.",
+    "eyebrow": "Die GTF-Community",
+    "heading1": "Offene Ideen,",
+    "heading2": "ein fairer Eintrag",
+    "intro": "GTF ist eine Community, in der Zukunftsideen zeitgestempelt und respektvoll geteilt werden. Die Regeln hier sorgen dafür, dass dies für alle ein sicherer Ort bleibt.",
+    "lastUpdated": "Zuletzt aktualisiert: 30. August 2026",
+    "version": "v1.0",
+    "s1Title": "Ehrlichkeit bei Vorhersagen",
+    "s1Intro": "Vorhersagen sollten deine echte Meinung zu einem zukünftigen, überprüfbaren Ereignis widerspiegeln.",
+    "s1Rules": [
+      "Versuche nicht, den Inhalt einer versiegelten Vorhersage vor der Öffnung zu ändern oder zu löschen, oder die Vorhersage einer anderen Person als deine eigene auszugeben.",
+      "Nenne bei als sicher dargestellten Vorhersagen klar Quellen, Kontext und Unsicherheiten.",
+      "Stütze Ergebnisbewertungen auf überprüfbare Quellen; gehe mit Meinungsverschiedenheiten höflich und begründet um. Ein Ergebnis, an dem du zweifelst, kannst du anfechten."
+    ],
+    "s2Title": "Respektvolle Kommunikation",
+    "s2Body": "Meinungsverschiedenheiten sind ein natürlicher Teil von GTF; persönliche Angriffe sind es nicht. Verwende eine Sprache, mit der sich alle sicher einbringen können.",
+    "s2Warning": "Belästigung, Drohungen, gezieltes Anprangern, Hassrede und herabwürdigende Inhalte aufgrund geschützter Merkmale werden auf GTF nicht akzeptiert.",
+    "s3Title": "Spam und irreführende Inhalte",
+    "s3Rules": [
+      "Wiederholte Beiträge, themenfremde Links und automatisiertes Engagement, um Follower zu gewinnen.",
+      "Daten, die bearbeitet wurden, um andere zu täuschen, gefälschte Quellen oder aus dem Kontext gerissene Inhalte.",
+      "Anlage-, Wett- oder Gesundheitsratschläge mit echtem finanziellem Risiko als sicheres Ergebnis darstellen."
+    ],
+    "s4Title": "Datenschutz und Urheberrecht",
+    "s4Body1": "Teile keine privaten Informationen über dich oder andere ohne Zustimmung. Telefonnummern, Adressen, Ausweisdaten, private Korrespondenz und ähnliche Daten haben in der Community nichts zu suchen.",
+    "s4Body2": "Du musst die nötigen Rechte für jedes Bild, jeden Text und jeden Link besitzen, den du teilst.",
+    "s5Title": "Verhalten in Gruppen",
+    "s5Body": "Jede Gruppe kann ihr eigenes Thema und zusätzliche Grundsätze haben. Respektiere die Entscheidungen von Gruppengründer:innen und Moderator:innen in ihrem eigenen Bereich, solange sie diesen Richtlinien nicht widersprechen.",
+    "s5Note": "Wenn eine Diskussion hitzig wird, halte inne, bevor du antwortest, lies den Kontext erneut und melde es bei Bedarf.",
+    "s6Title": "Maßnahmen",
+    "s6Body": "Je nach Art und Wiederholung eines Verstoßes können Inhalte entfernt, Funktionen vorübergehend eingeschränkt, der Gruppenzugang entzogen oder das Konto gesperrt werden.",
+    "appealTitle": "Du kannst gegen Entscheidungen Einspruch einlegen",
+    "appealBody": "Für weitere Informationen zu einer Maßnahme oder eine erneute Prüfung wende dich an uns über das Hilfe-Center.",
+    "violationTitle": "Einen Verstoß entdeckt?",
+    "violationBody": "Meldungen werden vertraulich geprüft. In Notfällen wende dich an deinen örtlichen Notdienst.",
+    "reportCta": "Verstoß melden"
+  },
   "languages": {
     "tr": "Türkisch",
     "en": "Englisch",
