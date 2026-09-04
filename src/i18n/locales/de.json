@@ -324,7 +324,13 @@
       "currentPasswordLabel": "Aktuelles Passwort",
       "showPasswordAria": "Passwort anzeigen",
       "newPasswordLabel": "Neues Passwort",
-      "strengthLevels": ["Sehr schwach", "Schwach", "Mittel", "Gut", "Stark"],
+      "strengthLevels": [
+        "Sehr schwach",
+        "Schwach",
+        "Mittel",
+        "Gut",
+        "Stark"
+      ],
       "strengthTitle": "Passwortstärke",
       "strengthCount": "{{count}} / 4 Kriterien",
       "confirmPasswordLabel": "Neues Passwort wiederholen",
@@ -456,25 +462,79 @@
     "topicsSubtitle": "Tippe auf ein Thema, um verwandte Fragen zu sehen",
     "seeAllTopics": "Alle anzeigen",
     "topics": {
-      "hesap": { "title": "Dein Konto", "desc": "Zugriff und Sicherheit" },
-      "tahmin": { "title": "Vorhersagen", "desc": "Erstellen und bearbeiten" },
-      "muhur": { "title": "Versiegelte Einträge", "desc": "Zeitstempel und Öffnung" },
-      "dogrulama": { "title": "Verifizierung", "desc": "Ergebnis und Einspruch" },
-      "grup": { "title": "Gruppen", "desc": "Beitritt und Regeln" },
-      "mesaj": { "title": "Nachrichten", "desc": "Anfragen und Chats" }
+      "hesap": {
+        "title": "Dein Konto",
+        "desc": "Zugriff und Sicherheit"
+      },
+      "tahmin": {
+        "title": "Vorhersagen",
+        "desc": "Erstellen und bearbeiten"
+      },
+      "muhur": {
+        "title": "Versiegelte Einträge",
+        "desc": "Zeitstempel und Öffnung"
+      },
+      "dogrulama": {
+        "title": "Verifizierung",
+        "desc": "Ergebnis und Einspruch"
+      },
+      "grup": {
+        "title": "Gruppen",
+        "desc": "Beitritt und Regeln"
+      },
+      "mesaj": {
+        "title": "Nachrichten",
+        "desc": "Anfragen und Chats"
+      }
     },
     "faqTitle": "Häufige Fragen",
     "noMatches": "Keine passende Frage gefunden.",
     "faqs": [
-      { "topic": "muhur", "q": "Wann kann ich meine Vorhersage öffnen?", "a": "Sobald das von dir festgelegte Öffnungsdatum vergangen ist, gehst du zu deinem versiegelten Eintrag und markierst das Ergebnis selbst mit „Ist eingetroffen“ oder „Ist nicht eingetroffen“. Vor diesem Datum ist der Inhalt für niemanden sichtbar — auch nicht für dich." },
-      { "topic": "dogrulama", "q": "Wie lasse ich ein Ergebnis bestätigen?", "a": "Die Verifizierung basiert derzeit vollständig auf Selbstauskunft: Nur der Autor der Vorhersage markiert sie, es gibt keine unabhängige Prüfung. Zweifelt jemand an einem Ergebnis, kann er im Eintrag „Anfechten“ auswählen; die Anzahl der Einsprüche wird öffentlich angezeigt." },
-      { "topic": "tahmin", "q": "Wer kann meine Vorhersage sehen?", "a": "Wähle unter Einstellungen → Datenschutz → Sichtbarkeit von Vorhersagen „Öffentlich“ oder „Nur Follower“. Möchtest du eine bestimmte Vorhersage mit niemandem teilen, wähle beim Erstellen den Modus „Zeitkapsel“." },
-      { "topic": "tahmin", "q": "Was ist der Unterschied zwischen einer Zeitkapsel und einer versiegelten Vorhersage?", "a": "Eine Zeitkapsel ist völlig privat, wird mit niemandem geteilt und beeinflusst deine dauerhaften Statistiken nicht. Eine versiegelte Vorhersage wird je nach Sichtbarkeitswahl mit anderen geteilt und zählt zu deiner Trefferquote." },
-      { "topic": "tahmin", "q": "Wie werden meine Punkte berechnet?", "a": "Eine eingetroffene Vorhersage bringt +50 Punkte, eine nicht eingetroffene, aber ehrlich abgeschlossene Vorhersage bringt +5 Punkte. Wer mit einem gültigen Einladungscode beitritt, erhält +100 Punkte — genauso wie die einladende Person." },
-      { "topic": "hesap", "q": "Wie verdiene ich Abzeichen?", "a": "Abzeichen werden automatisch anhand deiner Vorhersagenanzahl, Trefferquote, Followerzahl, erhaltenen Likes, Kommentaranzahl und Gruppenaktivität berechnet. Deinen Fortschritt siehst du unter Profil → Abzeichen." },
-      { "topic": "hesap", "q": "Wie lösche ich mein Konto?", "a": "Über App-Einstellungen → Gefahrenzone → Mein Konto löschen kannst du dein Konto sofort und dauerhaft löschen, ohne weitere Bestätigung. Möchtest du stattdessen nur eine Pause einlegen, nutze „Konto vorübergehend einfrieren“." },
-      { "topic": "grup", "q": "Wie gründe ich eine Gruppe?", "a": "Tippe im Tab Gruppen auf „Neue Gruppe gründen“ und gib Name/Beschreibung/Kategorie ein. Vorhersagen, die du innerhalb einer Gruppe erstellst, sind nur für deren Mitglieder sichtbar, nicht im öffentlichen Feed." },
-      { "topic": "mesaj", "q": "Wer kann mir Nachrichten senden?", "a": "Wähle unter Einstellungen → Datenschutz → Nachrichtenanfragen „Alle“, „Nur Personen, denen ich folge“ oder „Niemand“. Wer außerhalb dieser Einstellung liegt, kann dir keine Nachricht senden." }
+      {
+        "topic": "muhur",
+        "q": "Wann kann ich meine Vorhersage öffnen?",
+        "a": "Sobald das von dir festgelegte Öffnungsdatum vergangen ist, gehst du zu deinem versiegelten Eintrag und markierst das Ergebnis selbst mit „Ist eingetroffen“ oder „Ist nicht eingetroffen“. Vor diesem Datum ist der Inhalt für niemanden sichtbar — auch nicht für dich."
+      },
+      {
+        "topic": "dogrulama",
+        "q": "Wie lasse ich ein Ergebnis bestätigen?",
+        "a": "Die Verifizierung basiert derzeit vollständig auf Selbstauskunft: Nur der Autor der Vorhersage markiert sie, es gibt keine unabhängige Prüfung. Zweifelt jemand an einem Ergebnis, kann er im Eintrag „Anfechten“ auswählen; die Anzahl der Einsprüche wird öffentlich angezeigt."
+      },
+      {
+        "topic": "tahmin",
+        "q": "Wer kann meine Vorhersage sehen?",
+        "a": "Wähle unter Einstellungen → Datenschutz → Sichtbarkeit von Vorhersagen „Öffentlich“ oder „Nur Follower“. Möchtest du eine bestimmte Vorhersage mit niemandem teilen, wähle beim Erstellen den Modus „Zeitkapsel“."
+      },
+      {
+        "topic": "tahmin",
+        "q": "Was ist der Unterschied zwischen einer Zeitkapsel und einer versiegelten Vorhersage?",
+        "a": "Eine Zeitkapsel ist völlig privat, wird mit niemandem geteilt und beeinflusst deine dauerhaften Statistiken nicht. Eine versiegelte Vorhersage wird je nach Sichtbarkeitswahl mit anderen geteilt und zählt zu deiner Trefferquote."
+      },
+      {
+        "topic": "tahmin",
+        "q": "Wie werden meine Punkte berechnet?",
+        "a": "Eine eingetroffene Vorhersage bringt +50 Punkte, eine nicht eingetroffene, aber ehrlich abgeschlossene Vorhersage bringt +5 Punkte. Wer mit einem gültigen Einladungscode beitritt, erhält +100 Punkte — genauso wie die einladende Person."
+      },
+      {
+        "topic": "hesap",
+        "q": "Wie verdiene ich Abzeichen?",
+        "a": "Abzeichen werden automatisch anhand deiner Vorhersagenanzahl, Trefferquote, Followerzahl, erhaltenen Likes, Kommentaranzahl und Gruppenaktivität berechnet. Deinen Fortschritt siehst du unter Profil → Abzeichen."
+      },
+      {
+        "topic": "hesap",
+        "q": "Wie lösche ich mein Konto?",
+        "a": "Über App-Einstellungen → Gefahrenzone → Mein Konto löschen kannst du dein Konto sofort und dauerhaft löschen, ohne weitere Bestätigung. Möchtest du stattdessen nur eine Pause einlegen, nutze „Konto vorübergehend einfrieren“."
+      },
+      {
+        "topic": "grup",
+        "q": "Wie gründe ich eine Gruppe?",
+        "a": "Tippe im Tab Gruppen auf „Neue Gruppe gründen“ und gib Name/Beschreibung/Kategorie ein. Vorhersagen, die du innerhalb einer Gruppe erstellst, sind nur für deren Mitglieder sichtbar, nicht im öffentlichen Feed."
+      },
+      {
+        "topic": "mesaj",
+        "q": "Wer kann mir Nachrichten senden?",
+        "a": "Wähle unter Einstellungen → Datenschutz → Nachrichtenanfragen „Alle“, „Nur Personen, denen ich folge“ oder „Niemand“. Wer außerhalb dieser Einstellung liegt, kann dir keine Nachricht senden."
+      }
     ],
     "stillNeedHelpTitle": "Die gesuchte Antwort nicht gefunden?",
     "stillNeedHelpBody": "Schreib uns direkt eine E-Mail, wir melden uns so schnell wie möglich.",
@@ -554,7 +614,653 @@
     "showcaseMax": "Du kannst höchstens 3 Abzeichen zeigen.",
     "showcaseFeatureDisabled": "Die Abzeichen-Vitrine ist noch nicht aktiv.",
     "showcaseUpdateFailed": "Vitrine konnte nicht aktualisiert werden, versuch es erneut.",
-    "earnedAt": "Verdient"
+    "earnedAt": "Verdient",
+    "showcaseTitle": "Abzeichen-Vitrine",
+    "viewAll": "Alle ansehen",
+    "earnedCountAndViewAll": "{{count}} Abzeichen · Alle ansehen",
+    "addSlot": "Hinzufügen",
+    "items": {
+      "ilk-kayit": {
+        "title": "Erster Eintrag",
+        "desc": "Veröffentliche deine erste versiegelte Vorhersage."
+      },
+      "ilk-takip": {
+        "title": "Erstes Folgen",
+        "desc": "Folge einer Vorhersage-Person."
+      },
+      "ilk-halka": {
+        "title": "Erster Kreis",
+        "desc": "Tritt deiner ersten Gruppe bei."
+      },
+      "ilk-yorum": {
+        "title": "Erster Kommentar",
+        "desc": "Füge einer Vorhersage deine Gedanken hinzu."
+      },
+      "yarin-notu": {
+        "title": "Notiz für Morgen",
+        "desc": "Erstelle eine Vorhersage für in 7 Tagen."
+      },
+      "etiket-defteri": {
+        "title": "Themenheft",
+        "desc": "Veröffentliche Vorhersagen in 3 verschiedenen Kategorien."
+      },
+      "ilk-isaret": {
+        "title": "Erstes Lesezeichen",
+        "desc": "Speichere eine Vorhersage."
+      },
+      "acik-bakis": {
+        "title": "Offener Blick",
+        "desc": "Gefällt dir 5 Vorhersagen."
+      },
+      "ilk-arsiv": {
+        "title": "Erstes Archiv",
+        "desc": "Erstelle eine Zeitkapsel."
+      },
+      "yon-bul": {
+        "title": "Richtung finden",
+        "desc": "Teile eine Vorhersage in einer Gruppe."
+      },
+      "ilk-paylasim": {
+        "title": "Erstes Teilen",
+        "desc": "Teile eine Vorhersage mit einem Bild."
+      },
+      "dengeli-secim": {
+        "title": "Ausgewogene Wahl",
+        "desc": "Schreibe Vorhersagen in 2 verschiedenen Kategorien."
+      },
+      "sessiz-not": {
+        "title": "Leise Notiz",
+        "desc": "Erstelle eine als sensibel markierte Vorhersage."
+      },
+      "ilk-dogrulama": {
+        "title": "Erste Bestätigung",
+        "desc": "Lass deine erste Vorhersage sich auflösen."
+      },
+      "konu-tohumu": {
+        "title": "Themenkeim",
+        "desc": "Gründe deine eigene Gruppe."
+      },
+      "ufuk-cizgisi": {
+        "title": "Horizontlinie",
+        "desc": "Erstelle eine Vorhersage für in 30 Tagen."
+      },
+      "acilis-saati": {
+        "title": "Enthüllungsstunde",
+        "desc": "Markiere ein Ergebnis am Tag der Öffnung."
+      },
+      "gozlemci": {
+        "title": "Beobachter",
+        "desc": "Speichere 3 Vorhersagen."
+      },
+      "soru-isareti": {
+        "title": "Fragezeichen",
+        "desc": "Widerspreche einem Ergebnis, das du bezweifelst."
+      },
+      "ilk-kanit": {
+        "title": "Erster Beweis",
+        "desc": "Bestätige ein Ergebnis mit einer angegebenen Quelle."
+      },
+      "kisa-vade": {
+        "title": "Kurzfristig",
+        "desc": "Erstelle eine Vorhersage, die innerhalb von 3 Tagen öffnet."
+      },
+      "net-cumle": {
+        "title": "Klarer Satz",
+        "desc": "Schreibe 3 Kommentare."
+      },
+      "takvim-yapragi": {
+        "title": "Kalenderblatt",
+        "desc": "Erstelle 3 Vorhersagen."
+      },
+      "ortak-nokta": {
+        "title": "Gemeinsamer Nenner",
+        "desc": "Teile 3 Vorhersagen in Gruppen."
+      },
+      "iz-surucu": {
+        "title": "Wegbereiter",
+        "desc": "Gefällt dir 10 Vorhersagen."
+      },
+      "ilk-yanit": {
+        "title": "Erste Antwort",
+        "desc": "Erhalte den ersten Kommentar zu deiner Vorhersage."
+      },
+      "konu-kapisi": {
+        "title": "Themen-Tor",
+        "desc": "Tritt einer zweiten Gruppe bei."
+      },
+      "gunluk-kayit": {
+        "title": "Tägliche Notiz",
+        "desc": "Sei 2 Tage in Folge aktiv."
+      },
+      "acik-sayfa": {
+        "title": "Offene Seite",
+        "desc": "Erstelle deine zweite Zeitkapsel."
+      },
+      "kucuk-adim": {
+        "title": "Kleiner Schritt",
+        "desc": "Verbringe 7 Tage mit deinem Konto."
+      },
+      "ilk-arkadas": {
+        "title": "Erster Freund",
+        "desc": "Folge 5 Personen."
+      },
+      "goz-atma": {
+        "title": "Durchstöbern",
+        "desc": "Speichere 5 Vorhersagen."
+      },
+      "goruntu-notu": {
+        "title": "Bildnotiz",
+        "desc": "Füge 3 Vorhersagen ein Bild oder Video hinzu."
+      },
+      "hizli-cikis": {
+        "title": "Schneller Start",
+        "desc": "Erstelle 3 Vorhersagen, die innerhalb von 3 Tagen öffnen."
+      },
+      "takim-ruhu": {
+        "title": "Teamgeist",
+        "desc": "Teile 2 Vorhersagen in Gruppen."
+      },
+      "uc-halka": {
+        "title": "Drei Kreise",
+        "desc": "Tritt 3 Gruppen bei."
+      },
+      "geri-donus": {
+        "title": "Rückkehr",
+        "desc": "Erhalte 2 Kommentare zu deinen Vorhersagen."
+      },
+      "davetiye": {
+        "title": "Einladung",
+        "desc": "Lade 1 Person zu GTF ein."
+      },
+      "genis-cevre": {
+        "title": "Weiter Kreis",
+        "desc": "Folge 10 Personen."
+      },
+      "ay-isigi": {
+        "title": "Mondlicht",
+        "desc": "Verbringe 30 Tage mit deinem Konto."
+      },
+      "duzenli-notlar": {
+        "title": "Regelmäßige Notizen",
+        "desc": "Sei 4 Wochen in Folge aktiv."
+      },
+      "on-gunluk-iz": {
+        "title": "Zehn-Tage-Spur",
+        "desc": "Halte an 10 verschiedenen Tagen Einträge fest."
+      },
+      "donus-noktasi": {
+        "title": "Wendepunkt",
+        "desc": "Enthülle 5 Ergebnisse."
+      },
+      "uzun-vade": {
+        "title": "Langfristig",
+        "desc": "Erstelle eine Vorhersage für in 90 Tagen."
+      },
+      "haftanin-sesi": {
+        "title": "Stimme der Woche",
+        "desc": "Schreibe 7 Kommentare."
+      },
+      "sakin-akis": {
+        "title": "Ruhiger Fluss",
+        "desc": "Gefällt dir 20 Vorhersagen."
+      },
+      "sureklilik": {
+        "title": "Kontinuität",
+        "desc": "Sei 14 Tage in Folge aktiv."
+      },
+      "takvim-ustasi": {
+        "title": "Kalendermeister",
+        "desc": "Erstelle 15 Vorhersagen."
+      },
+      "yedi-gun": {
+        "title": "Sieben Tage",
+        "desc": "Sei 7 Tage in Folge aktiv."
+      },
+      "otuz-gun": {
+        "title": "Dreißig Tage",
+        "desc": "Sei 30 Tage in Folge aktiv."
+      },
+      "iz-birakan-istikrar": {
+        "title": "Spuren hinterlassen",
+        "desc": "Erstelle 25 Vorhersagen."
+      },
+      "sabit-pusula": {
+        "title": "Fester Kompass",
+        "desc": "Schreibe Vorhersagen in 5 verschiedenen Kategorien."
+      },
+      "araliksiz-gozlem": {
+        "title": "Ununterbrochene Beobachtung",
+        "desc": "Gefällt dir 30 Vorhersagen."
+      },
+      "gun-sonu": {
+        "title": "Tagesende",
+        "desc": "Markiere 3 Ergebnisse am Tag der Öffnung."
+      },
+      "haftalik-bakis": {
+        "title": "Wochenrückblick",
+        "desc": "Schreibe 15 Kommentare."
+      },
+      "aylik-cizgi": {
+        "title": "Monatslinie",
+        "desc": "Enthülle 15 Ergebnisse."
+      },
+      "rota-tutucu": {
+        "title": "Routenhalter",
+        "desc": "Teile 5 Vorhersagen in Gruppen."
+      },
+      "dengeli-defter": {
+        "title": "Ausgewogenes Heft",
+        "desc": "Schreibe Vorhersagen in 6 verschiedenen Kategorien."
+      },
+      "tekrar-eden": {
+        "title": "Wiederholer",
+        "desc": "Speichere 10 Vorhersagen."
+      },
+      "kayda-deger": {
+        "title": "Bemerkenswert",
+        "desc": "Erhalte 5 Kommentare zu deinen Vorhersagen."
+      },
+      "duzen-saati": {
+        "title": "Ordnungsstunde",
+        "desc": "Sei 21 Tage in Folge aktiv."
+      },
+      "acik-takvim": {
+        "title": "Offener Kalender",
+        "desc": "Erstelle 3 langfristige Vorhersagen."
+      },
+      "kapanis-notu": {
+        "title": "Abschlussnotiz",
+        "desc": "Schließe 5 Ergebnisse mit angegebener Quelle ab."
+      },
+      "kayit-zinciri": {
+        "title": "Notizkette",
+        "desc": "Erstelle 40 Vorhersagen."
+      },
+      "sabir-tasi": {
+        "title": "Geduldsstein",
+        "desc": "Erstelle 2 Vorhersagen für in 90 Tagen."
+      },
+      "sira-sende": {
+        "title": "Du bist dran",
+        "desc": "Schreibe 25 Kommentare."
+      },
+      "donemsel-bakis": {
+        "title": "Periodischer Rückblick",
+        "desc": "Enthülle 25 Ergebnisse."
+      },
+      "ilk-sezon": {
+        "title": "Erste Saison",
+        "desc": "Verbringe 90 Tage mit deinem Konto."
+      },
+      "mevsim-notu": {
+        "title": "Saisonnotiz",
+        "desc": "Verbringe 180 Tage mit deinem Konto."
+      },
+      "yilin-baslangici": {
+        "title": "Jahresbeginn",
+        "desc": "Sei 60 Tage in Folge aktiv."
+      },
+      "begeni-ustasi": {
+        "title": "Like-Meister",
+        "desc": "Gefällt dir 15 Vorhersagen."
+      },
+      "geri-bildirim": {
+        "title": "Rückmeldung",
+        "desc": "Erhalte 10 Kommentare zu deinen Vorhersagen."
+      },
+      "takip-agi": {
+        "title": "Follower-Netzwerk",
+        "desc": "Folge 25 Personen."
+      },
+      "sekiz-gozlem": {
+        "title": "Acht Beobachtungen",
+        "desc": "Speichere 20 Vorhersagen."
+      },
+      "genis-alan": {
+        "title": "Weites Feld",
+        "desc": "Schreibe Vorhersagen in 7 verschiedenen Kategorien."
+      },
+      "topluluk-sesi": {
+        "title": "Stimme der Community",
+        "desc": "Teile 7 Vorhersagen in Gruppen."
+      },
+      "orta-vade": {
+        "title": "Mittelfristig",
+        "desc": "Erstelle 3 Vorhersagen für in 90 Tagen."
+      },
+      "ikinci-topluluk": {
+        "title": "Zweite Gemeinschaft",
+        "desc": "Gründe deine zweite Gruppe."
+      },
+      "genis-kanit": {
+        "title": "Umfangreicher Beweis",
+        "desc": "Bestätige 25 Ergebnisse mit Quelle."
+      },
+      "yaz-kis": {
+        "title": "Sommer bis Winter",
+        "desc": "Verbringe 270 Tage mit deinem Konto."
+      },
+      "ucte-uc": {
+        "title": "Drei von drei",
+        "desc": "Bestätige 3 Vorhersagen in Folge richtig."
+      },
+      "keskin-goz": {
+        "title": "Scharfer Blick",
+        "desc": "70%+ Genauigkeit bei mindestens 20 Ergebnissen."
+      },
+      "kategori-uzmani": {
+        "title": "Kategorie-Experte",
+        "desc": "Erziele 15 Treffer in einer Kategorie."
+      },
+      "genis-acik": {
+        "title": "Weiter Winkel",
+        "desc": "Erziele Treffer in 5 Kategorien."
+      },
+      "kanit-zinciri": {
+        "title": "Beweiskette",
+        "desc": "Bestätige 10 Ergebnisse mit angegebener Quelle."
+      },
+      "dogru-eksen": {
+        "title": "Wahre Achse",
+        "desc": "75%+ Genauigkeit bei mindestens 15 Ergebnissen."
+      },
+      "netlik-payi": {
+        "title": "Anteil an Klarheit",
+        "desc": "80%+ Genauigkeit bei mindestens 20 Ergebnissen."
+      },
+      "izlek-ustasi": {
+        "title": "Spurenmeister",
+        "desc": "Erziele 25 Treffer in einer Kategorie."
+      },
+      "cifte-dogrulama": {
+        "title": "Doppelte Bestätigung",
+        "desc": "Bestätige 20 Ergebnisse mit Quelle."
+      },
+      "yuksek-isabet": {
+        "title": "Hohe Trefferquote",
+        "desc": "85%+ Genauigkeit bei mindestens 25 Ergebnissen."
+      },
+      "konu-haritasi": {
+        "title": "Themenkarte",
+        "desc": "Erziele Treffer in 8 Kategorien."
+      },
+      "dort-mevsim": {
+        "title": "Vier Jahreszeiten",
+        "desc": "Erziele Treffer in 4 Kategorien."
+      },
+      "surec-okuru": {
+        "title": "Prozessleser",
+        "desc": "Erziele 30 richtige Ergebnisse."
+      },
+      "veri-notu": {
+        "title": "Datennotiz",
+        "desc": "Bestätige 15 Ergebnisse mit Quelle."
+      },
+      "fikir-bahcesi": {
+        "title": "Ideengarten",
+        "desc": "Schreibe Vorhersagen in 8 verschiedenen Kategorien."
+      },
+      "guven-cizgisi": {
+        "title": "Vertrauenslinie",
+        "desc": "70%+ Genauigkeit bei mindestens 50 Ergebnissen."
+      },
+      "onay-damgasi": {
+        "title": "Gütesiegel",
+        "desc": "Erziele 40 richtige Ergebnisse."
+      },
+      "sabit-oran": {
+        "title": "Feste Quote",
+        "desc": "75%+ Genauigkeit bei mindestens 40 Ergebnissen."
+      },
+      "dusunce-rotasi": {
+        "title": "Gedankenroute",
+        "desc": "Erziele 10 Treffer in einer Kategorie."
+      },
+      "acik-arsiv": {
+        "title": "Offenes Archiv",
+        "desc": "Erstelle 5 Zeitkapseln."
+      },
+      "capraz-bakis": {
+        "title": "Querblick",
+        "desc": "Erziele Treffer in 10 Kategorien."
+      },
+      "derinlik": {
+        "title": "Tiefe",
+        "desc": "Erziele 20 Treffer in einer Kategorie."
+      },
+      "dogruluk-payi": {
+        "title": "Anteil an Genauigkeit",
+        "desc": "80%+ Genauigkeit bei mindestens 30 Ergebnissen."
+      },
+      "saglam-zemin": {
+        "title": "Fester Boden",
+        "desc": "Erziele 50 richtige Ergebnisse."
+      },
+      "ongoru-ritmi": {
+        "title": "Rhythmus der Voraussicht",
+        "desc": "Bestätige 7 Vorhersagen in Folge richtig."
+      },
+      "ince-ayar": {
+        "title": "Feinabstimmung",
+        "desc": "90%+ Genauigkeit bei mindestens 15 Ergebnissen."
+      },
+      "sonuc-okuru": {
+        "title": "Ergebnisleser",
+        "desc": "Enthülle 50 Ergebnisse."
+      },
+      "ufuk-bekcisi": {
+        "title": "Horizontwächter",
+        "desc": "Erstelle 5 Vorhersagen für in 90 Tagen."
+      },
+      "bilgi-koprusu": {
+        "title": "Informationsbrücke",
+        "desc": "Werde 5-mal in einem Kommentar erwähnt."
+      },
+      "kapsamli-not": {
+        "title": "Umfassende Notiz",
+        "desc": "Bestätige 30 Ergebnisse mit Quelle."
+      },
+      "ilk-onay": {
+        "title": "Erste Anerkennung",
+        "desc": "65%+ Genauigkeit bei mindestens 10 Ergebnissen."
+      },
+      "iyi-cizgi": {
+        "title": "Gute Linie",
+        "desc": "75%+ Genauigkeit bei mindestens 35 Ergebnissen."
+      },
+      "cift-haneli": {
+        "title": "Zweistellig",
+        "desc": "Erziele 60 richtige Ergebnisse."
+      },
+      "genis-yelpaze": {
+        "title": "Breites Spektrum",
+        "desc": "Erziele Treffer in 9 Kategorien."
+      },
+      "derin-iz": {
+        "title": "Tiefe Spur",
+        "desc": "Erziele 30 Treffer in einer Kategorie."
+      },
+      "guclu-seri": {
+        "title": "Starke Serie",
+        "desc": "Bestätige 10 Vorhersagen in Folge richtig."
+      },
+      "genis-agi": {
+        "title": "Weites Netz",
+        "desc": "Gefällt dir 50 Vorhersagen."
+      },
+      "kanit-ustasi": {
+        "title": "Beweismeister",
+        "desc": "Bestätige 40 Ergebnisse mit Quelle."
+      },
+      "takipci-halkasi": {
+        "title": "Follower-Kreis",
+        "desc": "Erreiche 50 Follower."
+      },
+      "bahsedilen": {
+        "title": "Erwähnt",
+        "desc": "Werde 10-mal in einem Kommentar erwähnt."
+      },
+      "zamanin-tanigi": {
+        "title": "Zeitzeuge",
+        "desc": "Bestätige eine Vorhersage, die 1 Jahr offen blieb."
+      },
+      "kalici-cizgi": {
+        "title": "Bleibende Linie",
+        "desc": "Sei 365 Tage in Folge aktiv."
+      },
+      "nadir-isabet": {
+        "title": "Seltene Treffsicherheit",
+        "desc": "Übertriff 80% Genauigkeit bei 100 Vorhersagen."
+      },
+      "ortak-hafiza": {
+        "title": "Gemeinsame Erinnerung",
+        "desc": "Trage zu 10 Community-Einträgen bei."
+      },
+      "yuzyil-notu": {
+        "title": "Jahrhundertnotiz",
+        "desc": "Erstelle 100 Vorhersagen."
+      },
+      "buyuk-resim": {
+        "title": "Großes Bild",
+        "desc": "Erziele Treffer in allen Kategorien."
+      },
+      "sessiz-usta": {
+        "title": "Stiller Meister",
+        "desc": "Erstelle 10 als sensibel markierte Vorhersagen."
+      },
+      "zaman-koprusu": {
+        "title": "Zeitbrücke",
+        "desc": "Erstelle 10 Vorhersagen für in 90 Tagen."
+      },
+      "altin-oran": {
+        "title": "Goldener Schnitt",
+        "desc": "90%+ Genauigkeit bei mindestens 50 Ergebnissen."
+      },
+      "derin-arsiv": {
+        "title": "Tiefes Archiv",
+        "desc": "Erstelle 15 Zeitkapseln."
+      },
+      "son-soz": {
+        "title": "Letztes Wort",
+        "desc": "Schreibe 100 Kommentare."
+      },
+      "uzun-yol": {
+        "title": "Langer Weg",
+        "desc": "Erstelle 250 Vorhersagen."
+      },
+      "uzak-ufuk": {
+        "title": "Ferner Horizont",
+        "desc": "Bestätige eine Vorhersage, die 180 Tage offen blieb."
+      },
+      "iz-birakan-efsane": {
+        "title": "Ein Vermächtnis hinterlassen",
+        "desc": "Sammle 100 Likes auf deine Vorhersagen."
+      },
+      "bilge-pusula": {
+        "title": "Weiser Kompass",
+        "desc": "Erziele 50 Treffer in einer Kategorie."
+      },
+      "tarih-cizgisi": {
+        "title": "Zeitlinie",
+        "desc": "Enthülle 100 Ergebnisse."
+      },
+      "yildonumu": {
+        "title": "Jahrestag",
+        "desc": "Verbringe 1 Jahr mit deinem Konto."
+      },
+      "ani-defteri": {
+        "title": "Erinnerungsbuch",
+        "desc": "Speichere 50 Vorhersagen."
+      },
+      "donem-tanigi": {
+        "title": "Zeitzeuge einer Ära",
+        "desc": "Verbringe 2 Jahre mit deinem Konto."
+      },
+      "kesin-imza": {
+        "title": "Endgültige Signatur",
+        "desc": "95%+ Genauigkeit bei mindestens 20 Ergebnissen."
+      },
+      "bin-kayit": {
+        "title": "Tausend Einträge",
+        "desc": "Erstelle 1000 Vorhersagen."
+      },
+      "acik-miras": {
+        "title": "Offenes Erbe",
+        "desc": "Lade 10 Personen zu GTF ein."
+      },
+      "buyuk-halka": {
+        "title": "Großer Kreis",
+        "desc": "Erreiche 500 Follower."
+      },
+      "topluluk-hafizasi": {
+        "title": "Erinnerung der Community",
+        "desc": "Gründe 5 Gruppen."
+      },
+      "surec-muhru": {
+        "title": "Siegel des Prozesses",
+        "desc": "Erziele 100 richtige Ergebnisse."
+      },
+      "guven-kaynagi": {
+        "title": "Vertrauensquelle",
+        "desc": "Bestätige 50 Ergebnisse mit Quelle."
+      },
+      "yuksek-esik": {
+        "title": "Hohe Schwelle",
+        "desc": "90%+ Genauigkeit bei mindestens 100 Ergebnissen."
+      },
+      "ustalik-defteri": {
+        "title": "Buch der Meisterschaft",
+        "desc": "Bestätige 15 Vorhersagen in Folge richtig."
+      },
+      "sonsuz-takvim": {
+        "title": "Endloser Kalender",
+        "desc": "Sei 730 Tage in Folge aktiv."
+      },
+      "kayit-bekcisi": {
+        "title": "Aktenwächter",
+        "desc": "Erhebe 10 Widersprüche."
+      },
+      "zirve-oran": {
+        "title": "Gipfelquote",
+        "desc": "92%+ Genauigkeit bei mindestens 55 Ergebnissen."
+      },
+      "iki-yuz-kayit": {
+        "title": "Zweihundert Einträge",
+        "desc": "Erstelle 200 Vorhersagen."
+      },
+      "uc-yillik-sadakat": {
+        "title": "Drei Jahre Treue",
+        "desc": "Verbringe 3 Jahre mit deinem Konto."
+      },
+      "devasa-takipci": {
+        "title": "Gewaltige Gefolgschaft",
+        "desc": "Erreiche 1000 Follower."
+      },
+      "buyuk-elci": {
+        "title": "Großer Botschafter",
+        "desc": "Lade 20 Personen zu GTF ein."
+      },
+      "sarsilmaz-seri": {
+        "title": "Unerschütterliche Serie",
+        "desc": "Bestätige 20 Vorhersagen in Folge richtig."
+      },
+      "genis-begeni": {
+        "title": "Weitreichendes Lob",
+        "desc": "Sammle 200 Likes auf deine Vorhersagen."
+      },
+      "derin-uzman": {
+        "title": "Tiefer Experte",
+        "desc": "Erziele 40 Treffer in einer Kategorie."
+      },
+      "yuz-yorum": {
+        "title": "Hundert Kommentare",
+        "desc": "Erhalte 50 Kommentare zu deinen Vorhersagen."
+      },
+      "cok-sesli-kurucu": {
+        "title": "Gründer vieler Stimmen",
+        "desc": "Gründe 8 Gruppen."
+      }
+    }
   },
   "activity": {
     "title": "Aktivität",

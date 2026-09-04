@@ -323,7 +323,13 @@
       "currentPasswordLabel": "当前密码",
       "showPasswordAria": "显示密码",
       "newPasswordLabel": "新密码",
-      "strengthLevels": ["非常弱", "弱", "一般", "良好", "强"],
+      "strengthLevels": [
+        "非常弱",
+        "弱",
+        "一般",
+        "良好",
+        "强"
+      ],
       "strengthTitle": "密码强度",
       "strengthCount": "{{count}} / 4 项标准",
       "confirmPasswordLabel": "确认新密码",
@@ -455,25 +461,79 @@
     "topicsSubtitle": "点击一个主题查看相关问题",
     "seeAllTopics": "查看全部",
     "topics": {
-      "hesap": { "title": "你的账户", "desc": "访问与安全" },
-      "tahmin": { "title": "预测", "desc": "创建与编辑" },
-      "muhur": { "title": "封存记录", "desc": "时间戳与开启" },
-      "dogrulama": { "title": "验证", "desc": "结果与申诉" },
-      "grup": { "title": "群组", "desc": "加入与规则" },
-      "mesaj": { "title": "消息", "desc": "请求与聊天" }
+      "hesap": {
+        "title": "你的账户",
+        "desc": "访问与安全"
+      },
+      "tahmin": {
+        "title": "预测",
+        "desc": "创建与编辑"
+      },
+      "muhur": {
+        "title": "封存记录",
+        "desc": "时间戳与开启"
+      },
+      "dogrulama": {
+        "title": "验证",
+        "desc": "结果与申诉"
+      },
+      "grup": {
+        "title": "群组",
+        "desc": "加入与规则"
+      },
+      "mesaj": {
+        "title": "消息",
+        "desc": "请求与聊天"
+      }
     },
     "faqTitle": "常见问题",
     "noMatches": "未找到匹配的问题。",
     "faqs": [
-      { "topic": "muhur", "q": "我什么时候可以开启我的预测？", "a": "一旦你设定的开启日期已过，前往你的封存记录，自行标记结果为「预测正确」或「预测错误」。在此日期之前，内容对任何人（包括你自己）都不可见。" },
-      { "topic": "dogrulama", "q": "我如何验证一个结果？", "a": "目前验证完全基于自我申报：只有预测作者本人可以标记结果，没有独立审核。如果有人对结果存疑，可以在记录中点击「提出异议」；异议数量会公开显示。" },
-      { "topic": "tahmin", "q": "谁能看到我的预测？", "a": "在「设置 → 隐私 → 预测可见范围」中选择「公开」或「仅粉丝」。如果不想与任何人分享某条预测，请在创建时选择「时间胶囊」模式。" },
-      { "topic": "tahmin", "q": "时间胶囊和封存预测有什么区别？", "a": "时间胶囊完全私密，永远不会与任何人分享，也不影响你的永久统计数据。封存预测会根据你的可见范围设置与他人分享，并计入你的准确率。" },
-      { "topic": "tahmin", "q": "我的积分是如何计算的？", "a": "预测正确可获得 +50 积分，预测错误但诚实标记可获得 +5 积分。使用有效邀请码加入的人可获得 +100 积分，邀请人同样获得 +100 积分。" },
-      { "topic": "hesap", "q": "我如何获得徽章？", "a": "徽章会根据你的预测数量、准确率、粉丝数、获赞数、评论数和群组活跃度自动计算。可在「我的 → 徽章」中查看进度。" },
-      { "topic": "hesap", "q": "我如何删除账户？", "a": "通过「应用设置 → 危险区域 → 删除我的账户」，无需额外确认即可立即永久删除账户。如果你只是想暂时休息一下，可以使用「暂时冻结账户」。" },
-      { "topic": "grup", "q": "如何创建群组？", "a": "在「群组」标签页点击「创建新群组」，输入名称/描述/分类。你在群组内创建的预测仅群组成员可见，不会出现在公开动态中。" },
-      { "topic": "mesaj", "q": "谁可以给我发消息？", "a": "在「设置 → 隐私 → 消息请求」中选择「所有人」「仅我关注的人」或「任何人都不行」。不符合此设置的人将无法给你发送消息。" }
+      {
+        "topic": "muhur",
+        "q": "我什么时候可以开启我的预测？",
+        "a": "一旦你设定的开启日期已过，前往你的封存记录，自行标记结果为「预测正确」或「预测错误」。在此日期之前，内容对任何人（包括你自己）都不可见。"
+      },
+      {
+        "topic": "dogrulama",
+        "q": "我如何验证一个结果？",
+        "a": "目前验证完全基于自我申报：只有预测作者本人可以标记结果，没有独立审核。如果有人对结果存疑，可以在记录中点击「提出异议」；异议数量会公开显示。"
+      },
+      {
+        "topic": "tahmin",
+        "q": "谁能看到我的预测？",
+        "a": "在「设置 → 隐私 → 预测可见范围」中选择「公开」或「仅粉丝」。如果不想与任何人分享某条预测，请在创建时选择「时间胶囊」模式。"
+      },
+      {
+        "topic": "tahmin",
+        "q": "时间胶囊和封存预测有什么区别？",
+        "a": "时间胶囊完全私密，永远不会与任何人分享，也不影响你的永久统计数据。封存预测会根据你的可见范围设置与他人分享，并计入你的准确率。"
+      },
+      {
+        "topic": "tahmin",
+        "q": "我的积分是如何计算的？",
+        "a": "预测正确可获得 +50 积分，预测错误但诚实标记可获得 +5 积分。使用有效邀请码加入的人可获得 +100 积分，邀请人同样获得 +100 积分。"
+      },
+      {
+        "topic": "hesap",
+        "q": "我如何获得徽章？",
+        "a": "徽章会根据你的预测数量、准确率、粉丝数、获赞数、评论数和群组活跃度自动计算。可在「我的 → 徽章」中查看进度。"
+      },
+      {
+        "topic": "hesap",
+        "q": "我如何删除账户？",
+        "a": "通过「应用设置 → 危险区域 → 删除我的账户」，无需额外确认即可立即永久删除账户。如果你只是想暂时休息一下，可以使用「暂时冻结账户」。"
+      },
+      {
+        "topic": "grup",
+        "q": "如何创建群组？",
+        "a": "在「群组」标签页点击「创建新群组」，输入名称/描述/分类。你在群组内创建的预测仅群组成员可见，不会出现在公开动态中。"
+      },
+      {
+        "topic": "mesaj",
+        "q": "谁可以给我发消息？",
+        "a": "在「设置 → 隐私 → 消息请求」中选择「所有人」「仅我关注的人」或「任何人都不行」。不符合此设置的人将无法给你发送消息。"
+      }
     ],
     "stillNeedHelpTitle": "没有找到你要的答案？",
     "stillNeedHelpBody": "直接给我们发邮件，我们会尽快回复你。",
@@ -553,7 +613,653 @@
     "showcaseMax": "展示区最多可显示 3 个徽章。",
     "showcaseFeatureDisabled": "徽章展示功能尚未启用。",
     "showcaseUpdateFailed": "展示区更新失败，请重试。",
-    "earnedAt": "获得于"
+    "earnedAt": "获得于",
+    "showcaseTitle": "徽章展示",
+    "viewAll": "查看全部",
+    "earnedCountAndViewAll": "{{count}} 枚徽章 · 查看全部",
+    "addSlot": "添加",
+    "items": {
+      "ilk-kayit": {
+        "title": "首次记录",
+        "desc": "发布你的第一条已封存预测。"
+      },
+      "ilk-takip": {
+        "title": "首次关注",
+        "desc": "关注一位预测者。"
+      },
+      "ilk-halka": {
+        "title": "第一圈",
+        "desc": "加入你的第一个小组。"
+      },
+      "ilk-yorum": {
+        "title": "首条评论",
+        "desc": "为一条预测添加你的想法。"
+      },
+      "yarin-notu": {
+        "title": "明日笔记",
+        "desc": "创建一条 7 天后的预测。"
+      },
+      "etiket-defteri": {
+        "title": "标签笔记本",
+        "desc": "在 3 个不同分类中发布预测。"
+      },
+      "ilk-isaret": {
+        "title": "首次收藏",
+        "desc": "收藏一条预测。"
+      },
+      "acik-bakis": {
+        "title": "开阔视野",
+        "desc": "为 5 条预测点赞。"
+      },
+      "ilk-arsiv": {
+        "title": "首个档案",
+        "desc": "创建一个时间胶囊。"
+      },
+      "yon-bul": {
+        "title": "寻找方向",
+        "desc": "在小组内分享一条预测。"
+      },
+      "ilk-paylasim": {
+        "title": "首次分享",
+        "desc": "分享一条带图片的预测。"
+      },
+      "dengeli-secim": {
+        "title": "均衡之选",
+        "desc": "在 2 个不同分类中撰写预测。"
+      },
+      "sessiz-not": {
+        "title": "静默笔记",
+        "desc": "创建一条标记为敏感内容的预测。"
+      },
+      "ilk-dogrulama": {
+        "title": "首次验证",
+        "desc": "让你的第一条预测揭晓结果。"
+      },
+      "konu-tohumu": {
+        "title": "话题萌芽",
+        "desc": "创建你自己的小组。"
+      },
+      "ufuk-cizgisi": {
+        "title": "地平线",
+        "desc": "创建一条 30 天后的预测。"
+      },
+      "acilis-saati": {
+        "title": "揭晓时刻",
+        "desc": "在开奖当天标记一个结果。"
+      },
+      "gozlemci": {
+        "title": "观察者",
+        "desc": "收藏 3 条预测。"
+      },
+      "soru-isareti": {
+        "title": "疑问标记",
+        "desc": "对你怀疑的结果提出异议。"
+      },
+      "ilk-kanit": {
+        "title": "首个证据",
+        "desc": "通过引用来源验证一个结果。"
+      },
+      "kisa-vade": {
+        "title": "短期预测",
+        "desc": "创建一条 3 天内揭晓的预测。"
+      },
+      "net-cumle": {
+        "title": "清晰一句",
+        "desc": "写 3 条评论。"
+      },
+      "takvim-yapragi": {
+        "title": "日历一页",
+        "desc": "创建 3 条预测。"
+      },
+      "ortak-nokta": {
+        "title": "共同点",
+        "desc": "在小组中分享 3 条预测。"
+      },
+      "iz-surucu": {
+        "title": "开拓者",
+        "desc": "为 10 条预测点赞。"
+      },
+      "ilk-yanit": {
+        "title": "首次回复",
+        "desc": "让你的预测获得第一条评论。"
+      },
+      "konu-kapisi": {
+        "title": "话题之门",
+        "desc": "加入第二个小组。"
+      },
+      "gunluk-kayit": {
+        "title": "每日记录",
+        "desc": "连续活跃 2 天。"
+      },
+      "acik-sayfa": {
+        "title": "开启新篇",
+        "desc": "创建你的第二个时间胶囊。"
+      },
+      "kucuk-adim": {
+        "title": "小小一步",
+        "desc": "使用账户满 7 天。"
+      },
+      "ilk-arkadas": {
+        "title": "第一位好友",
+        "desc": "关注 5 个人。"
+      },
+      "goz-atma": {
+        "title": "随手一览",
+        "desc": "收藏 5 条预测。"
+      },
+      "goruntu-notu": {
+        "title": "影像笔记",
+        "desc": "为 3 条预测添加图片或视频。"
+      },
+      "hizli-cikis": {
+        "title": "快速出发",
+        "desc": "创建 3 条 3 天内揭晓的预测。"
+      },
+      "takim-ruhu": {
+        "title": "团队精神",
+        "desc": "在小组中分享 2 条预测。"
+      },
+      "uc-halka": {
+        "title": "三个圈子",
+        "desc": "加入 3 个小组。"
+      },
+      "geri-donus": {
+        "title": "回归",
+        "desc": "让你的预测获得 2 条评论。"
+      },
+      "davetiye": {
+        "title": "邀请函",
+        "desc": "邀请 1 位好友加入 GTF。"
+      },
+      "genis-cevre": {
+        "title": "广阔人脉",
+        "desc": "关注 10 个人。"
+      },
+      "ay-isigi": {
+        "title": "月光",
+        "desc": "使用账户满 30 天。"
+      },
+      "duzenli-notlar": {
+        "title": "规律笔记",
+        "desc": "连续活跃 4 周。"
+      },
+      "on-gunluk-iz": {
+        "title": "十日足迹",
+        "desc": "在 10 个不同的日子留下记录。"
+      },
+      "donus-noktasi": {
+        "title": "转折点",
+        "desc": "揭晓 5 个结果。"
+      },
+      "uzun-vade": {
+        "title": "长期预测",
+        "desc": "创建一条 90 天后的预测。"
+      },
+      "haftanin-sesi": {
+        "title": "本周之声",
+        "desc": "写 7 条评论。"
+      },
+      "sakin-akis": {
+        "title": "平静之流",
+        "desc": "为 20 条预测点赞。"
+      },
+      "sureklilik": {
+        "title": "持续性",
+        "desc": "连续活跃 14 天。"
+      },
+      "takvim-ustasi": {
+        "title": "日历大师",
+        "desc": "创建 15 条预测。"
+      },
+      "yedi-gun": {
+        "title": "七日",
+        "desc": "连续活跃 7 天。"
+      },
+      "otuz-gun": {
+        "title": "三十日",
+        "desc": "连续活跃 30 天。"
+      },
+      "iz-birakan-istikrar": {
+        "title": "留下印记",
+        "desc": "创建 25 条预测。"
+      },
+      "sabit-pusula": {
+        "title": "稳定罗盘",
+        "desc": "在 5 个不同分类中撰写预测。"
+      },
+      "araliksiz-gozlem": {
+        "title": "不间断观察",
+        "desc": "为 30 条预测点赞。"
+      },
+      "gun-sonu": {
+        "title": "一日之终",
+        "desc": "在开奖当天标记 3 个结果。"
+      },
+      "haftalik-bakis": {
+        "title": "每周回顾",
+        "desc": "写 15 条评论。"
+      },
+      "aylik-cizgi": {
+        "title": "月度曲线",
+        "desc": "揭晓 15 个结果。"
+      },
+      "rota-tutucu": {
+        "title": "路线守护者",
+        "desc": "在小组中分享 5 条预测。"
+      },
+      "dengeli-defter": {
+        "title": "均衡笔记本",
+        "desc": "在 6 个不同分类中撰写预测。"
+      },
+      "tekrar-eden": {
+        "title": "反复收藏者",
+        "desc": "收藏 10 条预测。"
+      },
+      "kayda-deger": {
+        "title": "值得关注",
+        "desc": "让你的预测获得 5 条评论。"
+      },
+      "duzen-saati": {
+        "title": "秩序时刻",
+        "desc": "连续活跃 21 天。"
+      },
+      "acik-takvim": {
+        "title": "开放日历",
+        "desc": "创建 3 条长期预测。"
+      },
+      "kapanis-notu": {
+        "title": "结案笔记",
+        "desc": "用引用来源结案 5 个结果。"
+      },
+      "kayit-zinciri": {
+        "title": "记录链",
+        "desc": "创建 40 条预测。"
+      },
+      "sabir-tasi": {
+        "title": "耐心之石",
+        "desc": "创建 2 条 90 天后的预测。"
+      },
+      "sira-sende": {
+        "title": "轮到你了",
+        "desc": "写 25 条评论。"
+      },
+      "donemsel-bakis": {
+        "title": "定期回顾",
+        "desc": "揭晓 25 个结果。"
+      },
+      "ilk-sezon": {
+        "title": "第一个季节",
+        "desc": "使用账户满 90 天。"
+      },
+      "mevsim-notu": {
+        "title": "季节笔记",
+        "desc": "使用账户满 180 天。"
+      },
+      "yilin-baslangici": {
+        "title": "年初",
+        "desc": "连续活跃 60 天。"
+      },
+      "begeni-ustasi": {
+        "title": "点赞大师",
+        "desc": "为 15 条预测点赞。"
+      },
+      "geri-bildirim": {
+        "title": "反馈",
+        "desc": "让你的预测获得 10 条评论。"
+      },
+      "takip-agi": {
+        "title": "关注网络",
+        "desc": "关注 25 个人。"
+      },
+      "sekiz-gozlem": {
+        "title": "八次观察",
+        "desc": "收藏 20 条预测。"
+      },
+      "genis-alan": {
+        "title": "广阔领域",
+        "desc": "在 7 个不同分类中撰写预测。"
+      },
+      "topluluk-sesi": {
+        "title": "社群之声",
+        "desc": "在小组中分享 7 条预测。"
+      },
+      "orta-vade": {
+        "title": "中期预测",
+        "desc": "创建 3 条 90 天后的预测。"
+      },
+      "ikinci-topluluk": {
+        "title": "第二个社群",
+        "desc": "创建你的第二个小组。"
+      },
+      "genis-kanit": {
+        "title": "广泛证据",
+        "desc": "用来源验证 25 个结果。"
+      },
+      "yaz-kis": {
+        "title": "夏至冬",
+        "desc": "使用账户满 270 天。"
+      },
+      "ucte-uc": {
+        "title": "三连中",
+        "desc": "连续正确验证 3 条预测。"
+      },
+      "keskin-goz": {
+        "title": "敏锐之眼",
+        "desc": "至少 20 个结果中准确率达 70%+。"
+      },
+      "kategori-uzmani": {
+        "title": "分类专家",
+        "desc": "在一个分类中获得 15 次命中。"
+      },
+      "genis-acik": {
+        "title": "广阔视角",
+        "desc": "在 5 个分类中获得命中。"
+      },
+      "kanit-zinciri": {
+        "title": "证据链",
+        "desc": "用引用来源验证 10 个结果。"
+      },
+      "dogru-eksen": {
+        "title": "精准轴线",
+        "desc": "至少 15 个结果中准确率达 75%+。"
+      },
+      "netlik-payi": {
+        "title": "清晰之份",
+        "desc": "至少 20 个结果中准确率达 80%+。"
+      },
+      "izlek-ustasi": {
+        "title": "足迹大师",
+        "desc": "在一个分类中获得 25 次命中。"
+      },
+      "cifte-dogrulama": {
+        "title": "双重验证",
+        "desc": "用来源验证 20 个结果。"
+      },
+      "yuksek-isabet": {
+        "title": "高命中率",
+        "desc": "至少 25 个结果中准确率达 85%+。"
+      },
+      "konu-haritasi": {
+        "title": "话题地图",
+        "desc": "在 8 个分类中获得命中。"
+      },
+      "dort-mevsim": {
+        "title": "四季",
+        "desc": "在 4 个分类中获得命中。"
+      },
+      "surec-okuru": {
+        "title": "过程解读者",
+        "desc": "获得 30 个正确结果。"
+      },
+      "veri-notu": {
+        "title": "数据笔记",
+        "desc": "用来源验证 15 个结果。"
+      },
+      "fikir-bahcesi": {
+        "title": "想法花园",
+        "desc": "在 8 个不同分类中撰写预测。"
+      },
+      "guven-cizgisi": {
+        "title": "信任之线",
+        "desc": "至少 50 个结果中准确率达 70%+。"
+      },
+      "onay-damgasi": {
+        "title": "认可印章",
+        "desc": "获得 40 个正确结果。"
+      },
+      "sabit-oran": {
+        "title": "稳定比率",
+        "desc": "至少 40 个结果中准确率达 75%+。"
+      },
+      "dusunce-rotasi": {
+        "title": "思路路线",
+        "desc": "在一个分类中获得 10 次命中。"
+      },
+      "acik-arsiv": {
+        "title": "开放档案",
+        "desc": "创建 5 个时间胶囊。"
+      },
+      "capraz-bakis": {
+        "title": "交叉视角",
+        "desc": "在 10 个分类中获得命中。"
+      },
+      "derinlik": {
+        "title": "深度",
+        "desc": "在一个分类中获得 20 次命中。"
+      },
+      "dogruluk-payi": {
+        "title": "精准之份",
+        "desc": "至少 30 个结果中准确率达 80%+。"
+      },
+      "saglam-zemin": {
+        "title": "坚实根基",
+        "desc": "获得 50 个正确结果。"
+      },
+      "ongoru-ritmi": {
+        "title": "预见节奏",
+        "desc": "连续正确验证 7 条预测。"
+      },
+      "ince-ayar": {
+        "title": "精细调校",
+        "desc": "至少 15 个结果中准确率达 90%+。"
+      },
+      "sonuc-okuru": {
+        "title": "结果解读者",
+        "desc": "揭晓 50 个结果。"
+      },
+      "ufuk-bekcisi": {
+        "title": "地平线守望者",
+        "desc": "创建 5 条 90 天后的预测。"
+      },
+      "bilgi-koprusu": {
+        "title": "信息之桥",
+        "desc": "在评论中被提及 5 次。"
+      },
+      "kapsamli-not": {
+        "title": "详尽笔记",
+        "desc": "用来源验证 30 个结果。"
+      },
+      "ilk-onay": {
+        "title": "首次认可",
+        "desc": "至少 10 个结果中准确率达 65%+。"
+      },
+      "iyi-cizgi": {
+        "title": "良好曲线",
+        "desc": "至少 35 个结果中准确率达 75%+。"
+      },
+      "cift-haneli": {
+        "title": "两位数",
+        "desc": "获得 60 个正确结果。"
+      },
+      "genis-yelpaze": {
+        "title": "广泛领域",
+        "desc": "在 9 个分类中获得命中。"
+      },
+      "derin-iz": {
+        "title": "深邃足迹",
+        "desc": "在一个分类中获得 30 次命中。"
+      },
+      "guclu-seri": {
+        "title": "强劲连胜",
+        "desc": "连续正确验证 10 条预测。"
+      },
+      "genis-agi": {
+        "title": "广阔人气",
+        "desc": "为 50 条预测点赞。"
+      },
+      "kanit-ustasi": {
+        "title": "证据大师",
+        "desc": "用来源验证 40 个结果。"
+      },
+      "takipci-halkasi": {
+        "title": "关注者之环",
+        "desc": "达到 50 位关注者。"
+      },
+      "bahsedilen": {
+        "title": "被提及",
+        "desc": "在评论中被提及 10 次。"
+      },
+      "zamanin-tanigi": {
+        "title": "时间见证者",
+        "desc": "验证一条保持开放 1 年的预测。"
+      },
+      "kalici-cizgi": {
+        "title": "持久之线",
+        "desc": "连续活跃 365 天。"
+      },
+      "nadir-isabet": {
+        "title": "罕见精准",
+        "desc": "在 100 条预测中超过 80% 准确率。"
+      },
+      "ortak-hafiza": {
+        "title": "共同记忆",
+        "desc": "为 10 条社群记录作出贡献。"
+      },
+      "yuzyil-notu": {
+        "title": "世纪笔记",
+        "desc": "创建 100 条预测。"
+      },
+      "buyuk-resim": {
+        "title": "全景图",
+        "desc": "在所有分类中获得命中。"
+      },
+      "sessiz-usta": {
+        "title": "沉默大师",
+        "desc": "创建 10 条标记为敏感内容的预测。"
+      },
+      "zaman-koprusu": {
+        "title": "时间之桥",
+        "desc": "创建 10 条 90 天后的预测。"
+      },
+      "altin-oran": {
+        "title": "黄金比例",
+        "desc": "至少 50 个结果中准确率达 90%+。"
+      },
+      "derin-arsiv": {
+        "title": "深度档案",
+        "desc": "创建 15 个时间胶囊。"
+      },
+      "son-soz": {
+        "title": "最后一句",
+        "desc": "写 100 条评论。"
+      },
+      "uzun-yol": {
+        "title": "漫长之路",
+        "desc": "创建 250 条预测。"
+      },
+      "uzak-ufuk": {
+        "title": "遥远地平线",
+        "desc": "验证一条保持开放 180 天的预测。"
+      },
+      "iz-birakan-efsane": {
+        "title": "留下传奇",
+        "desc": "为你的预测集齐 100 个赞。"
+      },
+      "bilge-pusula": {
+        "title": "智慧罗盘",
+        "desc": "在一个分类中获得 50 次命中。"
+      },
+      "tarih-cizgisi": {
+        "title": "时间线",
+        "desc": "揭晓 100 个结果。"
+      },
+      "yildonumu": {
+        "title": "周年纪念",
+        "desc": "使用账户满 1 年。"
+      },
+      "ani-defteri": {
+        "title": "回忆之书",
+        "desc": "收藏 50 条预测。"
+      },
+      "donem-tanigi": {
+        "title": "时代见证者",
+        "desc": "使用账户满 2 年。"
+      },
+      "kesin-imza": {
+        "title": "最终签名",
+        "desc": "至少 20 个结果中准确率达 95%+。"
+      },
+      "bin-kayit": {
+        "title": "千条记录",
+        "desc": "创建 1000 条预测。"
+      },
+      "acik-miras": {
+        "title": "开放传承",
+        "desc": "邀请 10 位好友加入 GTF。"
+      },
+      "buyuk-halka": {
+        "title": "巨大圈子",
+        "desc": "达到 500 位关注者。"
+      },
+      "topluluk-hafizasi": {
+        "title": "社群记忆",
+        "desc": "创建 5 个小组。"
+      },
+      "surec-muhru": {
+        "title": "过程印章",
+        "desc": "获得 100 个正确结果。"
+      },
+      "guven-kaynagi": {
+        "title": "信任之源",
+        "desc": "用来源验证 50 个结果。"
+      },
+      "yuksek-esik": {
+        "title": "高门槛",
+        "desc": "至少 100 个结果中准确率达 90%+。"
+      },
+      "ustalik-defteri": {
+        "title": "精通之书",
+        "desc": "连续正确验证 15 条预测。"
+      },
+      "sonsuz-takvim": {
+        "title": "无尽日历",
+        "desc": "连续活跃 730 天。"
+      },
+      "kayit-bekcisi": {
+        "title": "记录守护者",
+        "desc": "提出 10 次异议。"
+      },
+      "zirve-oran": {
+        "title": "巅峰比率",
+        "desc": "至少 55 个结果中准确率达 92%+。"
+      },
+      "iki-yuz-kayit": {
+        "title": "两百条记录",
+        "desc": "创建 200 条预测。"
+      },
+      "uc-yillik-sadakat": {
+        "title": "三年忠诚",
+        "desc": "使用账户满 3 年。"
+      },
+      "devasa-takipci": {
+        "title": "庞大关注群",
+        "desc": "达到 1000 位关注者。"
+      },
+      "buyuk-elci": {
+        "title": "卓越大使",
+        "desc": "邀请 20 位好友加入 GTF。"
+      },
+      "sarsilmaz-seri": {
+        "title": "坚不可摧的连胜",
+        "desc": "连续正确验证 20 条预测。"
+      },
+      "genis-begeni": {
+        "title": "广泛赞誉",
+        "desc": "为你的预测集齐 200 个赞。"
+      },
+      "derin-uzman": {
+        "title": "深度专家",
+        "desc": "在一个分类中获得 40 次命中。"
+      },
+      "yuz-yorum": {
+        "title": "百条评论",
+        "desc": "让你的预测获得 50 条评论。"
+      },
+      "cok-sesli-kurucu": {
+        "title": "众声创始人",
+        "desc": "创建 8 个小组。"
+      }
+    }
   },
   "activity": {
     "title": "动态",

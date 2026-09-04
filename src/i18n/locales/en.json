@@ -324,7 +324,13 @@
       "currentPasswordLabel": "Current password",
       "showPasswordAria": "Show password",
       "newPasswordLabel": "New password",
-      "strengthLevels": ["Very weak", "Weak", "Okay", "Good", "Strong"],
+      "strengthLevels": [
+        "Very weak",
+        "Weak",
+        "Okay",
+        "Good",
+        "Strong"
+      ],
       "strengthTitle": "Password strength",
       "strengthCount": "{{count}} / 4 criteria",
       "confirmPasswordLabel": "Repeat new password",
@@ -456,25 +462,79 @@
     "topicsSubtitle": "Tap a topic to see related questions",
     "seeAllTopics": "See all",
     "topics": {
-      "hesap": { "title": "Your account", "desc": "Access and security" },
-      "tahmin": { "title": "Predictions", "desc": "Creating and editing" },
-      "muhur": { "title": "Sealed records", "desc": "Timestamp and opening" },
-      "dogrulama": { "title": "Verification", "desc": "Outcome and appeal" },
-      "grup": { "title": "Groups", "desc": "Joining and rules" },
-      "mesaj": { "title": "Messages", "desc": "Requests and chats" }
+      "hesap": {
+        "title": "Your account",
+        "desc": "Access and security"
+      },
+      "tahmin": {
+        "title": "Predictions",
+        "desc": "Creating and editing"
+      },
+      "muhur": {
+        "title": "Sealed records",
+        "desc": "Timestamp and opening"
+      },
+      "dogrulama": {
+        "title": "Verification",
+        "desc": "Outcome and appeal"
+      },
+      "grup": {
+        "title": "Groups",
+        "desc": "Joining and rules"
+      },
+      "mesaj": {
+        "title": "Messages",
+        "desc": "Requests and chats"
+      }
     },
     "faqTitle": "Frequently asked",
     "noMatches": "No matching question found.",
     "faqs": [
-      { "topic": "muhur", "q": "When can I open my prediction?", "a": "Once the opening date you set has passed, go to your sealed record and mark the outcome yourself with \"Turned out right\" or \"Turned out wrong.\" Before that date, the content is invisible to everyone — including you." },
-      { "topic": "dogrulama", "q": "How do I get a result verified?", "a": "Verification is currently entirely self-reported: only the prediction's author marks it, there's no independent review. If someone doubts an outcome, they can hit \"Dispute\" on the record; the dispute count is shown publicly." },
-      { "topic": "tahmin", "q": "Who can see my prediction?", "a": "Choose \"Public\" or \"Followers only\" under Settings → Privacy → Prediction visibility. If you don't want to share a specific prediction with anyone, pick \"Time capsule\" mode when creating it." },
-      { "topic": "tahmin", "q": "What's the difference between a time capsule and a sealed prediction?", "a": "A time capsule is entirely personal, never shared with anyone, and doesn't affect your permanent stats. A sealed prediction is shared with others per your visibility choice and counts toward your accuracy rate." },
-      { "topic": "tahmin", "q": "How are my points calculated?", "a": "A prediction that turns out right earns +50 points; one that turns out wrong but is closed honestly earns +5 points. Someone who joins with a valid invite code earns +100 points, and so does whoever invited them." },
-      { "topic": "hesap", "q": "How do I earn badges?", "a": "Badges are calculated automatically from your prediction count, accuracy rate, follower count, likes received, comment count, and group activity. See your progress under Profile → Badges." },
-      { "topic": "hesap", "q": "How do I delete my account?", "a": "Go to App Settings → Danger zone → Delete my account to delete it instantly and permanently, with no further confirmation. If you'd rather take a temporary break instead, use \"Temporarily freeze account.\"" },
-      { "topic": "grup", "q": "How do I start a group?", "a": "Tap \"Start a new group\" from the Groups tab, and enter a name/description/category. Predictions you create from inside a group are only visible to that group's members, not the public feed." },
-      { "topic": "mesaj", "q": "Who can send me a message?", "a": "Choose \"Everyone,\" \"Only people I follow,\" or \"No one\" under Settings → Privacy → Message requests. Anyone outside this preference can't send you a message." }
+      {
+        "topic": "muhur",
+        "q": "When can I open my prediction?",
+        "a": "Once the opening date you set has passed, go to your sealed record and mark the outcome yourself with \"Turned out right\" or \"Turned out wrong.\" Before that date, the content is invisible to everyone — including you."
+      },
+      {
+        "topic": "dogrulama",
+        "q": "How do I get a result verified?",
+        "a": "Verification is currently entirely self-reported: only the prediction's author marks it, there's no independent review. If someone doubts an outcome, they can hit \"Dispute\" on the record; the dispute count is shown publicly."
+      },
+      {
+        "topic": "tahmin",
+        "q": "Who can see my prediction?",
+        "a": "Choose \"Public\" or \"Followers only\" under Settings → Privacy → Prediction visibility. If you don't want to share a specific prediction with anyone, pick \"Time capsule\" mode when creating it."
+      },
+      {
+        "topic": "tahmin",
+        "q": "What's the difference between a time capsule and a sealed prediction?",
+        "a": "A time capsule is entirely personal, never shared with anyone, and doesn't affect your permanent stats. A sealed prediction is shared with others per your visibility choice and counts toward your accuracy rate."
+      },
+      {
+        "topic": "tahmin",
+        "q": "How are my points calculated?",
+        "a": "A prediction that turns out right earns +50 points; one that turns out wrong but is closed honestly earns +5 points. Someone who joins with a valid invite code earns +100 points, and so does whoever invited them."
+      },
+      {
+        "topic": "hesap",
+        "q": "How do I earn badges?",
+        "a": "Badges are calculated automatically from your prediction count, accuracy rate, follower count, likes received, comment count, and group activity. See your progress under Profile → Badges."
+      },
+      {
+        "topic": "hesap",
+        "q": "How do I delete my account?",
+        "a": "Go to App Settings → Danger zone → Delete my account to delete it instantly and permanently, with no further confirmation. If you'd rather take a temporary break instead, use \"Temporarily freeze account.\""
+      },
+      {
+        "topic": "grup",
+        "q": "How do I start a group?",
+        "a": "Tap \"Start a new group\" from the Groups tab, and enter a name/description/category. Predictions you create from inside a group are only visible to that group's members, not the public feed."
+      },
+      {
+        "topic": "mesaj",
+        "q": "Who can send me a message?",
+        "a": "Choose \"Everyone,\" \"Only people I follow,\" or \"No one\" under Settings → Privacy → Message requests. Anyone outside this preference can't send you a message."
+      }
     ],
     "stillNeedHelpTitle": "Couldn't find the answer you're looking for?",
     "stillNeedHelpBody": "Email us directly and we'll get back to you as soon as we can.",
@@ -554,7 +614,653 @@
     "showcaseMax": "You can showcase at most 3 badges.",
     "showcaseFeatureDisabled": "The badge showcase feature isn't active yet.",
     "showcaseUpdateFailed": "Couldn't update the showcase, try again.",
-    "earnedAt": "Earned"
+    "earnedAt": "Earned",
+    "showcaseTitle": "Badge Showcase",
+    "viewAll": "View all",
+    "earnedCountAndViewAll": "{{count}} badges · View all",
+    "addSlot": "Add",
+    "items": {
+      "ilk-kayit": {
+        "title": "First Record",
+        "desc": "Publish your first sealed prediction."
+      },
+      "ilk-takip": {
+        "title": "First Follow",
+        "desc": "Follow a forecaster."
+      },
+      "ilk-halka": {
+        "title": "First Circle",
+        "desc": "Join your first group."
+      },
+      "ilk-yorum": {
+        "title": "First Comment",
+        "desc": "Add your thoughts to a prediction."
+      },
+      "yarin-notu": {
+        "title": "Tomorrow's Note",
+        "desc": "Create a prediction for 7 days out."
+      },
+      "etiket-defteri": {
+        "title": "Tag Notebook",
+        "desc": "Publish predictions in 3 different categories."
+      },
+      "ilk-isaret": {
+        "title": "First Bookmark",
+        "desc": "Save a prediction."
+      },
+      "acik-bakis": {
+        "title": "Open Eye",
+        "desc": "Like 5 predictions."
+      },
+      "ilk-arsiv": {
+        "title": "First Archive",
+        "desc": "Create a time capsule."
+      },
+      "yon-bul": {
+        "title": "Find Direction",
+        "desc": "Share a prediction inside a group."
+      },
+      "ilk-paylasim": {
+        "title": "First Share",
+        "desc": "Share a prediction with an image."
+      },
+      "dengeli-secim": {
+        "title": "Balanced Pick",
+        "desc": "Write predictions in 2 different categories."
+      },
+      "sessiz-not": {
+        "title": "Quiet Note",
+        "desc": "Create a prediction marked as sensitive content."
+      },
+      "ilk-dogrulama": {
+        "title": "First Verification",
+        "desc": "Have your first prediction resolve."
+      },
+      "konu-tohumu": {
+        "title": "Topic Seed",
+        "desc": "Start your own group."
+      },
+      "ufuk-cizgisi": {
+        "title": "Horizon Line",
+        "desc": "Create a prediction for 30 days out."
+      },
+      "acilis-saati": {
+        "title": "Reveal Hour",
+        "desc": "Mark an outcome on its opening day."
+      },
+      "gozlemci": {
+        "title": "Observer",
+        "desc": "Save 3 predictions."
+      },
+      "soru-isareti": {
+        "title": "Question Mark",
+        "desc": "Dispute an outcome you doubt."
+      },
+      "ilk-kanit": {
+        "title": "First Evidence",
+        "desc": "Verify an outcome with a cited source."
+      },
+      "kisa-vade": {
+        "title": "Short Term",
+        "desc": "Create a prediction that opens within 3 days."
+      },
+      "net-cumle": {
+        "title": "Clear Sentence",
+        "desc": "Write 3 comments."
+      },
+      "takvim-yapragi": {
+        "title": "Calendar Page",
+        "desc": "Create 3 predictions."
+      },
+      "ortak-nokta": {
+        "title": "Common Ground",
+        "desc": "Share 3 predictions in groups."
+      },
+      "iz-surucu": {
+        "title": "Trailblazer",
+        "desc": "Like 10 predictions."
+      },
+      "ilk-yanit": {
+        "title": "First Reply",
+        "desc": "Get your first comment on a prediction."
+      },
+      "konu-kapisi": {
+        "title": "Topic Gateway",
+        "desc": "Join a second group."
+      },
+      "gunluk-kayit": {
+        "title": "Daily Record",
+        "desc": "Stay active 2 days in a row."
+      },
+      "acik-sayfa": {
+        "title": "Open Page",
+        "desc": "Create your second time capsule."
+      },
+      "kucuk-adim": {
+        "title": "Small Step",
+        "desc": "Spend 7 days with your account."
+      },
+      "ilk-arkadas": {
+        "title": "First Friend",
+        "desc": "Follow 5 people."
+      },
+      "goz-atma": {
+        "title": "Browsing",
+        "desc": "Save 5 predictions."
+      },
+      "goruntu-notu": {
+        "title": "Visual Note",
+        "desc": "Add an image or video to 3 predictions."
+      },
+      "hizli-cikis": {
+        "title": "Quick Start",
+        "desc": "Create 3 predictions opening within 3 days."
+      },
+      "takim-ruhu": {
+        "title": "Team Spirit",
+        "desc": "Share 2 predictions in groups."
+      },
+      "uc-halka": {
+        "title": "Three Circles",
+        "desc": "Join 3 groups."
+      },
+      "geri-donus": {
+        "title": "Return",
+        "desc": "Get 2 comments on your predictions."
+      },
+      "davetiye": {
+        "title": "Invitation",
+        "desc": "Invite 1 person to GTF."
+      },
+      "genis-cevre": {
+        "title": "Wide Circle",
+        "desc": "Follow 10 people."
+      },
+      "ay-isigi": {
+        "title": "Moonlight",
+        "desc": "Spend 30 days with your account."
+      },
+      "duzenli-notlar": {
+        "title": "Regular Notes",
+        "desc": "Stay active 4 weeks in a row."
+      },
+      "on-gunluk-iz": {
+        "title": "Ten-Day Trail",
+        "desc": "Keep records on 10 separate days."
+      },
+      "donus-noktasi": {
+        "title": "Turning Point",
+        "desc": "Reveal 5 outcomes."
+      },
+      "uzun-vade": {
+        "title": "Long Term",
+        "desc": "Create a prediction for 90 days out."
+      },
+      "haftanin-sesi": {
+        "title": "Voice of the Week",
+        "desc": "Write 7 comments."
+      },
+      "sakin-akis": {
+        "title": "Calm Flow",
+        "desc": "Like 20 predictions."
+      },
+      "sureklilik": {
+        "title": "Continuity",
+        "desc": "Stay active 14 days in a row."
+      },
+      "takvim-ustasi": {
+        "title": "Calendar Master",
+        "desc": "Create 15 predictions."
+      },
+      "yedi-gun": {
+        "title": "Seven Days",
+        "desc": "Stay active 7 days in a row."
+      },
+      "otuz-gun": {
+        "title": "Thirty Days",
+        "desc": "Stay active 30 days in a row."
+      },
+      "iz-birakan-istikrar": {
+        "title": "Leaving a Mark",
+        "desc": "Create 25 predictions."
+      },
+      "sabit-pusula": {
+        "title": "Steady Compass",
+        "desc": "Write predictions in 5 different categories."
+      },
+      "araliksiz-gozlem": {
+        "title": "Uninterrupted Watch",
+        "desc": "Like 30 predictions."
+      },
+      "gun-sonu": {
+        "title": "End of Day",
+        "desc": "Mark 3 outcomes on their opening day."
+      },
+      "haftalik-bakis": {
+        "title": "Weekly Review",
+        "desc": "Write 15 comments."
+      },
+      "aylik-cizgi": {
+        "title": "Monthly Line",
+        "desc": "Reveal 15 outcomes."
+      },
+      "rota-tutucu": {
+        "title": "Route Keeper",
+        "desc": "Share 5 predictions in groups."
+      },
+      "dengeli-defter": {
+        "title": "Balanced Ledger",
+        "desc": "Write predictions in 6 different categories."
+      },
+      "tekrar-eden": {
+        "title": "Repeat Saver",
+        "desc": "Save 10 predictions."
+      },
+      "kayda-deger": {
+        "title": "Noteworthy",
+        "desc": "Get 5 comments on your predictions."
+      },
+      "duzen-saati": {
+        "title": "Order Hour",
+        "desc": "Stay active 21 days in a row."
+      },
+      "acik-takvim": {
+        "title": "Open Calendar",
+        "desc": "Create 3 long-term predictions."
+      },
+      "kapanis-notu": {
+        "title": "Closing Note",
+        "desc": "Close 5 outcomes with a cited source."
+      },
+      "kayit-zinciri": {
+        "title": "Record Chain",
+        "desc": "Create 40 predictions."
+      },
+      "sabir-tasi": {
+        "title": "Patience Stone",
+        "desc": "Create 2 predictions for 90 days out."
+      },
+      "sira-sende": {
+        "title": "Your Turn",
+        "desc": "Write 25 comments."
+      },
+      "donemsel-bakis": {
+        "title": "Periodic Review",
+        "desc": "Reveal 25 outcomes."
+      },
+      "ilk-sezon": {
+        "title": "First Season",
+        "desc": "Spend 90 days with your account."
+      },
+      "mevsim-notu": {
+        "title": "Seasonal Note",
+        "desc": "Spend 180 days with your account."
+      },
+      "yilin-baslangici": {
+        "title": "Start of the Year",
+        "desc": "Stay active 60 days in a row."
+      },
+      "begeni-ustasi": {
+        "title": "Like Master",
+        "desc": "Like 15 predictions."
+      },
+      "geri-bildirim": {
+        "title": "Feedback",
+        "desc": "Get 10 comments on your predictions."
+      },
+      "takip-agi": {
+        "title": "Follow Network",
+        "desc": "Follow 25 people."
+      },
+      "sekiz-gozlem": {
+        "title": "Eight Observations",
+        "desc": "Save 20 predictions."
+      },
+      "genis-alan": {
+        "title": "Wide Field",
+        "desc": "Write predictions in 7 different categories."
+      },
+      "topluluk-sesi": {
+        "title": "Voice of the Community",
+        "desc": "Share 7 predictions in groups."
+      },
+      "orta-vade": {
+        "title": "Medium Term",
+        "desc": "Create 3 predictions for 90 days out."
+      },
+      "ikinci-topluluk": {
+        "title": "Second Community",
+        "desc": "Start your second group."
+      },
+      "genis-kanit": {
+        "title": "Broad Evidence",
+        "desc": "Verify 25 outcomes with a source."
+      },
+      "yaz-kis": {
+        "title": "Summer to Winter",
+        "desc": "Spend 270 days with your account."
+      },
+      "ucte-uc": {
+        "title": "Three for Three",
+        "desc": "Verify 3 predictions correctly in a row."
+      },
+      "keskin-goz": {
+        "title": "Sharp Eye",
+        "desc": "70%+ accuracy over at least 20 outcomes."
+      },
+      "kategori-uzmani": {
+        "title": "Category Expert",
+        "desc": "Score 15 correct calls in one category."
+      },
+      "genis-acik": {
+        "title": "Wide Angle",
+        "desc": "Score correct calls in 5 categories."
+      },
+      "kanit-zinciri": {
+        "title": "Evidence Chain",
+        "desc": "Verify 10 outcomes with a cited source."
+      },
+      "dogru-eksen": {
+        "title": "True Axis",
+        "desc": "75%+ accuracy over at least 15 outcomes."
+      },
+      "netlik-payi": {
+        "title": "Share of Clarity",
+        "desc": "80%+ accuracy over at least 20 outcomes."
+      },
+      "izlek-ustasi": {
+        "title": "Trail Master",
+        "desc": "Score 25 correct calls in one category."
+      },
+      "cifte-dogrulama": {
+        "title": "Double Verification",
+        "desc": "Verify 20 outcomes with a source."
+      },
+      "yuksek-isabet": {
+        "title": "High Precision",
+        "desc": "85%+ accuracy over at least 25 outcomes."
+      },
+      "konu-haritasi": {
+        "title": "Topic Map",
+        "desc": "Score correct calls in 8 categories."
+      },
+      "dort-mevsim": {
+        "title": "Four Seasons",
+        "desc": "Score correct calls in 4 categories."
+      },
+      "surec-okuru": {
+        "title": "Process Reader",
+        "desc": "Score 30 correct outcomes."
+      },
+      "veri-notu": {
+        "title": "Data Note",
+        "desc": "Verify 15 outcomes with a source."
+      },
+      "fikir-bahcesi": {
+        "title": "Garden of Ideas",
+        "desc": "Write predictions in 8 different categories."
+      },
+      "guven-cizgisi": {
+        "title": "Line of Trust",
+        "desc": "70%+ accuracy over at least 50 outcomes."
+      },
+      "onay-damgasi": {
+        "title": "Stamp of Approval",
+        "desc": "Score 40 correct outcomes."
+      },
+      "sabit-oran": {
+        "title": "Steady Rate",
+        "desc": "75%+ accuracy over at least 40 outcomes."
+      },
+      "dusunce-rotasi": {
+        "title": "Route of Thought",
+        "desc": "Score 10 correct calls in one category."
+      },
+      "acik-arsiv": {
+        "title": "Open Archive",
+        "desc": "Create 5 time capsules."
+      },
+      "capraz-bakis": {
+        "title": "Cross View",
+        "desc": "Score correct calls in 10 categories."
+      },
+      "derinlik": {
+        "title": "Depth",
+        "desc": "Score 20 correct calls in one category."
+      },
+      "dogruluk-payi": {
+        "title": "Share of Accuracy",
+        "desc": "80%+ accuracy over at least 30 outcomes."
+      },
+      "saglam-zemin": {
+        "title": "Solid Ground",
+        "desc": "Score 50 correct outcomes."
+      },
+      "ongoru-ritmi": {
+        "title": "Rhythm of Foresight",
+        "desc": "Verify 7 predictions correctly in a row."
+      },
+      "ince-ayar": {
+        "title": "Fine Tuning",
+        "desc": "90%+ accuracy over at least 15 outcomes."
+      },
+      "sonuc-okuru": {
+        "title": "Outcome Reader",
+        "desc": "Reveal 50 outcomes."
+      },
+      "ufuk-bekcisi": {
+        "title": "Horizon Watcher",
+        "desc": "Create 5 predictions for 90 days out."
+      },
+      "bilgi-koprusu": {
+        "title": "Bridge of Information",
+        "desc": "Get mentioned in a comment 5 times."
+      },
+      "kapsamli-not": {
+        "title": "Comprehensive Note",
+        "desc": "Verify 30 outcomes with a source."
+      },
+      "ilk-onay": {
+        "title": "First Approval",
+        "desc": "65%+ accuracy over at least 10 outcomes."
+      },
+      "iyi-cizgi": {
+        "title": "Good Line",
+        "desc": "75%+ accuracy over at least 35 outcomes."
+      },
+      "cift-haneli": {
+        "title": "Double Digits",
+        "desc": "Score 60 correct outcomes."
+      },
+      "genis-yelpaze": {
+        "title": "Wide Range",
+        "desc": "Score correct calls in 9 categories."
+      },
+      "derin-iz": {
+        "title": "Deep Trail",
+        "desc": "Score 30 correct calls in one category."
+      },
+      "guclu-seri": {
+        "title": "Strong Streak",
+        "desc": "Verify 10 predictions correctly in a row."
+      },
+      "genis-agi": {
+        "title": "Wide Web",
+        "desc": "Like 50 predictions."
+      },
+      "kanit-ustasi": {
+        "title": "Evidence Master",
+        "desc": "Verify 40 outcomes with a source."
+      },
+      "takipci-halkasi": {
+        "title": "Circle of Followers",
+        "desc": "Reach 50 followers."
+      },
+      "bahsedilen": {
+        "title": "Mentioned",
+        "desc": "Get mentioned in a comment 10 times."
+      },
+      "zamanin-tanigi": {
+        "title": "Witness of Time",
+        "desc": "Verify a prediction that stayed open for 1 year."
+      },
+      "kalici-cizgi": {
+        "title": "Lasting Line",
+        "desc": "Stay active 365 days in a row."
+      },
+      "nadir-isabet": {
+        "title": "Rare Precision",
+        "desc": "Beat 80% accuracy over 100 predictions."
+      },
+      "ortak-hafiza": {
+        "title": "Shared Memory",
+        "desc": "Contribute to 10 community records."
+      },
+      "yuzyil-notu": {
+        "title": "Century Note",
+        "desc": "Create 100 predictions."
+      },
+      "buyuk-resim": {
+        "title": "Big Picture",
+        "desc": "Score correct calls in every category."
+      },
+      "sessiz-usta": {
+        "title": "Quiet Master",
+        "desc": "Create 10 predictions marked as sensitive content."
+      },
+      "zaman-koprusu": {
+        "title": "Bridge of Time",
+        "desc": "Create 10 predictions for 90 days out."
+      },
+      "altin-oran": {
+        "title": "Golden Ratio",
+        "desc": "90%+ accuracy over at least 50 outcomes."
+      },
+      "derin-arsiv": {
+        "title": "Deep Archive",
+        "desc": "Create 15 time capsules."
+      },
+      "son-soz": {
+        "title": "Last Word",
+        "desc": "Write 100 comments."
+      },
+      "uzun-yol": {
+        "title": "Long Road",
+        "desc": "Create 250 predictions."
+      },
+      "uzak-ufuk": {
+        "title": "Distant Horizon",
+        "desc": "Verify a prediction that stayed open for 180 days."
+      },
+      "iz-birakan-efsane": {
+        "title": "Leaving a Legend",
+        "desc": "Collect 100 likes on your predictions."
+      },
+      "bilge-pusula": {
+        "title": "Wise Compass",
+        "desc": "Score 50 correct calls in one category."
+      },
+      "tarih-cizgisi": {
+        "title": "Timeline",
+        "desc": "Reveal 100 outcomes."
+      },
+      "yildonumu": {
+        "title": "Anniversary",
+        "desc": "Spend 1 year with your account."
+      },
+      "ani-defteri": {
+        "title": "Memory Book",
+        "desc": "Save 50 predictions."
+      },
+      "donem-tanigi": {
+        "title": "Witness of the Era",
+        "desc": "Spend 2 years with your account."
+      },
+      "kesin-imza": {
+        "title": "Definitive Signature",
+        "desc": "95%+ accuracy over at least 20 outcomes."
+      },
+      "bin-kayit": {
+        "title": "Thousand Records",
+        "desc": "Create 1000 predictions."
+      },
+      "acik-miras": {
+        "title": "Open Legacy",
+        "desc": "Invite 10 people to GTF."
+      },
+      "buyuk-halka": {
+        "title": "Great Circle",
+        "desc": "Reach 500 followers."
+      },
+      "topluluk-hafizasi": {
+        "title": "Memory of the Community",
+        "desc": "Start 5 groups."
+      },
+      "surec-muhru": {
+        "title": "Seal of the Process",
+        "desc": "Score 100 correct outcomes."
+      },
+      "guven-kaynagi": {
+        "title": "Source of Trust",
+        "desc": "Verify 50 outcomes with a source."
+      },
+      "yuksek-esik": {
+        "title": "High Threshold",
+        "desc": "90%+ accuracy over at least 100 outcomes."
+      },
+      "ustalik-defteri": {
+        "title": "Book of Mastery",
+        "desc": "Verify 15 predictions correctly in a row."
+      },
+      "sonsuz-takvim": {
+        "title": "Endless Calendar",
+        "desc": "Stay active 730 days in a row."
+      },
+      "kayit-bekcisi": {
+        "title": "Record Keeper",
+        "desc": "Raise 10 disputes."
+      },
+      "zirve-oran": {
+        "title": "Peak Rate",
+        "desc": "92%+ accuracy over at least 55 outcomes."
+      },
+      "iki-yuz-kayit": {
+        "title": "Two Hundred Records",
+        "desc": "Create 200 predictions."
+      },
+      "uc-yillik-sadakat": {
+        "title": "Three-Year Loyalty",
+        "desc": "Spend 3 years with your account."
+      },
+      "devasa-takipci": {
+        "title": "Massive Following",
+        "desc": "Reach 1000 followers."
+      },
+      "buyuk-elci": {
+        "title": "Grand Ambassador",
+        "desc": "Invite 20 people to GTF."
+      },
+      "sarsilmaz-seri": {
+        "title": "Unshakeable Streak",
+        "desc": "Verify 20 predictions correctly in a row."
+      },
+      "genis-begeni": {
+        "title": "Widespread Praise",
+        "desc": "Collect 200 likes on your predictions."
+      },
+      "derin-uzman": {
+        "title": "Deep Expert",
+        "desc": "Score 40 correct calls in one category."
+      },
+      "yuz-yorum": {
+        "title": "Hundred Comments",
+        "desc": "Get 50 comments on your predictions."
+      },
+      "cok-sesli-kurucu": {
+        "title": "Founder of Many Voices",
+        "desc": "Start 8 groups."
+      }
+    }
   },
   "activity": {
     "title": "Activity",

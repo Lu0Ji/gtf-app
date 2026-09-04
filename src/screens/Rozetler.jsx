@@ -9,12 +9,6 @@ import BadgeMedallion from '../components/BadgeMedallion.jsx'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
 import Card from '../components/ui/Card.jsx'
 
-// NOTE: badge.title/badge.desc (the 120-badge catalog in lib/badges.js)
-// stay Turkish for now — translating that catalog into 8 languages is a
-// separate, much larger follow-up pass, not part of this one. Everything
-// else on this screen (labels, filters, tier names via t(TIERS labelKey))
-// is fully translated.
-
 const INITIAL_PER_TIER = 6
 
 async function safeCount(promise) {
@@ -76,8 +70,8 @@ function BadgeCard({ badge, tier, earnedAt, showcased, editingShowcase, onToggle
           ></iconify-icon>
         )}
       </div>
-      <h3 className="mt-3 text-sm font-extrabold leading-4">{badge.title}</h3>
-      <p className="mt-1 text-[10px] leading-4 text-muted-foreground">{badge.desc}</p>
+      <h3 className="mt-3 text-sm font-extrabold leading-4">{t(`badges.items.${badge.slug}.title`)}</h3>
+      <p className="mt-1 text-[10px] leading-4 text-muted-foreground">{t(`badges.items.${badge.slug}.desc`)}</p>
       {badge.earned ? (
         <p className="mt-2 text-[10px] font-bold" style={{ color: tier.ink }}>
           {t(tier.labelKey)} · {earnedAt ? formatDateLong(earnedAt) : t('badges.earnedAt')}
@@ -246,7 +240,12 @@ export default function Rozetler() {
     if (statusFilter === 'earned' && !b.earned) return false
     if (statusFilter === 'locked' && b.earned) return false
     if (tierFilter && b.tier !== tierFilter) return false
-    if (trimmedQuery && !b.title.toLowerCase().includes(trimmedQuery) && !b.desc.toLowerCase().includes(trimmedQuery)) return false
+    if (
+      trimmedQuery &&
+      !t(`badges.items.${b.slug}.title`).toLowerCase().includes(trimmedQuery) &&
+      !t(`badges.items.${b.slug}.desc`).toLowerCase().includes(trimmedQuery)
+    )
+      return false
     return true
   })
   const isFiltering = statusFilter !== 'all' || !!tierFilter || !!trimmedQuery
@@ -330,7 +329,7 @@ export default function Rozetler() {
                             <iconify-icon icon="lucide:x" class="text-base"></iconify-icon>
                           </button>
                         </div>
-                        <p className="mt-4 font-heading text-sm font-extrabold">{badge.title}</p>
+                        <p className="mt-4 font-heading text-sm font-extrabold">{t(`badges.items.${badge.slug}.title`)}</p>
                         <p className="mt-1 text-[10px] font-bold" style={{ color: tier.ink }}>
                           {t(tier.labelKey)}
                         </p>

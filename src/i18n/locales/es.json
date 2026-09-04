@@ -324,7 +324,13 @@
       "currentPasswordLabel": "Contraseña actual",
       "showPasswordAria": "Mostrar contraseña",
       "newPasswordLabel": "Nueva contraseña",
-      "strengthLevels": ["Muy débil", "Débil", "Media", "Buena", "Fuerte"],
+      "strengthLevels": [
+        "Muy débil",
+        "Débil",
+        "Media",
+        "Buena",
+        "Fuerte"
+      ],
       "strengthTitle": "Seguridad de la contraseña",
       "strengthCount": "{{count}} / 4 criterios",
       "confirmPasswordLabel": "Repite la nueva contraseña",
@@ -456,25 +462,79 @@
     "topicsSubtitle": "Toca un tema para ver las preguntas relacionadas",
     "seeAllTopics": "Ver todos",
     "topics": {
-      "hesap": { "title": "Tu cuenta", "desc": "Acceso y seguridad" },
-      "tahmin": { "title": "Predicciones", "desc": "Crear y editar" },
-      "muhur": { "title": "Registros sellados", "desc": "Marca de tiempo y apertura" },
-      "dogrulama": { "title": "Verificación", "desc": "Resultado y apelación" },
-      "grup": { "title": "Grupos", "desc": "Unirte y reglas" },
-      "mesaj": { "title": "Mensajes", "desc": "Solicitudes y chats" }
+      "hesap": {
+        "title": "Tu cuenta",
+        "desc": "Acceso y seguridad"
+      },
+      "tahmin": {
+        "title": "Predicciones",
+        "desc": "Crear y editar"
+      },
+      "muhur": {
+        "title": "Registros sellados",
+        "desc": "Marca de tiempo y apertura"
+      },
+      "dogrulama": {
+        "title": "Verificación",
+        "desc": "Resultado y apelación"
+      },
+      "grup": {
+        "title": "Grupos",
+        "desc": "Unirte y reglas"
+      },
+      "mesaj": {
+        "title": "Mensajes",
+        "desc": "Solicitudes y chats"
+      }
     },
     "faqTitle": "Preguntas frecuentes",
     "noMatches": "No se encontró ninguna pregunta coincidente.",
     "faqs": [
-      { "topic": "muhur", "q": "¿Cuándo puedo abrir mi predicción?", "a": "Una vez que pase la fecha de apertura que elegiste, ve a tu registro sellado y marca el resultado tú mismo con «Resultó cierto» o «Resultó falso». Antes de esa fecha, el contenido es invisible para todos, incluido tú." },
-      { "topic": "dogrulama", "q": "¿Cómo verifico un resultado?", "a": "Por ahora la verificación depende totalmente de lo que declare el autor: solo él la marca, no hay revisión independiente. Si alguien duda de un resultado, puede pulsar «Impugnar» en el registro; el número de impugnaciones se muestra públicamente." },
-      { "topic": "tahmin", "q": "¿Quién puede ver mi predicción?", "a": "Elige «Pública» o «Solo seguidores» en Ajustes → Privacidad → Visibilidad de predicciones. Si no quieres compartir una predicción con nadie, elige el modo «Cápsula del tiempo» al crearla." },
-      { "topic": "tahmin", "q": "¿Cuál es la diferencia entre una cápsula del tiempo y una predicción sellada?", "a": "Una cápsula del tiempo es totalmente personal, nunca se comparte con nadie y no afecta tus estadísticas permanentes. Una predicción sellada se comparte con otros según tu elección de visibilidad y cuenta para tu porcentaje de acierto." },
-      { "topic": "tahmin", "q": "¿Cómo se calculan mis puntos?", "a": "Una predicción que resulta cierta otorga +50 puntos; una que resulta falsa pero se cierra con honestidad otorga +5 puntos. Quien se une con un código de invitación válido gana +100 puntos, igual que quien lo invitó." },
-      { "topic": "hesap", "q": "¿Cómo gano insignias?", "a": "Las insignias se calculan automáticamente según tu número de predicciones, porcentaje de acierto, número de seguidores, «me gusta» recibidos, número de comentarios y actividad en grupos. Consulta tu progreso en Perfil → Insignias." },
-      { "topic": "hesap", "q": "¿Cómo elimino mi cuenta?", "a": "Ve a Ajustes de la app → Zona de peligro → Eliminar mi cuenta para borrarla al instante y de forma permanente, sin más confirmaciones. Si prefieres tomarte solo un descanso, usa «Congelar cuenta temporalmente»." },
-      { "topic": "grup", "q": "¿Cómo creo un grupo?", "a": "Toca «Crear nuevo grupo» en la pestaña Grupos e ingresa nombre, descripción y categoría. Las predicciones que creas dentro de un grupo solo son visibles para sus miembros, no aparecen en el feed público." },
-      { "topic": "mesaj", "q": "¿Quién puede enviarme mensajes?", "a": "Elige «Todos», «Solo a quienes sigo» o «Nadie» en Ajustes → Privacidad → Solicitudes de mensajes. Nadie fuera de esta preferencia podrá enviarte un mensaje." }
+      {
+        "topic": "muhur",
+        "q": "¿Cuándo puedo abrir mi predicción?",
+        "a": "Una vez que pase la fecha de apertura que elegiste, ve a tu registro sellado y marca el resultado tú mismo con «Resultó cierto» o «Resultó falso». Antes de esa fecha, el contenido es invisible para todos, incluido tú."
+      },
+      {
+        "topic": "dogrulama",
+        "q": "¿Cómo verifico un resultado?",
+        "a": "Por ahora la verificación depende totalmente de lo que declare el autor: solo él la marca, no hay revisión independiente. Si alguien duda de un resultado, puede pulsar «Impugnar» en el registro; el número de impugnaciones se muestra públicamente."
+      },
+      {
+        "topic": "tahmin",
+        "q": "¿Quién puede ver mi predicción?",
+        "a": "Elige «Pública» o «Solo seguidores» en Ajustes → Privacidad → Visibilidad de predicciones. Si no quieres compartir una predicción con nadie, elige el modo «Cápsula del tiempo» al crearla."
+      },
+      {
+        "topic": "tahmin",
+        "q": "¿Cuál es la diferencia entre una cápsula del tiempo y una predicción sellada?",
+        "a": "Una cápsula del tiempo es totalmente personal, nunca se comparte con nadie y no afecta tus estadísticas permanentes. Una predicción sellada se comparte con otros según tu elección de visibilidad y cuenta para tu porcentaje de acierto."
+      },
+      {
+        "topic": "tahmin",
+        "q": "¿Cómo se calculan mis puntos?",
+        "a": "Una predicción que resulta cierta otorga +50 puntos; una que resulta falsa pero se cierra con honestidad otorga +5 puntos. Quien se une con un código de invitación válido gana +100 puntos, igual que quien lo invitó."
+      },
+      {
+        "topic": "hesap",
+        "q": "¿Cómo gano insignias?",
+        "a": "Las insignias se calculan automáticamente según tu número de predicciones, porcentaje de acierto, número de seguidores, «me gusta» recibidos, número de comentarios y actividad en grupos. Consulta tu progreso en Perfil → Insignias."
+      },
+      {
+        "topic": "hesap",
+        "q": "¿Cómo elimino mi cuenta?",
+        "a": "Ve a Ajustes de la app → Zona de peligro → Eliminar mi cuenta para borrarla al instante y de forma permanente, sin más confirmaciones. Si prefieres tomarte solo un descanso, usa «Congelar cuenta temporalmente»."
+      },
+      {
+        "topic": "grup",
+        "q": "¿Cómo creo un grupo?",
+        "a": "Toca «Crear nuevo grupo» en la pestaña Grupos e ingresa nombre, descripción y categoría. Las predicciones que creas dentro de un grupo solo son visibles para sus miembros, no aparecen en el feed público."
+      },
+      {
+        "topic": "mesaj",
+        "q": "¿Quién puede enviarme mensajes?",
+        "a": "Elige «Todos», «Solo a quienes sigo» o «Nadie» en Ajustes → Privacidad → Solicitudes de mensajes. Nadie fuera de esta preferencia podrá enviarte un mensaje."
+      }
     ],
     "stillNeedHelpTitle": "¿No encontraste la respuesta que buscabas?",
     "stillNeedHelpBody": "Escríbenos directamente por correo y te responderemos lo antes posible.",
@@ -554,7 +614,653 @@
     "showcaseMax": "Puedes mostrar como máximo 3 insignias.",
     "showcaseFeatureDisabled": "La función de vitrina de insignias aún no está activa.",
     "showcaseUpdateFailed": "No se pudo actualizar la vitrina, inténtalo de nuevo.",
-    "earnedAt": "Obtenida"
+    "earnedAt": "Obtenida",
+    "showcaseTitle": "Vitrina de Insignias",
+    "viewAll": "Ver todas",
+    "earnedCountAndViewAll": "{{count}} insignias · Ver todas",
+    "addSlot": "Añadir",
+    "items": {
+      "ilk-kayit": {
+        "title": "Primer Registro",
+        "desc": "Publica tu primera predicción sellada."
+      },
+      "ilk-takip": {
+        "title": "Primer Seguimiento",
+        "desc": "Sigue a un pronosticador."
+      },
+      "ilk-halka": {
+        "title": "Primer Círculo",
+        "desc": "Únete a tu primer grupo."
+      },
+      "ilk-yorum": {
+        "title": "Primer Comentario",
+        "desc": "Añade tu opinión a una predicción."
+      },
+      "yarin-notu": {
+        "title": "Nota de Mañana",
+        "desc": "Crea una predicción para dentro de 7 días."
+      },
+      "etiket-defteri": {
+        "title": "Cuaderno de Etiquetas",
+        "desc": "Publica predicciones en 3 categorías distintas."
+      },
+      "ilk-isaret": {
+        "title": "Primera Marca",
+        "desc": "Guarda una predicción."
+      },
+      "acik-bakis": {
+        "title": "Mirada Abierta",
+        "desc": "Dale me gusta a 5 predicciones."
+      },
+      "ilk-arsiv": {
+        "title": "Primer Archivo",
+        "desc": "Crea una cápsula del tiempo."
+      },
+      "yon-bul": {
+        "title": "Encontrar Rumbo",
+        "desc": "Comparte una predicción dentro de un grupo."
+      },
+      "ilk-paylasim": {
+        "title": "Primera Publicación",
+        "desc": "Comparte una predicción con una imagen."
+      },
+      "dengeli-secim": {
+        "title": "Elección Equilibrada",
+        "desc": "Escribe predicciones en 2 categorías distintas."
+      },
+      "sessiz-not": {
+        "title": "Nota Silenciosa",
+        "desc": "Crea una predicción marcada como contenido sensible."
+      },
+      "ilk-dogrulama": {
+        "title": "Primera Verificación",
+        "desc": "Deja que se resuelva tu primera predicción."
+      },
+      "konu-tohumu": {
+        "title": "Semilla de Tema",
+        "desc": "Crea tu propio grupo."
+      },
+      "ufuk-cizgisi": {
+        "title": "Línea del Horizonte",
+        "desc": "Crea una predicción para dentro de 30 días."
+      },
+      "acilis-saati": {
+        "title": "Hora de Apertura",
+        "desc": "Marca un resultado el día de su apertura."
+      },
+      "gozlemci": {
+        "title": "Observador",
+        "desc": "Guarda 3 predicciones."
+      },
+      "soru-isareti": {
+        "title": "Signo de Interrogación",
+        "desc": "Impugna un resultado del que dudas."
+      },
+      "ilk-kanit": {
+        "title": "Primera Prueba",
+        "desc": "Verifica un resultado citando una fuente."
+      },
+      "kisa-vade": {
+        "title": "Corto Plazo",
+        "desc": "Crea una predicción que se abra en 3 días."
+      },
+      "net-cumle": {
+        "title": "Frase Clara",
+        "desc": "Escribe 3 comentarios."
+      },
+      "takvim-yapragi": {
+        "title": "Hoja de Calendario",
+        "desc": "Crea 3 predicciones."
+      },
+      "ortak-nokta": {
+        "title": "Punto en Común",
+        "desc": "Comparte 3 predicciones en grupos."
+      },
+      "iz-surucu": {
+        "title": "Explorador",
+        "desc": "Dale me gusta a 10 predicciones."
+      },
+      "ilk-yanit": {
+        "title": "Primera Respuesta",
+        "desc": "Recibe tu primer comentario en una predicción."
+      },
+      "konu-kapisi": {
+        "title": "Puerta al Tema",
+        "desc": "Únete a un segundo grupo."
+      },
+      "gunluk-kayit": {
+        "title": "Registro Diario",
+        "desc": "Mantente activo 2 días seguidos."
+      },
+      "acik-sayfa": {
+        "title": "Página Abierta",
+        "desc": "Crea tu segunda cápsula del tiempo."
+      },
+      "kucuk-adim": {
+        "title": "Pequeño Paso",
+        "desc": "Pasa 7 días con tu cuenta."
+      },
+      "ilk-arkadas": {
+        "title": "Primer Amigo",
+        "desc": "Sigue a 5 personas."
+      },
+      "goz-atma": {
+        "title": "Ojeada",
+        "desc": "Guarda 5 predicciones."
+      },
+      "goruntu-notu": {
+        "title": "Nota Visual",
+        "desc": "Añade una imagen o video a 3 predicciones."
+      },
+      "hizli-cikis": {
+        "title": "Salida Rápida",
+        "desc": "Crea 3 predicciones que se abran en 3 días."
+      },
+      "takim-ruhu": {
+        "title": "Espíritu de Equipo",
+        "desc": "Comparte 2 predicciones en grupos."
+      },
+      "uc-halka": {
+        "title": "Tres Círculos",
+        "desc": "Únete a 3 grupos."
+      },
+      "geri-donus": {
+        "title": "Regreso",
+        "desc": "Recibe 2 comentarios en tus predicciones."
+      },
+      "davetiye": {
+        "title": "Invitación",
+        "desc": "Invita a 1 persona a GTF."
+      },
+      "genis-cevre": {
+        "title": "Círculo Amplio",
+        "desc": "Sigue a 10 personas."
+      },
+      "ay-isigi": {
+        "title": "Luz de Luna",
+        "desc": "Pasa 30 días con tu cuenta."
+      },
+      "duzenli-notlar": {
+        "title": "Notas Regulares",
+        "desc": "Mantente activo 4 semanas seguidas."
+      },
+      "on-gunluk-iz": {
+        "title": "Rastro de Diez Días",
+        "desc": "Registra actividad en 10 días distintos."
+      },
+      "donus-noktasi": {
+        "title": "Punto de Inflexión",
+        "desc": "Revela 5 resultados."
+      },
+      "uzun-vade": {
+        "title": "Largo Plazo",
+        "desc": "Crea una predicción para dentro de 90 días."
+      },
+      "haftanin-sesi": {
+        "title": "Voz de la Semana",
+        "desc": "Escribe 7 comentarios."
+      },
+      "sakin-akis": {
+        "title": "Flujo Tranquilo",
+        "desc": "Dale me gusta a 20 predicciones."
+      },
+      "sureklilik": {
+        "title": "Continuidad",
+        "desc": "Mantente activo 14 días seguidos."
+      },
+      "takvim-ustasi": {
+        "title": "Maestro del Calendario",
+        "desc": "Crea 15 predicciones."
+      },
+      "yedi-gun": {
+        "title": "Siete Días",
+        "desc": "Mantente activo 7 días seguidos."
+      },
+      "otuz-gun": {
+        "title": "Treinta Días",
+        "desc": "Mantente activo 30 días seguidos."
+      },
+      "iz-birakan-istikrar": {
+        "title": "Dejando Huella",
+        "desc": "Crea 25 predicciones."
+      },
+      "sabit-pusula": {
+        "title": "Brújula Firme",
+        "desc": "Escribe predicciones en 5 categorías distintas."
+      },
+      "araliksiz-gozlem": {
+        "title": "Observación Ininterrumpida",
+        "desc": "Dale me gusta a 30 predicciones."
+      },
+      "gun-sonu": {
+        "title": "Fin del Día",
+        "desc": "Marca 3 resultados el día de su apertura."
+      },
+      "haftalik-bakis": {
+        "title": "Revisión Semanal",
+        "desc": "Escribe 15 comentarios."
+      },
+      "aylik-cizgi": {
+        "title": "Línea Mensual",
+        "desc": "Revela 15 resultados."
+      },
+      "rota-tutucu": {
+        "title": "Guardián de Ruta",
+        "desc": "Comparte 5 predicciones en grupos."
+      },
+      "dengeli-defter": {
+        "title": "Cuaderno Equilibrado",
+        "desc": "Escribe predicciones en 6 categorías distintas."
+      },
+      "tekrar-eden": {
+        "title": "Repetidor",
+        "desc": "Guarda 10 predicciones."
+      },
+      "kayda-deger": {
+        "title": "Digno de Mención",
+        "desc": "Recibe 5 comentarios en tus predicciones."
+      },
+      "duzen-saati": {
+        "title": "Hora de Orden",
+        "desc": "Mantente activo 21 días seguidos."
+      },
+      "acik-takvim": {
+        "title": "Calendario Abierto",
+        "desc": "Crea 3 predicciones a largo plazo."
+      },
+      "kapanis-notu": {
+        "title": "Nota de Cierre",
+        "desc": "Cierra 5 resultados citando una fuente."
+      },
+      "kayit-zinciri": {
+        "title": "Cadena de Registros",
+        "desc": "Crea 40 predicciones."
+      },
+      "sabir-tasi": {
+        "title": "Piedra de Paciencia",
+        "desc": "Crea 2 predicciones para dentro de 90 días."
+      },
+      "sira-sende": {
+        "title": "Es tu Turno",
+        "desc": "Escribe 25 comentarios."
+      },
+      "donemsel-bakis": {
+        "title": "Revisión Periódica",
+        "desc": "Revela 25 resultados."
+      },
+      "ilk-sezon": {
+        "title": "Primera Temporada",
+        "desc": "Pasa 90 días con tu cuenta."
+      },
+      "mevsim-notu": {
+        "title": "Nota Estacional",
+        "desc": "Pasa 180 días con tu cuenta."
+      },
+      "yilin-baslangici": {
+        "title": "Comienzo del Año",
+        "desc": "Mantente activo 60 días seguidos."
+      },
+      "begeni-ustasi": {
+        "title": "Maestro del Me Gusta",
+        "desc": "Dale me gusta a 15 predicciones."
+      },
+      "geri-bildirim": {
+        "title": "Retroalimentación",
+        "desc": "Recibe 10 comentarios en tus predicciones."
+      },
+      "takip-agi": {
+        "title": "Red de Seguidores",
+        "desc": "Sigue a 25 personas."
+      },
+      "sekiz-gozlem": {
+        "title": "Ocho Observaciones",
+        "desc": "Guarda 20 predicciones."
+      },
+      "genis-alan": {
+        "title": "Campo Amplio",
+        "desc": "Escribe predicciones en 7 categorías distintas."
+      },
+      "topluluk-sesi": {
+        "title": "Voz de la Comunidad",
+        "desc": "Comparte 7 predicciones en grupos."
+      },
+      "orta-vade": {
+        "title": "Plazo Medio",
+        "desc": "Crea 3 predicciones para dentro de 90 días."
+      },
+      "ikinci-topluluk": {
+        "title": "Segunda Comunidad",
+        "desc": "Crea tu segundo grupo."
+      },
+      "genis-kanit": {
+        "title": "Prueba Amplia",
+        "desc": "Verifica 25 resultados con fuente."
+      },
+      "yaz-kis": {
+        "title": "Verano a Invierno",
+        "desc": "Pasa 270 días con tu cuenta."
+      },
+      "ucte-uc": {
+        "title": "Tres de Tres",
+        "desc": "Verifica 3 predicciones correctas seguidas."
+      },
+      "keskin-goz": {
+        "title": "Ojo Agudo",
+        "desc": "70%+ de precisión en al menos 20 resultados."
+      },
+      "kategori-uzmani": {
+        "title": "Experto en Categoría",
+        "desc": "Consigue 15 aciertos en una categoría."
+      },
+      "genis-acik": {
+        "title": "Ángulo Amplio",
+        "desc": "Consigue aciertos en 5 categorías."
+      },
+      "kanit-zinciri": {
+        "title": "Cadena de Pruebas",
+        "desc": "Verifica 10 resultados citando una fuente."
+      },
+      "dogru-eksen": {
+        "title": "Eje Correcto",
+        "desc": "75%+ de precisión en al menos 15 resultados."
+      },
+      "netlik-payi": {
+        "title": "Cuota de Claridad",
+        "desc": "80%+ de precisión en al menos 20 resultados."
+      },
+      "izlek-ustasi": {
+        "title": "Maestro del Rastro",
+        "desc": "Consigue 25 aciertos en una categoría."
+      },
+      "cifte-dogrulama": {
+        "title": "Doble Verificación",
+        "desc": "Verifica 20 resultados con fuente."
+      },
+      "yuksek-isabet": {
+        "title": "Alta Precisión",
+        "desc": "85%+ de precisión en al menos 25 resultados."
+      },
+      "konu-haritasi": {
+        "title": "Mapa de Temas",
+        "desc": "Consigue aciertos en 8 categorías."
+      },
+      "dort-mevsim": {
+        "title": "Cuatro Estaciones",
+        "desc": "Consigue aciertos en 4 categorías."
+      },
+      "surec-okuru": {
+        "title": "Lector de Procesos",
+        "desc": "Consigue 30 resultados correctos."
+      },
+      "veri-notu": {
+        "title": "Nota de Datos",
+        "desc": "Verifica 15 resultados con fuente."
+      },
+      "fikir-bahcesi": {
+        "title": "Jardín de Ideas",
+        "desc": "Escribe predicciones en 8 categorías distintas."
+      },
+      "guven-cizgisi": {
+        "title": "Línea de Confianza",
+        "desc": "70%+ de precisión en al menos 50 resultados."
+      },
+      "onay-damgasi": {
+        "title": "Sello de Aprobación",
+        "desc": "Consigue 40 resultados correctos."
+      },
+      "sabit-oran": {
+        "title": "Tasa Estable",
+        "desc": "75%+ de precisión en al menos 40 resultados."
+      },
+      "dusunce-rotasi": {
+        "title": "Ruta del Pensamiento",
+        "desc": "Consigue 10 aciertos en una categoría."
+      },
+      "acik-arsiv": {
+        "title": "Archivo Abierto",
+        "desc": "Crea 5 cápsulas del tiempo."
+      },
+      "capraz-bakis": {
+        "title": "Mirada Cruzada",
+        "desc": "Consigue aciertos en 10 categorías."
+      },
+      "derinlik": {
+        "title": "Profundidad",
+        "desc": "Consigue 20 aciertos en una categoría."
+      },
+      "dogruluk-payi": {
+        "title": "Cuota de Precisión",
+        "desc": "80%+ de precisión en al menos 30 resultados."
+      },
+      "saglam-zemin": {
+        "title": "Terreno Firme",
+        "desc": "Consigue 50 resultados correctos."
+      },
+      "ongoru-ritmi": {
+        "title": "Ritmo de Previsión",
+        "desc": "Verifica 7 predicciones correctas seguidas."
+      },
+      "ince-ayar": {
+        "title": "Ajuste Fino",
+        "desc": "90%+ de precisión en al menos 15 resultados."
+      },
+      "sonuc-okuru": {
+        "title": "Lector de Resultados",
+        "desc": "Revela 50 resultados."
+      },
+      "ufuk-bekcisi": {
+        "title": "Guardián del Horizonte",
+        "desc": "Crea 5 predicciones para dentro de 90 días."
+      },
+      "bilgi-koprusu": {
+        "title": "Puente de Información",
+        "desc": "Sé mencionado en un comentario 5 veces."
+      },
+      "kapsamli-not": {
+        "title": "Nota Exhaustiva",
+        "desc": "Verifica 30 resultados con fuente."
+      },
+      "ilk-onay": {
+        "title": "Primera Aprobación",
+        "desc": "65%+ de precisión en al menos 10 resultados."
+      },
+      "iyi-cizgi": {
+        "title": "Buena Línea",
+        "desc": "75%+ de precisión en al menos 35 resultados."
+      },
+      "cift-haneli": {
+        "title": "Doble Dígito",
+        "desc": "Consigue 60 resultados correctos."
+      },
+      "genis-yelpaze": {
+        "title": "Amplio Abanico",
+        "desc": "Consigue aciertos en 9 categorías."
+      },
+      "derin-iz": {
+        "title": "Rastro Profundo",
+        "desc": "Consigue 30 aciertos en una categoría."
+      },
+      "guclu-seri": {
+        "title": "Racha Fuerte",
+        "desc": "Verifica 10 predicciones correctas seguidas."
+      },
+      "genis-agi": {
+        "title": "Red Amplia",
+        "desc": "Dale me gusta a 50 predicciones."
+      },
+      "kanit-ustasi": {
+        "title": "Maestro de la Prueba",
+        "desc": "Verifica 40 resultados con fuente."
+      },
+      "takipci-halkasi": {
+        "title": "Círculo de Seguidores",
+        "desc": "Alcanza 50 seguidores."
+      },
+      "bahsedilen": {
+        "title": "Mencionado",
+        "desc": "Sé mencionado en un comentario 10 veces."
+      },
+      "zamanin-tanigi": {
+        "title": "Testigo del Tiempo",
+        "desc": "Verifica una predicción que estuvo abierta 1 año."
+      },
+      "kalici-cizgi": {
+        "title": "Línea Duradera",
+        "desc": "Mantente activo 365 días seguidos."
+      },
+      "nadir-isabet": {
+        "title": "Precisión Rara",
+        "desc": "Supera el 80% de precisión en 100 predicciones."
+      },
+      "ortak-hafiza": {
+        "title": "Memoria Compartida",
+        "desc": "Contribuye a 10 registros de la comunidad."
+      },
+      "yuzyil-notu": {
+        "title": "Nota del Siglo",
+        "desc": "Crea 100 predicciones."
+      },
+      "buyuk-resim": {
+        "title": "Panorama Completo",
+        "desc": "Consigue aciertos en todas las categorías."
+      },
+      "sessiz-usta": {
+        "title": "Maestro Silencioso",
+        "desc": "Crea 10 predicciones marcadas como contenido sensible."
+      },
+      "zaman-koprusu": {
+        "title": "Puente del Tiempo",
+        "desc": "Crea 10 predicciones para dentro de 90 días."
+      },
+      "altin-oran": {
+        "title": "Proporción Áurea",
+        "desc": "90%+ de precisión en al menos 50 resultados."
+      },
+      "derin-arsiv": {
+        "title": "Archivo Profundo",
+        "desc": "Crea 15 cápsulas del tiempo."
+      },
+      "son-soz": {
+        "title": "Última Palabra",
+        "desc": "Escribe 100 comentarios."
+      },
+      "uzun-yol": {
+        "title": "Camino Largo",
+        "desc": "Crea 250 predicciones."
+      },
+      "uzak-ufuk": {
+        "title": "Horizonte Lejano",
+        "desc": "Verifica una predicción que estuvo abierta 180 días."
+      },
+      "iz-birakan-efsane": {
+        "title": "Dejando una Leyenda",
+        "desc": "Reúne 100 me gusta en tus predicciones."
+      },
+      "bilge-pusula": {
+        "title": "Brújula Sabia",
+        "desc": "Consigue 50 aciertos en una categoría."
+      },
+      "tarih-cizgisi": {
+        "title": "Línea de Tiempo",
+        "desc": "Revela 100 resultados."
+      },
+      "yildonumu": {
+        "title": "Aniversario",
+        "desc": "Pasa 1 año con tu cuenta."
+      },
+      "ani-defteri": {
+        "title": "Libro de Recuerdos",
+        "desc": "Guarda 50 predicciones."
+      },
+      "donem-tanigi": {
+        "title": "Testigo de una Era",
+        "desc": "Pasa 2 años con tu cuenta."
+      },
+      "kesin-imza": {
+        "title": "Firma Definitiva",
+        "desc": "95%+ de precisión en al menos 20 resultados."
+      },
+      "bin-kayit": {
+        "title": "Mil Registros",
+        "desc": "Crea 1000 predicciones."
+      },
+      "acik-miras": {
+        "title": "Legado Abierto",
+        "desc": "Invita a 10 personas a GTF."
+      },
+      "buyuk-halka": {
+        "title": "Gran Círculo",
+        "desc": "Alcanza 500 seguidores."
+      },
+      "topluluk-hafizasi": {
+        "title": "Memoria de la Comunidad",
+        "desc": "Crea 5 grupos."
+      },
+      "surec-muhru": {
+        "title": "Sello del Proceso",
+        "desc": "Consigue 100 resultados correctos."
+      },
+      "guven-kaynagi": {
+        "title": "Fuente de Confianza",
+        "desc": "Verifica 50 resultados con fuente."
+      },
+      "yuksek-esik": {
+        "title": "Umbral Alto",
+        "desc": "90%+ de precisión en al menos 100 resultados."
+      },
+      "ustalik-defteri": {
+        "title": "Libro de la Maestría",
+        "desc": "Verifica 15 predicciones correctas seguidas."
+      },
+      "sonsuz-takvim": {
+        "title": "Calendario Infinito",
+        "desc": "Mantente activo 730 días seguidos."
+      },
+      "kayit-bekcisi": {
+        "title": "Guardián de Registros",
+        "desc": "Presenta 10 impugnaciones."
+      },
+      "zirve-oran": {
+        "title": "Tasa Cumbre",
+        "desc": "92%+ de precisión en al menos 55 resultados."
+      },
+      "iki-yuz-kayit": {
+        "title": "Doscientos Registros",
+        "desc": "Crea 200 predicciones."
+      },
+      "uc-yillik-sadakat": {
+        "title": "Tres Años de Lealtad",
+        "desc": "Pasa 3 años con tu cuenta."
+      },
+      "devasa-takipci": {
+        "title": "Seguimiento Masivo",
+        "desc": "Alcanza 1000 seguidores."
+      },
+      "buyuk-elci": {
+        "title": "Gran Embajador",
+        "desc": "Invita a 20 personas a GTF."
+      },
+      "sarsilmaz-seri": {
+        "title": "Racha Inquebrantable",
+        "desc": "Verifica 20 predicciones correctas seguidas."
+      },
+      "genis-begeni": {
+        "title": "Elogio Extendido",
+        "desc": "Reúne 200 me gusta en tus predicciones."
+      },
+      "derin-uzman": {
+        "title": "Experto Profundo",
+        "desc": "Consigue 40 aciertos en una categoría."
+      },
+      "yuz-yorum": {
+        "title": "Cien Comentarios",
+        "desc": "Recibe 50 comentarios en tus predicciones."
+      },
+      "cok-sesli-kurucu": {
+        "title": "Fundador de Muchas Voces",
+        "desc": "Crea 8 grupos."
+      }
+    }
   },
   "activity": {
     "title": "Actividad",

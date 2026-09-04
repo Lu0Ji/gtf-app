@@ -324,7 +324,13 @@
       "currentPasswordLabel": "Mevcut şifre",
       "showPasswordAria": "Şifreyi göster",
       "newPasswordLabel": "Yeni şifre",
-      "strengthLevels": ["Çok zayıf", "Zayıf", "Orta", "İyi", "Güçlü"],
+      "strengthLevels": [
+        "Çok zayıf",
+        "Zayıf",
+        "Orta",
+        "İyi",
+        "Güçlü"
+      ],
       "strengthTitle": "Şifre gücü",
       "strengthCount": "{{count}} / 4 ölçüt",
       "confirmPasswordLabel": "Yeni şifre tekrarı",
@@ -456,25 +462,79 @@
     "topicsSubtitle": "Bir konuya dokunarak ilgili soruları gör",
     "seeAllTopics": "Tümünü gör",
     "topics": {
-      "hesap": { "title": "Hesabın", "desc": "Erişim ve güvenlik" },
-      "tahmin": { "title": "Tahminler", "desc": "Oluşturma ve düzenleme" },
-      "muhur": { "title": "Mühürlü kayıtlar", "desc": "Zaman damgası ve açılma" },
-      "dogrulama": { "title": "Doğrulama", "desc": "Sonuç ve itiraz" },
-      "grup": { "title": "Gruplar", "desc": "Katılım ve kurallar" },
-      "mesaj": { "title": "Mesajlar", "desc": "İstekler ve sohbetler" }
+      "hesap": {
+        "title": "Hesabın",
+        "desc": "Erişim ve güvenlik"
+      },
+      "tahmin": {
+        "title": "Tahminler",
+        "desc": "Oluşturma ve düzenleme"
+      },
+      "muhur": {
+        "title": "Mühürlü kayıtlar",
+        "desc": "Zaman damgası ve açılma"
+      },
+      "dogrulama": {
+        "title": "Doğrulama",
+        "desc": "Sonuç ve itiraz"
+      },
+      "grup": {
+        "title": "Gruplar",
+        "desc": "Katılım ve kurallar"
+      },
+      "mesaj": {
+        "title": "Mesajlar",
+        "desc": "İstekler ve sohbetler"
+      }
     },
     "faqTitle": "Sık sorulanlar",
     "noMatches": "Eşleşen bir soru bulunamadı.",
     "faqs": [
-      { "topic": "muhur", "q": "Tahminimi ne zaman açabilirim?", "a": "Belirlediğin açılış tarihi geçtiğinde, mühürlü kaydına gidip \"Doğru çıktı\" veya \"Yanlış çıktı\" diyerek sonucu sen işaretlersin. Tarih gelmeden içerik kimseye — sana bile — görünmez." },
-      { "topic": "dogrulama", "q": "Bir sonucu nasıl doğrulatırım?", "a": "Şu an doğrulama tamamen beyana dayalı: yalnızca tahminin sahibi işaretler, bağımsız bir denetim yok. Başkası bir sonuca şüpheyle yaklaşırsa, kayıtta \"İtiraz et\" diyebilir; itiraz sayısı herkese açık şekilde gösterilir." },
-      { "topic": "tahmin", "q": "Tahminimi kimler görebilir?", "a": "Ayarlar → Gizlilik → Tahmin görünürlüğü'nden \"Herkese açık\" veya \"Yalnızca takipçilerim\" seçebilirsin. Bir tahmini kimseyle paylaşmak istemiyorsan, oluştururken \"Zaman kapsülü\" modunu seç." },
-      { "topic": "tahmin", "q": "Zaman kapsülü ile mühürlü tahmin arasındaki fark ne?", "a": "Zaman kapsülü tamamen kişiseldir, hiç kimseyle paylaşılmaz ve kalıcı başarı istatistiklerini etkilemez. Mühürlü tahmin ise görünürlük tercihine göre başkalarıyla paylaşılır ve doğruluk oranına dahil olur." },
-      { "topic": "tahmin", "q": "Puanlarım nasıl hesaplanıyor?", "a": "Doğru çıkan bir tahmin +50 puan kazandırır, yanlış çıkan ama dürüstçe kapatılan bir tahmin +5 puan kazandırır. Doğru bir davet koduyla katılan biri hem kendine hem seni davet edene +100 puan kazandırır." },
-      { "topic": "hesap", "q": "Rozetleri nasıl kazanırım?", "a": "Rozetler; tahmin sayın, doğruluk oranın, takipçi sayın, aldığın beğeni, yorum sayın ve grup etkinliğine göre otomatik hesaplanır. Profil → Rozetler'den ilerlemeni görebilirsin." },
-      { "topic": "hesap", "q": "Hesabımı nasıl silerim?", "a": "Uygulama Ayarları → Tehlikeli bölge → Hesabımı sil yoluyla, hiçbir onay beklemeden, anında ve kalıcı olarak hesabını silebilirsin. Bunun yerine geçici bir ara vermek istersen, \"Hesabı geçici olarak dondur\" seçeneğini kullanabilirsin." },
-      { "topic": "grup", "q": "Bir grup nasıl kurulur?", "a": "Gruplar sekmesinden \"Yeni grup kur\"a dokun, ad/açıklama/kategori gir. Grup içinden oluşturduğun tahminler yalnızca o grubun üyelerine görünür, herkese açık akışta yer almaz." },
-      { "topic": "mesaj", "q": "Kim bana mesaj gönderebilir?", "a": "Ayarlar → Gizlilik → Mesaj istekleri'nden \"Herkes\", \"Yalnızca takip ettiklerim\" veya \"Hiç kimse\" seçebilirsin. Bu tercih dışındaki biri sana mesaj gönderemez." }
+      {
+        "topic": "muhur",
+        "q": "Tahminimi ne zaman açabilirim?",
+        "a": "Belirlediğin açılış tarihi geçtiğinde, mühürlü kaydına gidip \"Doğru çıktı\" veya \"Yanlış çıktı\" diyerek sonucu sen işaretlersin. Tarih gelmeden içerik kimseye — sana bile — görünmez."
+      },
+      {
+        "topic": "dogrulama",
+        "q": "Bir sonucu nasıl doğrulatırım?",
+        "a": "Şu an doğrulama tamamen beyana dayalı: yalnızca tahminin sahibi işaretler, bağımsız bir denetim yok. Başkası bir sonuca şüpheyle yaklaşırsa, kayıtta \"İtiraz et\" diyebilir; itiraz sayısı herkese açık şekilde gösterilir."
+      },
+      {
+        "topic": "tahmin",
+        "q": "Tahminimi kimler görebilir?",
+        "a": "Ayarlar → Gizlilik → Tahmin görünürlüğü'nden \"Herkese açık\" veya \"Yalnızca takipçilerim\" seçebilirsin. Bir tahmini kimseyle paylaşmak istemiyorsan, oluştururken \"Zaman kapsülü\" modunu seç."
+      },
+      {
+        "topic": "tahmin",
+        "q": "Zaman kapsülü ile mühürlü tahmin arasındaki fark ne?",
+        "a": "Zaman kapsülü tamamen kişiseldir, hiç kimseyle paylaşılmaz ve kalıcı başarı istatistiklerini etkilemez. Mühürlü tahmin ise görünürlük tercihine göre başkalarıyla paylaşılır ve doğruluk oranına dahil olur."
+      },
+      {
+        "topic": "tahmin",
+        "q": "Puanlarım nasıl hesaplanıyor?",
+        "a": "Doğru çıkan bir tahmin +50 puan kazandırır, yanlış çıkan ama dürüstçe kapatılan bir tahmin +5 puan kazandırır. Doğru bir davet koduyla katılan biri hem kendine hem seni davet edene +100 puan kazandırır."
+      },
+      {
+        "topic": "hesap",
+        "q": "Rozetleri nasıl kazanırım?",
+        "a": "Rozetler; tahmin sayın, doğruluk oranın, takipçi sayın, aldığın beğeni, yorum sayın ve grup etkinliğine göre otomatik hesaplanır. Profil → Rozetler'den ilerlemeni görebilirsin."
+      },
+      {
+        "topic": "hesap",
+        "q": "Hesabımı nasıl silerim?",
+        "a": "Uygulama Ayarları → Tehlikeli bölge → Hesabımı sil yoluyla, hiçbir onay beklemeden, anında ve kalıcı olarak hesabını silebilirsin. Bunun yerine geçici bir ara vermek istersen, \"Hesabı geçici olarak dondur\" seçeneğini kullanabilirsin."
+      },
+      {
+        "topic": "grup",
+        "q": "Bir grup nasıl kurulur?",
+        "a": "Gruplar sekmesinden \"Yeni grup kur\"a dokun, ad/açıklama/kategori gir. Grup içinden oluşturduğun tahminler yalnızca o grubun üyelerine görünür, herkese açık akışta yer almaz."
+      },
+      {
+        "topic": "mesaj",
+        "q": "Kim bana mesaj gönderebilir?",
+        "a": "Ayarlar → Gizlilik → Mesaj istekleri'nden \"Herkes\", \"Yalnızca takip ettiklerim\" veya \"Hiç kimse\" seçebilirsin. Bu tercih dışındaki biri sana mesaj gönderemez."
+      }
     ],
     "stillNeedHelpTitle": "Aradığın cevabı bulamadın mı?",
     "stillNeedHelpBody": "Bize doğrudan e-posta at, en kısa sürede döneriz.",
@@ -554,7 +614,653 @@
     "showcaseMax": "Vitrinde en fazla 3 rozet gösterebilirsin.",
     "showcaseFeatureDisabled": "Rozet vitrini özelliği henüz etkin değil.",
     "showcaseUpdateFailed": "Vitrin güncellenemedi, tekrar dene.",
-    "earnedAt": "Kazanıldı"
+    "earnedAt": "Kazanıldı",
+    "showcaseTitle": "Rozet Vitrini",
+    "viewAll": "Tümü",
+    "earnedCountAndViewAll": "{{count}} rozet · Tümü",
+    "addSlot": "Ekle",
+    "items": {
+      "ilk-kayit": {
+        "title": "İlk Kayıt",
+        "desc": "İlk mühürlü tahminini yayımla."
+      },
+      "ilk-takip": {
+        "title": "İlk Takip",
+        "desc": "Bir öngörü sahibini takip et."
+      },
+      "ilk-halka": {
+        "title": "İlk Halka",
+        "desc": "İlk grubuna katıl."
+      },
+      "ilk-yorum": {
+        "title": "İlk Yorum",
+        "desc": "Bir tahmine düşünceni ekle."
+      },
+      "yarin-notu": {
+        "title": "Yarın Notu",
+        "desc": "7 gün sonrası için bir tahmin oluştur."
+      },
+      "etiket-defteri": {
+        "title": "Etiket Defteri",
+        "desc": "3 farklı kategoride tahmin yayımla."
+      },
+      "ilk-isaret": {
+        "title": "İlk İşaret",
+        "desc": "Bir tahmini kaydet."
+      },
+      "acik-bakis": {
+        "title": "Açık Bakış",
+        "desc": "5 tahmini beğen."
+      },
+      "ilk-arsiv": {
+        "title": "İlk Arşiv",
+        "desc": "Bir zaman kapsülü oluştur."
+      },
+      "yon-bul": {
+        "title": "Yön Bul",
+        "desc": "Bir grup içinde tahmin paylaş."
+      },
+      "ilk-paylasim": {
+        "title": "İlk Paylaşım",
+        "desc": "Görsel ekleyerek bir tahmin paylaş."
+      },
+      "dengeli-secim": {
+        "title": "Dengeli Seçim",
+        "desc": "2 farklı kategoride tahmin yaz."
+      },
+      "sessiz-not": {
+        "title": "Sessiz Not",
+        "desc": "Hassas içerik olarak işaretlenmiş bir tahmin oluştur."
+      },
+      "ilk-dogrulama": {
+        "title": "İlk Doğrulama",
+        "desc": "İlk tahminin sonuçlansın."
+      },
+      "konu-tohumu": {
+        "title": "Konu Tohumu",
+        "desc": "Kendi grubunu kur."
+      },
+      "ufuk-cizgisi": {
+        "title": "Ufuk Çizgisi",
+        "desc": "30 gün sonrası için bir tahmin oluştur."
+      },
+      "acilis-saati": {
+        "title": "Açılış Saati",
+        "desc": "Açılış gününde bir sonucu işaretle."
+      },
+      "gozlemci": {
+        "title": "Gözlemci",
+        "desc": "3 tahmini kaydet."
+      },
+      "soru-isareti": {
+        "title": "Soru İşareti",
+        "desc": "Şüphelendiğin bir sonuca itiraz et."
+      },
+      "ilk-kanit": {
+        "title": "İlk Kanıt",
+        "desc": "Bir sonucu kaynak göstererek doğrula."
+      },
+      "kisa-vade": {
+        "title": "Kısa Vade",
+        "desc": "3 gün içinde açılacak bir tahmin oluştur."
+      },
+      "net-cumle": {
+        "title": "Net Cümle",
+        "desc": "3 yorum yaz."
+      },
+      "takvim-yapragi": {
+        "title": "Takvim Yaprağı",
+        "desc": "3 tahmin oluştur."
+      },
+      "ortak-nokta": {
+        "title": "Ortak Nokta",
+        "desc": "Gruplarda 3 tahmin paylaş."
+      },
+      "iz-surucu": {
+        "title": "İz Sürücü",
+        "desc": "10 tahmini beğen."
+      },
+      "ilk-yanit": {
+        "title": "İlk Yanıt",
+        "desc": "Tahminine ilk yorum gelsin."
+      },
+      "konu-kapisi": {
+        "title": "Konu Kapısı",
+        "desc": "İkinci bir gruba katıl."
+      },
+      "gunluk-kayit": {
+        "title": "Günlük Kayıt",
+        "desc": "2 gün üst üste aktif ol."
+      },
+      "acik-sayfa": {
+        "title": "Açık Sayfa",
+        "desc": "İkinci zaman kapsülünü oluştur."
+      },
+      "kucuk-adim": {
+        "title": "Küçük Adım",
+        "desc": "Hesabınla 7 gün geçir."
+      },
+      "ilk-arkadas": {
+        "title": "İlk Arkadaş",
+        "desc": "5 kişiyi takip et."
+      },
+      "goz-atma": {
+        "title": "Göz Atma",
+        "desc": "5 tahmini kaydet."
+      },
+      "goruntu-notu": {
+        "title": "Görüntü Notu",
+        "desc": "3 tahmine görsel veya video ekle."
+      },
+      "hizli-cikis": {
+        "title": "Hızlı Çıkış",
+        "desc": "3 gün içinde açılacak 3 tahmin oluştur."
+      },
+      "takim-ruhu": {
+        "title": "Takım Ruhu",
+        "desc": "Gruplarda 2 tahmin paylaş."
+      },
+      "uc-halka": {
+        "title": "Üç Halka",
+        "desc": "3 gruba katıl."
+      },
+      "geri-donus": {
+        "title": "Geri Dönüş",
+        "desc": "Tahminlerine 2 yorum gelsin."
+      },
+      "davetiye": {
+        "title": "Davetiye",
+        "desc": "GTF'e 1 kişi davet et."
+      },
+      "genis-cevre": {
+        "title": "Geniş Çevre",
+        "desc": "10 kişiyi takip et."
+      },
+      "ay-isigi": {
+        "title": "Ay Işığı",
+        "desc": "Hesabınla 30 gün geçir."
+      },
+      "duzenli-notlar": {
+        "title": "Düzenli Notlar",
+        "desc": "4 hafta üst üste aktif ol."
+      },
+      "on-gunluk-iz": {
+        "title": "On Günlük İz",
+        "desc": "10 ayrı günde kayıt tut."
+      },
+      "donus-noktasi": {
+        "title": "Dönüş Noktası",
+        "desc": "5 sonuç kaydını aç."
+      },
+      "uzun-vade": {
+        "title": "Uzun Vade",
+        "desc": "90 gün sonrası için bir tahmin oluştur."
+      },
+      "haftanin-sesi": {
+        "title": "Haftanın Sesi",
+        "desc": "7 yorum yaz."
+      },
+      "sakin-akis": {
+        "title": "Sakin Akış",
+        "desc": "20 tahmini beğen."
+      },
+      "sureklilik": {
+        "title": "Süreklilik",
+        "desc": "14 gün üst üste aktif ol."
+      },
+      "takvim-ustasi": {
+        "title": "Takvim Ustası",
+        "desc": "15 tahmin oluştur."
+      },
+      "yedi-gun": {
+        "title": "Yedi Gün",
+        "desc": "7 gün üst üste aktif ol."
+      },
+      "otuz-gun": {
+        "title": "Otuz Gün",
+        "desc": "30 gün üst üste aktif ol."
+      },
+      "iz-birakan-istikrar": {
+        "title": "İz Bırakan",
+        "desc": "25 tahmin oluştur."
+      },
+      "sabit-pusula": {
+        "title": "Sabit Pusula",
+        "desc": "5 farklı kategoride tahmin yaz."
+      },
+      "araliksiz-gozlem": {
+        "title": "Aralıksız Gözlem",
+        "desc": "30 tahmini beğen."
+      },
+      "gun-sonu": {
+        "title": "Gün Sonu",
+        "desc": "3 sonucu açılış gününde işaretle."
+      },
+      "haftalik-bakis": {
+        "title": "Haftalık Bakış",
+        "desc": "15 yorum yaz."
+      },
+      "aylik-cizgi": {
+        "title": "Aylık Çizgi",
+        "desc": "15 sonuç aç."
+      },
+      "rota-tutucu": {
+        "title": "Rota Tutucu",
+        "desc": "Gruplarda 5 tahmin paylaş."
+      },
+      "dengeli-defter": {
+        "title": "Dengeli Defter",
+        "desc": "6 farklı kategoride tahmin yaz."
+      },
+      "tekrar-eden": {
+        "title": "Tekrar Eden",
+        "desc": "10 tahmin kaydet."
+      },
+      "kayda-deger": {
+        "title": "Kayda Değer",
+        "desc": "Tahminlerine 5 yorum gelsin."
+      },
+      "duzen-saati": {
+        "title": "Düzen Saati",
+        "desc": "21 gün üst üste aktif ol."
+      },
+      "acik-takvim": {
+        "title": "Açık Takvim",
+        "desc": "3 uzun vadeli tahmin oluştur."
+      },
+      "kapanis-notu": {
+        "title": "Kapanış Notu",
+        "desc": "5 sonucu kaynak göstererek kapat."
+      },
+      "kayit-zinciri": {
+        "title": "Kayıt Zinciri",
+        "desc": "40 tahmin oluştur."
+      },
+      "sabir-tasi": {
+        "title": "Sabır Taşı",
+        "desc": "90 gün sonrası için 2 tahmin oluştur."
+      },
+      "sira-sende": {
+        "title": "Sıra Sende",
+        "desc": "25 yorum yaz."
+      },
+      "donemsel-bakis": {
+        "title": "Dönemsel Bakış",
+        "desc": "25 sonuç aç."
+      },
+      "ilk-sezon": {
+        "title": "İlk Sezon",
+        "desc": "Hesabınla 90 gün geçir."
+      },
+      "mevsim-notu": {
+        "title": "Mevsim Notu",
+        "desc": "Hesabınla 180 gün geçir."
+      },
+      "yilin-baslangici": {
+        "title": "Yılın Başlangıcı",
+        "desc": "60 gün üst üste aktif ol."
+      },
+      "begeni-ustasi": {
+        "title": "Beğeni Ustası",
+        "desc": "15 tahmini beğen."
+      },
+      "geri-bildirim": {
+        "title": "Geri Bildirim",
+        "desc": "Tahminlerine 10 yorum gelsin."
+      },
+      "takip-agi": {
+        "title": "Takip Ağı",
+        "desc": "25 kişiyi takip et."
+      },
+      "sekiz-gozlem": {
+        "title": "Sekiz Gözlem",
+        "desc": "20 tahmin kaydet."
+      },
+      "genis-alan": {
+        "title": "Geniş Alan",
+        "desc": "7 farklı kategoride tahmin yaz."
+      },
+      "topluluk-sesi": {
+        "title": "Topluluk Sesi",
+        "desc": "Gruplarda 7 tahmin paylaş."
+      },
+      "orta-vade": {
+        "title": "Orta Vade",
+        "desc": "90 gün sonrası için 3 tahmin oluştur."
+      },
+      "ikinci-topluluk": {
+        "title": "İkinci Topluluk",
+        "desc": "İkinci grubunu kur."
+      },
+      "genis-kanit": {
+        "title": "Geniş Kanıt",
+        "desc": "25 sonucu kaynaklı doğrula."
+      },
+      "yaz-kis": {
+        "title": "Yaz Kış",
+        "desc": "Hesabınla 270 gün geçir."
+      },
+      "ucte-uc": {
+        "title": "Üçte Üç",
+        "desc": "Arka arkaya 3 tahmini doğrula."
+      },
+      "keskin-goz": {
+        "title": "Keskin Göz",
+        "desc": "En az 20 sonuçta %70+ doğruluk."
+      },
+      "kategori-uzmani": {
+        "title": "Kategori Uzmanı",
+        "desc": "Bir kategoride 15 isabet kaydet."
+      },
+      "genis-acik": {
+        "title": "Geniş Açı",
+        "desc": "5 kategoride isabet kaydet."
+      },
+      "kanit-zinciri": {
+        "title": "Kanıt Zinciri",
+        "desc": "10 sonucu kaynak göstererek doğrula."
+      },
+      "dogru-eksen": {
+        "title": "Doğru Eksen",
+        "desc": "En az 15 sonuçta %75+ doğruluk."
+      },
+      "netlik-payi": {
+        "title": "Netlik Payı",
+        "desc": "En az 20 sonuçta %80+ doğruluk."
+      },
+      "izlek-ustasi": {
+        "title": "İzlek Ustası",
+        "desc": "Bir kategoride 25 isabet kaydet."
+      },
+      "cifte-dogrulama": {
+        "title": "Çifte Doğrulama",
+        "desc": "20 sonucu kaynaklı doğrula."
+      },
+      "yuksek-isabet": {
+        "title": "Yüksek İsabet",
+        "desc": "En az 25 sonuçta %85+ doğruluk."
+      },
+      "konu-haritasi": {
+        "title": "Konu Haritası",
+        "desc": "8 kategoride isabet kaydet."
+      },
+      "dort-mevsim": {
+        "title": "Dört Mevsim",
+        "desc": "4 kategoride isabet kaydet."
+      },
+      "surec-okuru": {
+        "title": "Süreç Okuru",
+        "desc": "30 doğru sonuç kaydet."
+      },
+      "veri-notu": {
+        "title": "Veri Notu",
+        "desc": "15 sonucu kaynaklı doğrula."
+      },
+      "fikir-bahcesi": {
+        "title": "Fikir Bahçesi",
+        "desc": "8 farklı kategoride tahmin yaz."
+      },
+      "guven-cizgisi": {
+        "title": "Güven Çizgisi",
+        "desc": "En az 50 sonuçta %70+ doğruluk."
+      },
+      "onay-damgasi": {
+        "title": "Onay Damgası",
+        "desc": "40 doğru sonuç kaydet."
+      },
+      "sabit-oran": {
+        "title": "Sabit Oran",
+        "desc": "En az 40 sonuçta %75+ doğruluk."
+      },
+      "dusunce-rotasi": {
+        "title": "Düşünce Rotası",
+        "desc": "Bir kategoride 10 isabet kaydet."
+      },
+      "acik-arsiv": {
+        "title": "Açık Arşiv",
+        "desc": "5 zaman kapsülü oluştur."
+      },
+      "capraz-bakis": {
+        "title": "Çapraz Bakış",
+        "desc": "10 kategoride isabet kaydet."
+      },
+      "derinlik": {
+        "title": "Derinlik",
+        "desc": "Bir kategoride 20 isabet kaydet."
+      },
+      "dogruluk-payi": {
+        "title": "Doğruluk Payı",
+        "desc": "En az 30 sonuçta %80+ doğruluk."
+      },
+      "saglam-zemin": {
+        "title": "Sağlam Zemin",
+        "desc": "50 doğru sonuç kaydet."
+      },
+      "ongoru-ritmi": {
+        "title": "Öngörü Ritmi",
+        "desc": "Arka arkaya 7 tahmini doğrula."
+      },
+      "ince-ayar": {
+        "title": "İnce Ayar",
+        "desc": "En az 15 sonuçta %90+ doğruluk."
+      },
+      "sonuc-okuru": {
+        "title": "Sonuç Okuru",
+        "desc": "50 sonuç aç."
+      },
+      "ufuk-bekcisi": {
+        "title": "Ufuk Bekçisi",
+        "desc": "90 gün sonrası için 5 tahmin oluştur."
+      },
+      "bilgi-koprusu": {
+        "title": "Bilgi Köprüsü",
+        "desc": "5 kez bir yorumda bahsedilmiş ol."
+      },
+      "kapsamli-not": {
+        "title": "Kapsamlı Not",
+        "desc": "30 sonucu kaynaklı doğrula."
+      },
+      "ilk-onay": {
+        "title": "İlk Onay",
+        "desc": "En az 10 sonuçta %65+ doğruluk."
+      },
+      "iyi-cizgi": {
+        "title": "İyi Çizgi",
+        "desc": "En az 35 sonuçta %75+ doğruluk."
+      },
+      "cift-haneli": {
+        "title": "Çift Haneli",
+        "desc": "60 doğru sonuç kaydet."
+      },
+      "genis-yelpaze": {
+        "title": "Geniş Yelpaze",
+        "desc": "9 kategoride isabet kaydet."
+      },
+      "derin-iz": {
+        "title": "Derin İz",
+        "desc": "Bir kategoride 30 isabet kaydet."
+      },
+      "guclu-seri": {
+        "title": "Güçlü Seri",
+        "desc": "Arka arkaya 10 tahmini doğrula."
+      },
+      "genis-agi": {
+        "title": "Geniş Ağı",
+        "desc": "50 tahmini beğen."
+      },
+      "kanit-ustasi": {
+        "title": "Kanıt Ustası",
+        "desc": "40 sonucu kaynaklı doğrula."
+      },
+      "takipci-halkasi": {
+        "title": "Takipçi Halkası",
+        "desc": "50 takipçiye ulaş."
+      },
+      "bahsedilen": {
+        "title": "Bahsedilen",
+        "desc": "10 kez bir yorumda bahsedilmiş ol."
+      },
+      "zamanin-tanigi": {
+        "title": "Zamanın Tanığı",
+        "desc": "1 yıl açık kalan tahmini doğrula."
+      },
+      "kalici-cizgi": {
+        "title": "Kalıcı Çizgi",
+        "desc": "365 gün üst üste aktif ol."
+      },
+      "nadir-isabet": {
+        "title": "Nadir İsabet",
+        "desc": "100 tahminde %80 doğruluk aş."
+      },
+      "ortak-hafiza": {
+        "title": "Ortak Hafıza",
+        "desc": "10 topluluk kaydına katkı yap."
+      },
+      "yuzyil-notu": {
+        "title": "Yüzyıl Notu",
+        "desc": "100 tahmin oluştur."
+      },
+      "buyuk-resim": {
+        "title": "Büyük Resim",
+        "desc": "Tüm kategorilerde isabet kaydet."
+      },
+      "sessiz-usta": {
+        "title": "Sessiz Usta",
+        "desc": "10 hassas içerikli tahmin oluştur."
+      },
+      "zaman-koprusu": {
+        "title": "Zaman Köprüsü",
+        "desc": "90 gün sonrası için 10 tahmin oluştur."
+      },
+      "altin-oran": {
+        "title": "Altın Oran",
+        "desc": "En az 50 sonuçta %90+ doğruluk."
+      },
+      "derin-arsiv": {
+        "title": "Derin Arşiv",
+        "desc": "15 zaman kapsülü oluştur."
+      },
+      "son-soz": {
+        "title": "Son Söz",
+        "desc": "100 yorum yaz."
+      },
+      "uzun-yol": {
+        "title": "Uzun Yol",
+        "desc": "250 tahmin oluştur."
+      },
+      "uzak-ufuk": {
+        "title": "Uzak Ufuk",
+        "desc": "180 gün açık kalan bir tahmini doğrula."
+      },
+      "iz-birakan-efsane": {
+        "title": "İz Bırakan",
+        "desc": "Tahminlerine 100 beğeni topla."
+      },
+      "bilge-pusula": {
+        "title": "Bilge Pusula",
+        "desc": "Bir kategoride 50 isabet kaydet."
+      },
+      "tarih-cizgisi": {
+        "title": "Tarih Çizgisi",
+        "desc": "100 sonuç aç."
+      },
+      "yildonumu": {
+        "title": "Yıldönümü",
+        "desc": "Hesabınla 1 yıl geçir."
+      },
+      "ani-defteri": {
+        "title": "Anı Defteri",
+        "desc": "50 tahmin kaydet."
+      },
+      "donem-tanigi": {
+        "title": "Dönem Tanığı",
+        "desc": "Hesabınla 2 yıl geçir."
+      },
+      "kesin-imza": {
+        "title": "Kesin İmza",
+        "desc": "En az 20 sonuçta %95+ doğruluk."
+      },
+      "bin-kayit": {
+        "title": "Bin Kayıt",
+        "desc": "1000 tahmin oluştur."
+      },
+      "acik-miras": {
+        "title": "Açık Miras",
+        "desc": "10 kişiyi GTF’e davet et."
+      },
+      "buyuk-halka": {
+        "title": "Büyük Halka",
+        "desc": "500 takipçiye ulaş."
+      },
+      "topluluk-hafizasi": {
+        "title": "Topluluk Hafızası",
+        "desc": "5 grup kur."
+      },
+      "surec-muhru": {
+        "title": "Süreç Mührü",
+        "desc": "100 doğru sonuç kaydet."
+      },
+      "guven-kaynagi": {
+        "title": "Güven Kaynağı",
+        "desc": "50 sonucu kaynaklı doğrula."
+      },
+      "yuksek-esik": {
+        "title": "Yüksek Eşik",
+        "desc": "En az 100 sonuçta %90+ doğruluk."
+      },
+      "ustalik-defteri": {
+        "title": "Ustalık Defteri",
+        "desc": "Arka arkaya 15 tahmini doğrula."
+      },
+      "sonsuz-takvim": {
+        "title": "Sonsuz Takvim",
+        "desc": "730 gün üst üste aktif ol."
+      },
+      "kayit-bekcisi": {
+        "title": "Kayıt Bekçisi",
+        "desc": "10 itiraz kaydı oluştur."
+      },
+      "zirve-oran": {
+        "title": "Zirve Oran",
+        "desc": "En az 55 sonuçta %92+ doğruluk."
+      },
+      "iki-yuz-kayit": {
+        "title": "İki Yüz Kayıt",
+        "desc": "200 tahmin oluştur."
+      },
+      "uc-yillik-sadakat": {
+        "title": "Üç Yıllık Sadakat",
+        "desc": "Hesabınla 3 yıl geçir."
+      },
+      "devasa-takipci": {
+        "title": "Devasa Takipçi",
+        "desc": "1000 takipçiye ulaş."
+      },
+      "buyuk-elci": {
+        "title": "Büyük Elçi",
+        "desc": "20 kişiyi GTF'e davet et."
+      },
+      "sarsilmaz-seri": {
+        "title": "Sarsılmaz Seri",
+        "desc": "Arka arkaya 20 tahmini doğrula."
+      },
+      "genis-begeni": {
+        "title": "Geniş Beğeni",
+        "desc": "Tahminlerine 200 beğeni topla."
+      },
+      "derin-uzman": {
+        "title": "Derin Uzman",
+        "desc": "Bir kategoride 40 isabet kaydet."
+      },
+      "yuz-yorum": {
+        "title": "Yüz Yorum",
+        "desc": "Tahminlerine 50 yorum gelsin."
+      },
+      "cok-sesli-kurucu": {
+        "title": "Çok Sesli Kurucu",
+        "desc": "8 grup kur."
+      }
+    }
   },
   "activity": {
     "title": "Hareketler",

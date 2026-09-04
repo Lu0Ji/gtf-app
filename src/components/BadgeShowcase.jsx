@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { BADGES, TIERS } from '../lib/badges.js'
 import BadgeMedallion from './BadgeMedallion.jsx'
 
@@ -8,6 +9,7 @@ import BadgeMedallion from './BadgeMedallion.jsx'
 // so displaying a showcased slug elsewhere just needs a catalog lookup by
 // slug, not a full stats recompute for whoever's profile this is.
 export default function BadgeShowcase({ slugs, totalEarned, isOwn }) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const showcased = (slugs || []).map((slug) => BADGES.find((b) => b.slug === slug)).filter(Boolean)
 
@@ -20,10 +22,10 @@ export default function BadgeShowcase({ slugs, totalEarned, isOwn }) {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-1.5">
           <iconify-icon icon="lucide:sparkles" class="text-base text-accent"></iconify-icon>
-          <h2 className="font-heading text-sm font-extrabold tracking-tight">Rozet Vitrini</h2>
+          <h2 className="font-heading text-sm font-extrabold tracking-tight">{t('badges.showcaseTitle')}</h2>
         </div>
         <button onClick={() => navigate('/rozetler')} className="text-[11px] font-bold text-primary">
-          {totalEarned > 0 ? `${totalEarned} rozet · Tümü` : 'Tümü'}
+          {totalEarned > 0 ? t('badges.earnedCountAndViewAll', { count: totalEarned }) : t('badges.viewAll')}
         </button>
       </div>
       <div className="mt-3 grid grid-cols-3 gap-2.5">
@@ -40,7 +42,7 @@ export default function BadgeShowcase({ slugs, totalEarned, isOwn }) {
                 className="line-clamp-2 text-center text-[10px] font-bold leading-tight"
                 style={{ color: TIERS.find((t) => t.key === badge.tier)?.ink }}
               >
-                {badge.title}
+                {t(`badges.items.${badge.slug}.title`)}
               </span>
             </button>
           ) : (
@@ -50,7 +52,7 @@ export default function BadgeShowcase({ slugs, totalEarned, isOwn }) {
               className="flex flex-col items-center justify-center gap-1.5 rounded-theme border border-dashed border-border py-3.5 text-muted-foreground"
             >
               <iconify-icon icon="lucide:plus" class="text-lg"></iconify-icon>
-              <span className="text-[9px] font-bold">Ekle</span>
+              <span className="text-[9px] font-bold">{t('badges.addSlot')}</span>
             </button>
           )
         )}
