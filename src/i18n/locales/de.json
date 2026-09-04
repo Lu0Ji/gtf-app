@@ -760,6 +760,28 @@
     "membersCount": "Mitglieder ({{count}})",
     "noMembersYet": "Noch keine Mitglieder."
   },
+  "chat": {
+    "sendAria": "Nachricht senden",
+    "backToMessagesAria": "Zurück zu Nachrichten",
+    "typing": "schreibt…",
+    "typingOne": "{{name}} schreibt…",
+    "typingTwo": "{{name1}} und {{name2}} schreiben…",
+    "typingMany": "{{count}} Personen schreiben…",
+    "onlineCount": "{{count}} gerade online",
+    "online": "Online",
+    "someone": "Jemand",
+    "defaultGroupName": "Gruppe",
+    "groupMessagePlaceholder": "Nachricht an die Gruppe...",
+    "dmMessagePlaceholder": "Nachricht schreiben...",
+    "emptyGroupMessages": "Noch keine Nachrichten. Sag als Erstes etwas.",
+    "emptyDmMessages": "Noch keine Nachrichten. Schreib die erste und starte das Gespräch.",
+    "groupMessagesAria": "Gruppenchat-Nachrichten",
+    "dmMessagesAria": "Chat-Nachrichten",
+    "sendFailedNotMember": "Konnte nicht gesendet werden — du musst Mitglied dieser Gruppe sein.",
+    "sendFailedGeneric": "Nachricht konnte nicht gesendet werden, versuch's erneut.",
+    "sendFailedRecipientRestricted": "Diese Person akzeptiert nur Nachrichten von Leuten, denen sie folgt.",
+    "blockedNotice": "Du kannst dieser Person keine Nachrichten schicken."
+  },
   "languages": {
     "tr": "Türkisch",
     "en": "Englisch",

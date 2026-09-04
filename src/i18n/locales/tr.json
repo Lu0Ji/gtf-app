@@ -760,6 +760,28 @@
     "membersCount": "Üyeler ({{count}})",
     "noMembersYet": "Henüz üye yok."
   },
+  "chat": {
+    "sendAria": "Mesaj gönder",
+    "backToMessagesAria": "Mesajlara dön",
+    "typing": "yazıyor…",
+    "typingOne": "{{name}} yazıyor…",
+    "typingTwo": "{{name1}} ve {{name2}} yazıyor…",
+    "typingMany": "{{count}} kişi yazıyor…",
+    "onlineCount": "{{count}} kişi şu an çevrimiçi",
+    "online": "Çevrimiçi",
+    "someone": "Biri",
+    "defaultGroupName": "Grup",
+    "groupMessagePlaceholder": "Gruba mesaj yaz...",
+    "dmMessagePlaceholder": "Mesaj yaz...",
+    "emptyGroupMessages": "Henüz mesaj yok. Grupta ilk sözü sen al.",
+    "emptyDmMessages": "Henüz mesaj yok. İlk mesajı sen göndererek sohbeti başlat.",
+    "groupMessagesAria": "Grup sohbeti mesajları",
+    "dmMessagesAria": "Sohbet mesajları",
+    "sendFailedNotMember": "Mesaj gönderemedin — bu grubun üyesi olman gerekiyor.",
+    "sendFailedGeneric": "Mesaj gönderilemedi, tekrar dene.",
+    "sendFailedRecipientRestricted": "Bu kişi yalnızca takip ettiklerinden mesaj kabul ediyor.",
+    "blockedNotice": "Bu kullanıcıyla mesajlaşamazsın."
+  },
   "languages": {
     "tr": "Türkçe",
     "en": "İngilizce",

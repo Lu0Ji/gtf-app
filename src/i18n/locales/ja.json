@@ -759,6 +759,28 @@
     "membersCount": "メンバー（{{count}}人）",
     "noMembersYet": "まだメンバーがいません。"
   },
+  "chat": {
+    "sendAria": "メッセージを送信",
+    "backToMessagesAria": "メッセージ一覧に戻る",
+    "typing": "入力中…",
+    "typingOne": "{{name}}が入力中…",
+    "typingTwo": "{{name1}}と{{name2}}が入力中…",
+    "typingMany": "{{count}}人が入力中…",
+    "onlineCount": "現在{{count}}人がオンライン",
+    "online": "オンライン",
+    "someone": "誰か",
+    "defaultGroupName": "グループ",
+    "groupMessagePlaceholder": "グループにメッセージを送る...",
+    "dmMessagePlaceholder": "メッセージを入力...",
+    "emptyGroupMessages": "まだメッセージがありません。最初のひと言を送ろう。",
+    "emptyDmMessages": "まだメッセージがありません。最初のメッセージを送って会話を始めよう。",
+    "groupMessagesAria": "グループチャットのメッセージ",
+    "dmMessagesAria": "チャットメッセージ",
+    "sendFailedNotMember": "送信できませんでした——このグループのメンバーである必要があります。",
+    "sendFailedGeneric": "メッセージを送信できませんでした。もう一度お試しください。",
+    "sendFailedRecipientRestricted": "この相手はフォローしている人からのメッセージのみ受け付けています。",
+    "blockedNotice": "このユーザーにメッセージを送ることはできません。"
+  },
   "languages": {
     "tr": "トルコ語",
     "en": "英語",

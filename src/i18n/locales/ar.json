@@ -764,6 +764,28 @@
     "membersCount": "الأعضاء ({{count}})",
     "noMembersYet": "لا يوجد أعضاء بعد."
   },
+  "chat": {
+    "sendAria": "إرسال الرسالة",
+    "backToMessagesAria": "العودة إلى الرسائل",
+    "typing": "يكتب الآن…",
+    "typingOne": "{{name}} يكتب الآن…",
+    "typingTwo": "{{name1}} و{{name2}} يكتبان الآن…",
+    "typingMany": "{{count}} أشخاص يكتبون الآن…",
+    "onlineCount": "{{count}} متصل الآن",
+    "online": "متصل",
+    "someone": "شخص ما",
+    "defaultGroupName": "المجموعة",
+    "groupMessagePlaceholder": "اكتب رسالة للمجموعة...",
+    "dmMessagePlaceholder": "اكتب رسالة...",
+    "emptyGroupMessages": "لا توجد رسائل بعد. كن أول من يبدأ الحديث.",
+    "emptyDmMessages": "لا توجد رسائل بعد. أرسل أول رسالة لتبدأ المحادثة.",
+    "groupMessagesAria": "رسائل محادثة المجموعة",
+    "dmMessagesAria": "رسائل المحادثة",
+    "sendFailedNotMember": "تعذّر الإرسال — يجب أن تكون عضوًا في هذه المجموعة.",
+    "sendFailedGeneric": "تعذّر إرسال الرسالة، حاول مرة أخرى.",
+    "sendFailedRecipientRestricted": "هذا الشخص يقبل الرسائل فقط ممن يتابعهم.",
+    "blockedNotice": "لا يمكنك مراسلة هذا المستخدم."
+  },
   "languages": {
     "tr": "التركية",
     "en": "الإنجليزية",

@@ -762,6 +762,28 @@
     "membersCount": "Участники ({{count}})",
     "noMembersYet": "Участников пока нет."
   },
+  "chat": {
+    "sendAria": "Отправить сообщение",
+    "backToMessagesAria": "Назад к сообщениям",
+    "typing": "печатает…",
+    "typingOne": "{{name}} печатает…",
+    "typingTwo": "{{name1}} и {{name2}} печатают…",
+    "typingMany": "{{count}} человек печатают…",
+    "onlineCount": "{{count}} сейчас в сети",
+    "online": "В сети",
+    "someone": "Кто-то",
+    "defaultGroupName": "Группа",
+    "groupMessagePlaceholder": "Написать группе...",
+    "dmMessagePlaceholder": "Написать сообщение...",
+    "emptyGroupMessages": "Сообщений пока нет. Напиши первым.",
+    "emptyDmMessages": "Сообщений пока нет. Отправь первое, чтобы начать разговор.",
+    "groupMessagesAria": "Сообщения группового чата",
+    "dmMessagesAria": "Сообщения чата",
+    "sendFailedNotMember": "Не удалось отправить — тебе нужно быть участником этой группы.",
+    "sendFailedGeneric": "Не удалось отправить сообщение, попробуй ещё раз.",
+    "sendFailedRecipientRestricted": "Этот человек принимает сообщения только от тех, на кого подписан.",
+    "blockedNotice": "Ты не можешь писать этому пользователю."
+  },
   "languages": {
     "tr": "Турецкий",
     "en": "Английский",

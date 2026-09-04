@@ -759,6 +759,28 @@
     "membersCount": "成员（{{count}}）",
     "noMembersYet": "暂无成员。"
   },
+  "chat": {
+    "sendAria": "发送消息",
+    "backToMessagesAria": "返回消息列表",
+    "typing": "正在输入…",
+    "typingOne": "{{name}} 正在输入…",
+    "typingTwo": "{{name1}} 和 {{name2}} 正在输入…",
+    "typingMany": "{{count}} 人正在输入…",
+    "onlineCount": "{{count}} 人在线",
+    "online": "在线",
+    "someone": "某人",
+    "defaultGroupName": "小组",
+    "groupMessagePlaceholder": "给小组发消息...",
+    "dmMessagePlaceholder": "输入消息...",
+    "emptyGroupMessages": "还没有消息，第一个开口吧。",
+    "emptyDmMessages": "还没有消息，发送第一条开始对话吧。",
+    "groupMessagesAria": "小组聊天消息",
+    "dmMessagesAria": "聊天消息",
+    "sendFailedNotMember": "发送失败——你需要先加入这个小组。",
+    "sendFailedGeneric": "消息发送失败，请重试。",
+    "sendFailedRecipientRestricted": "此用户只接收其关注对象的消息。",
+    "blockedNotice": "你无法给该用户发送消息。"
+  },
   "languages": {
     "tr": "土耳其语",
     "en": "英语",

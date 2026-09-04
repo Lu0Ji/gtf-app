@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
@@ -20,13 +21,14 @@ const TYPING_TIMEOUT_MS = 3000
 // up top so people can see who's actually here to talk right now, not just
 // who's a member on paper.
 export default function GrupSohbeti() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuth()
   const { showToast } = useToast()
   const onlineIds = useOnlineUsers()
   const groupId = location.state?.groupId
-  const groupName = location.state?.groupName || 'Grup'
+  const groupName = location.state?.groupName || t('chat.defaultGroupName')
 
   const [members, setMembers] = useState([])
   const [messages, setMessages] = useState([])
@@ -94,7 +96,7 @@ export default function GrupSohbeti() {
       )
       .on('broadcast', { event: 'typing' }, ({ payload }) => {
         if (!payload?.userId || payload.userId === user.id) return
-        setTypingUsers((prev) => ({ ...prev, [payload.userId]: payload.name || 'Biri' }))
+        setTypingUsers((prev) => ({ ...prev, [payload.userId]: payload.name || t('chat.someone') }))
         clearTimeout(typingTimeoutsRef.current[payload.userId])
         typingTimeoutsRef.current[payload.userId] = setTimeout(() => {
           setTypingUsers((prev) => {
@@ -109,11 +111,12 @@ export default function GrupSohbeti() {
 
     return () => {
       cancelled = true
-      for (const t of Object.values(typingTimeoutsRef.current)) clearTimeout(t)
+      for (const timeoutId of Object.values(typingTimeoutsRef.current)) clearTimeout(timeoutId)
       typingTimeoutsRef.current = {}
       channelRef.current = null
       supabase.removeChannel(channel)
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [user, groupId])
 
   useEffect(() => {
@@ -125,7 +128,7 @@ export default function GrupSohbeti() {
     const now = Date.now()
     if (value.trim() && now - typingSentAtRef.current > 2000) {
       typingSentAtRef.current = now
-      const myName = members.find((m) => m.id === user.id)?.display_name?.split(' ')[0] || 'Biri'
+      const myName = members.find((m) => m.id === user.id)?.display_name?.split(' ')[0] || t('chat.someone')
       channelRef.current?.send({ type: 'broadcast', event: 'typing', payload: { userId: user.id, name: myName } })
     }
   }
@@ -154,9 +157,7 @@ export default function GrupSohbeti() {
       setMessages((prev) => prev.filter((m) => m.id !== optimistic.id))
       setDraft(content)
       showToast(
-        error.code === '42501'
-          ? 'Mesaj gönderemedin — bu grubun üyesi olman gerekiyor.'
-          : 'Mesaj gönderilemedi, tekrar dene.'
+        error.code === '42501' ? t('chat.sendFailedNotMember') : t('chat.sendFailedGeneric')
       )
     }
     setSending(false)
@@ -170,10 +171,10 @@ export default function GrupSohbeti() {
     typingNames.length === 0
       ? null
       : typingNames.length === 1
-        ? `${typingNames[0]} yazıyor…`
+        ? t('chat.typingOne', { name: typingNames[0] })
         : typingNames.length === 2
-          ? `${typingNames[0]} ve ${typingNames[1]} yazıyor…`
-          : `${typingNames.length} kişi yazıyor…`
+          ? t('chat.typingTwo', { name1: typingNames[0], name2: typingNames[1] })
+          : t('chat.typingMany', { count: typingNames.length })
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-body">
@@ -181,7 +182,7 @@ export default function GrupSohbeti() {
         <header className="sticky top-0 z-20 border-b border-border bg-background/95 px-5 pb-4 pt-12 backdrop-blur-md">
           <div className="flex items-center justify-between">
             <button
-              aria-label="Geri dön"
+              aria-label={t('common.backAria')}
               onClick={() => navigate(-1)}
               className="flex h-10 w-10 items-center justify-center rounded-theme bg-secondary text-secondary-foreground"
             >
@@ -193,9 +194,9 @@ export default function GrupSohbeti() {
                 {typingLabel ? (
                   <span className="font-semibold text-primary">{typingLabel}</span>
                 ) : onlineMembers.length > 0 ? (
-                  `${onlineMembers.length} kişi şu an çevrimiçi`
+                  t('chat.onlineCount', { count: onlineMembers.length })
                 ) : (
-                  `${members.length} üye`
+                  t('groups.memberCount', { count: members.length })
                 )}
               </p>
             </div>
@@ -225,13 +226,13 @@ export default function GrupSohbeti() {
 
         <main className="flex-1 px-5 pb-36 pt-6">
           {loading ? (
-            <p className="text-center text-xs text-muted-foreground">Yükleniyor…</p>
+            <p className="text-center text-xs text-muted-foreground">{t('common.loading')}</p>
           ) : messages.length === 0 ? (
             <p className="text-center text-xs text-muted-foreground">
-              Henüz mesaj yok. Grupta ilk sözü sen al.
+              {t('chat.emptyGroupMessages')}
             </p>
           ) : (
-            <section aria-label="Grup sohbeti mesajları">
+            <section aria-label={t('chat.groupMessagesAria')}>
               {messages.map((m, i) => {
                 const isMine = m.sender_id === user.id
                 const sender = m.profiles
@@ -256,7 +257,7 @@ export default function GrupSohbeti() {
                             <button onClick={() => navigate(`/kullanici/${m.sender_id}`)} className="block h-full w-full">
                               <img
                                 src={sender?.avatar_url || fallbackAvatarFor(m.sender_id)}
-                                alt={sender?.display_name || 'Kullanıcı'}
+                                alt={sender?.display_name || t('common.unknownUser')}
                                 className="h-full w-full rounded-full bg-muted object-cover"
                               />
                             </button>
@@ -266,7 +267,7 @@ export default function GrupSohbeti() {
                       <div className={isMine ? 'max-w-[286px]' : 'max-w-[268px]'}>
                         {!isMine && isFirstInGroup && (
                           <p className="mb-1 px-1 text-[11px] font-bold text-muted-foreground">
-                            {sender?.display_name || 'Kullanıcı'}
+                            {sender?.display_name || t('common.unknownUser')}
                           </p>
                         )}
                         <div
@@ -313,12 +314,12 @@ export default function GrupSohbeti() {
                 onKeyDown={(e) => {
                   if (e.key === 'Enter') handleSend()
                 }}
-                placeholder="Gruba mesaj yaz..."
+                placeholder={t('chat.groupMessagePlaceholder')}
                 className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
               />
             </div>
             <button
-              aria-label="Mesaj gönder"
+              aria-label={t('chat.sendAria')}
               onClick={handleSend}
               disabled={!draft.trim() || sending}
               className="flex h-12 w-12 shrink-0 items-center justify-center rounded-theme bg-primary text-primary-foreground shadow-sm transition-transform duration-150 active:scale-90 disabled:opacity-60 disabled:active:scale-100"

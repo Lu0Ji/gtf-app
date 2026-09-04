@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
@@ -14,6 +15,7 @@ import { dayLabel, groupInfo } from '../lib/chatGrouping.js'
 const TYPING_TIMEOUT_MS = 3000
 
 export default function Sohbet() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuth()
@@ -183,9 +185,7 @@ export default function Sohbet() {
       // not a network blip. "tekrar dene" would be a lie: retrying can't
       // ever succeed here, so say what's actually true instead.
       showToast(
-        error.code === '42501'
-          ? 'Bu kişi yalnızca takip ettiklerinden mesaj kabul ediyor.'
-          : 'Mesaj gönderilemedi, tekrar dene.'
+        error.code === '42501' ? t('chat.sendFailedRecipientRestricted') : t('chat.sendFailedGeneric')
       )
     }
     setSending(false)
@@ -201,7 +201,7 @@ export default function Sohbet() {
         <header className="sticky top-0 z-20 border-b border-border bg-background/95 px-5 pb-4 pt-12 backdrop-blur-md">
           <div className="flex items-center justify-between">
             <button
-              aria-label="Mesajlara dön"
+              aria-label={t('chat.backToMessagesAria')}
               onClick={() => navigate(-1)}
               className="flex h-10 w-10 items-center justify-center rounded-theme bg-secondary text-secondary-foreground"
             >
@@ -226,9 +226,9 @@ export default function Sohbet() {
                 <p className="truncate font-heading text-sm font-extrabold tracking-tight">{partner.display_name}</p>
                 <p className="mt-0.5 truncate text-[11px] text-muted-foreground">
                   {partnerTyping ? (
-                    <span className="font-semibold text-primary">yazıyor…</span>
+                    <span className="font-semibold text-primary">{t('chat.typing')}</span>
                   ) : partnerOnline ? (
-                    'Çevrimiçi'
+                    t('chat.online')
                   ) : (
                     `@${partner.username}`
                   )}
@@ -242,13 +242,13 @@ export default function Sohbet() {
 
         <main className="flex-1 px-5 pb-36 pt-6">
           {loading ? (
-            <p className="text-center text-xs text-muted-foreground">Yükleniyor…</p>
+            <p className="text-center text-xs text-muted-foreground">{t('common.loading')}</p>
           ) : messages.length === 0 ? (
             <p className="text-center text-xs text-muted-foreground">
-              Henüz mesaj yok. İlk mesajı sen göndererek sohbeti başlat.
+              {t('chat.emptyDmMessages')}
             </p>
           ) : (
-            <section aria-label="Sohbet mesajları">
+            <section aria-label={t('chat.dmMessagesAria')}>
               {messages.map((m, i) => {
                 const isMine = m.sender_id === user.id
                 const { newDay, isFirstInGroup, isLastInGroup } = groupInfo(messages, i)
@@ -331,7 +331,7 @@ export default function Sohbet() {
           {blocked ? (
             <div className="mx-auto flex max-w-[393px] items-center gap-2 rounded-theme bg-muted px-4 py-3 text-xs font-semibold text-muted-foreground">
               <iconify-icon icon="lucide:ban" class="text-base"></iconify-icon>
-              Bu kullanıcıyla mesajlaşamazsın.
+              {t('chat.blockedNotice')}
             </div>
           ) : (
             <div className="mx-auto flex max-w-[393px] items-end gap-2">
@@ -342,12 +342,12 @@ export default function Sohbet() {
                   onKeyDown={(e) => {
                     if (e.key === 'Enter') handleSend()
                   }}
-                  placeholder="Mesaj yaz..."
+                  placeholder={t('chat.dmMessagePlaceholder')}
                   className="w-full bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
                 />
               </div>
               <button
-                aria-label="Mesaj gönder"
+                aria-label={t('chat.sendAria')}
                 onClick={handleSend}
                 disabled={!draft.trim() || sending}
                 className="flex h-12 w-12 shrink-0 items-center justify-center rounded-theme bg-primary text-primary-foreground shadow-sm transition-transform duration-150 active:scale-90 disabled:opacity-50 disabled:active:scale-100"
