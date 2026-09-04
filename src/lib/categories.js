@@ -50,3 +50,7 @@ export const CATEGORY_SLUGS = Object.keys(CATEGORY_META).filter((key) => key !==
 
 // Groups can also be left uncategorized ("Genel"), predictions can't.
 export const GROUP_CATEGORIES = ['Genel', ...CATEGORIES]
+
+// Same order as GROUP_CATEGORIES, but stable DB slugs — use this for
+// language-independent group category state/storage (see CATEGORY_SLUGS).
+export const GROUP_CATEGORY_SLUGS = ['genel', ...CATEGORY_SLUGS]

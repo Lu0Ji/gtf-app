@@ -1,19 +1,21 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import { supabase } from '../lib/supabase.js'
 import { formatTimeUntil } from '../lib/format.js'
-import { CATEGORY_META, GROUP_CATEGORIES as CATEGORIES } from '../lib/categories.js'
+import { CATEGORY_META, GROUP_CATEGORY_SLUGS } from '../lib/categories.js'
 import ScreenHeader from '../components/ui/ScreenHeader.jsx'
 import EmptyState from '../components/ui/EmptyState.jsx'
 
 function CreateGroupModal({ onClose, onCreated }) {
+  const { t } = useTranslation()
   const { user } = useAuth()
   const coverInputRef = useRef(null)
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
-  const [category, setCategory] = useState('Genel')
+  const [category, setCategory] = useState('genel')
   const [coverFile, setCoverFile] = useState(null)
   const [coverPreview, setCoverPreview] = useState(null)
   const [saving, setSaving] = useState(false)
@@ -36,7 +38,7 @@ function CreateGroupModal({ onClose, onCreated }) {
         .insert({
           name: name.trim(),
           description: description.trim() || null,
-          category: category.toLowerCase(),
+          category,
           created_by: user.id,
         })
         .select()
@@ -62,7 +64,7 @@ function CreateGroupModal({ onClose, onCreated }) {
 
       onCreated({ ...group, cover_image_url: coverImageUrl })
     } catch (err) {
-      setError(err.message || 'Grup oluşturulamadı.')
+      setError(err.message || t('groups.createFailed'))
     } finally {
       setSaving(false)
     }
@@ -75,66 +77,66 @@ function CreateGroupModal({ onClose, onCreated }) {
         className="w-full rounded-t-theme bg-background p-5 pb-8"
       >
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-heading text-lg font-bold">Yeni grup kur</h2>
-          <button onClick={onClose} aria-label="Kapat" className="text-muted-foreground">
+          <h2 className="font-heading text-lg font-bold">{t('groups.newGroup')}</h2>
+          <button onClick={onClose} aria-label={t('common.close')} className="text-muted-foreground">
             <iconify-icon icon="lucide:x" class="text-xl"></iconify-icon>
           </button>
         </div>
 
         <div className="space-y-4">
           <div>
-            <label className="mb-2 block text-sm font-bold text-foreground">Kapak fotoğrafı</label>
+            <label className="mb-2 block text-sm font-bold text-foreground">{t('groups.coverLabel')}</label>
             <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handlePickCover} />
             <button
               onClick={() => coverInputRef.current?.click()}
               className="flex h-24 w-full items-center justify-center overflow-hidden rounded-theme border border-dashed border-border bg-muted"
             >
               {coverPreview ? (
-                <img src={coverPreview} alt="Kapak önizleme" className="h-full w-full object-cover" />
+                <img src={coverPreview} alt={t('groups.coverPreviewAlt')} className="h-full w-full object-cover" />
               ) : (
                 <span className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground">
                   <iconify-icon icon="lucide:image-plus" class="text-base"></iconify-icon>
-                  İsteğe bağlı kapak fotoğrafı ekle
+                  {t('groups.coverAddCta')}
                 </span>
               )}
             </button>
             <p className="mt-2 text-[11px] leading-4 text-muted-foreground">
-              Kapak fotoğrafı eklersen grubun keşfet listesinde daha dikkat çekici görünür.
+              {t('groups.coverHint')}
             </p>
           </div>
           <div>
-            <label className="mb-2 block text-sm font-bold text-foreground">Grup adı</label>
+            <label className="mb-2 block text-sm font-bold text-foreground">{t('groups.nameLabel')}</label>
             <input
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="Derbi Odası"
+              placeholder={t('groups.namePlaceholder')}
               className="w-full rounded-theme border border-border bg-input px-4 py-3 text-sm text-foreground shadow-sm outline-none"
             />
           </div>
           <div>
-            <label className="mb-2 block text-sm font-bold text-foreground">Açıklama</label>
+            <label className="mb-2 block text-sm font-bold text-foreground">{t('groups.descriptionLabel')}</label>
             <textarea
               value={description}
               onChange={(e) => setDescription(e.target.value)}
               rows={2}
-              placeholder="Bu grup ne hakkında?"
+              placeholder={t('groups.descriptionPlaceholder')}
               className="w-full resize-none rounded-theme border border-border bg-input px-4 py-3 text-sm leading-5 text-foreground shadow-sm outline-none"
             />
           </div>
           <div>
-            <label className="mb-2 block text-sm font-bold text-foreground">Kategori</label>
+            <label className="mb-2 block text-sm font-bold text-foreground">{t('createPrediction.categoryTitle')}</label>
             <div className="flex flex-wrap gap-2">
-              {CATEGORIES.map((c) => (
+              {GROUP_CATEGORY_SLUGS.map((slug) => (
                 <button
-                  key={c}
-                  onClick={() => setCategory(c)}
+                  key={slug}
+                  onClick={() => setCategory(slug)}
                   className={`rounded-full px-3.5 py-2 text-xs font-bold ${
-                    c === category
+                    slug === category
                       ? 'bg-primary text-primary-foreground'
                       : 'border border-border bg-card text-card-foreground'
                   }`}
                 >
-                  {c}
+                  {t(CATEGORY_META[slug].labelKey)}
                 </button>
               ))}
             </div>
@@ -151,7 +153,7 @@ function CreateGroupModal({ onClose, onCreated }) {
             disabled={!name.trim() || saving}
             className="flex w-full items-center justify-center gap-2 rounded-theme bg-primary px-4 py-3.5 text-sm font-extrabold text-primary-foreground shadow-sm disabled:opacity-50"
           >
-            {saving ? 'Oluşturuluyor…' : 'Grubu oluştur'}
+            {saving ? t('groups.creating') : t('groups.createCta')}
           </button>
         </div>
       </div>
@@ -167,6 +169,7 @@ function categoryTint(ink) {
 }
 
 function GroupCard({ group, isMember, onToggleMembership }) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const meta = CATEGORY_META[group.category] || CATEGORY_META.genel
   const memberCount = group.memberCount ?? 0
@@ -184,7 +187,7 @@ function GroupCard({ group, isMember, onToggleMembership }) {
         isMember ? 'bg-secondary text-secondary-foreground' : 'border border-border bg-card text-primary'
       }`}
     >
-      {isMember ? 'Üyesin' : 'Katıl'}
+      {isMember ? t('groups.memberBadge') : t('groups.joinCta')}
     </button>
   )
 
@@ -202,7 +205,7 @@ function GroupCard({ group, isMember, onToggleMembership }) {
               className="rounded-full bg-background/90 px-2.5 py-1 text-[10px] font-bold backdrop-blur-sm"
               style={{ color: meta.ink }}
             >
-              {group.category?.toUpperCase()}
+              {t(meta.labelKey).toUpperCase()}
             </span>
             <span className="flex items-center gap-1 rounded-full bg-black/40 px-2.5 py-1 text-[10px] font-semibold text-white backdrop-blur-sm">
               <iconify-icon icon="lucide:users" class="text-xs"></iconify-icon>
@@ -229,7 +232,7 @@ function GroupCard({ group, isMember, onToggleMembership }) {
                 >
                   <iconify-icon icon="lucide:lock-keyhole" class="text-sm"></iconify-icon>
                 </div>
-                <p className="text-xs font-semibold text-foreground">{predictionCount} mühürlü tahmin</p>
+                <p className="text-xs font-semibold text-foreground">{t('groups.sealedPredictionCount', { count: predictionCount })}</p>
               </div>
               {nextOpeningAt ? (
                 <span className="flex items-center gap-1 text-[11px] font-semibold text-accent">
@@ -237,7 +240,7 @@ function GroupCard({ group, isMember, onToggleMembership }) {
                   {formatTimeUntil(nextOpeningAt)}
                 </span>
               ) : (
-                todayCount > 0 && <span className="text-[11px] font-semibold text-success">+{todayCount} bugün</span>
+                todayCount > 0 && <span className="text-[11px] font-semibold text-success">{t('groups.todayCountInline', { count: todayCount })}</span>
               )}
             </div>
           )}
@@ -264,15 +267,15 @@ function GroupCard({ group, isMember, onToggleMembership }) {
             className="shrink-0 rounded-full px-2 py-0.5 text-[9px] font-bold"
             style={{ background: categoryTint(meta.ink), color: meta.ink }}
           >
-            {group.category?.toUpperCase()}
+            {t(meta.labelKey).toUpperCase()}
           </span>
         </div>
         {group.description && <p className="mt-1 line-clamp-1 text-[11px] text-muted-foreground">{group.description}</p>}
         <p className="mt-1 flex items-center gap-1 text-[11px] text-muted-foreground">
           <span className="truncate">
-            {memberCount} üye
-            {predictionCount > 0 && ` · ${predictionCount} tahmin`}
-            {!nextOpeningAt && todayCount > 0 && ` · +${todayCount} bugün`}
+            {t('groups.memberCount', { count: memberCount })}
+            {predictionCount > 0 && ` · ${t('groups.predictionCountInline', { count: predictionCount })}`}
+            {!nextOpeningAt && todayCount > 0 && ` · ${t('groups.todayCountInline', { count: todayCount })}`}
           </span>
           {nextOpeningAt && (
             <span className="flex shrink-0 items-center gap-1 font-semibold text-accent">
@@ -288,6 +291,7 @@ function GroupCard({ group, isMember, onToggleMembership }) {
 }
 
 export default function Gruplar() {
+  const { t } = useTranslation()
   const { user } = useAuth()
   const { showToast } = useToast()
   const [groups, setGroups] = useState([])
@@ -355,7 +359,7 @@ export default function Gruplar() {
       ? await supabase.from('group_members').delete().eq('group_id', group.id).eq('user_id', user.id)
       : await supabase.from('group_members').insert({ group_id: group.id, user_id: user.id })
     if (error) {
-      showToast(isMember ? 'Gruptan ayrılamadın, tekrar dene.' : 'Gruba katılamadın, tekrar dene.')
+      showToast(isMember ? t('groups.leaveFailedToast') : t('groups.joinFailedToast'))
       return
     }
     load()
@@ -373,7 +377,7 @@ export default function Gruplar() {
 
   return (
     <div className="min-h-screen w-full bg-background pb-28 text-foreground font-body">
-      <ScreenHeader eyebrow="Topluluklar" title="Gruplar" className="pb-0" />
+      <ScreenHeader eyebrow={t('groups.eyebrow')} title={t('nav.groups')} className="pb-0" />
       <div className="px-5 pb-5 pt-5">
         <div className="relative">
           <iconify-icon
@@ -381,11 +385,11 @@ export default function Gruplar() {
             class="pointer-events-none absolute left-4 top-1/2 -translate-y-1/2 text-lg text-muted-foreground"
           ></iconify-icon>
           <input
-            aria-label="Grup ara"
+            aria-label={t('groups.searchAria')}
             type="search"
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Grup ara"
+            placeholder={t('groups.searchPlaceholder')}
             className="h-12 w-full rounded-theme border border-border bg-input pl-11 pr-4 text-sm text-foreground outline-none placeholder:text-muted-foreground"
           />
         </div>
@@ -395,33 +399,33 @@ export default function Gruplar() {
           className="mt-3 flex h-12 w-full items-center justify-center gap-2 rounded-theme bg-primary text-sm font-bold text-primary-foreground shadow-sm"
         >
           <iconify-icon icon="lucide:plus" class="text-lg"></iconify-icon>
-          Yeni grup kur
+          {t('groups.newGroup')}
         </button>
       </div>
 
       <main className="pt-6">
         {loading ? (
-          <p className="px-5 text-xs text-muted-foreground">Yükleniyor…</p>
+          <p className="px-5 text-xs text-muted-foreground">{t('common.loading')}</p>
         ) : (
           <>
             <section>
               <div className="flex items-end justify-between px-5">
                 <div>
-                  <h2 className="font-heading text-lg font-bold tracking-tight">Gruplarım</h2>
-                  <p className="mt-0.5 text-xs text-muted-foreground">Üyesi olduğun topluluklar</p>
+                  <h2 className="font-heading text-lg font-bold tracking-tight">{t('groups.myGroupsTitle')}</h2>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{t('groups.myGroupsSubtitle')}</p>
                 </div>
               </div>
               {myGroups.length === 0 ? (
                 <EmptyState
                   className="mx-5 mt-4"
                   icon={trimmedQuery ? 'lucide:search-x' : 'lucide:users-round'}
-                  title={trimmedQuery ? 'Eşleşen bir grubun yok.' : 'Henüz bir gruba katılmadın.'}
+                  title={trimmedQuery ? t('groups.myGroupsEmptySearchTitle') : t('groups.myGroupsEmptyTitle')}
                   description={
                     trimmedQuery
                       ? null
                       : otherGroups.length > 0
-                        ? 'Aşağıdaki topluluklardan birine katıl, ya da kendi grubunu kurup ilk mührü sen bas.'
-                        : 'İlk grubu sen kur — mühürlü tahminlerin etrafında bir topluluk başlat.'
+                        ? t('groups.myGroupsEmptyDescWithOthers')
+                        : t('groups.myGroupsEmptyDescNoOthers')
                   }
                 />
               ) : (
@@ -434,16 +438,16 @@ export default function Gruplar() {
             <section className="mt-8">
               <div className="flex items-end justify-between px-5">
                 <div>
-                  <h2 className="font-heading text-lg font-bold tracking-tight">Keşfet</h2>
-                  <p className="mt-0.5 text-xs text-muted-foreground">En aktif topluluklar önce</p>
+                  <h2 className="font-heading text-lg font-bold tracking-tight">{t('nav.discover')}</h2>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{t('groups.discoverSubtitle')}</p>
                 </div>
               </div>
               {otherGroups.length === 0 ? (
                 <EmptyState
                   className="mx-5 mt-4"
                   icon={trimmedQuery ? 'lucide:search-x' : 'lucide:compass'}
-                  title={trimmedQuery ? 'Eşleşen bir grup yok.' : 'Henüz keşfedilecek başka grup yok.'}
-                  description={trimmedQuery ? null : 'İlk grubu sen kur, herkes senin peşinden gelsin.'}
+                  title={trimmedQuery ? t('groups.discoverEmptySearchTitle') : t('groups.discoverEmptyTitle')}
+                  description={trimmedQuery ? null : t('groups.discoverEmptyDesc')}
                 />
               ) : (
                 otherGroups.map((g) => (
