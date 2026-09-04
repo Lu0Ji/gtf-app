@@ -1,21 +1,26 @@
 import { useEffect, useRef, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
 import Card from '../components/ui/Card.jsx'
 
-const CUSTOM_THEME_NAME = 'Özel renk'
+// Stable keys, independent of the viewer's language — `key` is what state
+// compares against (and what initialSelection() below matches on), while
+// `labelKey` is what actually gets shown, via t(). Nothing here is
+// persisted; only the resolved hex is written to profiles.profile_color.
+const CUSTOM_THEME_KEY = 'custom'
 
 const THEME_COLORS = [
-  { name: 'Uygulama varsayılanı', hex: null },
-  { name: 'Gece Mürekkebi', hex: '#183B5B' },
-  { name: 'Kehribar Bakır', hex: '#A76522' },
-  { name: 'Orman Yeşili', hex: '#267050' },
-  { name: 'Sis Mavisi', hex: '#167C80' },
-  { name: 'Erik Moru', hex: '#6B5A97' },
-  { name: 'Koyu Bordo', hex: '#9D3B51' },
+  { key: 'default', labelKey: 'profileSettings.themeDefault', hex: null },
+  { key: 'night-ink', labelKey: 'profileSettings.themeNightInk', hex: '#183B5B' },
+  { key: 'amber-copper', labelKey: 'profileSettings.themeAmberCopper', hex: '#A76522' },
+  { key: 'forest-green', labelKey: 'profileSettings.themeForestGreen', hex: '#267050' },
+  { key: 'mist-blue', labelKey: 'profileSettings.themeMistBlue', hex: '#167C80' },
+  { key: 'plum-purple', labelKey: 'profileSettings.themePlumPurple', hex: '#6B5A97' },
+  { key: 'dark-maroon', labelKey: 'profileSettings.themeDarkMaroon', hex: '#9D3B51' },
 ]
 
 function normalizeHex(input) {
@@ -34,16 +39,17 @@ function isValidHex(v) {
 
 // A saved color that isn't one of the fixed presets means the person
 // already had a custom hex applied (from a previous visit here, or in
-// principle set some other way) — land them back in "Özel renk" mode with
-// their actual value prefilled instead of silently mislabeling it "varsayılan".
+// principle set some other way) — land them back in custom-color mode with
+// their actual value prefilled instead of silently mislabeling it "default".
 function initialSelection(hex) {
-  if (!hex) return { theme: THEME_COLORS[0].name, customHex: '' }
+  if (!hex) return { theme: THEME_COLORS[0].key, customHex: '' }
   const preset = THEME_COLORS.find((c) => c.hex && c.hex.toLowerCase() === hex.toLowerCase())
-  if (preset) return { theme: preset.name, customHex: '' }
-  return { theme: CUSTOM_THEME_NAME, customHex: hex }
+  if (preset) return { theme: preset.key, customHex: '' }
+  return { theme: CUSTOM_THEME_KEY, customHex: hex }
 }
 
 export default function ProfilAyarlari() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { user, profile, refreshProfile } = useAuth()
   const fileInputRef = useRef(null)
@@ -88,8 +94,8 @@ export default function ProfilAyarlari() {
 
   useEffect(() => {
     const root = document.documentElement
-    const preset = THEME_COLORS.find((c) => c.name === selectedTheme)
-    const previewHex = selectedTheme === CUSTOM_THEME_NAME ? (customHexValid ? customHexNormalized : null) : preset?.hex ?? null
+    const preset = THEME_COLORS.find((c) => c.key === selectedTheme)
+    const previewHex = selectedTheme === CUSTOM_THEME_KEY ? (customHexValid ? customHexNormalized : null) : preset?.hex ?? null
     if (previewHex) root.style.setProperty('--color-primary', previewHex)
     else root.style.removeProperty('--color-primary')
     return () => {
@@ -121,8 +127,8 @@ export default function ProfilAyarlari() {
 
   async function handleSave() {
     if (!user) return
-    if (selectedTheme === CUSTOM_THEME_NAME && !customHexValid) {
-      setError('Geçerli bir hex renk kodu gir (örn. #356A8A).')
+    if (selectedTheme === CUSTOM_THEME_KEY && !customHexValid) {
+      setError(t('profileSettings.invalidHexError'))
       return
     }
     setSaving(true)
@@ -159,9 +165,9 @@ export default function ProfilAyarlari() {
       setUploading(false)
 
       const finalColorHex =
-        selectedTheme === CUSTOM_THEME_NAME
+        selectedTheme === CUSTOM_THEME_KEY
           ? customHexNormalized.toUpperCase()
-          : THEME_COLORS.find((c) => c.name === selectedTheme)?.hex ?? null
+          : THEME_COLORS.find((c) => c.key === selectedTheme)?.hex ?? null
 
       const { error: updateError } = await supabase
         .from('profiles')
@@ -179,7 +185,7 @@ export default function ProfilAyarlari() {
       await refreshProfile()
       navigate(-1)
     } catch (err) {
-      setError(err.message || 'Kaydedilemedi, tekrar deneyin.')
+      setError(err.message || t('common.saveFailedGeneric'))
     } finally {
       setSaving(false)
       setUploading(false)
@@ -191,16 +197,16 @@ export default function ProfilAyarlari() {
 
   return (
     <div className="min-h-screen w-full bg-background pb-28 text-foreground font-body">
-      <DetailHeader title="Profil ayarları" subtitle="Görünümünü kişiselleştir" />
+      <DetailHeader title={t('profileSettings.title')} subtitle={t('profileSettings.subtitle')} />
 
       <main className="pt-6">
         <section className="px-5">
-          <h2 className="font-heading text-lg font-bold tracking-[-0.04em]">Temel bilgiler</h2>
-          <p className="mt-1 text-xs text-muted-foreground">Adın, kullanıcı adın ve biyografin</p>
+          <h2 className="font-heading text-lg font-bold tracking-[-0.04em]">{t('profileSettings.basicInfoTitle')}</h2>
+          <p className="mt-1 text-xs text-muted-foreground">{t('profileSettings.basicInfoSubtitle')}</p>
 
           <Card className="mt-4 space-y-4">
             <div>
-              <label className="mb-2 block text-sm font-bold text-foreground">Görünen ad</label>
+              <label className="mb-2 block text-sm font-bold text-foreground">{t('auth.displayNameLabel')}</label>
               <input
                 value={displayName}
                 onChange={(e) => setDisplayName(e.target.value)}
@@ -208,7 +214,7 @@ export default function ProfilAyarlari() {
               />
             </div>
             <div>
-              <label className="mb-2 block text-sm font-bold text-foreground">Kullanıcı adı</label>
+              <label className="mb-2 block text-sm font-bold text-foreground">{t('auth.usernameLabel')}</label>
               <div className="flex items-center rounded-theme border border-border bg-input shadow-sm">
                 <span className="pl-4 text-sm text-muted-foreground">@</span>
                 <input
@@ -219,12 +225,12 @@ export default function ProfilAyarlari() {
               </div>
             </div>
             <div>
-              <label className="mb-2 block text-sm font-bold text-foreground">Biyografi</label>
+              <label className="mb-2 block text-sm font-bold text-foreground">{t('profileSettings.bioLabel')}</label>
               <textarea
                 value={bio}
                 onChange={(e) => setBio(e.target.value)}
                 rows={3}
-                placeholder="Kendinden kısaca bahset…"
+                placeholder={t('profileSettings.bioPlaceholder')}
                 className="w-full resize-none rounded-theme border border-border bg-input px-4 py-3 text-sm leading-5 text-foreground shadow-sm outline-none"
               />
             </div>
@@ -232,13 +238,13 @@ export default function ProfilAyarlari() {
         </section>
 
         <section className="mt-7 px-5">
-          <h2 className="font-heading text-lg font-bold tracking-[-0.04em]">Kapak fotoğrafı</h2>
-          <p className="mt-1 text-xs text-muted-foreground">Profilinin üst kısmında görünür, isteğe bağlı</p>
+          <h2 className="font-heading text-lg font-bold tracking-[-0.04em]">{t('profileSettings.coverPhotoTitle')}</h2>
+          <p className="mt-1 text-xs text-muted-foreground">{t('profileSettings.coverPhotoSubtitle')}</p>
 
           <div className="mt-4 overflow-hidden rounded-theme border border-border bg-card shadow-sm">
             <div className="relative h-32 w-full bg-muted">
               {previewCover ? (
-                <img src={previewCover} alt="Kapak fotoğrafı" className="h-full w-full object-cover" />
+                <img src={previewCover} alt={t('profileSettings.coverPhotoTitle')} className="h-full w-full object-cover" />
               ) : (
                 <div className="flex h-full w-full items-center justify-center text-muted-foreground">
                   <iconify-icon icon="lucide:image" class="text-2xl"></iconify-icon>
@@ -246,7 +252,7 @@ export default function ProfilAyarlari() {
               )}
             </div>
             <div className="flex items-center justify-between gap-2 p-3">
-              <p className="text-[11px] text-muted-foreground">JPG veya PNG · En fazla 10 MB</p>
+              <p className="text-[11px] text-muted-foreground">{t('profileSettings.coverFileHint')}</p>
               <div className="flex gap-2">
                 <input
                   ref={coverInputRef}
@@ -260,7 +266,7 @@ export default function ProfilAyarlari() {
                   className="flex items-center gap-1.5 rounded-theme bg-secondary px-3 py-2 text-xs font-bold text-secondary-foreground"
                 >
                   <iconify-icon icon="lucide:replace" class="text-sm"></iconify-icon>
-                  {previewCover ? 'Değiştir' : 'Ekle'}
+                  {previewCover ? t('profileSettings.changeCta') : t('profileSettings.addCta')}
                 </button>
                 {previewCover && (
                   <button
@@ -268,7 +274,7 @@ export default function ProfilAyarlari() {
                     className="flex items-center gap-1.5 rounded-theme border border-border px-3 py-2 text-xs font-bold text-destructive"
                   >
                     <iconify-icon icon="lucide:trash-2" class="text-sm"></iconify-icon>
-                    Kaldır
+                    {t('profileSettings.removeCta')}
                   </button>
                 )}
               </div>
@@ -277,17 +283,17 @@ export default function ProfilAyarlari() {
         </section>
 
         <section className="mt-7 px-5">
-          <h2 className="font-heading text-lg font-bold tracking-[-0.04em]">Profil fotoğrafı</h2>
-          <p className="mt-1 text-xs text-muted-foreground">Tanıdıkların seni daha kolay bulsun</p>
+          <h2 className="font-heading text-lg font-bold tracking-[-0.04em]">{t('profileSettings.profilePhotoTitle')}</h2>
+          <p className="mt-1 text-xs text-muted-foreground">{t('profileSettings.profilePhotoSubtitle')}</p>
 
           <Card className="mt-4 flex items-center gap-4">
             <div className="h-16 w-16 shrink-0 overflow-hidden rounded-full border-2 border-secondary">
-              <img src={previewAvatar} alt={displayName || 'Profil fotoğrafı'} className="h-full w-full object-cover" />
+              <img src={previewAvatar} alt={displayName || t('profileSettings.profilePhotoTitle')} className="h-full w-full object-cover" />
             </div>
             <div className="flex-1">
-              <p className="text-sm font-bold">{displayName || 'İsimsiz'}</p>
+              <p className="text-sm font-bold">{displayName || t('profileSettings.unnamedFallback')}</p>
               <p className="mt-1 text-[11px] text-muted-foreground">
-                {uploading ? 'Yükleniyor…' : 'JPG, PNG veya HEIC · En fazla 10 MB'}
+                {uploading ? t('common.loading') : t('profileSettings.avatarFileHint')}
               </p>
             </div>
             <input
@@ -298,7 +304,7 @@ export default function ProfilAyarlari() {
               onChange={handlePickAvatar}
             />
             <button
-              aria-label="Profil fotoğrafını değiştir"
+              aria-label={t('profileSettings.changeAvatarAria')}
               onClick={() => fileInputRef.current?.click()}
               className="flex h-10 w-10 items-center justify-center rounded-theme bg-secondary text-primary"
             >
@@ -309,15 +315,15 @@ export default function ProfilAyarlari() {
 
         <section className="mt-7 px-5">
           <div>
-            <h2 className="font-heading text-lg font-bold tracking-[-0.04em]">Profil tema rengi</h2>
+            <h2 className="font-heading text-lg font-bold tracking-[-0.04em]">{t('profileSettings.themeColorTitle')}</h2>
             <p className="mt-1 text-xs leading-5 text-muted-foreground">
-              Seçimin uygulama genelinde ana vurgu rengini (butonlar, aktif sekmeler, rozetler) değiştirir.
+              {t('profileSettings.themeColorSubtitle')}
             </p>
           </div>
 
           <div className="mt-4 overflow-hidden rounded-theme border border-border bg-card shadow-sm">
             {THEME_COLORS.map((color) => {
-              const isSelected = color.name === selectedTheme
+              const isSelected = color.key === selectedTheme
               const swatchStyle = color.hex
                 ? isSelected
                   ? { backgroundColor: color.hex, boxShadow: `0 0 0 2px var(--color-card), 0 0 0 4px ${color.hex}` }
@@ -327,8 +333,8 @@ export default function ProfilAyarlari() {
                   : {}
               return (
                 <button
-                  key={color.name}
-                  onClick={() => setSelectedTheme(color.name)}
+                  key={color.key}
+                  onClick={() => setSelectedTheme(color.key)}
                   className="flex w-full items-center gap-3 border-b border-border px-4 py-3.5 text-left"
                 >
                   <span
@@ -343,15 +349,15 @@ export default function ProfilAyarlari() {
                     ></iconify-icon>
                   </span>
                   <span className="min-w-0 flex-1">
-                    <span className="block text-sm font-bold">{color.name}</span>
+                    <span className="block text-sm font-bold">{t(color.labelKey)}</span>
                     <span className="mt-0.5 block text-[10px] text-muted-foreground">
-                      {color.hex ? 'Yüksek kontrast · AA' : 'Yerleşik tema rengine döner'}
+                      {color.hex ? t('profileSettings.highContrastLabel') : t('profileSettings.defaultThemeResetLabel')}
                     </span>
                   </span>
                   {isSelected ? (
                     <span className="flex items-center gap-1 text-[10px] font-bold text-primary">
                       <iconify-icon icon="lucide:circle-check" class="text-sm"></iconify-icon>
-                      Seçili
+                      {t('common.selected')}
                     </span>
                   ) : (
                     <iconify-icon icon="lucide:chevron-right" class="text-lg text-muted-foreground"></iconify-icon>
@@ -360,18 +366,19 @@ export default function ProfilAyarlari() {
               )
             })}
 
-            {/* Özel renk — same row pattern as the presets above, but tapping it
-                also expands an inline hex field instead of just selecting. The
-                swatch previews a conic "color wheel" until a color is actually
-                picked, then shows the live hex itself (or red once invalid). */}
+            {/* Custom color — same row pattern as the presets above, but tapping
+                it also expands an inline hex field instead of just selecting.
+                The swatch previews a conic "color wheel" until a color is
+                actually picked, then shows the live hex itself (or red once
+                invalid). */}
             <button
-              onClick={() => setSelectedTheme(CUSTOM_THEME_NAME)}
+              onClick={() => setSelectedTheme(CUSTOM_THEME_KEY)}
               className="flex w-full items-center gap-3 px-4 py-3.5 text-left"
             >
               <span
                 className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full text-white"
                 style={
-                  selectedTheme === CUSTOM_THEME_NAME
+                  selectedTheme === CUSTOM_THEME_KEY
                     ? {
                         backgroundColor: customHexValid ? customHexNormalized : 'var(--color-destructive)',
                         boxShadow: `0 0 0 2px var(--color-card), 0 0 0 4px ${customHexValid ? customHexNormalized : 'var(--color-destructive)'}`,
@@ -380,30 +387,30 @@ export default function ProfilAyarlari() {
                 }
               >
                 <iconify-icon
-                  icon={selectedTheme === CUSTOM_THEME_NAME ? (customHexValid ? 'lucide:check' : 'lucide:alert-triangle') : 'lucide:pipette'}
-                  class={selectedTheme === CUSTOM_THEME_NAME ? 'text-lg' : 'text-sm'}
+                  icon={selectedTheme === CUSTOM_THEME_KEY ? (customHexValid ? 'lucide:check' : 'lucide:alert-triangle') : 'lucide:pipette'}
+                  class={selectedTheme === CUSTOM_THEME_KEY ? 'text-lg' : 'text-sm'}
                 ></iconify-icon>
               </span>
               <span className="min-w-0 flex-1">
-                <span className="block text-sm font-bold">{CUSTOM_THEME_NAME}</span>
-                <span className="mt-0.5 block text-[10px] text-muted-foreground">Kendi hex kodunu gir</span>
+                <span className="block text-sm font-bold">{t('profileSettings.themeCustom')}</span>
+                <span className="mt-0.5 block text-[10px] text-muted-foreground">{t('profileSettings.customThemeSubtitle')}</span>
               </span>
-              {selectedTheme === CUSTOM_THEME_NAME ? (
+              {selectedTheme === CUSTOM_THEME_KEY ? (
                 <span className="flex items-center gap-1 text-[10px] font-bold text-primary">
                   <iconify-icon icon="lucide:circle-check" class="text-sm"></iconify-icon>
-                  Seçili
+                  {t('common.selected')}
                 </span>
               ) : (
                 <iconify-icon icon="lucide:chevron-right" class="text-lg text-muted-foreground"></iconify-icon>
               )}
             </button>
-            {selectedTheme === CUSTOM_THEME_NAME && (
+            {selectedTheme === CUSTOM_THEME_KEY && (
               <div className="border-t border-border bg-muted/50 px-4 py-4">
-                <label className="mb-2 block text-xs font-bold text-foreground">Hex renk kodu</label>
+                <label className="mb-2 block text-xs font-bold text-foreground">{t('profileSettings.hexCodeLabel')}</label>
                 <div className="flex items-center gap-2.5">
                   <input
                     type="color"
-                    aria-label="Renk seç"
+                    aria-label={t('profileSettings.colorPickerAria')}
                     value={customHexValid ? customHexNormalized : '#356A8A'}
                     onChange={(e) => setCustomHex(e.target.value)}
                     className="h-11 w-11 shrink-0 cursor-pointer rounded-theme border border-border bg-input p-1"
@@ -419,9 +426,7 @@ export default function ProfilAyarlari() {
                   />
                 </div>
                 <p className={`mt-2 text-[11px] ${customHexValid ? 'text-muted-foreground' : 'font-semibold text-destructive'}`}>
-                  {customHexValid
-                    ? 'Renk çarkına dokun ya da 6 haneli hex kodunu elle yaz.'
-                    : 'Geçerli bir hex kod gir — örn. #356A8A ya da #35A.'}
+                  {customHexValid ? t('profileSettings.hexHintValid') : t('profileSettings.hexHintInvalid')}
                 </p>
               </div>
             )}
@@ -432,7 +437,7 @@ export default function ProfilAyarlari() {
           <div className="flex items-start gap-2.5">
             <iconify-icon icon="lucide:info" class="mt-0.5 text-base text-primary"></iconify-icon>
             <p className="text-[11px] leading-5 text-muted-foreground">
-              "Değişiklikleri kaydet"e bastığında rengin bu cihazda ve diğer cihazlarında hemen uygulanır.
+              {t('profileSettings.liveApplyNotice')}
             </p>
           </div>
         </section>
@@ -450,7 +455,7 @@ export default function ProfilAyarlari() {
               onClick={() => navigate(-1)}
               className="flex h-12 flex-1 items-center justify-center rounded-theme border border-border bg-card text-sm font-bold text-secondary-foreground transition-transform duration-150 active:scale-[0.98]"
             >
-              Vazgeç
+              {t('common.cancel')}
             </button>
             <button
               onClick={handleSave}
@@ -458,7 +463,7 @@ export default function ProfilAyarlari() {
               className="flex h-12 flex-[1.45] items-center justify-center gap-2 rounded-theme bg-primary text-sm font-bold text-primary-foreground shadow-sm transition-transform duration-150 active:scale-[0.98] disabled:opacity-60 disabled:active:scale-100"
             >
               <iconify-icon icon="lucide:check" class="text-lg"></iconify-icon>
-              {saving ? 'Kaydediliyor…' : 'Değişiklikleri kaydet'}
+              {saving ? t('common.saving') : t('common.saveChanges')}
             </button>
           </div>
         </div>
