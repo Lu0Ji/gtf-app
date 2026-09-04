@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState, useCallback } from 'rea
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from './AuthContext.jsx'
 import { setTimeFormatPreference } from '../lib/format.js'
+import i18n from '../i18n/index.js'
 
 export const DEFAULT_SETTINGS = {
   notifications: {
@@ -22,8 +23,12 @@ export const DEFAULT_SETTINGS = {
   },
   // Bölge ve Tarih Biçimi — the one real region/format control (see
   // lib/format.js for why country/timezone/date-order aren't here too).
+  // `language` starts unset (not a hardcoded 'tr') so a fresh account keeps
+  // whatever i18next's own browser-language detection already picked —
+  // this only overrides that once someone actually chooses a language.
   region: {
     timeFormat: '24h',
+    language: null,
   },
 }
 
@@ -89,6 +94,14 @@ export function UserSettingsProvider({ children }) {
   useEffect(() => {
     setTimeFormatPreference(settings.region.timeFormat)
   }, [settings.region.timeFormat])
+
+  // A signed-in account's explicit language choice follows them across
+  // devices; a guest or a user who's never touched the picker keeps
+  // whatever i18next's own detector (localStorage, then browser language)
+  // already resolved — see i18n/index.js.
+  useEffect(() => {
+    if (settings.region.language) i18n.changeLanguage(settings.region.language)
+  }, [settings.region.language])
 
   const update = useCallback(
     async (section, patch) => {

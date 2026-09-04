@@ -1,4 +1,5 @@
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { NAV_TABS } from '../lib/navTabs.js'
 import { useUnreadMessages } from '../contexts/UnreadMessagesContext.jsx'
 import { useAuth } from '../contexts/AuthContext.jsx'
@@ -11,6 +12,7 @@ import StreakFlame, { streakTierColor } from './StreakFlame.jsx'
 // per breakpoint via CSS rather than conditional rendering, so neither ever
 // pops in/out on a resize.
 export default function SidebarNav() {
+  const { t } = useTranslation()
   const location = useLocation()
   const navigate = useNavigate()
   const unreadCount = useUnreadMessages()
@@ -54,7 +56,7 @@ export default function SidebarNav() {
               <p className="font-heading text-xl font-extrabold tracking-[-0.03em] text-foreground">
                 {profile.points ?? 0}
               </p>
-              <p className="mt-0.5 text-[11px] font-medium text-muted-foreground">puan</p>
+              <p className="mt-0.5 text-[11px] font-medium text-muted-foreground">{t('nav.points')}</p>
             </div>
             <div className="flex items-center gap-2 rounded-theme bg-muted px-3.5 py-3">
               <StreakFlame count={profile.streak_count ?? 0} size="lg" />
@@ -65,7 +67,7 @@ export default function SidebarNav() {
                 >
                   {profile.streak_count ?? 0}
                 </p>
-                <p className="mt-0.5 text-[11px] font-medium text-muted-foreground">gün seri</p>
+                <p className="mt-0.5 text-[11px] font-medium text-muted-foreground">{t('nav.streakDays')}</p>
               </div>
             </div>
           </div>
@@ -77,7 +79,7 @@ export default function SidebarNav() {
             const showBadge = tab.path === '/mesajlar' && unreadCount > 0
             return (
               <button
-                key={tab.name}
+                key={tab.path}
                 type="button"
                 onClick={() => navigate(tab.path)}
                 className={`flex items-center gap-3.5 rounded-theme px-3.5 py-3 text-base transition-colors duration-150 ${
@@ -92,7 +94,7 @@ export default function SidebarNav() {
                     </span>
                   )}
                 </span>
-                {tab.name}
+                {t(tab.nameKey)}
               </button>
             )
           })}
@@ -104,7 +106,7 @@ export default function SidebarNav() {
         className="flex h-[52px] w-full items-center justify-center gap-2 rounded-theme bg-primary text-[15px] font-bold text-primary-foreground shadow-sm transition-transform duration-150 active:scale-[0.98]"
       >
         <iconify-icon icon="lucide:plus" class="text-lg"></iconify-icon>
-        Tahmin oluştur
+        {t('nav.createPrediction')}
       </button>
     </aside>
   )

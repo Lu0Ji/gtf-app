@@ -1,21 +1,28 @@
 import { useCallback, useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useTranslation, Trans } from 'react-i18next'
 import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase, queryWithGroupIdFallback } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import { useUserSettings } from '../hooks/useUserSettings.js'
 import { formatDateLong, sealLabel, timeAgo } from '../lib/format.js'
-import { CATEGORIES as PREDICTION_CATEGORIES } from '../lib/categories.js'
+import { CATEGORY_META, CATEGORY_SLUGS } from '../lib/categories.js'
 import DifficultyChip from '../components/DifficultyChip.jsx'
 import Chip from '../components/ui/Chip.jsx'
 import Card from '../components/ui/Card.jsx'
 import StreakFlame from '../components/StreakFlame.jsx'
 import { rankFeed } from '../lib/feedRanking.js'
 
-const CATEGORIES = ['Tümü', ...PREDICTION_CATEGORIES]
+// 'all' is a UI-only sentinel (never stored/queried) — every real entry is
+// a stable DB slug (see categories.js), translated for display via
+// CATEGORY_META[slug].labelKey. Keeping state in slugs, not display labels,
+// is what lets the tab bar and the DB filter below stay correct in every
+// language at once.
+const CATEGORY_TABS = ['all', ...CATEGORY_SLUGS]
 
 function Header() {
+  const { t } = useTranslation()
   const { profile } = useAuth()
 
   return (
@@ -30,7 +37,7 @@ function Header() {
               Gelecek Tahmin Fonu
             </p>
             <p className="mt-1 text-[10px] font-medium text-muted-foreground">
-              Herkese açık akış
+              {t('home.publicFeed')}
             </p>
           </div>
         </div>
@@ -38,7 +45,7 @@ function Header() {
           {profile?.streak_count > 1 && (
             <span
               className="flex items-center gap-1 rounded-full bg-accent/10 px-2.5 py-1.5 text-xs font-bold text-accent"
-              title={`${profile.streak_count} gündür üst üste aktifsin`}
+              title={t('home.streakTitleAttr', { count: profile.streak_count })}
             >
               <StreakFlame count={profile.streak_count} size="sm" />
               {profile.streak_count}
@@ -54,6 +61,7 @@ function Header() {
 }
 
 function ComposeCard() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { profile } = useAuth()
 
@@ -67,7 +75,7 @@ function ComposeCard() {
           onClick={() => navigate('/tahmin-olustur')}
           className="flex h-11 flex-1 items-center rounded-theme bg-muted px-4 text-left text-sm text-muted-foreground"
         >
-          Ne tahmin ediyorsun?
+          {t('home.composePlaceholder')}
         </button>
       </div>
       <div className="mt-3 flex items-center justify-between border-t border-border pt-3">
@@ -77,18 +85,18 @@ function ComposeCard() {
             className="flex items-center gap-1.5 rounded-theme bg-secondary px-3 py-2 text-xs font-bold text-secondary-foreground"
           >
             <iconify-icon icon="lucide:pen-line" class="text-sm text-primary"></iconify-icon>
-            Tahmin
+            {t('home.tabPrediction')}
           </button>
           <button
             onClick={() => navigate('/tahmin-olustur')}
             className="flex items-center gap-1.5 rounded-theme bg-muted px-3 py-2 text-xs font-bold text-muted-foreground"
           >
             <iconify-icon icon="lucide:archive" class="text-sm"></iconify-icon>
-            Zaman kapsülü
+            {t('home.tabCapsule')}
           </button>
         </div>
         <button
-          aria-label="Yeni tahmin oluştur"
+          aria-label={t('home.newPredictionAria')}
           onClick={() => navigate('/tahmin-olustur')}
           className="flex h-9 w-9 items-center justify-center rounded-theme bg-primary text-primary-foreground"
         >
@@ -103,6 +111,7 @@ function ComposeCard() {
 // are the one thing only you can act on right now, so surface them above
 // everything else instead of leaving them to be found on your profile.
 function OpeningTodayBanner() {
+  const { t } = useTranslation()
   const { user } = useAuth()
   const navigate = useNavigate()
   const [pending, setPending] = useState([])
@@ -136,11 +145,9 @@ function OpeningTodayBanner() {
         <iconify-icon icon="lucide:stamp" class="text-lg"></iconify-icon>
       </span>
       <div className="min-w-0 flex-1">
-        <p className="text-sm font-bold">
-          {pending.length === 1 ? 'Bir mührün açılmaya hazır!' : `${pending.length} mührün açılmaya hazır!`}
-        </p>
+        <p className="text-sm font-bold">{t('home.sealReady', { count: pending.length })}</p>
         <p className="mt-0.5 truncate text-xs text-muted-foreground">
-          "{pending[0].title}" — sonucu şimdi işaretle.
+          {t('home.sealReadyBody', { title: pending[0].title })}
         </p>
       </div>
       <iconify-icon icon="lucide:chevron-right" class="shrink-0 text-lg text-muted-foreground"></iconify-icon>
@@ -149,23 +156,25 @@ function OpeningTodayBanner() {
 }
 
 function CategoryTabs({ active, onSelect }) {
+  const { t } = useTranslation()
   return (
     <section className="mt-5">
       <div className="flex gap-2 overflow-x-auto px-5 pb-1">
-        {CATEGORIES.map((category) => {
-          const isActive = category === active
+        {CATEGORY_TABS.map((slug) => {
+          const isActive = slug === active
+          const label = slug === 'all' ? t('nav.allCategories') : t(CATEGORY_META[slug].labelKey)
           return (
             <button
-              key={category}
+              key={slug}
               type="button"
-              onClick={() => onSelect(category)}
+              onClick={() => onSelect(slug)}
               className={
                 isActive
                   ? 'shrink-0 rounded-full bg-primary px-4 py-2 text-xs font-bold text-primary-foreground'
                   : 'shrink-0 rounded-full border border-border bg-card px-4 py-2 text-xs font-semibold text-secondary-foreground'
               }
             >
-              {category}
+              {label}
             </button>
           )
         })}
@@ -175,6 +184,7 @@ function CategoryTabs({ active, onSelect }) {
 }
 
 function StatsBanner() {
+  const { t } = useTranslation()
   const [stats, setStats] = useState(null)
 
   useEffect(() => {
@@ -213,10 +223,13 @@ function StatsBanner() {
           <iconify-icon icon="lucide:activity" class="text-lg"></iconify-icon>
         </div>
         <div className="min-w-0 flex-1">
-          <p className="text-xs font-bold text-foreground">Platformda şu an</p>
+          <p className="text-xs font-bold text-foreground">{t('home.platformNow')}</p>
           <p className="mt-1 text-[11px] leading-4 text-muted-foreground">
-            <span className="font-semibold text-foreground">{stats.sealed}</span> açılmayı bekleyen mühürlü kayıt ·{' '}
-            <span className="font-semibold text-foreground">{stats.verified}</span> doğrulanmış sonuç
+            <Trans
+              i18nKey="home.platformStats"
+              values={{ sealed: stats.sealed, verified: stats.verified }}
+              components={{ b: <span className="font-semibold text-foreground" /> }}
+            />
           </p>
         </div>
       </div>
@@ -225,8 +238,10 @@ function StatsBanner() {
 }
 
 function PredictionCard({ prediction, social, onToggleLike, onToggleSave }) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const author = prediction.profiles
+  const categoryMeta = CATEGORY_META[prediction.category]
   const isVerified = prediction.status === 'verified_correct' || prediction.status === 'verified_incorrect'
   const isCorrect = prediction.status === 'verified_correct'
   const { liked, likeCount, saved, commentCount } = social
@@ -247,7 +262,7 @@ function PredictionCard({ prediction, social, onToggleLike, onToggleSave }) {
         >
           <img
             src={author?.avatar_url || fallbackAvatarFor(prediction.author_id)}
-            alt={author?.display_name || 'Kullanıcı'}
+            alt={author?.display_name || t('common.unknownUser')}
             className="h-full w-full object-cover"
           />
         </button>
@@ -261,18 +276,18 @@ function PredictionCard({ prediction, social, onToggleLike, onToggleSave }) {
               className="text-left"
             >
               <div className="flex items-center gap-1.5">
-                <h2 className="text-sm font-bold">{author?.display_name || 'Kullanıcı'}</h2>
+                <h2 className="text-sm font-bold">{author?.display_name || t('common.unknownUser')}</h2>
                 <iconify-icon icon="lucide:badge-check" class="text-sm text-primary"></iconify-icon>
               </div>
               <p className="mt-0.5 text-[11px] text-muted-foreground">
-                @{author?.username || 'kullanici'} · {timeAgo(prediction.created_at)}
+                @{author?.username || t('common.unknownUsername')} · {timeAgo(prediction.created_at)}
               </p>
             </button>
           </div>
           {prediction.is_sensitive && (
             <span className="mt-3 inline-flex items-center gap-1 rounded-full bg-destructive/10 px-2 py-1 text-[10px] font-bold text-destructive">
               <iconify-icon icon="lucide:triangle-alert" class="text-xs"></iconify-icon>
-              Hassas içerik olarak işaretlendi
+              {t('home.sensitiveTag')}
             </span>
           )}
           <p className="mt-3 text-[15px] font-medium leading-6 text-foreground">{prediction.title}</p>
@@ -296,14 +311,14 @@ function PredictionCard({ prediction, social, onToggleLike, onToggleSave }) {
               >
                 <span className="flex items-center gap-1.5">
                   <iconify-icon icon={isCorrect ? 'lucide:badge-check' : 'lucide:x-circle'} class="text-sm"></iconify-icon>
-                  {isCorrect ? 'Doğrulandı' : 'Gerçekleşmedi'}
+                  {isCorrect ? t('home.verified') : t('home.notRealized')}
                 </span>
                 <span>{formatDateLong(prediction.verified_at)}</span>
               </div>
               <div className="bg-muted p-3">
                 <div className="flex items-center gap-1.5">
                   <span className="rounded-full bg-card px-2.5 py-1 text-[10px] font-bold text-primary">
-                    {prediction.category?.toUpperCase()}
+                    {categoryMeta ? t(categoryMeta.labelKey).toUpperCase() : prediction.category?.toUpperCase()}
                   </span>
                   <DifficultyChip tier={prediction.difficulty_tier} />
                 </div>
@@ -315,13 +330,13 @@ function PredictionCard({ prediction, social, onToggleLike, onToggleSave }) {
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-1.5">
                   <span className="rounded-full bg-card px-2.5 py-1 text-[10px] font-bold text-primary">
-                    {prediction.category?.toUpperCase()}
+                    {categoryMeta ? t(categoryMeta.labelKey).toUpperCase() : prediction.category?.toUpperCase()}
                   </span>
                   <DifficultyChip tier={prediction.difficulty_tier} />
                 </div>
                 <span className="flex items-center gap-1 text-[10px] font-semibold text-accent">
                   <iconify-icon icon="lucide:stamp" class="text-xs"></iconify-icon>
-                  Mühürlü tahmin
+                  {t('home.sealedPrediction')}
                 </span>
               </div>
               <div className="mt-4 flex items-center gap-3">
@@ -330,9 +345,7 @@ function PredictionCard({ prediction, social, onToggleLike, onToggleSave }) {
                 </div>
                 <div>
                   <p className="text-xs font-bold">{sealLabel(prediction.event_date)}</p>
-                  <p className="mt-0.5 text-[10px] text-muted-foreground">
-                    Kayıt sabit; içerik açılana kadar gizli.
-                  </p>
+                  <p className="mt-0.5 text-[10px] text-muted-foreground">{t('home.sealedFixedHint')}</p>
                 </div>
               </div>
             </div>
@@ -341,7 +354,7 @@ function PredictionCard({ prediction, social, onToggleLike, onToggleSave }) {
           <div className="mt-3 flex items-center justify-between">
             <div className="flex items-center gap-4 text-muted-foreground">
               <button
-                aria-label="Beğen"
+                aria-label={t('home.likeAria')}
                 onClick={(e) => {
                   e.stopPropagation()
                   onToggleLike(prediction.id)
@@ -352,7 +365,7 @@ function PredictionCard({ prediction, social, onToggleLike, onToggleSave }) {
                 {likeCount}
               </button>
               <button
-                aria-label="Yorum yap"
+                aria-label={t('home.commentAria')}
                 onClick={(e) => {
                   e.stopPropagation()
                   navigate('/tahmin-kaydi', { state: { prediction } })
@@ -364,7 +377,7 @@ function PredictionCard({ prediction, social, onToggleLike, onToggleSave }) {
               </button>
             </div>
             <button
-              aria-label="Kaydet"
+              aria-label={t('home.saveAria')}
               onClick={(e) => {
                 e.stopPropagation()
                 onToggleSave(prediction.id)
@@ -384,6 +397,7 @@ const EMPTY_SOCIAL = { liked: false, likeCount: 0, saved: false, commentCount: 0
 const FEED_PAGE_SIZE = 15
 
 function PredictionFeed({ category }) {
+  const { t } = useTranslation()
   const { user, profile } = useAuth()
   const { showToast } = useToast()
   const { settings } = useUserSettings()
@@ -456,7 +470,7 @@ function PredictionFeed({ category }) {
           .order('created_at', { ascending: false })
           .range(from, to)
         if (filterGroupId) q = q.is('group_id', null)
-        if (category !== 'Tümü') q = q.eq('category', category.toLowerCase())
+        if (category !== 'all') q = q.eq('category', category)
         return q
       }),
       user ? supabase.rpc('blocked_user_ids') : Promise.resolve({ data: [] }),
@@ -554,7 +568,7 @@ function PredictionFeed({ category }) {
       : await supabase.from('prediction_likes').delete().eq('user_id', user.id).eq('prediction_id', predictionId)
     if (error) {
       setSocialById((prev) => ({ ...prev, [predictionId]: current }))
-      showToast('Beğeni kaydedilemedi, tekrar dene.')
+      showToast(t('home.likeFailedToast'))
     }
   }
 
@@ -568,19 +582,19 @@ function PredictionFeed({ category }) {
       : await supabase.from('prediction_saves').delete().eq('user_id', user.id).eq('prediction_id', predictionId)
     if (error) {
       setSocialById((prev) => ({ ...prev, [predictionId]: current }))
-      showToast('Kaydetme işlemi başarısız oldu, tekrar dene.')
+      showToast(t('home.saveFailedToast'))
     }
   }
 
   if (loading) {
-    return <p className="mx-5 mt-4 text-xs text-muted-foreground">Kayıtlar yükleniyor…</p>
+    return <p className="mx-5 mt-4 text-xs text-muted-foreground">{t('home.loadingRecords')}</p>
   }
 
   if (predictions.length === 0) {
     return (
       <div className="mx-5 mt-4 rounded-theme border border-dashed border-border bg-card p-6 text-center">
-        <p className="text-sm font-bold text-foreground">Henüz kayıt yok</p>
-        <p className="mt-1 text-xs text-muted-foreground">İlk tahminini oluşturarak akışı başlat.</p>
+        <p className="text-sm font-bold text-foreground">{t('home.noRecordsTitle')}</p>
+        <p className="mt-1 text-xs text-muted-foreground">{t('home.noRecordsBody')}</p>
       </div>
     )
   }
@@ -601,7 +615,7 @@ function PredictionFeed({ category }) {
           {loadingMore && (
             <span className="flex items-center gap-2 text-xs font-bold text-muted-foreground">
               <iconify-icon icon="lucide:loader-2" class="animate-spin text-base"></iconify-icon>
-              Yükleniyor…
+              {t('home.loadingMore')}
             </span>
           )}
         </div>
@@ -611,6 +625,7 @@ function PredictionFeed({ category }) {
 }
 
 function SuggestedPeople() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { user } = useAuth()
   const { showToast } = useToast()
@@ -647,7 +662,7 @@ function SuggestedPeople() {
     const { error } = await supabase.from('follows').insert({ follower_id: user.id, following_id: personId })
     if (error) {
       setPeople((prev) => (removed ? [...prev, removed] : prev))
-      showToast('Takip edilemedi, tekrar dene.')
+      showToast(t('home.followFailedToast'))
     }
   }
 
@@ -657,8 +672,8 @@ function SuggestedPeople() {
     <section className="mt-7">
       <div className="flex items-end justify-between px-5">
         <div>
-          <h2 className="font-heading text-lg font-bold tracking-tight">Sana önerilen kişiler</h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">GTF'e yeni katılanlar</p>
+          <h2 className="font-heading text-lg font-bold tracking-tight">{t('home.suggestedPeople')}</h2>
+          <p className="mt-0.5 text-xs text-muted-foreground">{t('home.newOnGtf')}</p>
         </div>
       </div>
       <div className="mt-4 flex gap-3 overflow-x-auto px-5 pb-1">
@@ -675,7 +690,7 @@ function SuggestedPeople() {
               onClick={() => handleFollow(person.id)}
               className="mt-3 w-full rounded-theme bg-secondary py-2 text-xs font-bold text-secondary-foreground"
             >
-              Takip et
+              {t('home.followAction')}
             </button>
           </article>
         ))}
@@ -685,6 +700,7 @@ function SuggestedPeople() {
 }
 
 function FollowedGroups() {
+  const { t } = useTranslation()
   const { user } = useAuth()
   const navigate = useNavigate()
   const [groups, setGroups] = useState([])
@@ -714,13 +730,13 @@ function FollowedGroups() {
     <section className="mt-7">
       <div className="flex items-end justify-between px-5">
         <div>
-          <h2 className="font-heading text-lg font-bold tracking-tight">Gruplarından</h2>
+          <h2 className="font-heading text-lg font-bold tracking-tight">{t('home.yourGroups')}</h2>
           <p className="mt-0.5 text-xs text-muted-foreground">
-            {groups.length === 0 ? 'Henüz bir gruba katılmadın' : 'Üyesi olduğun topluluklar'}
+            {groups.length === 0 ? t('home.notJoinedYet') : t('home.joinedCommunities')}
           </p>
         </div>
         <button onClick={() => navigate('/gruplar')} className="text-xs font-bold text-primary">
-          Gruplar
+          {t('home.groupsCta')}
         </button>
       </div>
 
@@ -730,7 +746,7 @@ function FollowedGroups() {
           className="mx-5 mt-4 flex w-[calc(100%-40px)] items-center justify-center gap-2 rounded-theme border border-dashed border-border bg-card py-4 text-xs font-bold text-primary"
         >
           <iconify-icon icon="lucide:users-round" class="text-base"></iconify-icon>
-          Bir gruba katıl veya yeni grup kur
+          {t('home.joinOrCreateGroup')}
         </button>
       ) : (
         <div className="mt-4 flex gap-3 overflow-x-auto px-5 pb-2">
@@ -761,11 +777,12 @@ function FollowedGroups() {
 }
 
 export default function Anasayfa() {
+  const { t } = useTranslation()
   const location = useLocation()
   // Keşfet's "Popüler alanlar" tiles land here with a category already
   // chosen — someone tapping "Ekonomi" there wants Ekonomi predictions,
-  // not to land on Tümü and have to find the tab themselves.
-  const [activeCategory, setActiveCategory] = useState(() => location.state?.category || 'Tümü')
+  // not to land on the "all" tab and have to find the tab themselves.
+  const [activeCategory, setActiveCategory] = useState(() => location.state?.category || 'all')
   const { settings } = useUserSettings()
   // Already-satisfied by the state above when arriving with a category —
   // the interest-based default below is a fallback for a plain visit, not
@@ -774,13 +791,17 @@ export default function Anasayfa() {
 
   // Land people with a single declared interest straight on that tab. Only
   // applies once, and only before the user has touched the tabs themselves.
+  // Interests are still stored as Turkish labels (Uygulama Ayarları isn't
+  // migrated to slugs yet), so lowercasing one gives back the matching DB
+  // slug — the exact same coupling feedRanking.js already relies on.
   useEffect(() => {
     if (appliedInterestDefault.current) return
     const interests = settings.content.interests
     if (interests.length === 0) return
     appliedInterestDefault.current = true
-    if (interests.length === 1 && CATEGORIES.includes(interests[0])) {
-      setActiveCategory(interests[0])
+    const slug = interests[0].toLowerCase()
+    if (interests.length === 1 && CATEGORY_SLUGS.includes(slug)) {
+      setActiveCategory(slug)
     }
   }, [settings.content.interests])
 
@@ -795,8 +816,8 @@ export default function Anasayfa() {
         <section className="mt-7">
           <div className="flex items-center justify-between px-5">
             <div>
-              <h1 className="font-heading text-xl font-extrabold tracking-[-0.045em]">Akış</h1>
-              <p className="mt-1 text-xs text-muted-foreground">Herkese açık mühürlü ve doğrulanmış kayıtlar</p>
+              <h1 className="font-heading text-xl font-extrabold tracking-[-0.045em]">{t('home.feedTitle')}</h1>
+              <p className="mt-1 text-xs text-muted-foreground">{t('home.feedSubtitle')}</p>
             </div>
           </div>
           <PredictionFeed category={activeCategory} />

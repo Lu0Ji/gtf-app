@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { difficultyMeta } from '../lib/difficulty.js'
 
 // Small tier chip for prediction cards (feed/group/profile lists) — the
@@ -6,6 +7,7 @@ import { difficultyMeta } from '../lib/difficulty.js'
 // nothing for predictions created before the difficulty migration (no
 // tier stored) instead of showing a misleading default.
 export default function DifficultyChip({ tier, className = '' }) {
+  const { t } = useTranslation()
   const meta = difficultyMeta(tier)
   if (!meta) return null
   return (
@@ -14,7 +16,7 @@ export default function DifficultyChip({ tier, className = '' }) {
       style={{ background: meta.tint, color: meta.ink }}
     >
       <iconify-icon icon={meta.icon} class="text-[10px]"></iconify-icon>
-      {meta.label}
+      {t(meta.labelKey)}
     </span>
   )
 }

@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { supabase, queryWithGroupIdFallback } from '../lib/supabase.js'
 import { fallbackAvatarFor } from '../lib/images.js'
 import { formatTimeUntil } from '../lib/format.js'
@@ -17,6 +18,7 @@ import { useToast } from '../contexts/ToastContext.jsx'
 // same idea, but a standing rail widget beats something buried below a
 // 15-card feed someone has to scroll past to ever see.
 export default function RightRail() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { user } = useAuth()
   const { showToast } = useToast()
@@ -75,7 +77,7 @@ export default function RightRail() {
     const { error } = await supabase.from('follows').insert({ follower_id: user.id, following_id: personId })
     if (error) {
       setPeople((prev) => (removed ? [...prev, removed] : prev))
-      showToast('Takip edilemedi, tekrar dene.')
+      showToast(t('home.followFailedToast'))
     }
   }
 
@@ -89,11 +91,11 @@ export default function RightRail() {
             <span className="flex h-8 w-8 items-center justify-center rounded-theme bg-secondary text-primary">
               <iconify-icon icon="lucide:hourglass" class="text-base"></iconify-icon>
             </span>
-            <h2 className="text-base font-bold tracking-[-0.04em] text-foreground">Yaklaşan açılışlar</h2>
+            <h2 className="text-base font-bold tracking-[-0.04em] text-foreground">{t('home.upcomingOpenings')}</h2>
           </div>
           <div className="mt-4 flex flex-col gap-4">
             {openingSoon.map((p) => {
-              const meta = CATEGORY_META[p.category] || { icon: 'lucide:tag', label: p.category }
+              const meta = CATEGORY_META[p.category]
               return (
                 <button
                   key={p.id}
@@ -106,8 +108,8 @@ export default function RightRail() {
                   </div>
                   <p className="mt-1.5 truncate text-sm font-semibold leading-5 text-foreground">{p.title}</p>
                   <span className="mt-1.5 inline-flex items-center gap-1 rounded-full bg-muted px-2.5 py-1 text-[10px] font-bold text-primary">
-                    <iconify-icon icon={meta.icon} class="text-[10px]"></iconify-icon>
-                    {meta.label}
+                    <iconify-icon icon={meta?.icon || 'lucide:tag'} class="text-[10px]"></iconify-icon>
+                    {meta ? t(meta.labelKey) : p.category}
                   </span>
                 </button>
               )
@@ -123,8 +125,8 @@ export default function RightRail() {
               <iconify-icon icon="lucide:user-plus" class="text-base"></iconify-icon>
             </span>
             <div>
-              <h2 className="text-base font-bold tracking-[-0.04em] text-foreground">Sana önerilen kişiler</h2>
-              <p className="text-[11px] text-muted-foreground">GTF'e yeni katılanlar</p>
+              <h2 className="text-base font-bold tracking-[-0.04em] text-foreground">{t('home.suggestedPeople')}</h2>
+              <p className="text-[11px] text-muted-foreground">{t('home.newOnGtf')}</p>
             </div>
           </div>
           <div className="mt-4 flex flex-col gap-3.5">
@@ -149,7 +151,7 @@ export default function RightRail() {
                   onClick={() => handleFollow(person.id)}
                   className="shrink-0 rounded-theme bg-secondary px-3 py-2 text-xs font-bold text-secondary-foreground transition-transform duration-150 active:scale-95"
                 >
-                  Takip et
+                  {t('home.followAction')}
                 </button>
               </div>
             ))}
@@ -164,10 +166,10 @@ export default function RightRail() {
               <span className="flex h-8 w-8 items-center justify-center rounded-theme bg-secondary text-primary">
                 <iconify-icon icon="lucide:medal" class="text-base"></iconify-icon>
               </span>
-              <h2 className="text-base font-bold tracking-[-0.04em] text-foreground">Liderlik tablosu</h2>
+              <h2 className="text-base font-bold tracking-[-0.04em] text-foreground">{t('home.leaderboard')}</h2>
             </div>
             <button onClick={() => navigate('/liderlik-tablosu')} className="text-xs font-bold text-primary">
-              Tümü
+              {t('home.leaderboardSeeAll')}
             </button>
           </div>
           <div className="mt-4 flex flex-col gap-3.5">
@@ -190,7 +192,7 @@ export default function RightRail() {
                 <span className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">
                   {p.display_name}
                 </span>
-                <span className="shrink-0 text-xs font-bold text-muted-foreground">{p.points} puan</span>
+                <span className="shrink-0 text-xs font-bold text-muted-foreground">{p.points} {t('nav.points')}</span>
               </button>
             ))}
           </div>

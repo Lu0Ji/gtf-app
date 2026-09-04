@@ -1,9 +1,11 @@
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { NAV_TABS } from '../lib/navTabs.js'
 import { useUnreadMessages } from '../contexts/UnreadMessagesContext.jsx'
 
 // Mobile only (<768px) — SidebarNav is the md+ equivalent, see AppShell.
 export default function BottomNav() {
+  const { t } = useTranslation()
   const location = useLocation()
   const navigate = useNavigate()
   const unreadCount = useUnreadMessages()
@@ -16,7 +18,7 @@ export default function BottomNav() {
           const showBadge = tab.path === '/mesajlar' && unreadCount > 0
           return (
             <button
-              key={tab.name}
+              key={tab.path}
               type="button"
               onClick={() => navigate(tab.path)}
               className={`flex min-w-[60px] flex-col items-center gap-1 ${
@@ -36,7 +38,7 @@ export default function BottomNav() {
                 )}
               </span>
               <span className={`text-[10px] ${isActive ? 'font-bold' : 'font-medium'}`}>
-                {tab.name}
+                {t(tab.nameKey)}
               </span>
             </button>
           )

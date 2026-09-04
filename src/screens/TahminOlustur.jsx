@@ -1,10 +1,11 @@
 import { useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useTranslation, Trans } from 'react-i18next'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import { useUserSettings } from '../hooks/useUserSettings.js'
-import { CATEGORIES, CATEGORY_META } from '../lib/categories.js'
+import { CATEGORY_META, CATEGORY_SLUGS } from '../lib/categories.js'
 import { checkPredictionText } from '../lib/predictionCheck.js'
 import DateTimePicker from '../components/DateTimePicker.jsx'
 import Chip from '../components/ui/Chip.jsx'
@@ -15,6 +16,7 @@ function isFutureDate(dateStr) {
 }
 
 export default function TahminOlustur() {
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuth()
@@ -22,8 +24,8 @@ export default function TahminOlustur() {
   const { settings } = useUserSettings()
   // Present when launched from Grup Detayı's "Tahmin oluştur" — tags the
   // prediction to that group so it lands in the group's own feed instead of
-  // the public one. Only applies to "Tahmin" mode: a Zaman kapsülü stays a
-  // private personal record regardless of where it was created from.
+  // the public one. Only applies to "prediction" mode: a time capsule stays
+  // a private personal record regardless of where it was created from.
   const groupId = location.state?.groupId || null
   const groupName = location.state?.groupName || ''
   // Present when launched from a "Yaklaşan Etkinlikler" card (Keşfet) — a
@@ -32,9 +34,11 @@ export default function TahminOlustur() {
   // content itself is still left blank: that's the actual prediction, not
   // something a fixture listing could ever fill in for you.
   const prefill = location.state?.prefill || null
-  const [mode, setMode] = useState('Tahmin')
+  // Internal sentinels, never displayed or persisted directly — see
+  // t('createPrediction.modePrediction'/'modeCapsule') for the shown text.
+  const [mode, setMode] = useState('prediction')
   const [category, setCategory] = useState(() =>
-    prefill?.category ? CATEGORY_META[prefill.category]?.label || 'Spor' : 'Spor'
+    prefill?.category && CATEGORY_META[prefill.category] ? prefill.category : 'spor'
   )
   const [title, setTitle] = useState(prefill?.title || '')
   const [sealedContent, setSealedContent] = useState('')
@@ -68,7 +72,7 @@ export default function TahminOlustur() {
     const isVideo = file.type.startsWith('video/')
     const limit = isVideo ? MAX_VIDEO_BYTES : MAX_IMAGE_BYTES
     if (file.size > limit) {
-      setError(isVideo ? 'Video en fazla 25 MB olabilir.' : 'Görsel en fazla 8 MB olabilir.')
+      setError(isVideo ? t('createPrediction.videoTooLarge') : t('createPrediction.imageTooLarge'))
       if (mediaInputRef.current) mediaInputRef.current.value = ''
       return
     }
@@ -87,24 +91,24 @@ export default function TahminOlustur() {
     if (!canSubmit || submitting) return
     setError('')
 
-    // Zaman kapsülü is a personal note, not a public claim someone else
-    // will ever vote on — only real "Tahmin" mode content needs to look
+    // A time capsule is a personal note, not a public claim someone else
+    // will ever vote on — only real "prediction" mode content needs to look
     // like an actual prediction. See lib/predictionCheck.js.
-    if (mode === 'Tahmin') {
-      const check = checkPredictionText(sealedContent)
+    if (mode === 'prediction') {
+      const check = checkPredictionText(sealedContent, i18n.language)
       if (!check.valid) {
-        setError(check.reason)
+        setError(t(check.reasonKey))
         return
       }
     }
 
     setSubmitting(true)
     try {
-      const isCapsule = mode === 'Zaman kapsülü'
+      const isCapsule = mode === 'capsule'
       const targetGroupId = !isCapsule ? groupId : null
       const basePayload = {
         author_id: user.id,
-        category: category.toLowerCase(),
+        category,
         title: title.trim(),
         sealed_content: sealedContent.trim(),
         status: 'sealed',
@@ -124,7 +128,7 @@ export default function TahminOlustur() {
         // whole prediction — the text content still matters more than the
         // attached media. Just drop it and tell the user why.
         if (uploadError) {
-          showToast(mediaType === 'video' ? 'Video yüklenemedi, tahmin medyasız kaydedilecek.' : 'Görsel yüklenemedi, tahmin görselsiz kaydedilecek.')
+          showToast(mediaType === 'video' ? t('createPrediction.videoUploadFailed') : t('createPrediction.imageUploadFailed'))
           mediaType = null
         } else {
           const { data: publicUrlData } = supabase.storage.from('prediction-media').getPublicUrl(path)
@@ -156,7 +160,7 @@ export default function TahminOlustur() {
       if (insertError) throw insertError
       navigate(targetGroupId ? `/grup/${targetGroupId}` : '/', { replace: true })
     } catch (err) {
-      setError(err.message || 'Tahmin kaydedilemedi, tekrar deneyin.')
+      setError(err.message || t('createPrediction.genericError'))
     } finally {
       setSubmitting(false)
     }
@@ -164,34 +168,37 @@ export default function TahminOlustur() {
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-body pb-28">
-      <DetailHeader eyebrow={groupId ? groupName || 'Grup kaydı' : 'Yeni kayıt'} title="Tahmin oluştur" />
+      <DetailHeader
+        eyebrow={groupId ? groupName || t('createPrediction.eyebrowGroup') : t('createPrediction.eyebrowNew')}
+        title={t('createPrediction.title')}
+      />
 
       <main className="space-y-7 px-5">
         <section>
           {groupId ? (
             <div className="flex items-center justify-center gap-2 rounded-theme bg-primary px-3 py-3 text-sm font-bold text-primary-foreground shadow-sm">
               <iconify-icon icon="lucide:pen-line" class="text-base"></iconify-icon>
-              Tahmin
+              {t('createPrediction.modePrediction')}
             </div>
           ) : (
             <div className="flex rounded-theme bg-secondary p-1">
               <button
-                onClick={() => setMode('Tahmin')}
+                onClick={() => setMode('prediction')}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-[10px] px-3 py-3 text-sm font-bold ${
-                  mode === 'Tahmin' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-secondary-foreground'
+                  mode === 'prediction' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-secondary-foreground'
                 }`}
               >
                 <iconify-icon icon="lucide:pen-line" class="text-base"></iconify-icon>
-                Tahmin
+                {t('createPrediction.modePrediction')}
               </button>
               <button
-                onClick={() => setMode('Zaman kapsülü')}
+                onClick={() => setMode('capsule')}
                 className={`flex flex-1 items-center justify-center gap-2 rounded-[10px] px-3 py-3 text-sm font-bold ${
-                  mode === 'Zaman kapsülü' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-secondary-foreground'
+                  mode === 'capsule' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-secondary-foreground'
                 }`}
               >
                 <iconify-icon icon="lucide:archive" class="text-base"></iconify-icon>
-                Zaman kapsülü
+                {t('createPrediction.modeCapsule')}
               </button>
             </div>
           )}
@@ -199,8 +206,7 @@ export default function TahminOlustur() {
             <div className="mt-3 flex items-center gap-2.5 rounded-theme border border-accent/30 bg-accent/10 px-3.5 py-3">
               <iconify-icon icon="lucide:calendar-clock" class="shrink-0 text-lg text-accent"></iconify-icon>
               <p className="text-xs leading-5 text-foreground">
-                <span className="font-semibold">Yaklaşan Etkinlikler</span>'den başlatıldı — başlık ve tarih
-                doldu, mühürlenecek tahmini sen yazacaksın.
+                <Trans i18nKey="createPrediction.prefillBanner" components={{ b: <span className="font-semibold" /> }} />
               </p>
             </div>
           )}
@@ -210,17 +216,17 @@ export default function TahminOlustur() {
             </div>
             <p className="text-xs leading-5 text-muted-foreground">
               {groupId ? (
-                <>
-                  Bu tahmin yalnızca <span className="font-semibold text-foreground">{groupName || 'grup'}</span>{' '}
-                  üyelerine görünür, herkese açık akışta yer almaz. Zaman kapsülü şu an yalnızca kişisel akıştan
-                  oluşturulabiliyor.
-                </>
+                <Trans
+                  i18nKey="createPrediction.scopeGroupBody"
+                  values={{ group: groupName || t('createPrediction.defaultGroupLabel') }}
+                  components={{ b: <span className="font-semibold text-foreground" /> }}
+                />
               ) : (
-                <>
-                  Doğrulanan sonuç, <span className="font-semibold text-foreground">{category}</span> kategorisindeki
-                  kalıcı başarı istatistiklerine eklenir. Zaman kapsülleri yalnızca sana ait kalır ve istatistikleri
-                  etkilemez.
-                </>
+                <Trans
+                  i18nKey="createPrediction.scopePublicBody"
+                  values={{ category: t(CATEGORY_META[category].labelKey) }}
+                  components={{ b: <span className="font-semibold text-foreground" /> }}
+                />
               )}
             </p>
           </div>
@@ -229,25 +235,23 @@ export default function TahminOlustur() {
         <section className="space-y-4">
           <div>
             <div className="mb-2 flex items-center justify-between">
-              <label className="text-sm font-bold text-foreground">Görünür başlık</label>
-              <span className="text-[11px] font-medium text-muted-foreground">Zorunlu</span>
+              <label className="text-sm font-bold text-foreground">{t('createPrediction.titleLabel')}</label>
+              <span className="text-[11px] font-medium text-muted-foreground">{t('common.required')}</span>
             </div>
             <input
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Önümüzdeki derbi tahminimdir"
+              placeholder={t('createPrediction.titlePlaceholder')}
               className="w-full rounded-theme border border-border bg-input px-4 py-3 font-heading text-[15px] font-bold leading-5 text-foreground shadow-sm outline-none"
             />
-            <p className="mt-2 text-[11px] leading-4 text-muted-foreground">
-              Bu başlık mühürlü içerikten önce görünür.
-            </p>
+            <p className="mt-2 text-[11px] leading-4 text-muted-foreground">{t('createPrediction.titleHint')}</p>
           </div>
         </section>
 
         <section>
           <div className="mb-2 flex items-center justify-between">
-            <label className="text-sm font-bold text-foreground">Görsel veya video</label>
-            <span className="text-[11px] font-medium text-muted-foreground">İsteğe bağlı</span>
+            <label className="text-sm font-bold text-foreground">{t('createPrediction.mediaLabel')}</label>
+            <span className="text-[11px] font-medium text-muted-foreground">{t('common.optional')}</span>
           </div>
           <input
             ref={mediaInputRef}
@@ -261,11 +265,11 @@ export default function TahminOlustur() {
               {mediaFile?.type.startsWith('video/') ? (
                 <video src={mediaPreview} controls className="h-40 w-full object-cover" />
               ) : (
-                <img src={mediaPreview} alt="Seçilen görsel" className="h-40 w-full object-cover" />
+                <img src={mediaPreview} alt={t('createPrediction.mediaSelectedAlt')} className="h-40 w-full object-cover" />
               )}
               <button
                 type="button"
-                aria-label="Medyayı kaldır"
+                aria-label={t('createPrediction.mediaRemoveAria')}
                 onClick={handleRemoveMedia}
                 className="absolute right-2 top-2 flex h-8 w-8 items-center justify-center rounded-full bg-black/60 text-white"
               >
@@ -279,7 +283,7 @@ export default function TahminOlustur() {
               className="flex h-24 w-full items-center justify-center gap-1.5 rounded-theme border border-dashed border-border bg-muted text-xs font-bold text-muted-foreground"
             >
               <iconify-icon icon="lucide:image-plus" class="text-base"></iconify-icon>
-              Görsel (8 MB) veya video (25 MB) ekle
+              {t('createPrediction.mediaPickCta')}
             </button>
           )}
         </section>
@@ -291,45 +295,43 @@ export default function TahminOlustur() {
                 <iconify-icon icon="lucide:lock-keyhole" class="text-base"></iconify-icon>
               </span>
               <div>
-                <h2 className="font-heading text-[16px] font-extrabold tracking-tight">Mühürlenecek tahmin</h2>
-                <p className="mt-0.5 text-[11px] text-muted-foreground">Sadece açılış anında görünür</p>
+                <h2 className="font-heading text-[16px] font-extrabold tracking-tight">{t('createPrediction.sealedTitle')}</h2>
+                <p className="mt-0.5 text-[11px] text-muted-foreground">{t('createPrediction.sealedSubtitle')}</p>
               </div>
             </div>
-            <Chip>GİZLİ</Chip>
+            <Chip>{t('createPrediction.sealedTag')}</Chip>
           </div>
           <textarea
             value={sealedContent}
             onChange={(e) => setSealedContent(e.target.value)}
-            placeholder="Fenerbahçe, Galatasaray'ı 3-2 yenecek."
+            placeholder={t('createPrediction.sealedPlaceholder')}
             rows={2}
             className="mt-4 w-full resize-none rounded-theme border border-border bg-muted px-4 py-3.5 font-heading text-[16px] font-bold leading-6 text-foreground outline-none"
           />
           <div className="mt-3 flex gap-2.5">
             <iconify-icon icon="lucide:shield-check" class="mt-0.5 shrink-0 text-[17px] text-primary"></iconify-icon>
-            <p className="text-[11px] leading-5 text-muted-foreground">
-              Mühürledikten sonra sen dahil hiç kimse açılış anına kadar göremez veya değiştiremez.
-            </p>
+            <p className="text-[11px] leading-5 text-muted-foreground">{t('createPrediction.sealedHint')}</p>
           </div>
         </section>
 
         <section>
           <div className="mb-3 flex items-center justify-between">
-            <h2 className="font-heading text-[16px] font-extrabold tracking-tight">Kategori</h2>
+            <h2 className="font-heading text-[16px] font-extrabold tracking-tight">{t('createPrediction.categoryTitle')}</h2>
           </div>
           <div className="flex flex-wrap gap-2">
-            {CATEGORIES.map((cat) => {
-              const isActive = cat === category
+            {CATEGORY_SLUGS.map((slug) => {
+              const isActive = slug === category
               return (
                 <button
-                  key={cat}
-                  onClick={() => setCategory(cat)}
+                  key={slug}
+                  onClick={() => setCategory(slug)}
                   className={`rounded-full px-4 py-2.5 text-xs font-bold ${
                     isActive
                       ? 'bg-primary text-primary-foreground'
                       : 'border border-border bg-card text-card-foreground'
                   }`}
                 >
-                  {cat}
+                  {t(CATEGORY_META[slug].labelKey)}
                 </button>
               )
             })}
@@ -350,19 +352,17 @@ export default function TahminOlustur() {
               {isSensitive && <iconify-icon icon="lucide:check" class="text-xs"></iconify-icon>}
             </span>
             <span className="min-w-0 flex-1">
-              <span className="block text-sm font-bold text-foreground">Hassas içerik olarak işaretle</span>
+              <span className="block text-sm font-bold text-foreground">{t('createPrediction.sensitiveToggleTitle')}</span>
               <span className="mt-0.5 block text-[11px] leading-4 text-muted-foreground">
-                Görenlerin gösterim tercihine göre bir uyarı etiketiyle gösterilir.
+                {t('createPrediction.sensitiveToggleBody')}
               </span>
             </span>
           </button>
         </section>
 
         <section>
-          <h2 className="font-heading text-[16px] font-extrabold tracking-tight">Açılış nasıl olsun?</h2>
-          <p className="mt-1 text-[11px] leading-4 text-muted-foreground">
-            Bir an seç, o an gelince herkese açılsın — ya da tarih verme, tamamen sana bağlı kalsın.
-          </p>
+          <h2 className="font-heading text-[16px] font-extrabold tracking-tight">{t('createPrediction.unlockTitle')}</h2>
+          <p className="mt-1 text-[11px] leading-4 text-muted-foreground">{t('createPrediction.unlockSubtitle')}</p>
           <div className="mt-3 flex rounded-theme bg-secondary p-1">
             <button
               type="button"
@@ -372,7 +372,7 @@ export default function TahminOlustur() {
               }`}
             >
               <iconify-icon icon="lucide:calendar-clock" class="text-base"></iconify-icon>
-              Bir an seç
+              {t('createPrediction.unlockScheduled')}
             </button>
             <button
               type="button"
@@ -382,7 +382,7 @@ export default function TahminOlustur() {
               }`}
             >
               <iconify-icon icon="lucide:hand" class="text-base"></iconify-icon>
-              Ben açarım
+              {t('createPrediction.unlockManual')}
             </button>
           </div>
 
@@ -396,7 +396,7 @@ export default function TahminOlustur() {
               {eventDate && !eventDateIsFuture && (
                 <p className="mt-2 flex items-center gap-1.5 text-[11px] font-semibold text-destructive">
                   <iconify-icon icon="lucide:circle-alert" class="text-sm"></iconify-icon>
-                  Seçilen an artık geçmişte kaldı, lütfen ileri bir tarih/saat seç.
+                  {t('createPrediction.unlockPastError')}
                 </p>
               )}
             </>
@@ -404,10 +404,7 @@ export default function TahminOlustur() {
             <div className="mt-3 flex gap-3 rounded-theme border border-dashed border-border bg-muted/60 p-4">
               <iconify-icon icon="lucide:lock-keyhole" class="mt-0.5 shrink-0 text-lg text-primary"></iconify-icon>
               <p className="text-xs leading-5 text-muted-foreground">
-                Bu kayıt kendiliğinden hiç açılmaz. Kayıt sayfasına gidip{' '}
-                <span className="font-semibold text-foreground">istediğin an</span> açabilirsin — 5 dakika sonra da
-                olur, bir yıl sonra da. Ama dikkat:{' '}
-                <span className="font-semibold text-foreground">bir kere açtığında geri mühürleyemezsin.</span>
+                <Trans i18nKey="createPrediction.unlockManualBody" components={{ b: <span className="font-semibold text-foreground" /> }} />
               </p>
             </div>
           )}
@@ -418,11 +415,8 @@ export default function TahminOlustur() {
             <iconify-icon icon="lucide:handshake" class="text-[18px]"></iconify-icon>
           </div>
           <div>
-            <h2 className="text-sm font-bold text-foreground">Nasıl doğrulanır?</h2>
-            <p className="mt-1 text-xs leading-5 text-muted-foreground">
-              Açılış anında sonucu ilk sen işaretlersin, ama son karar sende kalmaz — diğer kullanıcılar da
-              "doğru/yanlış" oyu verebilir, topluluk senden farklı düşünürse sonuç değişebilir.
-            </p>
+            <h2 className="text-sm font-bold text-foreground">{t('createPrediction.verifyTitle')}</h2>
+            <p className="mt-1 text-xs leading-5 text-muted-foreground">{t('createPrediction.verifyBody')}</p>
           </div>
         </section>
 
@@ -442,11 +436,9 @@ export default function TahminOlustur() {
             className="flex w-full items-center justify-center gap-2 rounded-theme bg-primary px-4 py-4 text-sm font-extrabold text-primary-foreground shadow-sm transition-transform duration-150 active:scale-[0.98] disabled:opacity-50 disabled:active:scale-100"
           >
             <iconify-icon icon="lucide:lock-keyhole" class="text-[18px]"></iconify-icon>
-            {submitting ? 'Mühürleniyor…' : 'Tahmini mühürle'}
+            {submitting ? t('createPrediction.submitBusy') : t('createPrediction.submitCta')}
           </button>
-          <p className="mt-2 text-center text-[10px] text-muted-foreground">
-            Mühürleme işleminden sonra kayıt değiştirilemez.
-          </p>
+          <p className="mt-2 text-center text-[10px] text-muted-foreground">{t('createPrediction.submitHint')}</p>
         </div>
       </div>
     </div>

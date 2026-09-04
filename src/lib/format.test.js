@@ -1,5 +1,15 @@
-import { describe, expect, it, beforeEach, afterEach, vi } from 'vitest'
+import { describe, expect, it, beforeAll, beforeEach, afterEach, vi } from 'vitest'
+import i18n from '../i18n/index.js'
 import { formatDateLong, formatTime, formatTimeUntil, setTimeFormatPreference, timeAgo } from './format.js'
+
+// format.js's phrasing/date locale now follows the app's active language
+// (see i18n/index.js) instead of a hardcoded 'tr-TR' — these assertions are
+// all in Turkish, so pin the language regardless of the test runner's own
+// navigator.language (jsdom defaults to 'en-US', which would otherwise
+// silently flip every string below to English).
+beforeAll(async () => {
+  await i18n.changeLanguage('tr')
+})
 
 describe('formatDateLong', () => {
   it('renders a full Turkish date', () => {

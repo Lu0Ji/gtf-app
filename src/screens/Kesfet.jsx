@@ -150,7 +150,11 @@ function CategoryTile({ category, count, variant, navigate }) {
 
   return (
     <button
-      onClick={() => navigate('/', { state: { category: meta.label } })}
+      // Anasayfa's category tabs are keyed by DB slug (see categories.js's
+      // CATEGORY_SLUGS), not the Turkish display label — passing the slug
+      // here is what makes this land on the right tab regardless of the
+      // viewer's language.
+      onClick={() => navigate('/', { state: { category } })}
       className={`rounded-theme p-4 text-left ${variantClass}`}
     >
       <div className="flex items-start justify-between">

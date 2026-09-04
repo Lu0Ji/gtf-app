@@ -1,4 +1,5 @@
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 
 // See DESIGN.md §8/§9 — the back-button header for every drill-down/detail/
 // settings screen (27 screens already share this shape, more than any other
@@ -15,6 +16,7 @@ import { useNavigate } from 'react-router-dom'
 //     default (Hareketler, Begeniler — a centered subtitle read as intentional
 //     there, not left-aligned drift).
 export default function DetailHeader({ title, subtitle, eyebrow, onBack, action, trailing, centered = false, sticky = true }) {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const handleBack = onBack || (() => navigate(-1))
   const wrapperClass = `border-b border-border/80 px-5 pb-4 pt-12 ${
@@ -22,7 +24,7 @@ export default function DetailHeader({ title, subtitle, eyebrow, onBack, action,
   }`
   const backButton = (
     <button
-      aria-label="Geri dön"
+      aria-label={t('common.backAria')}
       onClick={handleBack}
       className="flex h-10 w-10 shrink-0 items-center justify-center rounded-theme border border-border bg-card text-foreground shadow-sm"
     >

@@ -6,11 +6,13 @@
 // fabricated/unmeasurable placeholders, even where the exact criterion
 // had to be invented to fit an under-specified name.
 
+// `label` is the Turkish default/fallback; `labelKey` is the i18n key for
+// screens that translate it via t() (see DifficultyChip.jsx).
 export const TIERS = [
-  { key: 'baslangic', label: 'Başlangıç', tint: '#E4F0F6', ink: 'var(--color-primary)' },
-  { key: 'istikrar', label: 'İstikrar', tint: '#E4EAF0', ink: '#183B5B' },
-  { key: 'ustalik', label: 'Ustalık', tint: '#DDEDEA', ink: 'var(--color-success)' },
-  { key: 'efsane', label: 'Efsane', tint: '#EAE4F1', ink: '#6B5A97' },
+  { key: 'baslangic', label: 'Başlangıç', labelKey: 'difficulty.baslangic', tint: '#E4F0F6', ink: 'var(--color-primary)' },
+  { key: 'istikrar', label: 'İstikrar', labelKey: 'difficulty.istikrar', tint: '#E4EAF0', ink: '#183B5B' },
+  { key: 'ustalik', label: 'Ustalık', labelKey: 'difficulty.ustalik', tint: '#DDEDEA', ink: 'var(--color-success)' },
+  { key: 'efsane', label: 'Efsane', labelKey: 'difficulty.efsane', tint: '#EAE4F1', ink: '#6B5A97' },
 ]
 
 // metric: key into the stats object computed by computeBadgeStats().

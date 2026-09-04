@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useTranslation, Trans } from 'react-i18next'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { supabase } from '../lib/supabase.js'
 import { IMG } from '../lib/images.js'
@@ -13,6 +14,7 @@ import { IMG } from '../lib/images.js'
 const LOGIN_HERO = IMG('2485f89f-ddd3-4c79-ba33-e9df27be46ef')
 
 export default function Giris() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const { signIn, signUp, signInWithGoogle, signInWithApple } = useAuth()
@@ -46,7 +48,7 @@ export default function Giris() {
       factorId: mfaFactorId,
     })
     if (challengeError) {
-      setError(challengeError.message || 'Kod doğrulanamadı, tekrar dene.')
+      setError(challengeError.message || t('auth.mfaChallengeFailed'))
       setBusy(false)
       return
     }
@@ -57,7 +59,7 @@ export default function Giris() {
     })
     setBusy(false)
     if (verifyError) {
-      setError('Kod yanlış, tekrar dene.')
+      setError(t('auth.mfaCodeInvalid'))
       return
     }
     navigate('/', { replace: true })
@@ -70,7 +72,7 @@ export default function Giris() {
       await signInWithGoogle()
       // Browser is about to navigate away to Google; nothing else to do here.
     } catch (err) {
-      setError(err.message || 'Google ile giriş başlatılamadı, tekrar deneyin.')
+      setError(err.message || t('auth.googleError'))
       setGoogleBusy(false)
     }
   }
@@ -82,7 +84,7 @@ export default function Giris() {
       await signInWithApple()
       // Browser is about to navigate away to Apple; nothing else to do here.
     } catch (err) {
-      setError(err.message || 'Apple ile giriş başlatılamadı, tekrar deneyin.')
+      setError(err.message || t('auth.appleError'))
       setAppleBusy(false)
     }
   }
@@ -117,7 +119,7 @@ export default function Giris() {
         }
       }
     } catch (err) {
-      setError(err.message || 'Bir şeyler ters gitti, tekrar deneyin.')
+      setError(err.message || t('auth.genericError'))
     } finally {
       setBusy(false)
     }
@@ -131,10 +133,8 @@ export default function Giris() {
             <div className="flex h-14 w-14 items-center justify-center rounded-theme bg-secondary text-primary">
               <iconify-icon icon="lucide:shield-check" class="text-2xl"></iconify-icon>
             </div>
-            <h1 className="mt-4 font-heading text-xl font-extrabold tracking-tight">İki aşamalı doğrulama</h1>
-            <p className="mt-2 text-center text-sm text-muted-foreground">
-              Doğrulayıcı uygulamandaki 6 haneli kodu gir.
-            </p>
+            <h1 className="mt-4 font-heading text-xl font-extrabold tracking-tight">{t('auth.mfaTitle')}</h1>
+            <p className="mt-2 text-center text-sm text-muted-foreground">{t('auth.mfaSubtitle')}</p>
           </div>
           <form onSubmit={handleVerifyMfa} className="mt-6 space-y-4">
             <input
@@ -155,7 +155,7 @@ export default function Giris() {
               disabled={busy || mfaCode.length !== 6}
               className="flex w-full items-center justify-center gap-2 rounded-theme bg-primary px-4 py-3.5 text-sm font-extrabold text-primary-foreground shadow-sm disabled:opacity-60"
             >
-              {busy ? 'Doğrulanıyor…' : 'Doğrula'}
+              {busy ? t('auth.mfaVerifying') : t('auth.mfaVerify')}
             </button>
           </form>
         </div>
@@ -169,10 +169,9 @@ export default function Giris() {
         <div className="flex h-14 w-14 items-center justify-center rounded-theme bg-success text-success-foreground">
           <iconify-icon icon="lucide:mail-check" class="text-2xl"></iconify-icon>
         </div>
-        <h1 className="mt-5 font-heading text-xl font-extrabold tracking-tight">E-postanı doğrula</h1>
+        <h1 className="mt-5 font-heading text-xl font-extrabold tracking-tight">{t('auth.verifyEmailTitle')}</h1>
         <p className="mt-2 text-sm leading-6 text-muted-foreground">
-          <span className="font-semibold text-foreground">{email}</span> adresine bir doğrulama bağlantısı
-          gönderdik. Onayladıktan sonra giriş yapabilirsin.
+          <Trans i18nKey="auth.verifyEmailBody" values={{ email }} components={{ b: <span className="font-semibold text-foreground" /> }} />
         </p>
         <button
           onClick={() => {
@@ -181,7 +180,7 @@ export default function Giris() {
           }}
           className="mt-6 rounded-theme bg-primary px-5 py-3 text-sm font-bold text-primary-foreground"
         >
-          Girişe dön
+          {t('auth.backToSignIn')}
         </button>
       </div>
     )
@@ -203,7 +202,7 @@ export default function Giris() {
             Gelecek Tahmin Fonu
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
-            {mode === 'signin' ? 'Hesabına giriş yap' : 'Yeni bir hesap oluştur'}
+            {mode === 'signin' ? t('auth.signInSubtitle') : t('auth.signUpSubtitle')}
           </p>
         </div>
 
@@ -215,7 +214,7 @@ export default function Giris() {
               mode === 'signin' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-secondary-foreground'
             }`}
           >
-            Giriş yap
+            {t('auth.signInTab')}
           </button>
           <button
             type="button"
@@ -224,7 +223,7 @@ export default function Giris() {
               mode === 'signup' ? 'bg-primary text-primary-foreground shadow-sm' : 'text-secondary-foreground'
             }`}
           >
-            Kayıt ol
+            {t('auth.signUpTab')}
           </button>
         </div>
 
@@ -232,59 +231,57 @@ export default function Giris() {
           {mode === 'signup' && (
             <>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">Görünen ad</label>
+                <label className="mb-2 block text-sm font-bold text-foreground">{t('auth.displayNameLabel')}</label>
                 <input
                   required
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
-                  placeholder="Elif Demir"
+                  placeholder={t('auth.displayNamePlaceholder')}
                   className="w-full rounded-theme border border-border bg-input px-4 py-3 text-sm text-foreground shadow-sm outline-none"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">Kullanıcı adı</label>
+                <label className="mb-2 block text-sm font-bold text-foreground">{t('auth.usernameLabel')}</label>
                 <input
                   required
                   value={username}
                   onChange={(e) => setUsername(e.target.value.replace(/\s+/g, '').toLowerCase())}
-                  placeholder="elifdemir"
+                  placeholder={t('auth.usernamePlaceholder')}
                   className="w-full rounded-theme border border-border bg-input px-4 py-3 text-sm text-foreground shadow-sm outline-none"
                 />
               </div>
               <div>
-                <label className="mb-2 block text-sm font-bold text-foreground">Davet kodu (opsiyonel)</label>
+                <label className="mb-2 block text-sm font-bold text-foreground">{t('auth.inviteCodeLabel')}</label>
                 <input
                   value={referredByUsername}
                   onChange={(e) => setReferredByUsername(e.target.value.replace(/\s+/g, '').toLowerCase())}
-                  placeholder="arkadaşının kullanıcı adı"
+                  placeholder={t('auth.inviteCodePlaceholder')}
                   className="w-full rounded-theme border border-border bg-input px-4 py-3 text-sm text-foreground shadow-sm outline-none"
                 />
-                <p className="mt-2 text-[11px] leading-4 text-muted-foreground">
-                  Doğru bir kullanıcı adıysa ikiniz de 100 puan kazanırsınız.
-                </p>
+                <p className="mt-2 text-[11px] leading-4 text-muted-foreground">{t('auth.inviteCodeHint')}</p>
               </div>
             </>
           )}
           <div>
-            <label className="mb-2 block text-sm font-bold text-foreground">E-posta</label>
+            <label className="mb-2 block text-sm font-bold text-foreground">{t('auth.emailLabel')}</label>
             <input
               required
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
-              placeholder="ornek@eposta.com"
+              placeholder={t('auth.emailPlaceholder')}
               className="w-full rounded-theme border border-border bg-input px-4 py-3 text-sm text-foreground shadow-sm outline-none"
             />
           </div>
           <div>
-            <label className="mb-2 block text-sm font-bold text-foreground">Parola</label>
+            <label className="mb-2 block text-sm font-bold text-foreground">{t('auth.passwordLabel')}</label>
             <input
               required
               type="password"
               minLength={6}
               value={password}
               onChange={(e) => setPassword(e.target.value)}
-              placeholder="En az 6 karakter"
+              placeholder={t('auth.passwordPlaceholder')}
               className="w-full rounded-theme border border-border bg-input px-4 py-3 text-sm text-foreground shadow-sm outline-none"
             />
           </div>
@@ -300,12 +297,12 @@ export default function Giris() {
             disabled={busy}
             className="flex w-full items-center justify-center gap-2 rounded-theme bg-primary px-4 py-3.5 text-sm font-extrabold text-primary-foreground shadow-sm disabled:opacity-60"
           >
-            {busy ? 'Lütfen bekleyin…' : mode === 'signin' ? 'Giriş yap' : 'Hesap oluştur'}
+            {busy ? t('auth.submitBusy') : mode === 'signin' ? t('auth.submitSignIn') : t('auth.submitSignUp')}
           </button>
 
           <div className="flex items-center gap-3 py-1">
             <div className="h-px flex-1 bg-border" />
-            <span className="text-[11px] font-medium text-muted-foreground">veya</span>
+            <span className="text-[11px] font-medium text-muted-foreground">{t('common.or')}</span>
             <div className="h-px flex-1 bg-border" />
           </div>
 
@@ -317,7 +314,7 @@ export default function Giris() {
               className="flex h-12 w-full items-center justify-center gap-3 rounded-theme border border-border bg-card text-sm font-bold text-foreground shadow-sm disabled:opacity-60"
             >
               <iconify-icon icon="simple-icons:google" class="text-[18px]"></iconify-icon>
-              {googleBusy ? 'Yönlendiriliyor…' : 'Google ile devam et'}
+              {googleBusy ? t('auth.redirecting') : t('auth.googleContinue')}
             </button>
             <button
               type="button"
@@ -326,7 +323,7 @@ export default function Giris() {
               className="flex h-12 w-full items-center justify-center gap-3 rounded-theme border border-border bg-card text-sm font-bold text-foreground shadow-sm disabled:opacity-60"
             >
               <iconify-icon icon="simple-icons:apple" class="text-[19px]"></iconify-icon>
-              {appleBusy ? 'Yönlendiriliyor…' : 'Apple ile devam et'}
+              {appleBusy ? t('auth.redirecting') : t('auth.appleContinue')}
             </button>
           </div>
         </form>
