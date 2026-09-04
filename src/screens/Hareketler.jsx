@@ -1,12 +1,17 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation, Trans } from 'react-i18next'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useUserSettings } from '../hooks/useUserSettings.js'
 import { formatDateLong, sealLabel } from '../lib/format.js'
+import i18n from '../i18n/index.js'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
 
-function dayLabel(dateStr) {
+// Reuses settings.searchHistory's today/yesterday/otherwise pattern
+// verbatim (same "special-case the last two days" wording Arama Geçmişi
+// already needed) rather than a duplicate pair of keys.
+function dayLabel(dateStr, t) {
   const date = new Date(dateStr)
   const today = new Date()
   const yesterday = new Date()
@@ -14,8 +19,8 @@ function dayLabel(dateStr) {
 
   const sameDay = (a, b) => a.toDateString() === b.toDateString()
 
-  if (sameDay(date, today)) return 'Bugün'
-  if (sameDay(date, yesterday)) return 'Dün'
+  if (sameDay(date, today)) return t('settings.searchHistory.today')
+  if (sameDay(date, yesterday)) return t('settings.searchHistory.yesterday')
   return formatDateLong(dateStr)
 }
 
@@ -38,10 +43,10 @@ function IconNode({ icon, tone }) {
 }
 
 const STATUS_META = {
-  open: { icon: 'lucide:pen-line', tone: 'bg-muted text-muted-foreground', text: 'Tahmin oluşturdun.' },
-  sealed: { icon: 'lucide:stamp', tone: 'bg-primary text-primary-foreground', text: 'Tahminini mühürledin.' },
-  verified_correct: { icon: 'lucide:check-circle-2', tone: 'bg-success text-success-foreground', text: 'Bir tahminin doğrulandı.' },
-  verified_incorrect: { icon: 'lucide:x-circle', tone: 'bg-destructive text-destructive-foreground', text: 'Bir tahminin gerçekleşmedi.' },
+  open: { icon: 'lucide:pen-line', tone: 'bg-muted text-muted-foreground', textKey: 'activity.statusOpenText' },
+  sealed: { icon: 'lucide:stamp', tone: 'bg-primary text-primary-foreground', textKey: 'activity.statusSealedText' },
+  verified_correct: { icon: 'lucide:check-circle-2', tone: 'bg-success text-success-foreground', textKey: 'activity.statusVerifiedCorrectText' },
+  verified_incorrect: { icon: 'lucide:x-circle', tone: 'bg-destructive text-destructive-foreground', textKey: 'activity.statusVerifiedIncorrectText' },
 }
 
 function EventRow({ icon, tone, text, timestamp, isLast, onClick, children }) {
@@ -54,7 +59,7 @@ function EventRow({ icon, tone, text, timestamp, isLast, onClick, children }) {
         <div className="flex items-start justify-between gap-3">
           <p className="text-[13px] leading-5 text-foreground">{text}</p>
           <time className="shrink-0 text-[10px] text-muted-foreground">
-            {new Date(timestamp).toLocaleTimeString('tr-TR', { hour: '2-digit', minute: '2-digit' })}
+            {new Date(timestamp).toLocaleTimeString(i18n.resolvedLanguage || i18n.language, { hour: '2-digit', minute: '2-digit', numberingSystem: 'latn' })}
           </time>
         </div>
         {children}
@@ -64,6 +69,7 @@ function EventRow({ icon, tone, text, timestamp, isLast, onClick, children }) {
 }
 
 export default function Hareketler() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const { user } = useAuth()
   const { settings } = useUserSettings()
@@ -172,7 +178,7 @@ export default function Hareketler() {
 
   const groupedByDay = []
   for (const event of visibleEvents) {
-    const label = dayLabel(event.timestamp)
+    const label = dayLabel(event.timestamp, t)
     let group = groupedByDay.find((g) => g.label === label)
     if (!group) {
       group = { label, events: [] }
@@ -183,15 +189,13 @@ export default function Hareketler() {
 
   return (
     <div className="min-h-screen w-full bg-background pb-10 text-foreground font-body">
-      <DetailHeader title="Hareketler" subtitle="Kalıcı etkinlik kaydın" centered />
+      <DetailHeader title={t('activity.title')} subtitle={t('activity.subtitle')} centered />
 
       <main>
         {loading ? (
-          <p className="px-5 py-6 text-xs text-muted-foreground">Yükleniyor…</p>
+          <p className="px-5 py-6 text-xs text-muted-foreground">{t('common.loading')}</p>
         ) : groupedByDay.length === 0 ? (
-          <p className="px-5 py-10 text-center text-xs text-muted-foreground">
-            Henüz bir hareketin yok. Bir tahmin oluştur veya bir gruba katıl.
-          </p>
+          <p className="px-5 py-10 text-center text-xs text-muted-foreground">{t('activity.emptyBody')}</p>
         ) : (
           groupedByDay.map((group) => (
             <section key={group.label} className="px-5 pt-6">
@@ -207,7 +211,7 @@ export default function Hareketler() {
                         key={`p-${event.data.id}`}
                         icon={meta.icon}
                         tone={meta.tone}
-                        text={<span className="font-bold">{meta.text}</span>}
+                        text={<span className="font-bold">{t(meta.textKey)}</span>}
                         timestamp={event.timestamp}
                         isLast={isLast}
                         onClick={() => navigate('/tahmin-kaydi', { state: { prediction: event.data } })}
@@ -218,7 +222,7 @@ export default function Hareketler() {
                               {event.data.category?.toUpperCase()}
                             </span>
                             {event.data.is_private && (
-                              <span className="text-[9px] font-semibold text-accent">Zaman kapsülü</span>
+                              <span className="text-[9px] font-semibold text-accent">{t('home.tabCapsule')}</span>
                             )}
                           </div>
                           <p className="mt-2 text-[12px] font-semibold leading-5">{event.data.title}</p>
@@ -234,11 +238,7 @@ export default function Hareketler() {
                         key={`g-${event.timestamp}`}
                         icon="lucide:users-round"
                         tone="bg-secondary text-primary"
-                        text={
-                          <>
-                            <span className="font-bold">{event.data.groups?.name}</span> grubuna katıldın.
-                          </>
-                        }
+                        text={<Trans i18nKey="activity.joinedGroup" values={{ name: event.data.groups?.name }} components={{ b: <span className="font-bold" /> }} />}
                         timestamp={event.timestamp}
                         isLast={isLast}
                         onClick={event.data.groups?.id ? () => navigate(`/grup/${event.data.groups.id}`) : undefined}
@@ -252,7 +252,7 @@ export default function Hareketler() {
                         key={`s-${event.timestamp}`}
                         icon="lucide:bookmark-check"
                         tone="bg-secondary text-primary"
-                        text={<span className="font-bold">Bir tahmini kaydettin.</span>}
+                        text={<span className="font-bold">{t('activity.savedPrediction')}</span>}
                         timestamp={event.timestamp}
                         isLast={isLast}
                         onClick={() => navigate('/tahmin-kaydi', { state: { prediction: event.data.predictions } })}
@@ -270,17 +270,18 @@ export default function Hareketler() {
                         icon="lucide:message-circle"
                         tone="bg-secondary text-primary"
                         text={
-                          <>
-                            <span className="font-bold">{target?.profiles?.display_name || 'Bir kullanıcının'}</span> tahminine
-                            yorum yaptın.
-                          </>
+                          <Trans
+                            i18nKey="activity.commentedOn"
+                            values={{ name: target?.profiles?.display_name || t('activity.fallbackAUser') }}
+                            components={{ b: <span className="font-bold" /> }}
+                          />
                         }
                         timestamp={event.timestamp}
                         isLast={isLast}
                         onClick={() => navigate('/tahmin-kaydi', { state: { prediction: target } })}
                       >
                         <div className="mt-2 rounded-theme border border-border bg-card p-3 shadow-sm">
-                          <p className="text-[11px] leading-4 text-muted-foreground">Yorumun</p>
+                          <p className="text-[11px] leading-4 text-muted-foreground">{t('activity.yourComment')}</p>
                           <p className="mt-1 text-[12px] font-medium leading-5 text-foreground">{event.data.content}</p>
                         </div>
                       </EventRow>
@@ -294,10 +295,11 @@ export default function Hareketler() {
                         icon="lucide:message-circle"
                         tone="bg-primary text-primary-foreground"
                         text={
-                          <>
-                            <span className="font-bold">{event.data.commenter?.display_name || 'Biri'}</span> tahminine yorum
-                            yaptı.
-                          </>
+                          <Trans
+                            i18nKey="activity.someoneCommented"
+                            values={{ name: event.data.commenter?.display_name || t('activity.fallbackSomeone') }}
+                            components={{ b: <span className="font-bold" /> }}
+                          />
                         }
                         timestamp={event.timestamp}
                         isLast={isLast}
@@ -318,9 +320,11 @@ export default function Hareketler() {
                         icon="lucide:user-plus"
                         tone="bg-primary text-primary-foreground"
                         text={
-                          <>
-                            <span className="font-bold">{p?.display_name || 'Biri'}</span> seni takip etmeye başladı.
-                          </>
+                          <Trans
+                            i18nKey="activity.someoneFollowed"
+                            values={{ name: p?.display_name || t('activity.fallbackSomeone') }}
+                            components={{ b: <span className="font-bold" /> }}
+                          />
                         }
                         timestamp={event.timestamp}
                         isLast={isLast}
@@ -336,9 +340,11 @@ export default function Hareketler() {
                       icon="lucide:heart"
                       tone="bg-destructive text-destructive-foreground"
                       text={
-                        <>
-                          <span className="font-bold">{event.data.profiles?.display_name || 'Biri'}</span> tahminini beğendi.
-                        </>
+                        <Trans
+                          i18nKey="activity.someoneLiked"
+                          values={{ name: event.data.profiles?.display_name || t('activity.fallbackSomeone') }}
+                          components={{ b: <span className="font-bold" /> }}
+                        />
                       }
                       timestamp={event.timestamp}
                       isLast={isLast}

@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
@@ -7,6 +8,12 @@ import { TIERS, computeBadgeStats, evaluateBadges } from '../lib/badges.js'
 import BadgeMedallion from '../components/BadgeMedallion.jsx'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
 import Card from '../components/ui/Card.jsx'
+
+// NOTE: badge.title/badge.desc (the 120-badge catalog in lib/badges.js)
+// stay Turkish for now — translating that catalog into 8 languages is a
+// separate, much larger follow-up pass, not part of this one. Everything
+// else on this screen (labels, filters, tier names via t(TIERS labelKey))
+// is fully translated.
 
 const INITIAL_PER_TIER = 6
 
@@ -46,12 +53,13 @@ function ProgressRing({ percent }) {
 }
 
 function BadgeCard({ badge, tier, earnedAt, showcased, editingShowcase, onToggleShowcase }) {
+  const { t } = useTranslation()
   return (
     <article className="relative rounded-theme border border-border bg-card p-3 shadow-sm">
       {editingShowcase && badge.earned && (
         <button
           onClick={() => onToggleShowcase(badge.slug)}
-          aria-label={showcased ? 'Vitrinden kaldır' : 'Vitrine ekle'}
+          aria-label={showcased ? t('badges.removeFromShowcaseAria') : t('badges.addToShowcaseAria')}
           className={`absolute right-2 top-2 flex h-6 w-6 items-center justify-center rounded-full ${
             showcased ? 'bg-primary text-primary-foreground' : 'bg-muted text-muted-foreground'
           }`}
@@ -72,7 +80,7 @@ function BadgeCard({ badge, tier, earnedAt, showcased, editingShowcase, onToggle
       <p className="mt-1 text-[10px] leading-4 text-muted-foreground">{badge.desc}</p>
       {badge.earned ? (
         <p className="mt-2 text-[10px] font-bold" style={{ color: tier.ink }}>
-          {tier.label} · {earnedAt ? formatDateLong(earnedAt) : 'Kazanıldı'}
+          {t(tier.labelKey)} · {earnedAt ? formatDateLong(earnedAt) : t('badges.earnedAt')}
         </p>
       ) : (
         <>
@@ -92,6 +100,7 @@ function BadgeCard({ badge, tier, earnedAt, showcased, editingShowcase, onToggle
 }
 
 export default function Rozetler() {
+  const { t } = useTranslation()
   const { user, profile, refreshProfile } = useAuth()
   const { showToast } = useToast()
   const [badges, setBadges] = useState([])
@@ -214,7 +223,7 @@ export default function Rozetler() {
   async function toggleShowcase(slug) {
     const prev = showcase
     if (!prev.includes(slug) && prev.length >= 3) {
-      showToast('Vitrinde en fazla 3 rozet gösterebilirsin.')
+      showToast(t('badges.showcaseMax'))
       return
     }
     const next = prev.includes(slug) ? prev.filter((s) => s !== slug) : [...prev, slug]
@@ -222,9 +231,7 @@ export default function Rozetler() {
     const { error } = await supabase.from('profiles').update({ showcase_badges: next }).eq('id', user.id)
     if (error) {
       setShowcase(prev)
-      showToast(
-        error.code === 'PGRST204' ? 'Rozet vitrini özelliği henüz etkin değil.' : 'Vitrin güncellenemedi, tekrar dene.'
-      )
+      showToast(error.code === 'PGRST204' ? t('badges.showcaseFeatureDisabled') : t('badges.showcaseUpdateFailed'))
       return
     }
     refreshProfile()
@@ -248,17 +255,13 @@ export default function Rozetler() {
     <div className="min-h-screen w-full bg-background text-foreground font-body">
       <div className="pb-28">
         <DetailHeader
-          title="Rozetler"
-          subtitle="Kayıtlı başarı koleksiyonun"
+          title={t('badges.title')}
+          subtitle={t('badges.subtitle')}
           centered
           trailing={
             <button
-              aria-label="Rozetler hakkında yardım"
-              onClick={() =>
-                showToast(
-                  '4 seviye var: Başlangıç (ilk adımlar), İstikrar (düzenli kullanım), Ustalık (isabet ve derinlik), Efsane (uzun vadeli, nadir başarılar). Hepsi gerçek etkinliğinden hesaplanır.'
-                )
-              }
+              aria-label={t('badges.helpAria')}
+              onClick={() => showToast(t('badges.helpBody'))}
               className="flex h-10 w-10 shrink-0 items-center justify-center rounded-theme border border-border bg-card text-muted-foreground shadow-sm"
             >
               <iconify-icon icon="lucide:circle-help" class="text-[19px]"></iconify-icon>
@@ -267,19 +270,19 @@ export default function Rozetler() {
         />
 
         {loading ? (
-          <p className="px-5 py-6 text-xs text-muted-foreground">Yükleniyor…</p>
+          <p className="px-5 py-6 text-xs text-muted-foreground">{t('common.loading')}</p>
         ) : (
           <main className="px-5">
             <section className="pt-5">
               <Card>
                 <div className="flex items-start justify-between">
                   <div>
-                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">Koleksiyon özeti</p>
+                    <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">{t('badges.collectionSummary')}</p>
                     <h1 className="mt-1 font-heading text-[27px] font-extrabold tracking-[-0.055em]">
-                      {earnedCount} rozet kazanıldı
+                      {t('badges.earnedHeading', { count: earnedCount })}
                     </h1>
                     <p className="mt-1 text-xs leading-5 text-muted-foreground">
-                      {badges.length} rozetin %{Math.round(percent)}'i kayıt defterinde doğrulandı.
+                      {t('badges.percentVerified', { total: badges.length, percent: Math.round(percent) })}
                     </p>
                   </div>
                   <ProgressRing percent={percent} />
@@ -287,15 +290,15 @@ export default function Rozetler() {
                 <div className="mt-4 grid grid-cols-3 divide-x divide-border rounded-theme bg-muted py-3">
                   <div className="px-3">
                     <p className="text-lg font-extrabold tracking-[-0.04em]">{earnedCount}</p>
-                    <p className="text-[10px] font-medium text-muted-foreground">Kazanılan</p>
+                    <p className="text-[10px] font-medium text-muted-foreground">{t('badges.earned')}</p>
                   </div>
                   <div className="px-3">
                     <p className="text-lg font-extrabold tracking-[-0.04em]">{showcase.length}</p>
-                    <p className="text-[10px] font-medium text-muted-foreground">Sergilenen</p>
+                    <p className="text-[10px] font-medium text-muted-foreground">{t('badges.showcased')}</p>
                   </div>
                   <div className="px-3">
                     <p className="text-lg font-extrabold tracking-[-0.04em]">{earnedThisMonth}</p>
-                    <p className="text-[10px] font-medium text-muted-foreground">Bu ay</p>
+                    <p className="text-[10px] font-medium text-muted-foreground">{t('badges.thisMonth')}</p>
                   </div>
                 </div>
               </Card>
@@ -304,32 +307,32 @@ export default function Rozetler() {
             <section className="mt-6">
               <div className="flex items-end justify-between">
                 <div>
-                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">Profil vitrini</p>
-                  <h2 className="mt-1 font-heading text-xl font-extrabold tracking-[-0.04em]">Öne çıkan rozetler</h2>
+                  <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">{t('badges.profileShowcase')}</p>
+                  <h2 className="mt-1 font-heading text-xl font-extrabold tracking-[-0.04em]">{t('badges.featuredBadges')}</h2>
                 </div>
                 <button onClick={() => setEditingShowcase((v) => !v)} className="text-xs font-bold text-primary">
-                  {editingShowcase ? 'Bitti' : 'Düzenle'}
+                  {editingShowcase ? t('badges.done') : t('badges.edit')}
                 </button>
               </div>
               {showcaseBadges.length === 0 && !editingShowcase ? (
                 <p className="mt-3 rounded-theme border border-dashed border-border bg-muted/60 p-4 text-center text-xs text-muted-foreground">
-                  Henüz vitrine rozet eklemedin. Düzenle'ye dokunup kazandığın rozetlerden 3 tanesini seç.
+                  {t('badges.showcaseEmpty')}
                 </p>
               ) : (
                 <div className="mt-3 flex gap-3 overflow-x-auto pb-2 pr-5">
                   {showcaseBadges.map((badge) => {
-                    const tier = TIERS.find((t) => t.key === badge.tier)
+                    const tier = TIERS.find((tr) => tr.key === badge.tier)
                     return (
                       <Card as="article" key={badge.slug} className="min-w-[202px]">
                         <div className="flex items-start justify-between">
                           <BadgeMedallion icon={badge.icon} tier={tier} earned size="md" />
-                          <button aria-label="Vitrinden kaldır" onClick={() => toggleShowcase(badge.slug)} className="text-muted-foreground">
+                          <button aria-label={t('badges.removeFromShowcaseAria')} onClick={() => toggleShowcase(badge.slug)} className="text-muted-foreground">
                             <iconify-icon icon="lucide:x" class="text-base"></iconify-icon>
                           </button>
                         </div>
                         <p className="mt-4 font-heading text-sm font-extrabold">{badge.title}</p>
                         <p className="mt-1 text-[10px] font-bold" style={{ color: tier.ink }}>
-                          {tier.label}
+                          {t(tier.labelKey)}
                         </p>
                       </Card>
                     )
@@ -337,9 +340,7 @@ export default function Rozetler() {
                 </div>
               )}
               {editingShowcase && (
-                <p className="mt-2 text-[11px] text-muted-foreground">
-                  Aşağıdaki kataloğunda kazandığın rozetlerin üzerindeki yıldıza dokunarak vitrine ekle (en fazla 3).
-                </p>
+                <p className="mt-2 text-[11px] text-muted-foreground">{t('badges.showcaseEditHint')}</p>
               )}
             </section>
 
@@ -350,16 +351,16 @@ export default function Rozetler() {
                   type="search"
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
-                  aria-label="Rozet ara"
-                  placeholder="Rozet ara"
+                  aria-label={t('badges.searchAria')}
+                  placeholder={t('badges.searchPlaceholder')}
                   className="min-w-0 flex-1 bg-transparent text-sm outline-none placeholder:text-muted-foreground"
                 />
               </div>
               <div className="mt-3 flex gap-2 overflow-x-auto pb-1">
                 {[
-                  { key: 'all', label: `Tümü · ${badges.length}` },
-                  { key: 'earned', label: `Kazanılan · ${earnedCount}` },
-                  { key: 'locked', label: `Kilitli · ${badges.length - earnedCount}` },
+                  { key: 'all', label: t('badges.filterAll', { count: badges.length }) },
+                  { key: 'earned', label: t('badges.filterEarned', { count: earnedCount }) },
+                  { key: 'locked', label: t('badges.filterLocked', { count: badges.length - earnedCount }) },
                 ].map((f) => (
                   <button
                     key={f.key}
@@ -379,29 +380,29 @@ export default function Rozetler() {
                     !tierFilter ? 'bg-secondary text-secondary-foreground' : 'border border-border bg-card text-muted-foreground'
                   }`}
                 >
-                  Tüm seviyeler
+                  {t('badges.allTiers')}
                 </button>
-                {TIERS.map((t) => (
+                {TIERS.map((tier) => (
                   <button
-                    key={t.key}
-                    onClick={() => setTierFilter(t.key)}
+                    key={tier.key}
+                    onClick={() => setTierFilter(tier.key)}
                     className={`shrink-0 rounded-full px-3 py-1.5 text-[10px] font-bold ${
-                      tierFilter === t.key ? 'bg-secondary text-secondary-foreground' : 'border border-border bg-card text-muted-foreground'
+                      tierFilter === tier.key ? 'bg-secondary text-secondary-foreground' : 'border border-border bg-card text-muted-foreground'
                     }`}
                   >
-                    {t.label}
+                    {t(tier.labelKey)}
                   </button>
                 ))}
               </div>
             </section>
 
             <section className="mt-6 pb-8">
-              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">Rozet kataloğu</p>
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">{t('badges.catalogTitle')}</p>
 
               {isFiltering ? (
                 filtered.length === 0 ? (
                   <p className="mt-4 rounded-theme border border-dashed border-border bg-muted/60 p-4 text-center text-xs text-muted-foreground">
-                    Eşleşen rozet yok.
+                    {t('badges.noMatches')}
                   </p>
                 ) : (
                   <div className="mt-3 grid grid-cols-2 gap-3">
@@ -428,13 +429,13 @@ export default function Rozetler() {
                     <div key={tier.key} className="mt-6 first:mt-3">
                       <div className="flex items-center justify-between">
                         <h2 className="font-heading text-xl font-extrabold tracking-[-0.04em]" style={{ color: tier.ink }}>
-                          {tier.label}
+                          {t(tier.labelKey)}
                         </h2>
                         <span
                           className="rounded-full px-2.5 py-1 text-[10px] font-bold"
                           style={{ background: tier.tint, color: tier.ink }}
                         >
-                          {tierBadges.length} rozet
+                          {t('badges.badgeCount', { count: tierBadges.length })}
                         </span>
                       </div>
                       <div className="mt-3 grid grid-cols-2 gap-3">
@@ -455,7 +456,7 @@ export default function Rozetler() {
                           onClick={() => setExpandedTiers((prev) => new Set(prev).add(tier.key))}
                           className="mt-3 flex w-full items-center justify-between rounded-theme border border-border bg-card px-4 py-3 text-xs font-bold text-primary"
                         >
-                          Diğer {remaining} {tier.label} rozetini gör
+                          {t('badges.seeMoreOfTier', { count: remaining, tier: t(tier.labelKey) })}
                           <iconify-icon icon="lucide:chevron-down" class="text-base"></iconify-icon>
                         </button>
                       )}
@@ -474,7 +475,7 @@ export default function Rozetler() {
           className="flex h-12 w-full items-center justify-center gap-2 rounded-theme bg-primary text-sm font-bold text-primary-foreground shadow-sm transition-transform duration-150 active:scale-[0.98]"
         >
           <iconify-icon icon="lucide:sliders-horizontal" class="text-lg"></iconify-icon>
-          Rozet görünümünü düzenle
+          {t('badges.editViewCta')}
         </button>
       </div>
     </div>
