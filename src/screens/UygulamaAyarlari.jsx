@@ -1,27 +1,37 @@
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import { useTheme } from '../contexts/ThemeContext.jsx'
 import { useUserSettings } from '../hooks/useUserSettings.js'
 import { supabase } from '../lib/supabase.js'
 import { getPushSubscriptionState, subscribeToPush, unsubscribeFromPush } from '../lib/pushNotifications.js'
+import { CATEGORY_META, CATEGORY_SLUGS } from '../lib/categories.js'
+import { SUPPORTED_LANGUAGES } from '../i18n/index.js'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
 
+// value stays the code ThemeContext/useTheme actually store ('system' /
+// 'light' / 'dark') — language-independent already; labelKey/descKey are
+// what render via t().
 const THEME_OPTIONS = [
-  { value: 'system', label: 'Sistem ayarı', desc: 'Cihazının temasını takip eder', icon: 'lucide:smartphone' },
-  { value: 'light', label: 'Açık', desc: 'Her zaman açık tema', icon: 'lucide:sun' },
-  { value: 'dark', label: 'Koyu', desc: 'Her zaman koyu tema', icon: 'lucide:moon' },
+  { value: 'system', labelKey: 'appSettings.themeSystem', descKey: 'appSettings.themeSystemDesc', icon: 'lucide:smartphone' },
+  { value: 'light', labelKey: 'appSettings.themeLight', descKey: 'appSettings.themeLightDesc', icon: 'lucide:sun' },
+  { value: 'dark', labelKey: 'appSettings.themeDark', descKey: 'appSettings.themeDarkDesc', icon: 'lucide:moon' },
 ]
 
 const FONT_SCALE_OPTIONS = [
-  { value: 90, label: 'Küçük' },
-  { value: 100, label: 'Varsayılan' },
-  { value: 112, label: 'Büyük' },
-  { value: 125, label: 'Çok büyük' },
+  { value: 90, labelKey: 'appSettings.fontScaleSmall' },
+  { value: 100, labelKey: 'appSettings.fontScaleDefault' },
+  { value: 112, labelKey: 'appSettings.fontScaleLarge' },
+  { value: 125, labelKey: 'appSettings.fontScaleExtraLarge' },
 ]
 
-const INTEREST_OPTIONS = ['Spor', 'Teknoloji', 'Bilim', 'Kültür', 'Ekonomi', 'Dünya']
+// Curated subset (not the full CATEGORY_SLUGS list) — matches the six
+// real_world_events kinds actually live so far (see Kesfet.jsx's ranking
+// comment). Stored as stable slugs in settings.content.interests, not
+// display labels, same labelKey pattern as CATEGORY_META elsewhere.
+const INTEREST_SLUGS = CATEGORY_SLUGS.slice(0, 6)
 
 function Toggle({ on }) {
   return (
@@ -63,33 +73,36 @@ function Row({ icon, iconTone = 'bg-muted text-primary', title, subtitle, right,
   )
 }
 
-function buildAccountRows(email, onChangePassword, onOpenContact, onOpenMfa, onOpenFreeze, onOpenSessions) {
+function buildAccountRows(t, email, onChangePassword, onOpenContact, onOpenMfa, onOpenFreeze, onOpenSessions) {
   return [
-    { icon: 'lucide:mail', title: 'E-posta ve Telefon', subtitle: email || 'Yükleniyor…', chevron: true, onClick: onOpenContact },
-    { icon: 'lucide:key-round', title: 'Şifre değiştir', subtitle: 'Hesap güvenliğini yönet', chevron: true, onClick: onChangePassword },
-    { icon: 'lucide:badge-check', title: 'İki aşamalı doğrulama', subtitle: 'Doğrulayıcı uygulamayla koru', chevron: true, onClick: onOpenMfa },
-    { icon: 'lucide:monitor-smartphone', title: 'Aktif oturumlar', subtitle: 'Diğer cihazlardan çıkış yap', chevron: true, onClick: onOpenSessions },
-    { icon: 'lucide:pause-circle', iconTone: 'bg-muted text-muted-foreground', title: 'Hesabı geçici olarak dondur', subtitle: 'Profilini gizle, istediğinde geri dön', chevron: true, onClick: onOpenFreeze },
+    { icon: 'lucide:mail', title: t('settings.emailPhone.title'), subtitle: email || t('common.loading'), chevron: true, onClick: onOpenContact },
+    { icon: 'lucide:key-round', title: t('appSettings.changePasswordRowTitle'), subtitle: t('appSettings.changePasswordRowSubtitle'), chevron: true, onClick: onChangePassword },
+    { icon: 'lucide:badge-check', title: t('settings.twoFactor.heading'), subtitle: t('appSettings.twoFactorRowSubtitle'), chevron: true, onClick: onOpenMfa },
+    { icon: 'lucide:monitor-smartphone', title: t('settings.activeSessions.title'), subtitle: t('appSettings.activeSessionsRowSubtitle'), chevron: true, onClick: onOpenSessions },
+    { icon: 'lucide:pause-circle', iconTone: 'bg-muted text-muted-foreground', title: t('appSettings.freezeRowTitle'), subtitle: t('appSettings.freezeRowSubtitle'), chevron: true, onClick: onOpenFreeze },
   ]
 }
 
 const LEGAL_URL = 'https://lu0ji.github.io/gtf-app/legal.html'
 
-const SUPPORT_ROWS = [
-  { icon: 'lucide:sparkles', title: 'İlk kullanım rehberini tekrar gör', route: '/rehber' },
-  { icon: 'lucide:help-circle', title: 'Yardım merkezi', route: '/ayarlar/yardim-merkezi' },
-  { icon: 'lucide:scale', title: 'Topluluk kuralları', route: '/ayarlar/topluluk-kurallari' },
-  { icon: 'lucide:shield', title: 'Gizlilik politikası', url: LEGAL_URL + '#g1' },
-  { icon: 'lucide:file-text', title: 'Kullanım koşulları', url: LEGAL_URL + '#k1' },
-]
+function buildSupportRows(t) {
+  return [
+    { icon: 'lucide:sparkles', title: t('appSettings.onboardingRowTitle'), route: '/rehber' },
+    { icon: 'lucide:help-circle', title: t('help.title'), route: '/ayarlar/yardim-merkezi' },
+    { icon: 'lucide:scale', title: t('community.title'), route: '/ayarlar/topluluk-kurallari' },
+    { icon: 'lucide:shield', title: t('appSettings.privacyPolicyTitle'), url: LEGAL_URL + '#g1' },
+    { icon: 'lucide:file-text', title: t('appSettings.termsTitle'), url: LEGAL_URL + '#k1' },
+  ]
+}
 
 function PickerSheet({ title, options, value, onSelect, onClose }) {
+  const { t } = useTranslation()
   return (
     <div className="fixed inset-0 z-50 flex items-end bg-black/40" onClick={onClose}>
       <div onClick={(e) => e.stopPropagation()} className="w-full rounded-t-theme bg-background p-5 pb-8">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-heading text-lg font-bold">{title}</h2>
-          <button onClick={onClose} aria-label="Kapat" className="text-muted-foreground">
+          <button onClick={onClose} aria-label={t('common.close')} className="text-muted-foreground">
             <iconify-icon icon="lucide:x" class="text-xl"></iconify-icon>
           </button>
         </div>
@@ -113,8 +126,8 @@ function PickerSheet({ title, options, value, onSelect, onClose }) {
                   </span>
                 )}
                 <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-bold">{opt.label}</span>
-                  {opt.desc && <span className="mt-0.5 block text-[11px] text-muted-foreground">{opt.desc}</span>}
+                  <span className="block text-sm font-bold">{t(opt.labelKey)}</span>
+                  {opt.descKey && <span className="mt-0.5 block text-[11px] text-muted-foreground">{t(opt.descKey)}</span>}
                 </span>
                 {isSelected && <iconify-icon icon="lucide:check" class="text-lg text-primary"></iconify-icon>}
               </button>
@@ -126,29 +139,35 @@ function PickerSheet({ title, options, value, onSelect, onClose }) {
   )
 }
 
+// options entries can be a plain string (rendered as-is) or a
+// { value, label } pair (for slug-backed pickers like interests, where the
+// stored value must stay a stable slug but the shown text is translated).
 function TagPickerSheet({ title, subtitle, options, values, onToggle, onClose }) {
+  const { t } = useTranslation()
   return (
     <div className="fixed inset-0 z-50 flex items-end bg-black/40" onClick={onClose}>
       <div onClick={(e) => e.stopPropagation()} className="w-full rounded-t-theme bg-background p-5 pb-8">
         <div className="mb-1 flex items-center justify-between">
           <h2 className="font-heading text-lg font-bold">{title}</h2>
-          <button onClick={onClose} aria-label="Kapat" className="text-muted-foreground">
+          <button onClick={onClose} aria-label={t('common.close')} className="text-muted-foreground">
             <iconify-icon icon="lucide:x" class="text-xl"></iconify-icon>
           </button>
         </div>
         {subtitle && <p className="mb-4 text-[11px] text-muted-foreground">{subtitle}</p>}
         <div className="flex flex-wrap gap-2">
           {options.map((opt) => {
-            const selected = values.includes(opt)
+            const value = typeof opt === 'string' ? opt : opt.value
+            const label = typeof opt === 'string' ? opt : opt.label
+            const selected = values.some((v) => v.toLowerCase() === value.toLowerCase())
             return (
               <button
-                key={opt}
-                onClick={() => onToggle(opt)}
+                key={value}
+                onClick={() => onToggle(value)}
                 className={`rounded-full px-3.5 py-2 text-xs font-bold ${
                   selected ? 'bg-primary text-primary-foreground' : 'border border-border bg-card text-foreground'
                 }`}
               >
-                {opt}
+                {label}
               </button>
             )
           })}
@@ -159,6 +178,7 @@ function TagPickerSheet({ title, subtitle, options, values, onToggle, onClose })
 }
 
 function WordListSheet({ title, subtitle, words, onAdd, onRemove, onClose }) {
+  const { t } = useTranslation()
   const [draft, setDraft] = useState('')
 
   function submit() {
@@ -173,7 +193,7 @@ function WordListSheet({ title, subtitle, words, onAdd, onRemove, onClose }) {
       <div onClick={(e) => e.stopPropagation()} className="w-full rounded-t-theme bg-background p-5 pb-8">
         <div className="mb-1 flex items-center justify-between">
           <h2 className="font-heading text-lg font-bold">{title}</h2>
-          <button onClick={onClose} aria-label="Kapat" className="text-muted-foreground">
+          <button onClick={onClose} aria-label={t('common.close')} className="text-muted-foreground">
             <iconify-icon icon="lucide:x" class="text-xl"></iconify-icon>
           </button>
         </div>
@@ -185,23 +205,23 @@ function WordListSheet({ title, subtitle, words, onAdd, onRemove, onClose }) {
             onKeyDown={(e) => {
               if (e.key === 'Enter') submit()
             }}
-            placeholder="Kelime ekle…"
+            placeholder={t('appSettings.mutedWordPlaceholder')}
             className="h-11 flex-1 rounded-theme border border-border bg-input px-3.5 text-sm text-foreground outline-none placeholder:text-muted-foreground"
           />
           <button
             onClick={submit}
-            aria-label="Kelime ekle"
+            aria-label={t('appSettings.mutedWordAddAria')}
             className="flex h-11 w-11 shrink-0 items-center justify-center rounded-theme bg-primary text-primary-foreground"
           >
             <iconify-icon icon="lucide:plus" class="text-lg"></iconify-icon>
           </button>
         </div>
         <div className="mt-4 flex flex-wrap gap-2">
-          {words.length === 0 && <p className="text-xs text-muted-foreground">Henüz kelime eklenmedi.</p>}
+          {words.length === 0 && <p className="text-xs text-muted-foreground">{t('appSettings.mutedWordsEmpty')}</p>}
           {words.map((w) => (
             <span key={w} className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-xs font-semibold">
               {w}
-              <button onClick={() => onRemove(w)} aria-label={`${w} kelimesini kaldır`}>
+              <button onClick={() => onRemove(w)} aria-label={t('appSettings.mutedWordRemoveAria', { word: w })}>
                 <iconify-icon icon="lucide:x" class="text-sm"></iconify-icon>
               </button>
             </span>
@@ -271,12 +291,14 @@ function localCacheBytes() {
 }
 
 export default function UygulamaAyarlari() {
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const { signOut, user, profile, refreshProfile } = useAuth()
   const { showToast } = useToast()
   const { theme, setTheme, fontScale, setFontScale, reduceMotion, setReduceMotion } = useTheme()
   const { settings, update: updateSettings } = useUserSettings()
   const accountRows = buildAccountRows(
+    t,
     user?.email,
     () => navigate('/ayarlar/sifre-degistir'),
     () => navigate('/ayarlar/eposta-telefon'),
@@ -284,6 +306,7 @@ export default function UygulamaAyarlari() {
     () => navigate('/ayarlar/hesabi-dondur'),
     () => navigate('/ayarlar/aktif-oturumlar')
   )
+  const supportRows = buildSupportRows(t)
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false)
   const [deleting, setDeleting] = useState(false)
   const [openPicker, setOpenPicker] = useState(null)
@@ -311,10 +334,10 @@ export default function UygulamaAyarlari() {
       } else {
         await subscribeToPush(user.id)
         setPushState('subscribed')
-        showToast('Push bildirimleri açıldı.', 'success')
+        showToast(t('appSettings.pushEnabledToast'), 'success')
       }
     } catch (e) {
-      showToast(e.message || 'Bildirimler açılamadı, tekrar dene.')
+      showToast(e.message || t('appSettings.pushFailedToast'))
       setPushState(await getPushSubscriptionState())
     } finally {
       setPushBusy(false)
@@ -322,14 +345,14 @@ export default function UygulamaAyarlari() {
   }
 
   async function handleCopyInvite() {
-    const message = `GTF'e katıl, ikimiz de 100 puan kazanalım! Davet kodum: @${profile?.username}`
+    const message = t('appSettings.inviteMessage', { username: profile?.username })
     try {
       await navigator.clipboard.writeText(message)
       setInviteCopied(true)
-      showToast('Davet mesajı kopyalandı, dilediğin yere yapıştır.', 'success')
+      showToast(t('appSettings.inviteCopiedToast'), 'success')
       setTimeout(() => setInviteCopied(false), 2000)
     } catch {
-      showToast('Kopyalanamadı, tekrar dene.')
+      showToast(t('appSettings.copyFailedToast'))
     }
   }
 
@@ -353,8 +376,10 @@ export default function UygulamaAyarlari() {
     }
   }, [user])
 
-  const themeLabel = THEME_OPTIONS.find((o) => o.value === theme)?.label || 'Sistem ayarı'
-  const fontScaleLabel = FONT_SCALE_OPTIONS.find((o) => o.value === fontScale)?.label || 'Varsayılan'
+  const themeLabel = t(THEME_OPTIONS.find((o) => o.value === theme)?.labelKey || 'appSettings.themeSystem')
+  const fontScaleLabel = t(FONT_SCALE_OPTIONS.find((o) => o.value === fontScale)?.labelKey || 'appSettings.fontScaleDefault')
+  const activeLanguage = i18n.resolvedLanguage || i18n.language
+  const appLanguageLabel = SUPPORTED_LANGUAGES.find((l) => l.code === activeLanguage)?.nativeName || activeLanguage
 
   async function handleSignOut() {
     await signOut()
@@ -366,7 +391,7 @@ export default function UygulamaAyarlari() {
     setDeleting(true)
     const { error } = await supabase.functions.invoke('delete-account')
     if (error) {
-      showToast('Hesap silinemedi, tekrar dene.')
+      showToast(t('appSettings.deleteAccountFailedToast'))
       setDeleting(false)
       return
     }
@@ -380,7 +405,7 @@ export default function UygulamaAyarlari() {
     const next = !profile.is_private
     const { error } = await supabase.from('profiles').update({ is_private: next }).eq('id', user.id)
     if (error) {
-      showToast('Değişiklik kaydedilemedi, tekrar dene.')
+      showToast(t('appSettings.changeSaveFailedToast'))
     } else {
       await refreshProfile()
     }
@@ -391,9 +416,15 @@ export default function UygulamaAyarlari() {
     updateSettings('notifications', { [key]: !settings.notifications[key] })
   }
 
+  // Case-insensitive match: interests saved before this screen switched
+  // from Turkish display labels ("Spor") to stable slugs ("spor") are still
+  // sitting in some accounts' settings.content.interests — comparing
+  // loosely here means toggling off an old capitalized entry actually
+  // removes it instead of adding a second, differently-cased duplicate.
   function toggleInterest(value) {
     const current = settings.content.interests
-    const next = current.includes(value) ? current.filter((v) => v !== value) : [...current, value]
+    const isSelected = current.some((v) => v.toLowerCase() === value.toLowerCase())
+    const next = isSelected ? current.filter((v) => v.toLowerCase() !== value.toLowerCase()) : [...current, value]
     updateSettings('content', { interests: next })
   }
 
@@ -436,9 +467,9 @@ export default function UygulamaAyarlari() {
       link.click()
       link.remove()
       URL.revokeObjectURL(url)
-      showToast('Verilerin indirildi.', 'success')
+      showToast(t('appSettings.exportSuccessToast'), 'success')
     } catch {
-      showToast('İndirme başlatılamadı, tekrar dene.')
+      showToast(t('appSettings.exportFailedToast'))
     }
     setExporting(false)
   }
@@ -453,15 +484,15 @@ export default function UygulamaAyarlari() {
       }
       toRemove.forEach((key) => localStorage.removeItem(key))
       setCacheBytes(localCacheBytes())
-      showToast('Önbellek temizlendi.', 'success')
+      showToast(t('appSettings.clearCacheSuccessToast'), 'success')
     } catch {
-      showToast('Önbellek temizlenemedi.')
+      showToast(t('appSettings.clearCacheFailedToast'))
     }
   }
 
   return (
     <div className="min-h-screen w-full bg-background pb-10 text-foreground font-body">
-      <DetailHeader title="Uygulama ayarları" subtitle="Hesabın, deneyimin ve verilerin senin kontrolünde." />
+      <DetailHeader title={t('appSettings.title')} subtitle={t('appSettings.subtitle')} />
 
       <main className="px-5 pb-8 pt-6">
         <section className="rounded-theme border-2 border-accent bg-accent/10 p-4 shadow-sm">
@@ -470,8 +501,8 @@ export default function UygulamaAyarlari() {
               <iconify-icon icon="lucide:gift" class="text-base"></iconify-icon>
             </span>
             <div>
-              <h2 className="text-sm font-bold text-foreground">Arkadaşını davet et</h2>
-              <p className="mt-0.5 text-[11px] text-muted-foreground">Katıldığında ikiniz de 100 puan kazanır.</p>
+              <h2 className="text-sm font-bold text-foreground">{t('appSettings.inviteTitle')}</h2>
+              <p className="mt-0.5 text-[11px] text-muted-foreground">{t('appSettings.inviteSubtitle')}</p>
             </div>
           </div>
           <button
@@ -479,65 +510,65 @@ export default function UygulamaAyarlari() {
             className="mt-3 flex w-full items-center justify-center gap-2 rounded-theme bg-accent py-2.5 text-xs font-bold text-accent-foreground"
           >
             <iconify-icon icon={inviteCopied ? 'lucide:check' : 'lucide:copy'} class="text-sm"></iconify-icon>
-            {inviteCopied ? 'Kopyalandı' : 'Davet kodunu kopyala'}
+            {inviteCopied ? t('record.copiedLabel') : t('appSettings.inviteCopyCta')}
           </button>
         </section>
 
         <section className="mt-8">
-          <SectionHeader icon="lucide:shield-check" title="Hesap ve güvenlik" subtitle="Giriş bilgilerin ve hesabının güvenliği" />
+          <SectionHeader icon="lucide:shield-check" title={t('appSettings.accountSecurityTitle')} subtitle={t('appSettings.accountSecuritySubtitle')} />
           <RowList rows={accountRows} />
         </section>
 
         <section className="mt-8">
-          <SectionHeader icon="lucide:lock-keyhole" title="Gizlilik" subtitle="Kimlerin seni ve kayıtlarını görebileceği" />
+          <SectionHeader icon="lucide:lock-keyhole" title={t('appSettings.privacyTitle')} subtitle={t('appSettings.privacySubtitle')} />
           <div className="overflow-hidden rounded-theme border border-border bg-card shadow-sm">
             <Row
               icon="lucide:user-round-lock"
-              title="Gizli hesap"
-              subtitle={profile?.is_private ? 'Yalnızca onayladığın kişiler tahminlerini görür' : 'Herkes tahminlerini görebilir'}
+              title={t('appSettings.privateAccountTitle')}
+              subtitle={profile?.is_private ? t('appSettings.privateAccountOnSubtitle') : t('appSettings.privateAccountOffSubtitle')}
               onClick={handleTogglePrivate}
               right={<Toggle on={!!profile?.is_private} />}
             />
             <Row
               icon="lucide:eye"
-              title="Tahmin görünürlüğü"
-              subtitle="Kim görebilir, ne zaman görebilir"
+              title={t('settings.predictionVisibility.heading')}
+              subtitle={t('appSettings.predictionVisibilityRowSubtitle')}
               onClick={() => navigate('/ayarlar/tahmin-gorunurlugu')}
               right={<iconify-icon icon="lucide:chevron-right" class="text-lg text-muted-foreground"></iconify-icon>}
             />
             <Row
               icon="lucide:user-round-check"
-              title="Takip istekleri"
-              subtitle={pendingCount === 0 ? 'Bekleyen istek yok' : `${pendingCount} bekleyen istek`}
+              title={t('settings.followRequests.title')}
+              subtitle={pendingCount === 0 ? t('settings.followRequests.noneSubtitle') : t('settings.followRequests.countSubtitle', { count: pendingCount })}
               badge={pendingCount > 0 ? String(pendingCount) : undefined}
               onClick={() => navigate('/ayarlar/takip-istekleri')}
               right={<iconify-icon icon="lucide:chevron-right" class="text-lg text-muted-foreground"></iconify-icon>}
             />
             <Row
               icon="lucide:mail-check"
-              title="Mesaj istekleri"
-              subtitle="Kim sana mesaj gönderebilir"
+              title={t('settings.messageRequests.title')}
+              subtitle={t('appSettings.messageRequestsRowSubtitle')}
               onClick={() => navigate('/ayarlar/mesaj-istekleri')}
               right={<iconify-icon icon="lucide:chevron-right" class="text-lg text-muted-foreground"></iconify-icon>}
             />
             <Row
               icon="lucide:at-sign"
-              title="Etiketleme ve Bahsetmeler"
-              subtitle="Kim seni yorumlarda bahsedebilir"
+              title={t('settings.mentions.title')}
+              subtitle={t('appSettings.mentionsRowSubtitle')}
               onClick={() => navigate('/ayarlar/etiketleme-bahsetmeler')}
               right={<iconify-icon icon="lucide:chevron-right" class="text-lg text-muted-foreground"></iconify-icon>}
             />
             <Row
               icon="lucide:radio"
-              title="Çevrimiçi durumunu göster"
-              subtitle="Mesajlarda aktif olduğun görünür"
+              title={t('appSettings.showOnlineTitle')}
+              subtitle={t('appSettings.showOnlineSubtitle')}
               onClick={() => updateSettings('privacy', { showOnline: !settings.privacy.showOnline })}
               right={<Toggle on={settings.privacy.showOnline} />}
             />
             <Row
               icon="lucide:ban"
-              title="Engellenen hesaplar"
-              subtitle={blockedCount === 0 ? 'Kimseyi engellemedin' : `${blockedCount} hesap engellendi`}
+              title={t('settings.blockedAccounts.title')}
+              subtitle={blockedCount === 0 ? t('settings.blockedAccounts.noneSubtitle') : t('settings.blockedAccounts.countSubtitle', { count: blockedCount })}
               last
               onClick={() => navigate('/ayarlar/engellenenler')}
               right={<iconify-icon icon="lucide:chevron-right" class="text-lg text-muted-foreground"></iconify-icon>}
@@ -546,55 +577,61 @@ export default function UygulamaAyarlari() {
         </section>
 
         <section className="mt-8">
-          <SectionHeader icon="lucide:bell-ring" title="Bildirimler" subtitle="Hareketler akışında neyi görmek istediğin" />
+          <SectionHeader icon="lucide:bell-ring" title={t('appSettings.notificationsTitle')} subtitle={t('appSettings.notificationsSubtitle')} />
           <RowList
             rows={[
               {
                 icon: 'lucide:bell',
                 iconTone: pushState === 'subscribed' ? 'bg-success/10 text-success' : 'bg-muted text-primary',
-                title: 'Push bildirimleri',
+                title: t('appSettings.pushTitle'),
                 subtitle:
                   pushState === 'unsupported'
-                    ? 'Bu tarayıcı desteklemiyor'
+                    ? t('appSettings.pushUnsupported')
                     : pushState === 'denied'
-                      ? 'Tarayıcı ayarlarından izin vermen gerek'
+                      ? t('appSettings.pushDenied')
                       : pushState === 'subscribed'
-                        ? 'Bu cihazda açık'
-                        : 'Uygulama kapalıyken de haber al',
+                        ? t('appSettings.pushOn')
+                        : t('appSettings.pushOff'),
                 toggle: pushState === 'subscribed',
                 onClick: pushState === 'unsupported' || pushState === 'denied' || pushBusy ? undefined : handleTogglePush,
               },
-              { icon: 'lucide:heart', title: 'Beğeniler', subtitle: 'Tahmin ve yorum beğenileri', toggle: settings.notifications.likes, onClick: () => toggleNotification('likes') },
-              { icon: 'lucide:message-circle', title: 'Yorumlar', subtitle: 'Kayıtlarına gelen yanıtlar', toggle: settings.notifications.comments, onClick: () => toggleNotification('comments') },
-              { icon: 'lucide:user-plus', title: 'Yeni takipçiler', subtitle: 'Takip istekleri ve yeni bağlantılar', toggle: settings.notifications.newFollowers, onClick: () => toggleNotification('newFollowers') },
-              { icon: 'lucide:users-round', title: 'Grup etkinlikleri', subtitle: 'Takip ettiğin gruplardaki hareketler', toggle: settings.notifications.groupActivity, onClick: () => toggleNotification('groupActivity') },
-              { icon: 'lucide:send', title: 'Mesajlar', subtitle: 'Yeni mesajlar ve istekler', toggle: settings.notifications.messages, onClick: () => toggleNotification('messages') },
-              { icon: 'lucide:stamp', iconTone: 'bg-secondary text-accent', title: 'Mühür açılmaları', subtitle: 'Tahminlerin sonuç zamanı geldiğinde', toggle: settings.notifications.sealOpenings, onClick: () => toggleNotification('sealOpenings') },
+              { icon: 'lucide:heart', title: t('appSettings.likesTitle'), subtitle: t('appSettings.likesSubtitle'), toggle: settings.notifications.likes, onClick: () => toggleNotification('likes') },
+              { icon: 'lucide:message-circle', title: t('appSettings.commentsTitle'), subtitle: t('appSettings.commentsSubtitle'), toggle: settings.notifications.comments, onClick: () => toggleNotification('comments') },
+              { icon: 'lucide:user-plus', title: t('appSettings.newFollowersTitle'), subtitle: t('appSettings.newFollowersSubtitle'), toggle: settings.notifications.newFollowers, onClick: () => toggleNotification('newFollowers') },
+              { icon: 'lucide:users-round', title: t('appSettings.groupActivityTitle'), subtitle: t('appSettings.groupActivitySubtitle'), toggle: settings.notifications.groupActivity, onClick: () => toggleNotification('groupActivity') },
+              { icon: 'lucide:send', title: t('nav.messages'), subtitle: t('appSettings.messagesNotifSubtitle'), toggle: settings.notifications.messages, onClick: () => toggleNotification('messages') },
+              { icon: 'lucide:stamp', iconTone: 'bg-secondary text-accent', title: t('appSettings.sealOpeningsTitle'), subtitle: t('appSettings.sealOpeningsSubtitle'), toggle: settings.notifications.sealOpenings, onClick: () => toggleNotification('sealOpenings') },
             ]}
           />
         </section>
 
         <section className="mt-8">
-          <SectionHeader icon="lucide:sliders-horizontal" title="İçerik tercihleri" subtitle="Akışını ilgine göre şekillendir" />
+          <SectionHeader icon="lucide:sliders-horizontal" title={t('appSettings.contentPrefsTitle')} subtitle={t('appSettings.contentPrefsSubtitle')} />
           <div className="overflow-hidden rounded-theme border border-border bg-card shadow-sm">
             <Row
               icon="lucide:tags"
-              title="İlgi alanların"
-              subtitle={settings.content.interests.length === 0 ? 'Henüz seçmedin' : settings.content.interests.join(', ')}
+              title={t('appSettings.interestsTitle')}
+              subtitle={
+                settings.content.interests.length === 0
+                  ? t('appSettings.interestsEmptySubtitle')
+                  : settings.content.interests
+                      .map((v) => t(CATEGORY_META[v.toLowerCase()]?.labelKey) || v)
+                      .join(', ')
+              }
               onClick={() => setOpenPicker('interests')}
               right={<iconify-icon icon="lucide:chevron-right" class="text-lg text-muted-foreground"></iconify-icon>}
             />
             <Row
               icon="lucide:volume-x"
-              title="Sessize alınan kelimeler"
-              subtitle={settings.content.mutedWords.length === 0 ? 'Kelime gizlenmiyor' : `${settings.content.mutedWords.length} kelime gizleniyor`}
+              title={t('appSettings.mutedWordsTitle')}
+              subtitle={settings.content.mutedWords.length === 0 ? t('appSettings.mutedWordsEmptySubtitle') : t('appSettings.mutedWordsCountSubtitle', { count: settings.content.mutedWords.length })}
               onClick={() => setOpenPicker('mutedWords')}
               right={<iconify-icon icon="lucide:chevron-right" class="text-lg text-muted-foreground"></iconify-icon>}
             />
             <Row
               icon="lucide:shield-check"
-              title="Hassas içerik kontrolü"
-              subtitle="Hassas işaretli kayıtları nasıl göreceğin"
+              title={t('appSettings.sensitiveContentRowTitle')}
+              subtitle={t('appSettings.sensitiveContentRowSubtitle')}
               last
               onClick={() => navigate('/ayarlar/hassas-icerik')}
               right={<iconify-icon icon="lucide:chevron-right" class="text-lg text-muted-foreground"></iconify-icon>}
@@ -603,18 +640,20 @@ export default function UygulamaAyarlari() {
         </section>
 
         <section className="mt-8">
-          <SectionHeader icon="lucide:languages" title="Dil ve bölge" subtitle="Uygulamayı tercih ettiğin dilde kullan" />
+          <SectionHeader icon="lucide:languages" title={t('appSettings.languageRegionTitle')} subtitle={t('appSettings.languageRegionSubtitle')} />
           <div className="overflow-hidden rounded-theme border border-border bg-card shadow-sm">
             <Row
               icon="lucide:globe-2"
               iconTone="bg-muted text-muted-foreground"
-              title="Uygulama dili"
-              subtitle="Şu an yalnızca Türkçe · diğer diller henüz yok"
+              title={t('appSettings.appLanguageTitle')}
+              subtitle={appLanguageLabel}
+              onClick={() => navigate('/ayarlar/bolge-tarih')}
+              right={<iconify-icon icon="lucide:chevron-right" class="text-lg text-muted-foreground"></iconify-icon>}
             />
             <Row
               icon="lucide:calendar-clock"
-              title="Bölge ve Tarih Biçimi"
-              subtitle="Saat biçimi tercihin"
+              title={t('settings.regionTitle')}
+              subtitle={t('appSettings.regionRowSubtitle')}
               last
               onClick={() => navigate('/ayarlar/bolge-tarih')}
               right={<iconify-icon icon="lucide:chevron-right" class="text-lg text-muted-foreground"></iconify-icon>}
@@ -623,26 +662,26 @@ export default function UygulamaAyarlari() {
         </section>
 
         <section className="mt-8">
-          <SectionHeader icon="lucide:palette" title="Görünüm" subtitle="Ekranı kendine uygun hale getir" />
+          <SectionHeader icon="lucide:palette" title={t('appSettings.appearanceTitle')} subtitle={t('appSettings.appearanceSubtitle')} />
           <div className="overflow-hidden rounded-theme border border-border bg-card shadow-sm">
             <Row
               icon="lucide:sun-moon"
-              title="Tema"
+              title={t('appSettings.themeRowTitle')}
               subtitle={themeLabel}
               onClick={() => setOpenPicker('theme')}
               right={<iconify-icon icon="lucide:chevron-right" class="text-lg text-muted-foreground"></iconify-icon>}
             />
             <Row
               icon="lucide:align-left"
-              title="Yazı boyutu"
+              title={t('appSettings.fontSizeRowTitle')}
               subtitle={fontScaleLabel}
               onClick={() => setOpenPicker('fontScale')}
               right={<iconify-icon icon="lucide:chevron-right" class="text-lg text-muted-foreground"></iconify-icon>}
             />
             <Row
               icon="lucide:circle-off"
-              title="Hareketleri azalt"
-              subtitle="Geçiş ve animasyonları sadeleştir"
+              title={t('appSettings.reduceMotionTitle')}
+              subtitle={t('appSettings.reduceMotionSubtitle')}
               last
               onClick={() => setReduceMotion(!reduceMotion)}
               right={<Toggle on={reduceMotion} />}
@@ -651,26 +690,26 @@ export default function UygulamaAyarlari() {
         </section>
 
         <section className="mt-8">
-          <SectionHeader icon="lucide:database" title="Veri kullanımı" subtitle="Verilerin ve cihaz depolaman" />
+          <SectionHeader icon="lucide:database" title={t('appSettings.dataUsageTitle')} subtitle={t('appSettings.dataUsageSubtitle')} />
           <div className="overflow-hidden rounded-theme border border-border bg-card shadow-sm">
             <Row
               icon="lucide:download"
-              title="Verilerini indir"
-              subtitle={exporting ? 'Hazırlanıyor…' : 'Tahminlerin, yorumların ve bağlantıların (JSON)'}
+              title={t('appSettings.exportDataTitle')}
+              subtitle={exporting ? t('appSettings.exportDataPreparing') : t('appSettings.exportDataSubtitle')}
               onClick={handleExportData}
               right={<iconify-icon icon="lucide:chevron-right" class="text-lg text-muted-foreground"></iconify-icon>}
             />
             <Row
               icon="lucide:trash-2"
-              title="Önbelleği temizle"
-              subtitle={`Cihazında ${bytesLabel(cacheBytes)} kullanılıyor`}
+              title={t('appSettings.clearCacheTitle')}
+              subtitle={t('appSettings.clearCacheSubtitle', { size: bytesLabel(cacheBytes) })}
               onClick={handleClearCache}
               right={<iconify-icon icon="lucide:chevron-right" class="text-lg text-muted-foreground"></iconify-icon>}
             />
             <Row
               icon="lucide:history"
-              title="Arama geçmişi"
-              subtitle="Bu cihazdaki son aramaların"
+              title={t('settings.searchHistory.title')}
+              subtitle={t('appSettings.searchHistoryRowSubtitle')}
               last
               onClick={() => navigate('/ayarlar/arama-gecmisi')}
               right={<iconify-icon icon="lucide:chevron-right" class="text-lg text-muted-foreground"></iconify-icon>}
@@ -679,9 +718,9 @@ export default function UygulamaAyarlari() {
         </section>
 
         <section className="mt-8">
-          <SectionHeader icon="lucide:circle-help" title="Destek ve yasal" subtitle="GTF hakkında daha fazlası" />
+          <SectionHeader icon="lucide:circle-help" title={t('appSettings.supportLegalTitle')} subtitle={t('appSettings.supportLegalSubtitle')} />
           <div className="overflow-hidden rounded-theme border border-border bg-card shadow-sm">
-            {SUPPORT_ROWS.map((row, i) => {
+            {supportRows.map((row, i) => {
               const isInteractive = Boolean(row.url || row.route)
               const Comp = isInteractive ? 'button' : 'div'
               const onClick = row.route
@@ -693,7 +732,7 @@ export default function UygulamaAyarlari() {
                 <Comp
                   key={row.title}
                   onClick={onClick}
-                  className={`flex w-full items-center gap-3 p-4 text-left ${isInteractive ? 'transition-colors duration-150 active:bg-muted' : ''} ${i < SUPPORT_ROWS.length - 1 ? 'border-b border-border' : ''}`}
+                  className={`flex w-full items-center gap-3 p-4 text-left ${isInteractive ? 'transition-colors duration-150 active:bg-muted' : ''} ${i < supportRows.length - 1 ? 'border-b border-border' : ''}`}
                 >
                   <span className="flex h-10 w-10 items-center justify-center rounded-theme bg-muted text-primary">
                     <iconify-icon icon={row.icon} class="text-lg"></iconify-icon>
@@ -718,8 +757,8 @@ export default function UygulamaAyarlari() {
               <iconify-icon icon="lucide:log-out" class="text-lg"></iconify-icon>
             </span>
             <span className="flex-1">
-              <span className="block text-sm font-bold">Çıkış yap</span>
-              <span className="mt-0.5 block text-[11px] text-muted-foreground">Bu cihazdaki oturumunu kapat</span>
+              <span className="block text-sm font-bold">{t('appSettings.signOutTitle')}</span>
+              <span className="mt-0.5 block text-[11px] text-muted-foreground">{t('appSettings.signOutSubtitle')}</span>
             </span>
             <iconify-icon icon="lucide:chevron-right" class="text-lg text-muted-foreground"></iconify-icon>
           </button>
@@ -731,22 +770,22 @@ export default function UygulamaAyarlari() {
               <iconify-icon icon="lucide:triangle-alert" class="text-lg"></iconify-icon>
             </span>
             <div className="min-w-0 flex-1">
-              <h2 className="font-heading text-[15px] font-bold text-destructive">Tehlikeli bölge</h2>
+              <h2 className="font-heading text-[15px] font-bold text-destructive">{t('appSettings.dangerZoneTitle')}</h2>
               <p className="mt-1 text-[11px] leading-4 text-muted-foreground">
-                Hesabını silmek tüm tahmin geçmişini, bağlantılarını ve verilerini kalıcı olarak kaldırır.
+                {t('appSettings.dangerZoneBody')}
               </p>
               <button
                 onClick={() => setShowDeleteConfirm(true)}
                 className="mt-4 flex items-center gap-2 rounded-theme border border-destructive/40 bg-card px-3 py-2.5 text-xs font-bold text-destructive"
               >
                 <iconify-icon icon="lucide:trash-2" class="text-sm"></iconify-icon>
-                Hesabımı sil
+                {t('appSettings.deleteAccountCta')}
               </button>
             </div>
           </div>
         </section>
 
-        <p className="mt-8 text-center text-[10px] font-medium text-muted-foreground">GTF · Sürüm 2.6.1</p>
+        <p className="mt-8 text-center text-[10px] font-medium text-muted-foreground">{t('appSettings.versionLabel', { version: '2.6.1' })}</p>
 
         {showDeleteConfirm && (
           <div
@@ -760,10 +799,9 @@ export default function UygulamaAyarlari() {
               <div className="flex h-11 w-11 items-center justify-center rounded-theme bg-destructive/10 text-destructive">
                 <iconify-icon icon="lucide:triangle-alert" class="text-xl"></iconify-icon>
               </div>
-              <h2 className="mt-3 font-heading text-base font-bold">Hesabını silmek üzeresin</h2>
+              <h2 className="mt-3 font-heading text-base font-bold">{t('appSettings.deleteConfirmTitle')}</h2>
               <p className="mt-2 text-xs leading-5 text-muted-foreground">
-                Bu işlem geri alınamaz. Tüm tahminlerin, mesajların, grup üyeliklerin ve profil bilgilerin kalıcı
-                olarak silinir.
+                {t('appSettings.deleteConfirmBody')}
               </p>
               <div className="mt-5 flex gap-2">
                 <button
@@ -771,14 +809,14 @@ export default function UygulamaAyarlari() {
                   disabled={deleting}
                   className="flex-1 rounded-theme border border-border bg-card py-2.5 text-xs font-bold text-foreground disabled:opacity-60"
                 >
-                  Vazgeç
+                  {t('common.cancel')}
                 </button>
                 <button
                   onClick={handleDeleteAccount}
                   disabled={deleting}
                   className="flex-1 rounded-theme bg-destructive py-2.5 text-xs font-bold text-destructive-foreground disabled:opacity-60"
                 >
-                  {deleting ? 'Siliniyor…' : 'Evet, sil'}
+                  {deleting ? t('appSettings.deleting') : t('appSettings.confirmDelete')}
                 </button>
               </div>
             </div>
@@ -787,7 +825,7 @@ export default function UygulamaAyarlari() {
 
         {openPicker === 'theme' && (
           <PickerSheet
-            title="Tema"
+            title={t('appSettings.themeRowTitle')}
             options={THEME_OPTIONS}
             value={theme}
             onSelect={setTheme}
@@ -796,7 +834,7 @@ export default function UygulamaAyarlari() {
         )}
         {openPicker === 'fontScale' && (
           <PickerSheet
-            title="Yazı boyutu"
+            title={t('appSettings.fontSizeRowTitle')}
             options={FONT_SCALE_OPTIONS}
             value={fontScale}
             onSelect={setFontScale}
@@ -805,9 +843,9 @@ export default function UygulamaAyarlari() {
         )}
         {openPicker === 'interests' && (
           <TagPickerSheet
-            title="İlgi alanların"
-            subtitle="Akışın seçtiğin kategoriye göre açılır"
-            options={INTEREST_OPTIONS}
+            title={t('appSettings.interestsTitle')}
+            subtitle={t('appSettings.interestsPickerSubtitle')}
+            options={INTEREST_SLUGS.map((slug) => ({ value: slug, label: t(CATEGORY_META[slug].labelKey) }))}
             values={settings.content.interests}
             onToggle={toggleInterest}
             onClose={() => setOpenPicker(null)}
@@ -815,8 +853,8 @@ export default function UygulamaAyarlari() {
         )}
         {openPicker === 'mutedWords' && (
           <WordListSheet
-            title="Sessize alınan kelimeler"
-            subtitle="Bu kelimeleri içeren tahminler akışında gizlenir"
+            title={t('appSettings.mutedWordsTitle')}
+            subtitle={t('appSettings.mutedWordsPickerSubtitle')}
             words={settings.content.mutedWords}
             onAdd={addMutedWord}
             onRemove={removeMutedWord}
