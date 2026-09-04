@@ -7,6 +7,7 @@ import { useToast } from '../contexts/ToastContext.jsx'
 import { formatDateLong, sealLabel, timeAgo } from '../lib/format.js'
 import BadgeShowcase from '../components/BadgeShowcase.jsx'
 import DifficultyChip from '../components/DifficultyChip.jsx'
+import Chip from '../components/ui/Chip.jsx'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
 import EmptyState from '../components/ui/EmptyState.jsx'
 
@@ -45,9 +46,7 @@ function PredictionCard({ prediction }) {
         </div>
         <div className="p-4">
           <div className="flex items-center gap-1.5">
-            <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold text-secondary-foreground">
-              {prediction.category?.toUpperCase()}
-            </span>
+            <Chip>{prediction.category?.toUpperCase()}</Chip>
             <DifficultyChip tier={prediction.difficulty_tier} />
           </div>
           <p className="mt-3 text-[15px] font-semibold leading-6">&ldquo;{prediction.sealed_content}&rdquo;</p>
@@ -63,9 +62,7 @@ function PredictionCard({ prediction }) {
     >
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5">
-          <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold text-secondary-foreground">
-            {prediction.category?.toUpperCase()}
-          </span>
+          <Chip>{prediction.category?.toUpperCase()}</Chip>
           <DifficultyChip tier={prediction.difficulty_tier} />
         </div>
         <span className="flex items-center gap-1 text-[10px] font-semibold text-accent">

@@ -8,6 +8,7 @@ import { useUserSettings } from '../hooks/useUserSettings.js'
 import { formatDateLong, sealLabel, timeAgo } from '../lib/format.js'
 import { CATEGORIES as PREDICTION_CATEGORIES } from '../lib/categories.js'
 import DifficultyChip from '../components/DifficultyChip.jsx'
+import Chip from '../components/ui/Chip.jsx'
 import StreakFlame from '../components/StreakFlame.jsx'
 import { rankFeed } from '../lib/feedRanking.js'
 
@@ -743,9 +744,7 @@ function FollowedGroups() {
                 </div>
               )}
               <div className="p-4">
-                <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold text-secondary-foreground">
-                  {group.category?.toUpperCase()}
-                </span>
+                <Chip>{group.category?.toUpperCase()}</Chip>
                 <h3 className="mt-3 font-heading text-[16px] font-bold">{group.name}</h3>
                 {group.description && (
                   <p className="mt-1 line-clamp-2 text-[11px] leading-4 text-muted-foreground">{group.description}</p>

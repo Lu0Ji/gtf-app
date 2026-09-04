@@ -7,6 +7,7 @@ import { useUserSettings } from '../hooks/useUserSettings.js'
 import { CATEGORIES, CATEGORY_META } from '../lib/categories.js'
 import { checkPredictionText } from '../lib/predictionCheck.js'
 import DateTimePicker from '../components/DateTimePicker.jsx'
+import Chip from '../components/ui/Chip.jsx'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
 
 function isFutureDate(dateStr) {
@@ -294,9 +295,7 @@ export default function TahminOlustur() {
                 <p className="mt-0.5 text-[11px] text-muted-foreground">Sadece açılış anında görünür</p>
               </div>
             </div>
-            <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold text-secondary-foreground">
-              GİZLİ
-            </span>
+            <Chip>GİZLİ</Chip>
           </div>
           <textarea
             value={sealedContent}

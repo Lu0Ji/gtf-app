@@ -6,6 +6,7 @@ import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import { formatDateLong, formatDateTimeLong } from '../lib/format.js'
 import { difficultyMeta } from '../lib/difficulty.js'
+import Chip from '../components/ui/Chip.jsx'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
 
 const CORRECT_POINTS_REWARD = 50
@@ -408,9 +409,7 @@ export default function TahminKaydi() {
                 </p>
               </button>
               <div className="flex shrink-0 flex-col items-end gap-1.5">
-                <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold text-secondary-foreground">
-                  {record.category?.toUpperCase()}
-                </span>
+                <Chip>{record.category?.toUpperCase()}</Chip>
                 {tierMeta && (
                   <span
                     className="flex items-center gap-1 rounded-full px-2.5 py-1 text-[10px] font-bold"

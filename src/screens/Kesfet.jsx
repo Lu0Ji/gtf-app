@@ -6,6 +6,7 @@ import { timeAgo, formatTimeUntil } from '../lib/format.js'
 import { CATEGORY_META } from '../lib/categories.js'
 import { addSearchHistoryEntry } from '../lib/searchHistory.js'
 import DifficultyChip from '../components/DifficultyChip.jsx'
+import Chip from '../components/ui/Chip.jsx'
 import { useUserSettings } from '../hooks/useUserSettings.js'
 import ScreenHeader from '../components/ui/ScreenHeader.jsx'
 
@@ -113,9 +114,7 @@ function SearchResults({ query, navigate }) {
               >
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-1.5">
-                    <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold text-secondary-foreground">
-                      {p.category?.toUpperCase()}
-                    </span>
+                    <Chip>{p.category?.toUpperCase()}</Chip>
                     <DifficultyChip tier={p.difficulty_tier} />
                   </div>
                   <span className="text-[10px] text-muted-foreground">{timeAgo(p.created_at)}</span>
@@ -621,9 +620,7 @@ export default function Kesfet() {
                     >
                       <div className="flex items-center justify-between">
                         <div className="flex items-center gap-1.5">
-                          <span className="rounded-full bg-secondary px-2.5 py-1 text-[10px] font-bold text-secondary-foreground">
-                            {p.category?.toUpperCase()}
-                          </span>
+                          <Chip>{p.category?.toUpperCase()}</Chip>
                           <DifficultyChip tier={p.difficulty_tier} />
                         </div>
                         <span className="text-[10px] text-muted-foreground">{timeAgo(p.created_at)}</span>
