@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
+import { useTranslation } from 'react-i18next'
 import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase, queryWithGroupIdFallback } from '../lib/supabase.js'
 import { timeAgo, formatTimeUntil } from '../lib/format.js'
@@ -13,7 +14,16 @@ import ScreenHeader from '../components/ui/ScreenHeader.jsx'
 
 const SEARCH_PAGE_SIZE = 15
 
+// CATEGORY_META covers every real slug, but news/event rows can carry a
+// category outside that set (external feeds) — meta then falls back to a
+// plain { icon, label: category } object with no labelKey, so fall through
+// to the raw string in that case instead of calling t(undefined).
+function categoryLabel(t, meta) {
+  return meta.labelKey ? t(meta.labelKey) : meta.label
+}
+
 function SearchResults({ query, navigate }) {
+  const { t } = useTranslation()
   const [profiles, setProfiles] = useState([])
   const [predictions, setPredictions] = useState([])
   const [loading, setLoading] = useState(true)
@@ -67,13 +77,13 @@ function SearchResults({ query, navigate }) {
   }, [query, limit])
 
   if (loading) {
-    return <p className="px-5 text-xs text-muted-foreground">Aranıyor…</p>
+    return <p className="px-5 text-xs text-muted-foreground">{t('discover.searching')}</p>
   }
 
   if (profiles.length === 0 && predictions.length === 0) {
     return (
       <p className="mx-5 rounded-theme border border-dashed border-border bg-muted/60 p-4 text-center text-xs text-muted-foreground">
-        "{query}" için sonuç bulunamadı.
+        {t('discover.noResults', { query })}
       </p>
     )
   }
@@ -82,7 +92,7 @@ function SearchResults({ query, navigate }) {
     <div>
       {profiles.length > 0 && (
         <section className="mb-6">
-          <h2 className="px-5 font-heading text-sm font-bold tracking-tight">Kullanıcılar</h2>
+          <h2 className="px-5 font-heading text-sm font-bold tracking-tight">{t('discover.usersHeading')}</h2>
           <div className="mt-3 overflow-hidden rounded-theme border border-border bg-card shadow-sm">
             {profiles.map((p, i) => (
               <button
@@ -105,25 +115,28 @@ function SearchResults({ query, navigate }) {
 
       {predictions.length > 0 && (
         <section className="mb-6">
-          <h2 className="px-5 font-heading text-sm font-bold tracking-tight">Tahminler</h2>
+          <h2 className="px-5 font-heading text-sm font-bold tracking-tight">{t('discover.predictionsHeading')}</h2>
           <div className="mt-3 space-y-3 px-5">
-            {predictions.map((p) => (
-              <button
-                key={p.id}
-                onClick={() => navigate('/tahmin-kaydi', { state: { prediction: p } })}
-                className="block w-full rounded-theme border border-border bg-card p-4 text-left shadow-sm"
-              >
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center gap-1.5">
-                    <Chip>{p.category?.toUpperCase()}</Chip>
-                    <DifficultyChip tier={p.difficulty_tier} />
+            {predictions.map((p) => {
+              const meta = CATEGORY_META[p.category] || { icon: 'lucide:tag', label: p.category }
+              return (
+                <button
+                  key={p.id}
+                  onClick={() => navigate('/tahmin-kaydi', { state: { prediction: p } })}
+                  className="block w-full rounded-theme border border-border bg-card p-4 text-left shadow-sm"
+                >
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-1.5">
+                      <Chip>{categoryLabel(t, meta).toUpperCase()}</Chip>
+                      <DifficultyChip tier={p.difficulty_tier} />
+                    </div>
+                    <span className="text-[10px] text-muted-foreground">{timeAgo(p.created_at)}</span>
                   </div>
-                  <span className="text-[10px] text-muted-foreground">{timeAgo(p.created_at)}</span>
-                </div>
-                <h3 className="mt-3 text-sm font-bold leading-5">{p.title}</h3>
-                <p className="mt-2 text-[11px] text-muted-foreground">{p.profiles?.display_name || 'Kullanıcı'}</p>
-              </button>
-            ))}
+                  <h3 className="mt-3 text-sm font-bold leading-5">{p.title}</h3>
+                  <p className="mt-2 text-[11px] text-muted-foreground">{p.profiles?.display_name || t('common.unknownUser')}</p>
+                </button>
+              )
+            })}
           </div>
           {predictionsFull && (
             <button
@@ -131,7 +144,7 @@ function SearchResults({ query, navigate }) {
               disabled={loadingMore}
               className="mx-5 mt-3 flex h-10 w-[calc(100%-40px)] items-center justify-center rounded-theme border border-border bg-card text-xs font-bold text-foreground shadow-sm disabled:opacity-60"
             >
-              {loadingMore ? 'Yükleniyor…' : 'Daha fazla göster'}
+              {loadingMore ? t('common.loading') : t('discover.loadMore')}
             </button>
           )}
         </section>
@@ -142,6 +155,7 @@ function SearchResults({ query, navigate }) {
 
 
 function CategoryTile({ category, count, variant, navigate }) {
+  const { t } = useTranslation()
   const meta = CATEGORY_META[category] || { icon: 'lucide:tag', label: category }
   const variantClass =
     variant === 'primary'
@@ -166,15 +180,16 @@ function CategoryTile({ category, count, variant, navigate }) {
           </span>
         )}
       </div>
-      <p className={`font-heading text-base font-bold ${variant === 'primary' ? 'mt-7' : 'mt-5'}`}>{meta.label}</p>
+      <p className={`font-heading text-base font-bold ${variant === 'primary' ? 'mt-7' : 'mt-5'}`}>{categoryLabel(t, meta)}</p>
       <p className={`mt-1 text-[11px] ${variant === 'primary' ? 'text-white/70' : 'text-muted-foreground'}`}>
-        {count} tahmin
+        {t('groups.predictionCountInline', { count })}
       </p>
     </button>
   )
 }
 
 export default function Kesfet() {
+  const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const { settings } = useUserSettings()
@@ -330,18 +345,18 @@ export default function Kesfet() {
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-body pb-28">
-      <ScreenHeader eyebrow="Keşfet" title="Geleceğin izinde" className="pb-0" />
+      <ScreenHeader eyebrow={t('nav.discover')} title={t('discover.title')} className="pb-0" />
       <div className="px-5 pb-5 pt-4">
         <div className="flex items-center gap-2 rounded-theme border border-border bg-card px-4 py-3 shadow-sm">
           <iconify-icon icon="lucide:search" class="text-lg text-muted-foreground"></iconify-icon>
           <input
             value={query}
             onChange={(e) => setQuery(e.target.value)}
-            placeholder="Kullanıcı veya tahmin ara…"
+            placeholder={t('discover.searchPlaceholder')}
             className="min-w-0 flex-1 bg-transparent text-sm text-foreground outline-none placeholder:text-muted-foreground"
           />
           {query && (
-            <button aria-label="Aramayı temizle" onClick={() => setQuery('')} className="text-muted-foreground">
+            <button aria-label={t('discover.clearSearchAria')} onClick={() => setQuery('')} className="text-muted-foreground">
               <iconify-icon icon="lucide:x" class="text-lg"></iconify-icon>
             </button>
           )}
@@ -352,7 +367,7 @@ export default function Kesfet() {
         {query.trim() ? (
           <SearchResults query={query.trim()} navigate={navigate} />
         ) : loading ? (
-          <p className="px-5 text-xs text-muted-foreground">Yükleniyor…</p>
+          <p className="px-5 text-xs text-muted-foreground">{t('common.loading')}</p>
         ) : (
           <>
             {upcomingEvents.length > 0 && (
@@ -360,10 +375,10 @@ export default function Kesfet() {
                 <div className="px-5">
                   <h2 className="flex items-center gap-1.5 font-heading text-lg font-bold tracking-tight">
                     <iconify-icon icon="lucide:radar" class="text-accent"></iconify-icon>
-                    Yaklaşan Etkinlikler
+                    {t('discover.upcomingEventsHeading')}
                   </h2>
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    Gerçek dünyadan — üzerine tahmin oluşturabileceğin yaklaşan maçlar
+                    {t('discover.upcomingEventsSubtitle')}
                   </p>
                 </div>
                 <div className="mt-3 flex gap-3 overflow-x-auto px-5 pb-2">
@@ -377,7 +392,7 @@ export default function Kesfet() {
                         <div className="flex items-center justify-between">
                           <span className="flex items-center gap-1 rounded-full bg-muted px-2 py-1 text-[10px] font-bold text-primary">
                             <iconify-icon icon={meta.icon} class="text-xs"></iconify-icon>
-                            {meta.label}
+                            {categoryLabel(t, meta)}
                           </span>
                           <span className="flex items-center gap-1 text-[10px] font-bold text-accent">
                             <iconify-icon icon="lucide:hourglass" class="text-xs"></iconify-icon>
@@ -405,7 +420,7 @@ export default function Kesfet() {
                           className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-theme bg-primary py-2 text-[11px] font-bold text-primary-foreground"
                         >
                           <iconify-icon icon="lucide:pen-line" class="text-xs"></iconify-icon>
-                          Tahmin oluştur
+                          {t('nav.createPrediction')}
                         </button>
                       </div>
                     )
@@ -419,10 +434,10 @@ export default function Kesfet() {
                 <div className="px-5">
                   <h2 className="flex items-center gap-1.5 font-heading text-lg font-bold tracking-tight">
                     <iconify-icon icon="lucide:newspaper" class="text-accent"></iconify-icon>
-                    Gündemde
+                    {t('discover.newsHeading')}
                   </h2>
                   <p className="mt-0.5 text-xs text-muted-foreground">
-                    Türkiye gündeminden — bir tahmine ilham olabilir
+                    {t('discover.newsSubtitle')}
                   </p>
                 </div>
                 <div className="mt-3 space-y-2.5 px-5">
@@ -436,7 +451,7 @@ export default function Kesfet() {
                         <div className="flex items-center justify-between gap-2">
                           <span className="flex items-center gap-1 rounded-full bg-muted px-2 py-1 text-[10px] font-bold text-primary">
                             <iconify-icon icon={meta.icon} class="text-xs"></iconify-icon>
-                            {meta.label}
+                            {categoryLabel(t, meta)}
                           </span>
                           <span className="shrink-0 text-[10px] text-muted-foreground">{timeAgo(item.event_date)}</span>
                         </div>
@@ -457,7 +472,7 @@ export default function Kesfet() {
                           className="mt-2.5 flex items-center gap-1.5 text-[11px] font-bold text-primary"
                         >
                           <iconify-icon icon="lucide:pen-line" class="text-xs"></iconify-icon>
-                          Bu konuda tahmin oluştur
+                          {t('discover.createPredictionAboutThisCta')}
                         </button>
                       </div>
                     )
@@ -469,8 +484,8 @@ export default function Kesfet() {
             {openingSoon.length > 0 && (
               <section className="mb-8">
                 <div className="px-5">
-                  <h2 className="font-heading text-lg font-bold tracking-tight">Yakında açılacaklar</h2>
-                  <p className="mt-0.5 text-xs text-muted-foreground">Önümüzdeki 48 saatte mührü açılacaklar</p>
+                  <h2 className="font-heading text-lg font-bold tracking-tight">{t('discover.openingSoonHeading')}</h2>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{t('discover.openingSoonSubtitle')}</p>
                 </div>
                 <div className="mt-3 flex gap-3 overflow-x-auto px-5 pb-1">
                   {openingSoon.map((p) => {
@@ -487,7 +502,7 @@ export default function Kesfet() {
                         <p className="mt-2 text-sm font-bold leading-5">{p.title}</p>
                         <span className="mt-2 inline-flex items-center gap-1 rounded-full bg-muted px-2 py-1 text-[10px] font-bold text-primary">
                           <iconify-icon icon={meta.icon} class="text-xs"></iconify-icon>
-                          {meta.label}
+                          {categoryLabel(t, meta)}
                         </span>
                       </div>
                     )
@@ -501,9 +516,9 @@ export default function Kesfet() {
                 <div className="px-5">
                   <h2 className="flex items-center gap-1.5 font-heading text-lg font-bold tracking-tight">
                     <iconify-icon icon="lucide:flame" class="text-accent"></iconify-icon>
-                    Trend olanlar
+                    {t('discover.trendingHeading')}
                   </h2>
-                  <p className="mt-0.5 text-xs text-muted-foreground">Şu an en çok konuşulanlar</p>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{t('discover.trendingSubtitle')}</p>
                 </div>
                 <div className="mt-3 space-y-2.5 px-5">
                   {trending.map(({ prediction, likeCount }) => (
@@ -533,14 +548,14 @@ export default function Kesfet() {
             <section className="mb-8">
               <div className="flex items-center justify-between px-5">
                 <div>
-                  <h2 className="font-heading text-lg font-bold tracking-tight">Popüler alanlar</h2>
-                  <p className="mt-0.5 text-xs text-muted-foreground">Kategoriye göre tahmin sayısı</p>
+                  <h2 className="font-heading text-lg font-bold tracking-tight">{t('discover.popularCategoriesHeading')}</h2>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{t('discover.popularCategoriesSubtitle')}</p>
                 </div>
               </div>
 
               {categoryCounts.length === 0 ? (
                 <p className="mx-5 mt-4 rounded-theme border border-dashed border-border bg-muted/60 p-4 text-center text-xs text-muted-foreground">
-                  Henüz kategorilere ayrılmış tahmin yok.
+                  {t('discover.noCategorizedPredictions')}
                 </p>
               ) : (
                 <div className="mt-3 grid grid-cols-2 gap-3 px-5">
@@ -564,12 +579,12 @@ export default function Kesfet() {
                     <span className="flex h-8 w-8 items-center justify-center rounded-lg bg-secondary text-primary">
                       <iconify-icon icon="lucide:medal" class="text-lg"></iconify-icon>
                     </span>
-                    <h2 className="font-heading text-lg font-bold tracking-tight">Liderlik Tablosu</h2>
+                    <h2 className="font-heading text-lg font-bold tracking-tight">{t('leaderboard.title')}</h2>
                   </div>
-                  <p className="mt-2 text-xs text-muted-foreground">Puana göre en iyi 3</p>
+                  <p className="mt-2 text-xs text-muted-foreground">{t('discover.leaderboardTop3Subtitle')}</p>
                 </div>
                 <button
-                  aria-label="Liderlik tablosunu aç"
+                  aria-label={t('discover.leaderboardOpenAria')}
                   onClick={() => navigate('/liderlik-tablosu')}
                   className="rounded-full bg-muted p-2 text-primary"
                 >
@@ -578,7 +593,7 @@ export default function Kesfet() {
               </div>
 
               {topRanked.length === 0 ? (
-                <p className="mt-4 text-xs text-muted-foreground">Henüz kimse yok.</p>
+                <p className="mt-4 text-xs text-muted-foreground">{t('discover.noOneYet')}</p>
               ) : (
                 <div className="mt-4 divide-y divide-border">
                   {topRanked.map((entry, i) => (
@@ -606,36 +621,39 @@ export default function Kesfet() {
             <section className="mb-5">
               <div className="flex items-end justify-between px-5">
                 <div>
-                  <h2 className="font-heading text-lg font-bold tracking-tight">Son eklenenler</h2>
-                  <p className="mt-0.5 text-xs text-muted-foreground">En yeni kayıtlar</p>
+                  <h2 className="font-heading text-lg font-bold tracking-tight">{t('discover.recentHeading')}</h2>
+                  <p className="mt-0.5 text-xs text-muted-foreground">{t('discover.recentSubtitle')}</p>
                 </div>
               </div>
 
               {recentPredictions.length === 0 ? (
                 <p className="mx-5 mt-4 rounded-theme border border-dashed border-border bg-muted/60 p-4 text-center text-xs text-muted-foreground">
-                  Henüz kayıt yok.
+                  {t('discover.noRecordsYet')}
                 </p>
               ) : (
                 <div className="mt-3 flex gap-3 overflow-x-auto px-5 pb-2">
-                  {recentPredictions.map((p) => (
-                    <button
-                      key={p.id}
-                      onClick={() => navigate('/tahmin-kaydi', { state: { prediction: p } })}
-                      className="min-w-[240px] rounded-theme border border-border bg-card p-4 text-left shadow-sm"
-                    >
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center gap-1.5">
-                          <Chip>{p.category?.toUpperCase()}</Chip>
-                          <DifficultyChip tier={p.difficulty_tier} />
+                  {recentPredictions.map((p) => {
+                    const meta = CATEGORY_META[p.category] || { icon: 'lucide:tag', label: p.category }
+                    return (
+                      <button
+                        key={p.id}
+                        onClick={() => navigate('/tahmin-kaydi', { state: { prediction: p } })}
+                        className="min-w-[240px] rounded-theme border border-border bg-card p-4 text-left shadow-sm"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-1.5">
+                            <Chip>{categoryLabel(t, meta).toUpperCase()}</Chip>
+                            <DifficultyChip tier={p.difficulty_tier} />
+                          </div>
+                          <span className="text-[10px] text-muted-foreground">{timeAgo(p.created_at)}</span>
                         </div>
-                        <span className="text-[10px] text-muted-foreground">{timeAgo(p.created_at)}</span>
-                      </div>
-                      <h3 className="mt-3 font-heading text-sm font-bold leading-5">{p.title}</h3>
-                      <p className="mt-2 text-[11px] text-muted-foreground">
-                        {p.profiles?.display_name || 'Kullanıcı'}
-                      </p>
-                    </button>
-                  ))}
+                        <h3 className="mt-3 font-heading text-sm font-bold leading-5">{p.title}</h3>
+                        <p className="mt-2 text-[11px] text-muted-foreground">
+                          {p.profiles?.display_name || t('common.unknownUser')}
+                        </p>
+                      </button>
+                    )
+                  })}
                 </div>
               )}
             </section>
