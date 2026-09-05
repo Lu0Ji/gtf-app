@@ -1884,3 +1884,172 @@ $$ language plpgsql;
 -- (Tümü'ne dönünce geçmiş mesajlar hemen geri görünür).
 alter table public.groups add column message_retention_minutes integer
   check (message_retention_minutes is null or message_retention_minutes > 0);
+
+-- ─────────────────────────────────────────────────────────────────────────
+
+-- TAHMİN DOĞRULAMA — TOPLULUK EŞİĞİ 3 → 10, YAZAR AĞIRLIĞI KALDIRILDI:
+-- iki gerçek sorun tespit edildi ve ikisi de bu blokta düzeltiliyor.
+--
+-- (1) İçerik açığa çıkmadan oy: TahminKaydi.jsx tarafında zamanlanmış bir
+--     tahminin açılış zamanı geçtiğinde mühürlü içerik artık yazarın kendi
+--     işaretlemesini beklemeden doğrudan gösteriliyor (bkz. isRevealed).
+--     Bu bloğun kendisi client-side, burada DB tarafında yapılacak bir şey
+--     yok — ama onu mümkün kılan eşik/ağırlık kuralı burada değişiyor.
+--
+-- (2) Eşik 3 → 10 ve AUTHOR_WEIGHT (3) kaldırıldı: artık ne "sealed"
+--     durumundan ilk karar ne de zaten doğrulanmış bir sonucun tersine
+--     çevrilmesi yazara hiçbir ağırlık bonusu tanımıyor — tek kural: en az
+--     10 toplam oy VE oylar eşit değilse, hangi taraf fazlaysa sonuç o
+--     olur. Bu kural mevcut durumdan (sealed / verified_correct /
+--     verified_incorrect) bağımsız olarak aynı şekilde uygulanıyor, yani
+--     doğrulanmış bir tahmin de topluluk oyu değiştikçe sürekli yeniden
+--     değerlendirilebilir (kalıcı "kilit" yok). Bu, ürün tarafında
+--     bilinçli olarak basit tutulan bir ilk kural — sayı gerektiğinde
+--     tekrar ayarlanabilir.
+--
+-- (3) protect_prediction_immutability() zaten doğrulanmış bir tahminin
+--     status'unu HER durumda engelliyordu (old.status in
+--     ('verified_correct','verified_incorrect') and new.status is distinct
+--     from old.status → exception) — bu, verify_prediction()'ın kendisini
+--     hiç etkilemiyordu (o sadece 'sealed'dan çıkış yapıyor) ama
+--     cast_prediction_vote()'un yukarıdaki "zaten doğrulanmışı tersine
+--     çevirme" yolunu HER ZAMAN bloke ediyordu — yani topluluk oyuyla flip
+--     özelliği hiç çalışmamış olabilirdi. Düzeltme: tetikleyici artık
+--     yalnızca gtf.allow_status_flip session ayarı 'on' değilken bu
+--     kontrolü uyguluyor; cast_prediction_vote() kendi flip update'inin
+--     etrafında bu ayarı açıp kapatıyor (gtf.allow_points_write'ta
+--     kullanılan aynı desen). Ham bir client update bu ayarı hiç
+--     ayarlamayacağından tamamen korumasız kalmıyor.
+create or replace function public.protect_prediction_immutability()
+returns trigger as $$
+begin
+  if old.title is distinct from new.title
+    or old.sealed_content is distinct from new.sealed_content
+    or old.category is distinct from new.category
+    or old.author_id is distinct from new.author_id
+    or old.event_date is distinct from new.event_date
+    or old.is_private is distinct from new.is_private
+    or old.created_at is distinct from new.created_at
+    or old.media_url is distinct from new.media_url
+    or old.media_type is distinct from new.media_type
+  then
+    raise exception 'Bu alanlar oluşturulduktan sonra değiştirilemez.';
+  end if;
+  if old.status in ('verified_correct', 'verified_incorrect')
+    and new.status is distinct from old.status
+    and coalesce(current_setting('gtf.allow_status_flip', true), 'off') <> 'on'
+  then
+    raise exception 'Doğrulanmış bir tahminin sonucu değiştirilemez.';
+  end if;
+  return new;
+end;
+$$ language plpgsql;
+
+create or replace function public.cast_prediction_vote(
+  p_prediction_id uuid,
+  p_vote text
+)
+returns void as $$
+declare
+  v_author_id uuid;
+  v_status text;
+  v_event_date timestamptz;
+  v_tier text;
+  v_title text;
+  v_correct_votes integer;
+  v_incorrect_votes integer;
+  v_new_status text;
+  v_multiplier numeric;
+  v_old_reward integer;
+  v_new_reward integer;
+begin
+  if p_vote not in ('correct', 'incorrect') then
+    raise exception 'Geçersiz oy.';
+  end if;
+
+  select author_id, status, event_date, difficulty_tier, title
+    into v_author_id, v_status, v_event_date, v_tier, v_title
+    from public.predictions where id = p_prediction_id for update;
+
+  if v_author_id is null then
+    raise exception 'Tahmin bulunamadı.';
+  end if;
+  if v_author_id = auth.uid() then
+    raise exception 'Kendi tahminine oy veremezsin, sonucu doğrudan işaretle.';
+  end if;
+  if v_status = 'open' then
+    raise exception 'Bu tahmin henüz mühürlenmemiş.';
+  end if;
+  if v_event_date is not null and v_event_date > now() then
+    raise exception 'Açılış zamanı henüz gelmedi.';
+  end if;
+
+  insert into public.prediction_votes (prediction_id, voter_id, vote)
+  values (p_prediction_id, auth.uid(), p_vote)
+  on conflict (prediction_id, voter_id) do update set vote = excluded.vote, created_at = now();
+
+  if v_status in ('verified_correct', 'verified_incorrect') then
+    if (p_vote = 'correct' and v_status = 'verified_incorrect')
+       or (p_vote = 'incorrect' and v_status = 'verified_correct') then
+      insert into public.prediction_disputes (prediction_id, user_id)
+      values (p_prediction_id, auth.uid())
+      on conflict (prediction_id, user_id) do nothing;
+    else
+      delete from public.prediction_disputes where prediction_id = p_prediction_id and user_id = auth.uid();
+    end if;
+  end if;
+
+  select count(*) filter (where vote = 'correct'), count(*) filter (where vote = 'incorrect')
+    into v_correct_votes, v_incorrect_votes
+    from public.prediction_votes where prediction_id = p_prediction_id;
+
+  -- Tek kural, mevcut durumdan bağımsız: en az 10 toplam oy ve net bir
+  -- çoğunluk varsa (eşitlik yok), sonuç o çoğunluğa göre belirlenir/
+  -- yeniden belirlenir. Yazar ağırlığı yok — kayıt zaten doğrulanmış olsa
+  -- bile salt oy çoğunluğu değişince sonuç onunla birlikte değişir.
+  v_new_status := null;
+  if (v_correct_votes + v_incorrect_votes) >= 10 and v_correct_votes <> v_incorrect_votes then
+    v_new_status := case when v_correct_votes > v_incorrect_votes then 'verified_correct' else 'verified_incorrect' end;
+  end if;
+
+  if v_new_status is not null and v_new_status <> v_status then
+    v_multiplier := case v_tier
+      when 'istikrar' then 1.25
+      when 'ustalik' then 1.75
+      when 'efsane' then 2.5
+      else 1.0
+    end;
+
+    perform set_config('gtf.allow_points_write', 'on', true);
+
+    if v_status in ('verified_correct', 'verified_incorrect') then
+      v_old_reward := round((case when v_status = 'verified_correct' then 50 else 5 end) * v_multiplier);
+      update public.profiles set points = points - v_old_reward where id = v_author_id;
+    end if;
+
+    v_new_reward := round((case when v_new_status = 'verified_correct' then 50 else 5 end) * v_multiplier);
+    update public.profiles set points = points + v_new_reward where id = v_author_id;
+
+    perform set_config('gtf.allow_points_write', 'off', true);
+
+    perform set_config('gtf.allow_status_flip', 'on', true);
+    update public.predictions
+    set status = v_new_status,
+        verified_at = coalesce(verified_at, now()),
+        disputed = true,
+        resolved_by = 'community'
+    where id = p_prediction_id;
+    perform set_config('gtf.allow_status_flip', 'off', true);
+
+    perform private.send_push_notification(
+      v_author_id,
+      case when v_new_status = 'verified_correct' then 'Tahmin doğrulandı!' else 'Tahmin sonuçlandı' end,
+      left(coalesce(v_title, ''), 60) || ' — topluluk oyuyla ' ||
+        (case when v_new_status = 'verified_correct' then 'gerçekleşti' else 'gerçekleşmedi' end),
+      '/tahmin-kaydi?id=' || p_prediction_id
+    );
+  end if;
+end;
+$$ language plpgsql security definer set search_path = public;
+
+grant execute on function public.cast_prediction_vote(uuid, text) to authenticated;

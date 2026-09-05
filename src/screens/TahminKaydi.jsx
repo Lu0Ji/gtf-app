@@ -19,6 +19,12 @@ const CORRECT_POINTS_REWARD = 50
 // punishing the honest close.
 const HONEST_CLOSE_REWARD = 5
 
+// Display-only mirror of the quorum enforced server-side in
+// cast_prediction_vote() (supabase/schema.sql) — purely for copy like "en
+// az {{count}} kişi oy verince…". The client never decides a result
+// itself; it just reflects whatever status the RPC's re-fetch returns.
+const COMMUNITY_QUORUM = 10
+
 
 function useCountdown(targetDate) {
   const [remaining, setRemaining] = useState(() => Math.max(0, new Date(targetDate).getTime() - Date.now()))
@@ -147,12 +153,18 @@ export default function TahminKaydi() {
   // author immediately, at any time they choose.
   const isManualSeal = !record.event_date
   const canVerify = isOwner && record.status === 'sealed' && countdown.isPast
-  // Anyone but the author: once a result exists, disputing it is always
-  // fair game. While still sealed, a "the author's gone quiet, we'll vote
-  // instead" pressure-vote only makes sense when a real scheduled moment
-  // has actually passed — a manual seal has no such moment, so nobody but
-  // the author can move it out of "sealed" before they choose to.
-  const canVote = !isOwner && user && record.status !== 'open' && (isVerified || (!isManualSeal && countdown.isPast))
+  // A scheduled seal's content used to stay hidden even after its own
+  // opening time passed — nobody but the author could actually read what
+  // they'd be voting "correct"/"incorrect" on, which made voting on a
+  // still-sealed record meaningless. Once the clock (or verification)
+  // says it's open, show it — a manual seal ("Ben açarım") has no clock to
+  // pass, so it stays locked until the author's own action either way.
+  const isRevealed = isVerified || (!isManualSeal && countdown.isPast)
+  // Anyone but the author: once content is actually revealed, voting on it
+  // is fair game — either agreeing/disputing an existing verdict, or (pre-
+  // quorum) helping decide one. Never before it's revealed: voting blind
+  // is what isRevealed itself was introduced to stop.
+  const canVote = !isOwner && user && record.status !== 'open' && isRevealed
   const tierMeta = difficultyMeta(record.difficulty_tier)
 
   async function handleShare() {
@@ -472,21 +484,28 @@ export default function TahminKaydi() {
           </div>
         </section>
 
-        {isVerified ? (
+        {isRevealed ? (
           <section className="mx-5 mt-5 overflow-hidden rounded-theme border border-border bg-card shadow-sm">
             <div
               className={`flex items-center justify-between px-5 py-3 text-sm font-bold ${
-                isCorrect ? 'bg-success text-success-foreground' : 'bg-destructive text-destructive-foreground'
+                !isVerified
+                  ? 'bg-muted text-foreground'
+                  : isCorrect
+                    ? 'bg-success text-success-foreground'
+                    : 'bg-destructive text-destructive-foreground'
               }`}
             >
               <span className="flex items-center gap-2">
-                <iconify-icon icon={isCorrect ? 'lucide:badge-check' : 'lucide:x-circle'} class="text-lg"></iconify-icon>
-                {isCorrect ? t('home.verified') : t('home.notRealized')}
-                {record.disputed && (
+                <iconify-icon
+                  icon={!isVerified ? 'lucide:hourglass' : isCorrect ? 'lucide:badge-check' : 'lucide:x-circle'}
+                  class="text-lg"
+                ></iconify-icon>
+                {!isVerified ? t('record.pendingBanner') : isCorrect ? t('home.verified') : t('home.notRealized')}
+                {isVerified && record.disputed && (
                   <span className="rounded-full bg-black/15 px-2 py-0.5 text-[9px] font-bold">{t('record.disputedTag')}</span>
                 )}
               </span>
-              <span className="text-xs font-semibold">{formatDateLong(record.verified_at)}</span>
+              {isVerified && <span className="text-xs font-semibold">{formatDateLong(record.verified_at)}</span>}
             </div>
             <div className="p-5">
               <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
@@ -495,7 +514,12 @@ export default function TahminKaydi() {
               <p className="mt-2 font-heading text-lg font-bold leading-6">
                 &ldquo;{record.sealed_content}&rdquo;
               </p>
-              {(record.evidence_note || record.evidence_url) && (
+              {!isVerified && (
+                <p className="mt-3 text-[11px] leading-4 text-muted-foreground">
+                  {t('record.pendingQuorumHint', { count: COMMUNITY_QUORUM })}
+                </p>
+              )}
+              {isVerified && (record.evidence_note || record.evidence_url) && (
                 <div className="mt-3 rounded-theme border border-dashed border-border bg-muted/60 p-3">
                   <p className="flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-muted-foreground">
                     <iconify-icon icon="lucide:link" class="text-xs"></iconify-icon>
@@ -518,10 +542,90 @@ export default function TahminKaydi() {
                 </div>
               )}
             </div>
+
+            {canVerify && pendingResult === null && (
+              <div className="border-t border-border px-5 py-4">
+                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                  {t('record.didItHappenQuestion')}
+                </p>
+                <div className="mt-3 flex gap-2">
+                  <button
+                    onClick={() => setPendingResult('correct')}
+                    disabled={verifying}
+                    className="flex flex-1 items-center justify-center gap-1.5 rounded-theme bg-success py-2.5 text-xs font-bold text-success-foreground disabled:opacity-60"
+                  >
+                    <iconify-icon icon="lucide:check-circle-2" class="text-sm"></iconify-icon>
+                    {t('record.correctCta')}
+                  </button>
+                  <button
+                    onClick={() => setPendingResult('incorrect')}
+                    disabled={verifying}
+                    className="flex flex-1 items-center justify-center gap-1.5 rounded-theme bg-destructive py-2.5 text-xs font-bold text-destructive-foreground disabled:opacity-60"
+                  >
+                    <iconify-icon icon="lucide:x-circle" class="text-sm"></iconify-icon>
+                    {t('record.incorrectCta')}
+                  </button>
+                </div>
+                <p className="mt-2 text-[10px] text-muted-foreground">
+                  {t('record.rewardHint', { correct: CORRECT_POINTS_REWARD, honest: HONEST_CLOSE_REWARD })}
+                </p>
+              </div>
+            )}
+
+            {canVerify && pendingResult !== null && (
+              <div className="border-t border-border px-5 py-4">
+                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                  {t('record.addEvidenceTitle')}
+                </p>
+                <p className="mt-1.5 text-[11px] leading-4 text-muted-foreground">{t('record.evidenceHint')}</p>
+                <textarea
+                  value={evidenceNote}
+                  onChange={(e) => setEvidenceNote(e.target.value)}
+                  rows={2}
+                  placeholder={t('record.evidenceNotePlaceholder')}
+                  className="mt-3 w-full resize-none rounded-theme border border-border bg-input px-3 py-2.5 text-xs leading-5 text-foreground outline-none placeholder:text-muted-foreground"
+                />
+                <input
+                  value={evidenceUrl}
+                  onChange={(e) => setEvidenceUrl(e.target.value)}
+                  placeholder={t('record.evidenceUrlPlaceholder')}
+                  className="mt-2 w-full rounded-theme border border-border bg-input px-3 py-2.5 text-xs text-foreground outline-none placeholder:text-muted-foreground"
+                />
+                <div className="mt-3 flex gap-2">
+                  <button
+                    onClick={() => {
+                      setPendingResult(null)
+                      setEvidenceNote('')
+                      setEvidenceUrl('')
+                    }}
+                    disabled={verifying}
+                    className="flex-1 rounded-theme bg-muted py-2.5 text-xs font-bold text-foreground disabled:opacity-60"
+                  >
+                    {t('common.cancel')}
+                  </button>
+                  <button
+                    onClick={() => handleVerify(pendingResult)}
+                    disabled={verifying}
+                    className={`flex-1 rounded-theme py-2.5 text-xs font-bold disabled:opacity-60 ${
+                      pendingResult === 'correct'
+                        ? 'bg-success text-success-foreground'
+                        : 'bg-destructive text-destructive-foreground'
+                    }`}
+                  >
+                    {verifying ? t('common.saving') : t('record.confirmResult')}
+                  </button>
+                </div>
+              </div>
+            )}
+
             {canVote && (
               <div className="border-t border-border px-5 py-4">
-                <p className="text-xs font-semibold text-foreground">{t('record.agreeQuestion')}</p>
-                <p className="mt-0.5 text-[11px] leading-4 text-muted-foreground">{t('record.communityMayChange')}</p>
+                <p className="text-xs font-semibold text-foreground">
+                  {isVerified ? t('record.agreeQuestion') : t('record.authorNotMarkedYet')}
+                </p>
+                <p className="mt-0.5 text-[11px] leading-4 text-muted-foreground">
+                  {isVerified ? t('record.communityMayChange') : t('record.communityCanResolve', { count: COMMUNITY_QUORUM })}
+                </p>
                 <div className="mt-3 flex items-center gap-2">
                   <button
                     onClick={() => handleVote('correct')}
@@ -530,8 +634,10 @@ export default function TahminKaydi() {
                       myVote === 'correct' ? 'bg-success text-success-foreground' : 'bg-muted text-muted-foreground'
                     }`}
                   >
-                    <iconify-icon icon="lucide:thumbs-up" class="text-sm"></iconify-icon>
-                    {t('record.agreeCta', { count: correctVotes })}
+                    <iconify-icon icon={isVerified ? 'lucide:thumbs-up' : 'lucide:check-circle-2'} class="text-sm"></iconify-icon>
+                    {isVerified
+                      ? t('record.agreeCta', { count: correctVotes })
+                      : t('record.correctVoteCta', { count: correctVotes })}
                   </button>
                   <button
                     onClick={() => handleVote('incorrect')}
@@ -540,8 +646,10 @@ export default function TahminKaydi() {
                       myVote === 'incorrect' ? 'bg-destructive text-destructive-foreground' : 'bg-muted text-muted-foreground'
                     }`}
                   >
-                    <iconify-icon icon="lucide:thumbs-down" class="text-sm"></iconify-icon>
-                    {t('record.disagreeCta', { count: incorrectVotes })}
+                    <iconify-icon icon={isVerified ? 'lucide:thumbs-down' : 'lucide:x-circle'} class="text-sm"></iconify-icon>
+                    {isVerified
+                      ? t('record.disagreeCta', { count: incorrectVotes })
+                      : t('record.incorrectVoteCta', { count: incorrectVotes })}
                   </button>
                 </div>
               </div>
@@ -563,7 +671,7 @@ export default function TahminKaydi() {
                   </div>
                 </div>
                 <span className="rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-bold">
-                  {isManualSeal ? t('record.upToYouTag') : countdown.isPast ? t('record.openedAwaitingTag') : t('record.notOpenedTag')}
+                  {isManualSeal ? t('record.upToYouTag') : t('record.notOpenedTag')}
                 </span>
               </div>
 
@@ -585,7 +693,7 @@ export default function TahminKaydi() {
                 <div className="mt-4 h-px bg-white/15" />
                 <div className="mt-4 flex items-center gap-2 text-xs text-white/75">
                   <iconify-icon
-                    icon={isManualSeal ? (isOwner ? 'lucide:eye' : 'lucide:eye-off') : countdown.isPast ? 'lucide:eye' : 'lucide:eye-off'}
+                    icon={isManualSeal && isOwner ? 'lucide:eye' : 'lucide:eye-off'}
                     class="text-base"
                   ></iconify-icon>
                   <span>
@@ -593,11 +701,7 @@ export default function TahminKaydi() {
                       ? isOwner
                         ? t('record.ownerManualHint')
                         : t('record.viewerManualHint')
-                      : countdown.isPast
-                        ? isOwner
-                          ? t('record.ownerPastDueHint')
-                          : t('record.viewerPastDueHint')
-                        : t('record.hiddenUntilOpenHint')}
+                      : t('record.hiddenUntilOpenHint')}
                   </span>
                 </div>
               </div>
@@ -674,37 +778,6 @@ export default function TahminKaydi() {
                       {verifying ? t('common.saving') : t('record.confirmResult')}
                     </button>
                   </div>
-                </div>
-              )}
-
-              {canVote && (
-                <div className="relative mt-4 rounded-theme border border-white/15 bg-white/10 p-4">
-                  <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-white/60">
-                    {t('record.authorNotMarkedYet')}
-                  </p>
-                  <div className="mt-3 flex gap-2">
-                    <button
-                      onClick={() => handleVote('correct')}
-                      disabled={voting}
-                      className={`flex flex-1 items-center justify-center gap-1.5 rounded-theme py-2.5 text-xs font-bold disabled:opacity-60 ${
-                        myVote === 'correct' ? 'bg-success text-success-foreground' : 'bg-white/10 text-white'
-                      }`}
-                    >
-                      <iconify-icon icon="lucide:check-circle-2" class="text-sm"></iconify-icon>
-                      {t('record.correctVoteCta', { count: correctVotes })}
-                    </button>
-                    <button
-                      onClick={() => handleVote('incorrect')}
-                      disabled={voting}
-                      className={`flex flex-1 items-center justify-center gap-1.5 rounded-theme py-2.5 text-xs font-bold disabled:opacity-60 ${
-                        myVote === 'incorrect' ? 'bg-destructive text-destructive-foreground' : 'bg-white/10 text-white'
-                      }`}
-                    >
-                      <iconify-icon icon="lucide:x-circle" class="text-sm"></iconify-icon>
-                      {t('record.incorrectVoteCta', { count: incorrectVotes })}
-                    </button>
-                  </div>
-                  <p className="mt-2 text-[10px] text-white/60">{t('record.communityCanResolve')}</p>
                 </div>
               )}
 
