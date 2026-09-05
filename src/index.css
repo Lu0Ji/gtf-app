@@ -115,39 +115,35 @@ body {
     flame-glow var(--flame-speed, 2.2s) ease-in-out infinite;
 }
 
-/* Interactive shine: the diagonal glare-sweep web buttons get on hover.
-   Layered as `background-image` (not a pseudo-element) specifically so it
-   never needs `overflow: hidden` on the button itself — plenty of buttons
-   here carry an absolutely-positioned child that must overflow on purpose
-   (BottomNav/SidebarNav's unread-count badge, TahminKaydi's icon badges),
-   and clipping those to add a hover effect would be a worse regression than
-   the effect is worth. `background-image` composites on top of whatever
-   `background-color` a button already has (Tailwind's bg-primary etc.) —
-   the gradient's own transparent stops just let it show through — so one
-   rule works uniformly across every button color in the app, light or dark
-   theme, no per-button opt-in needed. Swept via `background-position`
-   instead of `left`/`transform` for the same overflow-safety reason.
-   `:active` (not just `:hover`) is what makes this visible on a touch
-   screen — there's no real hover on a phone, but a press still lands on
-   `:active`. `@media (hover: hover)` keeps the *hover* trigger itself
-   mouse/trackpad-only, so a touch tap doesn't get stuck mid-sweep between
-   touchstart/touchend the way a true `:hover` emulation sometimes does. */
+/* Interactive shine: a light highlight on top of a button/link, not the
+   full diagonal sweep this started as (tried that first — too much).
+   Layered as `background-image` (not a pseudo-element) so it never needs
+   `overflow: hidden` on the button itself — plenty of buttons here carry
+   an absolutely-positioned child that must overflow on purpose (BottomNav/
+   SidebarNav's unread-count badge, TahminKaydi's icon badges), and clipping
+   those to add a hover effect would be a worse regression than the effect
+   is worth. `background-image` composites on top of whatever
+   `background-color` a button already has (Tailwind's bg-primary etc.), and
+   is clipped to the element's own border-radius automatically — one rule
+   works uniformly across every button color/shape in the app. `:active`
+   (not just `:hover`) is what makes this visible on a touch screen — no
+   real hover on a phone, but a press still lands on `:active`.
+   `@media (hover: hover)` keeps the *hover* trigger itself mouse/trackpad-
+   only, so a touch tap doesn't get stuck "hovered" after release. */
 button:not(:disabled),
 a[href] {
-  background-image: linear-gradient(115deg, transparent 30%, rgba(255, 255, 255, 0.45) 50%, transparent 70%);
-  background-size: 250% 100%;
-  background-position: 150% 0;
-  transition: background-position 0.6s ease;
+  background-image: linear-gradient(rgba(255, 255, 255, 0), rgba(255, 255, 255, 0));
+  transition: background-image 0.15s ease;
 }
 
 @media (hover: hover) {
   button:not(:disabled):hover,
   a[href]:hover {
-    background-position: -50% 0;
+    background-image: linear-gradient(rgba(255, 255, 255, 0.12), rgba(255, 255, 255, 0.12));
   }
 }
 
 button:not(:disabled):active,
 a[href]:active {
-  background-position: -50% 0;
+  background-image: linear-gradient(rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.16));
 }
