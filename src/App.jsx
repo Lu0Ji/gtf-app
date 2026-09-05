@@ -9,6 +9,7 @@ import { UnreadMessagesProvider } from './contexts/UnreadMessagesContext.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 import AccentColor from './components/AccentColor.jsx'
 import AndroidBackButton from './components/AndroidBackButton.jsx'
+import ErrorBoundary from './components/ErrorBoundary.jsx'
 import AppShell from './layouts/AppShell.jsx'
 import TabLayout from './layouts/TabLayout.jsx'
 import Giris from './screens/Giris.jsx'
@@ -70,55 +71,57 @@ export default function App() {
                 <AccentColor />
                 <AndroidBackButton />
                 <HashRouter>
-                  <Suspense fallback={<ScreenFallback />}>
-                    <Routes>
-                      <Route path="/giris" element={<Giris />} />
+                  <ErrorBoundary>
+                    <Suspense fallback={<ScreenFallback />}>
+                      <Routes>
+                        <Route path="/giris" element={<Giris />} />
 
-                      <Route element={<ProtectedRoute />}>
-                        {/* Full-bleed, no sidebar — a focused first-run flow,
-                            not a screen you navigate away from mid-slide. */}
-                        <Route path="/rehber" element={<IlkKullanimRehberi />} />
+                        <Route element={<ProtectedRoute />}>
+                          {/* Full-bleed, no sidebar — a focused first-run flow,
+                              not a screen you navigate away from mid-slide. */}
+                          <Route path="/rehber" element={<IlkKullanimRehberi />} />
 
-                        <Route element={<AppShell />}>
-                          <Route element={<TabLayout />}>
-                            <Route path="/" element={<Anasayfa />} />
-                            <Route path="/gruplar" element={<Gruplar />} />
-                            <Route path="/mesajlar" element={<Mesajlar />} />
-                            <Route path="/kesfet" element={<Kesfet />} />
-                            <Route path="/profil" element={<Profil />} />
+                          <Route element={<AppShell />}>
+                            <Route element={<TabLayout />}>
+                              <Route path="/" element={<Anasayfa />} />
+                              <Route path="/gruplar" element={<Gruplar />} />
+                              <Route path="/mesajlar" element={<Mesajlar />} />
+                              <Route path="/kesfet" element={<Kesfet />} />
+                              <Route path="/profil" element={<Profil />} />
+                            </Route>
+
+                            <Route path="/tahmin-olustur" element={<TahminOlustur />} />
+                            <Route path="/tahmin-kaydi" element={<TahminKaydi />} />
+                            <Route path="/sohbet" element={<Sohbet />} />
+                            <Route path="/grup-sohbeti" element={<GrupSohbeti />} />
+                            <Route path="/liderlik-tablosu" element={<LiderlikTablosu />} />
+                            <Route path="/rozetler" element={<Rozetler />} />
+                            <Route path="/profil-ayarlari" element={<ProfilAyarlari />} />
+                            <Route path="/uygulama-ayarlari" element={<UygulamaAyarlari />} />
+                            <Route path="/hareketler" element={<Hareketler />} />
+                            <Route path="/kullanici/:userId" element={<KullaniciProfili />} />
+                            <Route path="/grup/:groupId" element={<GrupDetayi />} />
+                            <Route path="/ayarlar/engellenenler" element={<EngellenenHesaplar />} />
+                            <Route path="/ayarlar/takip-istekleri" element={<TakipIstekleri />} />
+                            <Route path="/ayarlar/eposta-telefon" element={<EpostaVeTelefon />} />
+                            <Route path="/ayarlar/sifre-degistir" element={<SifreDegistir />} />
+                            <Route path="/ayarlar/iki-asamali-dogrulama" element={<IkiAsamaliDogrulama />} />
+                            <Route path="/ayarlar/hesabi-dondur" element={<HesabiDondur />} />
+                            <Route path="/ayarlar/tahmin-gorunurlugu" element={<TahminGorunurlugu />} />
+                            <Route path="/ayarlar/mesaj-istekleri" element={<MesajIstekleri />} />
+                            <Route path="/ayarlar/aktif-oturumlar" element={<AktifOturumlar />} />
+                            <Route path="/ayarlar/etiketleme-bahsetmeler" element={<EtiketlemeVeBahsetmeler />} />
+                            <Route path="/ayarlar/hassas-icerik" element={<HassasIcerikKontrolu />} />
+                            <Route path="/ayarlar/bolge-tarih" element={<BolgeVeTarihBicimi />} />
+                            <Route path="/ayarlar/arama-gecmisi" element={<AramaGecmisi />} />
+                            <Route path="/begeniler" element={<Begeniler />} />
+                            <Route path="/ayarlar/yardim-merkezi" element={<YardimMerkezi />} />
+                            <Route path="/ayarlar/topluluk-kurallari" element={<TopluluKurallari />} />
                           </Route>
-
-                          <Route path="/tahmin-olustur" element={<TahminOlustur />} />
-                          <Route path="/tahmin-kaydi" element={<TahminKaydi />} />
-                          <Route path="/sohbet" element={<Sohbet />} />
-                          <Route path="/grup-sohbeti" element={<GrupSohbeti />} />
-                          <Route path="/liderlik-tablosu" element={<LiderlikTablosu />} />
-                          <Route path="/rozetler" element={<Rozetler />} />
-                          <Route path="/profil-ayarlari" element={<ProfilAyarlari />} />
-                          <Route path="/uygulama-ayarlari" element={<UygulamaAyarlari />} />
-                          <Route path="/hareketler" element={<Hareketler />} />
-                          <Route path="/kullanici/:userId" element={<KullaniciProfili />} />
-                          <Route path="/grup/:groupId" element={<GrupDetayi />} />
-                          <Route path="/ayarlar/engellenenler" element={<EngellenenHesaplar />} />
-                          <Route path="/ayarlar/takip-istekleri" element={<TakipIstekleri />} />
-                          <Route path="/ayarlar/eposta-telefon" element={<EpostaVeTelefon />} />
-                          <Route path="/ayarlar/sifre-degistir" element={<SifreDegistir />} />
-                          <Route path="/ayarlar/iki-asamali-dogrulama" element={<IkiAsamaliDogrulama />} />
-                          <Route path="/ayarlar/hesabi-dondur" element={<HesabiDondur />} />
-                          <Route path="/ayarlar/tahmin-gorunurlugu" element={<TahminGorunurlugu />} />
-                          <Route path="/ayarlar/mesaj-istekleri" element={<MesajIstekleri />} />
-                          <Route path="/ayarlar/aktif-oturumlar" element={<AktifOturumlar />} />
-                          <Route path="/ayarlar/etiketleme-bahsetmeler" element={<EtiketlemeVeBahsetmeler />} />
-                          <Route path="/ayarlar/hassas-icerik" element={<HassasIcerikKontrolu />} />
-                          <Route path="/ayarlar/bolge-tarih" element={<BolgeVeTarihBicimi />} />
-                          <Route path="/ayarlar/arama-gecmisi" element={<AramaGecmisi />} />
-                          <Route path="/begeniler" element={<Begeniler />} />
-                          <Route path="/ayarlar/yardim-merkezi" element={<YardimMerkezi />} />
-                          <Route path="/ayarlar/topluluk-kurallari" element={<TopluluKurallari />} />
                         </Route>
-                      </Route>
-                    </Routes>
-                  </Suspense>
+                      </Routes>
+                    </Suspense>
+                  </ErrorBoundary>
                 </HashRouter>
               </UnreadMessagesProvider>
             </PresenceProvider>

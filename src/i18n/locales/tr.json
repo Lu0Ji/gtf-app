@@ -1709,6 +1709,12 @@
     "communityNoteTitle": "Rozet ve puan kazan",
     "communityNoteDesc": "Her doğru tahmin, her beğeni, her yeni takipçi seni bir adım ileri taşır."
   },
+  "errorBoundary": {
+    "title": "Bir şeyler ters gitti",
+    "body": "Beklenmeyen bir hata oluştu. Sayfayı yenilemeyi dene.",
+    "reloadCta": "Sayfayı yenile",
+    "goHomeCta": "Anasayfaya dön"
+  },
   "languages": {
     "tr": "Türkçe",
     "en": "İngilizce",

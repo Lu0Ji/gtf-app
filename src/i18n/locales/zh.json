@@ -1708,6 +1708,12 @@
     "communityNoteTitle": "赢取徽章和积分",
     "communityNoteDesc": "每一个正确的预测、每一个点赞、每一位新关注者都会让你更进一步。"
   },
+  "errorBoundary": {
+    "title": "出现了一些问题",
+    "body": "发生了意外错误。请尝试重新加载页面。",
+    "reloadCta": "重新加载页面",
+    "goHomeCta": "返回首页"
+  },
   "languages": {
     "tr": "土耳其语",
     "en": "英语",

@@ -1709,6 +1709,12 @@
     "communityNoteTitle": "Earn badges and points",
     "communityNoteDesc": "Every correct prediction, every like, every new follower moves you one step forward."
   },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "body": "An unexpected error occurred. Try reloading the page.",
+    "reloadCta": "Reload page",
+    "goHomeCta": "Go to home"
+  },
   "languages": {
     "tr": "Turkish",
     "en": "English",

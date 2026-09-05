@@ -1709,6 +1709,12 @@
     "communityNoteTitle": "Verdiene Abzeichen und Punkte",
     "communityNoteDesc": "Jede richtige Vorhersage, jedes Like, jeder neue Follower bringt dich einen Schritt weiter."
   },
+  "errorBoundary": {
+    "title": "Etwas ist schiefgelaufen",
+    "body": "Ein unerwarteter Fehler ist aufgetreten. Versuch, die Seite neu zu laden.",
+    "reloadCta": "Seite neu laden",
+    "goHomeCta": "Zur Startseite"
+  },
   "languages": {
     "tr": "Türkisch",
     "en": "Englisch",
