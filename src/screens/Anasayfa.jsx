@@ -258,7 +258,7 @@ function PredictionCard({ prediction, social, onToggleLike, onToggleSave }) {
             e.stopPropagation()
             navigate(`/kullanici/${prediction.author_id}`)
           }}
-          className="h-11 w-11 shrink-0 overflow-hidden rounded-full"
+          className="shine-none h-11 w-11 shrink-0 cursor-pointer overflow-hidden rounded-full"
         >
           <img
             src={author?.avatar_url || fallbackAvatarFor(prediction.author_id)}
@@ -273,7 +273,7 @@ function PredictionCard({ prediction, social, onToggleLike, onToggleSave }) {
                 e.stopPropagation()
                 navigate(`/kullanici/${prediction.author_id}`)
               }}
-              className="text-left"
+              className="shine-none cursor-pointer text-left"
             >
               <div className="flex items-center gap-1.5">
                 <h2 className="text-sm font-bold">{author?.display_name || t('common.unknownUser')}</h2>
@@ -679,7 +679,7 @@ function SuggestedPeople() {
       <div className="mt-4 flex gap-3 overflow-x-auto px-5 pb-1">
         {people.map((person) => (
           <article key={person.id} className="min-w-[166px] rounded-theme border border-border bg-card p-3 shadow-sm">
-            <button onClick={() => navigate(`/kullanici/${person.id}`)} className="block text-left">
+            <button onClick={() => navigate(`/kullanici/${person.id}`)} className="shine-none block cursor-pointer text-left">
               <div className="h-11 w-11 overflow-hidden rounded-full">
                 <img src={person.avatar_url || fallbackAvatarFor(person.id)} alt={person.display_name} className="h-full w-full object-cover" />
               </div>
