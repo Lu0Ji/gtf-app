@@ -1,4 +1,4 @@
--- GTF (Gelecek Tahmin Fonu) — Phase 1 schema: profiles + predictions
+-- GTF (Guess the Future) — Phase 1 schema: profiles + predictions
 -- Applied via Supabase SQL Editor. Keep this file as the source of truth;
 -- future changes should be added as new migration files in this folder.
 

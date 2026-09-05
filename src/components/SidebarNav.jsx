@@ -27,7 +27,7 @@ export default function SidebarNav() {
             GTF
           </span>
           <span className="font-heading text-[15px] font-extrabold leading-tight tracking-[-0.04em] text-foreground">
-            Gelecek Tahmin Fonu
+            Guess the Future
           </span>
         </div>
 

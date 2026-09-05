@@ -199,7 +199,7 @@ export default function Giris() {
             GTF
           </div>
           <h1 className="mt-4 font-heading text-2xl font-extrabold tracking-[-0.05em] text-primary">
-            Gelecek Tahmin Fonu
+            Guess the Future
           </h1>
           <p className="mt-1 text-sm text-muted-foreground">
             {mode === 'signin' ? t('auth.signInSubtitle') : t('auth.signUpSubtitle')}

@@ -8,7 +8,7 @@ self.addEventListener('push', (event) => {
   } catch {
     data = {}
   }
-  const title = data.title || 'Gelecek Tahmin Fonu'
+  const title = data.title || 'Guess the Future'
   const options = {
     body: data.body || '',
     icon: '/favicon.svg',

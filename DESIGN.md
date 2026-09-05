@@ -1,6 +1,6 @@
 # GTF Design Language
 
-**Gelecek Tahmin Fonu** — a Turkish social prediction app. People seal a prediction
+**Guess the Future (GTF)** — a Turkish social prediction app. People seal a prediction
 about something that hasn't happened yet, the app locks it until the event resolves,
 and the community follows, reacts, and keeps score. It's part social feed, part
 time capsule, part leaderboard.

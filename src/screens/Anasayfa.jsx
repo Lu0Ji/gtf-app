@@ -34,7 +34,7 @@ function Header() {
           </div>
           <div>
             <p className="font-heading text-[21px] font-extrabold leading-none tracking-[-0.06em] text-primary">
-              Gelecek Tahmin Fonu
+              Guess the Future
             </p>
             <p className="mt-1 text-[10px] font-medium text-muted-foreground">
               {t('home.publicFeed')}
