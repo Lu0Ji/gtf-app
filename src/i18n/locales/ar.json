@@ -1468,7 +1468,14 @@
     "noSealedRecordDescMember": "كن أول من يختم توقعًا في هذه المجموعة — سينتظر الأعضاء الكشف باهتمام.",
     "noSealedRecordDescNonMember": "انضم إلى المجموعة لترى ما تم ختمه وتضيف توقعك الخاص.",
     "membersCount": "الأعضاء ({{count}})",
-    "noMembersYet": "لا يوجد أعضاء بعد."
+    "noMembersYet": "لا يوجد أعضاء بعد.",
+    "onlineNow": "{{count}} متصل الآن",
+    "messageRetentionTitle": "مدة الاحتفاظ بالرسائل",
+    "messageRetentionSubtitle": "إلى أي مدى في الماضي يجب أن تعرض المحادثة الرسائل؟",
+    "retentionAll": "الكل",
+    "retentionLastHour": "آخر ساعة",
+    "retentionLast30Min": "آخر 30 دقيقة",
+    "retentionLast15Min": "آخر 15 دقيقة"
   },
   "chat": {
     "sendAria": "إرسال الرسالة",
@@ -1490,7 +1497,10 @@
     "sendFailedNotMember": "تعذّر الإرسال — يجب أن تكون عضوًا في هذه المجموعة.",
     "sendFailedGeneric": "تعذّر إرسال الرسالة، حاول مرة أخرى.",
     "sendFailedRecipientRestricted": "هذا الشخص يقبل الرسائل فقط ممن يتابعهم.",
-    "blockedNotice": "لا يمكنك مراسلة هذا المستخدم."
+    "blockedNotice": "لا يمكنك مراسلة هذا المستخدم.",
+    "retentionNoticeHour": "يتم عرض رسائل الساعة الأخيرة فقط.",
+    "retentionNotice30Min": "يتم عرض رسائل الـ 30 دقيقة الأخيرة فقط.",
+    "retentionNotice15Min": "يتم عرض رسائل الـ 15 دقيقة الأخيرة فقط."
   },
   "discover": {
     "title": "على أثر المستقبل",

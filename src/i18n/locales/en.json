@@ -1464,7 +1464,14 @@
     "noSealedRecordDescMember": "Be the first to seal a prediction in this group — members will be watching for the reveal.",
     "noSealedRecordDescNonMember": "Join the group to see what's sealed and add your own prediction.",
     "membersCount": "Members ({{count}})",
-    "noMembersYet": "No members yet."
+    "noMembersYet": "No members yet.",
+    "onlineNow": "{{count}} online",
+    "messageRetentionTitle": "Message retention",
+    "messageRetentionSubtitle": "How far back should the chat show messages?",
+    "retentionAll": "All",
+    "retentionLastHour": "Last hour",
+    "retentionLast30Min": "Last 30 minutes",
+    "retentionLast15Min": "Last 15 minutes"
   },
   "chat": {
     "sendAria": "Send message",
@@ -1486,7 +1493,10 @@
     "sendFailedNotMember": "Couldn't send — you need to be a member of this group.",
     "sendFailedGeneric": "Couldn't send the message, try again.",
     "sendFailedRecipientRestricted": "This person only accepts messages from people they follow.",
-    "blockedNotice": "You can't message this user."
+    "blockedNotice": "You can't message this user.",
+    "retentionNoticeHour": "Only messages from the last hour are shown.",
+    "retentionNotice30Min": "Only messages from the last 30 minutes are shown.",
+    "retentionNotice15Min": "Only messages from the last 15 minutes are shown."
   },
   "discover": {
     "title": "On the trail of the future",

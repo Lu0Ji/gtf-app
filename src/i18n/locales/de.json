@@ -1464,7 +1464,14 @@
     "noSealedRecordDescMember": "Versiegle als Erstes eine Vorhersage in dieser Gruppe — die Mitglieder werden gespannt auf die Enthüllung warten.",
     "noSealedRecordDescNonMember": "Tritt der Gruppe bei, um zu sehen, was versiegelt wurde, und eigene Vorhersagen hinzuzufügen.",
     "membersCount": "Mitglieder ({{count}})",
-    "noMembersYet": "Noch keine Mitglieder."
+    "noMembersYet": "Noch keine Mitglieder.",
+    "onlineNow": "{{count}} online",
+    "messageRetentionTitle": "Nachrichtenaufbewahrung",
+    "messageRetentionSubtitle": "Wie weit soll der Chat rückwirkend Nachrichten anzeigen?",
+    "retentionAll": "Alle",
+    "retentionLastHour": "Letzte Stunde",
+    "retentionLast30Min": "Letzte 30 Minuten",
+    "retentionLast15Min": "Letzte 15 Minuten"
   },
   "chat": {
     "sendAria": "Nachricht senden",
@@ -1486,7 +1493,10 @@
     "sendFailedNotMember": "Konnte nicht gesendet werden — du musst Mitglied dieser Gruppe sein.",
     "sendFailedGeneric": "Nachricht konnte nicht gesendet werden, versuch's erneut.",
     "sendFailedRecipientRestricted": "Diese Person akzeptiert nur Nachrichten von Leuten, denen sie folgt.",
-    "blockedNotice": "Du kannst dieser Person keine Nachrichten schicken."
+    "blockedNotice": "Du kannst dieser Person keine Nachrichten schicken.",
+    "retentionNoticeHour": "Es werden nur Nachrichten der letzten Stunde angezeigt.",
+    "retentionNotice30Min": "Es werden nur Nachrichten der letzten 30 Minuten angezeigt.",
+    "retentionNotice15Min": "Es werden nur Nachrichten der letzten 15 Minuten angezeigt."
   },
   "discover": {
     "title": "Auf der Spur der Zukunft",

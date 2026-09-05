@@ -1464,7 +1464,14 @@
     "noSealedRecordDescMember": "Bu grupta ilk mührü sen bas — açılış anını üyeler merakla bekleyecek.",
     "noSealedRecordDescNonMember": "Neler mühürlendiğini görmek ve kendi tahminini eklemek için gruba katıl.",
     "membersCount": "Üyeler ({{count}})",
-    "noMembersYet": "Henüz üye yok."
+    "noMembersYet": "Henüz üye yok.",
+    "onlineNow": "{{count}} çevrimiçi",
+    "messageRetentionTitle": "Mesaj saklama süresi",
+    "messageRetentionSubtitle": "Sohbette ne kadar geriye kadar mesaj gösterilsin?",
+    "retentionAll": "Tümü",
+    "retentionLastHour": "Son 1 saat",
+    "retentionLast30Min": "Son 30 dakika",
+    "retentionLast15Min": "Son 15 dakika"
   },
   "chat": {
     "sendAria": "Mesaj gönder",
@@ -1486,7 +1493,10 @@
     "sendFailedNotMember": "Mesaj gönderemedin — bu grubun üyesi olman gerekiyor.",
     "sendFailedGeneric": "Mesaj gönderilemedi, tekrar dene.",
     "sendFailedRecipientRestricted": "Bu kişi yalnızca takip ettiklerinden mesaj kabul ediyor.",
-    "blockedNotice": "Bu kullanıcıyla mesajlaşamazsın."
+    "blockedNotice": "Bu kullanıcıyla mesajlaşamazsın.",
+    "retentionNoticeHour": "Yalnızca son 1 saatteki mesajlar gösteriliyor.",
+    "retentionNotice30Min": "Yalnızca son 30 dakikadaki mesajlar gösteriliyor.",
+    "retentionNotice15Min": "Yalnızca son 15 dakikadaki mesajlar gösteriliyor."
   },
   "discover": {
     "title": "Geleceğin izinde",

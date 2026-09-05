@@ -5,10 +5,21 @@ import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
+import { useOnlineUsers } from '../contexts/PresenceContext.jsx'
 import { formatDateLong, formatTimeUntil, sealLabel, timeAgo } from '../lib/format.js'
 import { CATEGORY_META, GROUP_CATEGORY_SLUGS } from '../lib/categories.js'
 import DifficultyChip from '../components/DifficultyChip.jsx'
 
+
+// Fixed set an admin can pick from — null means "no limit" (today's
+// behavior), the rest are minutes. Kept as a plain array (not derived from
+// translations) since the persisted value is this number, not the label.
+const RETENTION_OPTIONS = [
+  { value: null, labelKey: 'groups.retentionAll' },
+  { value: 60, labelKey: 'groups.retentionLastHour' },
+  { value: 30, labelKey: 'groups.retentionLast30Min' },
+  { value: 15, labelKey: 'groups.retentionLast15Min' },
+]
 
 function EditGroupModal({ group, onClose, onSaved }) {
   const { t } = useTranslation()
@@ -16,21 +27,33 @@ function EditGroupModal({ group, onClose, onSaved }) {
   const [name, setName] = useState(group.name || '')
   const [description, setDescription] = useState(group.description || '')
   const [category, setCategory] = useState(group.category || 'genel')
+  const [retention, setRetention] = useState(group.message_retention_minutes ?? null)
   const [saving, setSaving] = useState(false)
 
   async function handleSave() {
     if (!name.trim() || saving) return
     setSaving(true)
-    const { error } = await supabase
+    const basePayload = { name: name.trim(), description: description.trim() || null, category }
+    let { error } = await supabase
       .from('groups')
-      .update({ name: name.trim(), description: description.trim() || null, category })
+      .update({ ...basePayload, message_retention_minutes: retention })
       .eq('id', group.id)
+    let retentionSaved = true
+    // message_retention_minutes is a newer column (see supabase/schema.sql)
+    // that may not have been migrated to the live DB yet — same
+    // base-payload-plus-optional-key retry pattern as TahminOlustur.jsx's
+    // media fields, so the rest of the edit still goes through.
+    if (error?.code === 'PGRST204') {
+      retentionSaved = false
+      ;({ error } = await supabase.from('groups').update(basePayload).eq('id', group.id))
+    }
     setSaving(false)
     if (error) {
       showToast(t('groups.updateFailedToast'))
       return
     }
-    onSaved({ name: name.trim(), description: description.trim() || null, category })
+    if (!retentionSaved) showToast(t('common.featureNotEnabledYet'))
+    onSaved({ ...basePayload, message_retention_minutes: retentionSaved ? retention : group.message_retention_minutes })
   }
 
   return (
@@ -74,6 +97,25 @@ function EditGroupModal({ group, onClose, onSaved }) {
                   }`}
                 >
                   {t(CATEGORY_META[slug].labelKey)}
+                </button>
+              ))}
+            </div>
+          </div>
+          <div>
+            <label className="mb-2 block text-sm font-bold text-foreground">{t('groups.messageRetentionTitle')}</label>
+            <p className="mb-2 text-[11px] leading-4 text-muted-foreground">{t('groups.messageRetentionSubtitle')}</p>
+            <div className="flex flex-wrap gap-2">
+              {RETENTION_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value ?? 'all'}
+                  onClick={() => setRetention(opt.value)}
+                  className={`rounded-full px-3.5 py-2 text-xs font-bold ${
+                    opt.value === retention
+                      ? 'bg-primary text-primary-foreground'
+                      : 'border border-border bg-card text-card-foreground'
+                  }`}
+                >
+                  {t(opt.labelKey)}
                 </button>
               ))}
             </div>
@@ -145,6 +187,7 @@ export default function GrupDetayi() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const { showToast } = useToast()
+  const onlineIds = useOnlineUsers()
   const [group, setGroup] = useState(null)
   const [members, setMembers] = useState([])
   const [predictions, setPredictions] = useState([])
@@ -181,6 +224,7 @@ export default function GrupDetayi() {
 
   const isMember = members.some((m) => m.user_id === user?.id)
   const isAdmin = members.some((m) => m.user_id === user?.id && m.role === 'admin')
+  const onlineCount = members.filter((m) => onlineIds.has(m.user_id)).length
 
   async function handleToggleAdmin(member) {
     if (memberActionBusy) return
@@ -361,12 +405,15 @@ export default function GrupDetayi() {
           >
             <div className="flex -space-x-2">
               {members.slice(0, 5).map((m) => (
-                <div key={m.user_id} className="h-8 w-8 overflow-hidden rounded-full border-2 border-background bg-muted">
+                <div key={m.user_id} className="relative h-8 w-8 overflow-hidden rounded-full border-2 border-background bg-muted">
                   <img
                     src={m.profiles.avatar_url || fallbackAvatarFor(m.user_id)}
                     alt={m.profiles.display_name}
                     className="h-full w-full object-cover"
                   />
+                  {onlineIds.has(m.user_id) && (
+                    <span className="absolute bottom-0 right-0 h-2 w-2 rounded-full border border-background bg-success" />
+                  )}
                 </div>
               ))}
             </div>
@@ -376,6 +423,9 @@ export default function GrupDetayi() {
                 : members.length === 1
                   ? t('groups.firstMemberYou')
                   : t('groups.memberCount', { count: members.length })}
+              {onlineCount > 0 && (
+                <span className="ml-1.5 text-success">· {t('groups.onlineNow', { count: onlineCount })}</span>
+              )}
             </span>
           </button>
         )}

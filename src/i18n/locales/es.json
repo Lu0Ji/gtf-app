@@ -1464,7 +1464,14 @@
     "noSealedRecordDescMember": "Sella la primera predicción de este grupo — los miembros esperarán con ganas la revelación.",
     "noSealedRecordDescNonMember": "Únete al grupo para ver qué se ha sellado y añadir tu propia predicción.",
     "membersCount": "Miembros ({{count}})",
-    "noMembersYet": "Aún no hay miembros."
+    "noMembersYet": "Aún no hay miembros.",
+    "onlineNow": "{{count}} en línea",
+    "messageRetentionTitle": "Retención de mensajes",
+    "messageRetentionSubtitle": "¿Hasta cuándo debe mostrar mensajes el chat?",
+    "retentionAll": "Todos",
+    "retentionLastHour": "Última hora",
+    "retentionLast30Min": "Últimos 30 minutos",
+    "retentionLast15Min": "Últimos 15 minutos"
   },
   "chat": {
     "sendAria": "Enviar mensaje",
@@ -1486,7 +1493,10 @@
     "sendFailedNotMember": "No se pudo enviar — necesitas ser miembro de este grupo.",
     "sendFailedGeneric": "No se pudo enviar el mensaje, inténtalo de nuevo.",
     "sendFailedRecipientRestricted": "Esta persona solo acepta mensajes de quienes sigue.",
-    "blockedNotice": "No puedes enviar mensajes a este usuario."
+    "blockedNotice": "No puedes enviar mensajes a este usuario.",
+    "retentionNoticeHour": "Solo se muestran los mensajes de la última hora.",
+    "retentionNotice30Min": "Solo se muestran los mensajes de los últimos 30 minutos.",
+    "retentionNotice15Min": "Solo se muestran los mensajes de los últimos 15 minutos."
   },
   "discover": {
     "title": "Tras la pista del futuro",

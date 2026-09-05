@@ -1466,7 +1466,14 @@
     "noSealedRecordDescMember": "Первым запечатай прогноз в этой группе — участники будут с нетерпением ждать раскрытия.",
     "noSealedRecordDescNonMember": "Присоединись к группе, чтобы увидеть, что запечатано, и добавить свой прогноз.",
     "membersCount": "Участники ({{count}})",
-    "noMembersYet": "Участников пока нет."
+    "noMembersYet": "Участников пока нет.",
+    "onlineNow": "{{count}} онлайн",
+    "messageRetentionTitle": "Хранение сообщений",
+    "messageRetentionSubtitle": "Насколько далеко в прошлое показывать сообщения в чате?",
+    "retentionAll": "Все",
+    "retentionLastHour": "Последний час",
+    "retentionLast30Min": "Последние 30 минут",
+    "retentionLast15Min": "Последние 15 минут"
   },
   "chat": {
     "sendAria": "Отправить сообщение",
@@ -1488,7 +1495,10 @@
     "sendFailedNotMember": "Не удалось отправить — тебе нужно быть участником этой группы.",
     "sendFailedGeneric": "Не удалось отправить сообщение, попробуй ещё раз.",
     "sendFailedRecipientRestricted": "Этот человек принимает сообщения только от тех, на кого подписан.",
-    "blockedNotice": "Ты не можешь писать этому пользователю."
+    "blockedNotice": "Ты не можешь писать этому пользователю.",
+    "retentionNoticeHour": "Показаны только сообщения за последний час.",
+    "retentionNotice30Min": "Показаны только сообщения за последние 30 минут.",
+    "retentionNotice15Min": "Показаны только сообщения за последние 15 минут."
   },
   "discover": {
     "title": "По следу будущего",

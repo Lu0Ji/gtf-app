@@ -1870,3 +1870,17 @@ begin
   return new;
 end;
 $$ language plpgsql;
+
+-- ─────────────────────────────────────────────────────────────────────────
+
+-- GRUP SOHBETİ — MESAJ SAKLAMA SÜRESİ: gruplar zamanla eski mesajlarla
+-- kalabalıklaşıyor (özellikle canlı/anlık tartışma için kullanılan
+-- gruplarda) — bir yönetici artık sohbetin ne kadar geriye gösterileceğini
+-- seçebilir. null = sınırsız (mevcut davranış, varsayılan). Bilinçli olarak
+-- bir GÖRÜNÜRLÜK penceresi, gerçek bir silme değil: eski mesajlar
+-- group_messages'ta kalmaya devam eder (kayıt/denetim amaçlı), istemci
+-- sadece bu pencerenin dışındakileri sorgulamaz/göstermez — bu yüzden ayrı
+-- bir zamanlanmış temizleme işine gerek yok ve ayar geri alınabilir
+-- (Tümü'ne dönünce geçmiş mesajlar hemen geri görünür).
+alter table public.groups add column message_retention_minutes integer
+  check (message_retention_minutes is null or message_retention_minutes > 0);

@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
+import { useOnlineUsers } from '../contexts/PresenceContext.jsx'
 import { supabase } from '../lib/supabase.js'
 import { formatTimeUntil } from '../lib/format.js'
 import { CATEGORY_META, GROUP_CATEGORY_SLUGS } from '../lib/categories.js'
@@ -171,11 +172,17 @@ function categoryTint(ink) {
 function GroupCard({ group, isMember, onToggleMembership }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
+  const onlineIds = useOnlineUsers()
   const meta = CATEGORY_META[group.category] || CATEGORY_META.genel
   const memberCount = group.memberCount ?? 0
   const predictionCount = group.predictionCount ?? 0
   const todayCount = group.todayCount ?? 0
   const nextOpeningAt = group.nextOpeningAt ?? null
+  // Cross-references the member list this screen already fetches with the
+  // app-wide presence set — cheap (both are already in memory), and it's
+  // what turns a static "42 members" line into something that actually
+  // reflects a group being alive right now.
+  const onlineCount = (group.memberIds || []).filter((id) => onlineIds.has(id)).length
 
   const JoinButton = (
     <button
@@ -211,6 +218,12 @@ function GroupCard({ group, isMember, onToggleMembership }) {
               <iconify-icon icon="lucide:users" class="text-xs"></iconify-icon>
               {memberCount}
             </span>
+            {onlineCount > 0 && (
+              <span className="flex items-center gap-1 rounded-full bg-success/90 px-2.5 py-1 text-[10px] font-semibold text-success-foreground backdrop-blur-sm">
+                <span className="h-1.5 w-1.5 rounded-full bg-success-foreground" />
+                {t('groups.onlineNow', { count: onlineCount })}
+              </span>
+            )}
           </div>
         </div>
         <div className="p-4">
@@ -277,6 +290,12 @@ function GroupCard({ group, isMember, onToggleMembership }) {
             {predictionCount > 0 && ` · ${t('groups.predictionCountInline', { count: predictionCount })}`}
             {!nextOpeningAt && todayCount > 0 && ` · ${t('groups.todayCountInline', { count: todayCount })}`}
           </span>
+          {onlineCount > 0 && (
+            <span className="flex shrink-0 items-center gap-1 font-semibold text-success">
+              · <span className="h-1.5 w-1.5 rounded-full bg-success" />
+              {t('groups.onlineNow', { count: onlineCount })}
+            </span>
+          )}
           {nextOpeningAt && (
             <span className="flex shrink-0 items-center gap-1 font-semibold text-accent">
               · <iconify-icon icon="lucide:hourglass" class="text-xs"></iconify-icon>
@@ -308,9 +327,12 @@ export default function Gruplar() {
     ])
 
     const memberCounts = new Map()
+    const memberIdsByGroup = new Map()
     const mine = new Set()
     for (const m of membersData || []) {
       memberCounts.set(m.group_id, (memberCounts.get(m.group_id) || 0) + 1)
+      if (!memberIdsByGroup.has(m.group_id)) memberIdsByGroup.set(m.group_id, [])
+      memberIdsByGroup.get(m.group_id).push(m.user_id)
       if (m.user_id === user.id) mine.add(m.group_id)
     }
 
@@ -339,6 +361,7 @@ export default function Gruplar() {
       (groupsData || []).map((g) => ({
         ...g,
         memberCount: memberCounts.get(g.id) || 0,
+        memberIds: memberIdsByGroup.get(g.id) || [],
         predictionCount: predictionCounts.get(g.id) || 0,
         todayCount: todayCounts.get(g.id) || 0,
         nextOpeningAt: nextOpenings.get(g.id) || null,

@@ -34,6 +34,10 @@ export default function GrupSohbeti() {
   const [messages, setMessages] = useState([])
   const [draft, setDraft] = useState('')
   const [loading, setLoading] = useState(true)
+  // null = no limit (default/current behavior); minutes otherwise. Column
+  // may not exist yet on the live DB (see supabase/schema.sql) — a 42703
+  // just leaves this at the safe default instead of breaking the load.
+  const [retentionMinutes, setRetentionMinutes] = useState(null)
   const [sending, setSending] = useState(false)
   // userId -> display name, for whoever has an active "typing" broadcast.
   const [typingUsers, setTypingUsers] = useState({})
@@ -62,11 +66,27 @@ export default function GrupSohbeti() {
     let cancelled = false
 
     async function load() {
-      const { data, error } = await supabase
+      const { data: groupRow, error: groupError } = await supabase
+        .from('groups')
+        .select('message_retention_minutes')
+        .eq('id', groupId)
+        .single()
+      // Any failure here (42703 = column not migrated yet, or otherwise)
+      // just means "no limit" — this is optional display metadata, not
+      // something worth blocking the actual message load over.
+      const retention = groupError ? null : (groupRow?.message_retention_minutes ?? null)
+      if (cancelled) return
+      setRetentionMinutes(retention)
+
+      let query = supabase
         .from('group_messages')
         .select('*, profiles:sender_id(display_name, username, avatar_url)')
         .eq('group_id', groupId)
         .order('created_at', { ascending: true })
+      if (retention) {
+        query = query.gte('created_at', new Date(Date.now() - retention * 60000).toISOString())
+      }
+      const { data, error } = await query
       if (!cancelled) {
         if (!error) setMessages(data || [])
         setLoading(false)
@@ -165,6 +185,14 @@ export default function GrupSohbeti() {
 
   if (!groupId) return null
 
+  const retentionNoticeKey =
+    retentionMinutes === 60
+      ? 'chat.retentionNoticeHour'
+      : retentionMinutes === 30
+        ? 'chat.retentionNotice30Min'
+        : retentionMinutes === 15
+          ? 'chat.retentionNotice15Min'
+          : null
   const onlineMembers = members.filter((m) => onlineIds.has(m.id))
   const typingNames = Object.values(typingUsers)
   const typingLabel =
@@ -223,6 +251,13 @@ export default function GrupSohbeti() {
             </div>
           )}
         </header>
+
+        {retentionNoticeKey && !loading && (
+          <p className="mt-3 px-5 text-center text-[11px] font-semibold text-muted-foreground">
+            <iconify-icon icon="lucide:timer" class="mr-1 align-[-2px] text-xs"></iconify-icon>
+            {t(retentionNoticeKey)}
+          </p>
+        )}
 
         <main className="flex-1 px-5 pb-36 pt-6">
           {loading ? (

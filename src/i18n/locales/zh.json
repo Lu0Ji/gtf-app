@@ -1463,7 +1463,14 @@
     "noSealedRecordDescMember": "第一个在这个小组封存预测——成员们会热切期待揭晓的那一刻。",
     "noSealedRecordDescNonMember": "加入小组即可查看已封存的内容并添加你自己的预测。",
     "membersCount": "成员（{{count}}）",
-    "noMembersYet": "暂无成员。"
+    "noMembersYet": "暂无成员。",
+    "onlineNow": "{{count}} 人在线",
+    "messageRetentionTitle": "消息保留时长",
+    "messageRetentionSubtitle": "聊天中最多显示多久之前的消息？",
+    "retentionAll": "全部",
+    "retentionLastHour": "最近 1 小时",
+    "retentionLast30Min": "最近 30 分钟",
+    "retentionLast15Min": "最近 15 分钟"
   },
   "chat": {
     "sendAria": "发送消息",
@@ -1485,7 +1492,10 @@
     "sendFailedNotMember": "发送失败——你需要先加入这个小组。",
     "sendFailedGeneric": "消息发送失败，请重试。",
     "sendFailedRecipientRestricted": "此用户只接收其关注对象的消息。",
-    "blockedNotice": "你无法给该用户发送消息。"
+    "blockedNotice": "你无法给该用户发送消息。",
+    "retentionNoticeHour": "仅显示最近 1 小时内的消息。",
+    "retentionNotice30Min": "仅显示最近 30 分钟内的消息。",
+    "retentionNotice15Min": "仅显示最近 15 分钟内的消息。"
   },
   "discover": {
     "title": "追随未来的足迹",

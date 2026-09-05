@@ -1463,7 +1463,14 @@
     "noSealedRecordDescMember": "このグループで最初の予測を封印しよう——メンバーが公開を心待ちにするはず。",
     "noSealedRecordDescNonMember": "グループに参加すると、封印された内容を見たり自分の予測を追加したりできます。",
     "membersCount": "メンバー（{{count}}人）",
-    "noMembersYet": "まだメンバーがいません。"
+    "noMembersYet": "まだメンバーがいません。",
+    "onlineNow": "{{count}}人がオンライン",
+    "messageRetentionTitle": "メッセージの保持期間",
+    "messageRetentionSubtitle": "チャットにどこまで遡ってメッセージを表示しますか？",
+    "retentionAll": "すべて",
+    "retentionLastHour": "直近1時間",
+    "retentionLast30Min": "直近30分",
+    "retentionLast15Min": "直近15分"
   },
   "chat": {
     "sendAria": "メッセージを送信",
@@ -1485,7 +1492,10 @@
     "sendFailedNotMember": "送信できませんでした——このグループのメンバーである必要があります。",
     "sendFailedGeneric": "メッセージを送信できませんでした。もう一度お試しください。",
     "sendFailedRecipientRestricted": "この相手はフォローしている人からのメッセージのみ受け付けています。",
-    "blockedNotice": "このユーザーにメッセージを送ることはできません。"
+    "blockedNotice": "このユーザーにメッセージを送ることはできません。",
+    "retentionNoticeHour": "直近1時間のメッセージのみ表示しています。",
+    "retentionNotice30Min": "直近30分のメッセージのみ表示しています。",
+    "retentionNotice15Min": "直近15分のメッセージのみ表示しています。"
   },
   "discover": {
     "title": "未来の兆しを追って",
