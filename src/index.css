@@ -147,3 +147,19 @@ button:not(:disabled):active,
 a[href]:active {
   background-image: linear-gradient(rgba(255, 255, 255, 0.16), rgba(255, 255, 255, 0.16));
 }
+
+/* Opt-out for plain "row" buttons — a person, a prediction preview, a
+   leaderboard entry. These have no fill/border of their own (just text and
+   an avatar), so the shine above doesn't read as a highlighted button, it
+   reads as a bare rectangle flashing over plain content — RightRail's
+   "Yaklaşan açılışlar"/"Sana önerilen kişiler" widgets specifically. Needs
+   `!important`: `button:not(:disabled):hover` in the rule above is more
+   specific than a single class, so a plain override loses to it otherwise.
+   Still a real clickable row, so it still gets a pointer cursor — Tailwind
+   dropped the old default-to-pointer behavior for buttons a while back, so
+   this needs the explicit `cursor-pointer` utility alongside it in JSX. */
+.shine-none,
+.shine-none:hover,
+.shine-none:active {
+  background-image: none !important;
+}

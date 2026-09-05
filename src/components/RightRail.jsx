@@ -101,7 +101,7 @@ export default function RightRail() {
                 <button
                   key={p.id}
                   onClick={() => navigate('/tahmin-kaydi', { state: { prediction: p } })}
-                  className="rounded-theme text-left transition-colors duration-150 active:bg-muted"
+                  className="shine-none cursor-pointer rounded-theme text-left transition-colors duration-150 active:bg-muted"
                 >
                   <div className="flex items-center gap-1.5 text-[11px] font-bold text-accent">
                     <iconify-icon icon="lucide:hourglass" class="text-xs"></iconify-icon>
@@ -135,7 +135,7 @@ export default function RightRail() {
               <div key={person.id} className="flex items-center gap-3">
                 <button
                   onClick={() => navigate(`/kullanici/${person.id}`)}
-                  className="flex min-w-0 flex-1 items-center gap-3 text-left"
+                  className="shine-none flex min-w-0 flex-1 cursor-pointer items-center gap-3 text-left"
                 >
                   <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-muted">
                     <img
@@ -169,7 +169,7 @@ export default function RightRail() {
               </span>
               <h2 className="text-base font-bold tracking-[-0.04em] text-foreground">{t('home.leaderboard')}</h2>
             </div>
-            <button onClick={() => navigate('/liderlik-tablosu')} className="text-xs font-bold text-primary">
+            <button onClick={() => navigate('/liderlik-tablosu')} className="shine-none cursor-pointer text-xs font-bold text-primary">
               {t('home.leaderboardSeeAll')}
             </button>
           </div>
@@ -178,7 +178,7 @@ export default function RightRail() {
               <button
                 key={entry.authorId}
                 onClick={() => navigate(`/kullanici/${entry.authorId}`)}
-                className="flex w-full items-center gap-3 rounded-theme text-left transition-colors duration-150 active:bg-muted"
+                className="shine-none flex w-full cursor-pointer items-center gap-3 rounded-theme text-left transition-colors duration-150 active:bg-muted"
               >
                 <span className={`w-5 shrink-0 font-heading text-sm font-extrabold ${i === 0 ? 'text-accent' : 'text-muted-foreground'}`}>
                   {i + 1}
