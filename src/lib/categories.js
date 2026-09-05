@@ -30,6 +30,16 @@ export const CATEGORY_META = {
   kripto: { icon: 'lucide:bitcoin', label: 'Kripto', labelKey: 'category.kripto', ink: 'var(--color-chart3)' },
   eğlence: { icon: 'lucide:clapperboard', label: 'Eğlence', labelKey: 'category.eğlence', ink: 'var(--color-chart5)' },
   uzay: { icon: 'lucide:rocket', label: 'Uzay', labelKey: 'category.uzay', ink: 'var(--color-chart1)' },
+  // 2026-09-05: catalog felt thin (12 topics) once real usage — and the
+  // per-category leaderboard/profile breakdowns — made the gaps obvious.
+  // These six don't overlap any existing topic (music/film specifically
+  // weren't covered by "Eğlence", which reads as general entertainment).
+  'yapay-zeka': { icon: 'lucide:brain-circuit', label: 'Yapay Zeka', labelKey: 'category.yapay-zeka', ink: 'var(--color-chart2)' },
+  müzik: { icon: 'lucide:music', label: 'Müzik', labelKey: 'category.müzik', ink: 'var(--color-chart4)' },
+  otomotiv: { icon: 'lucide:car', label: 'Otomotiv', labelKey: 'category.otomotiv', ink: 'var(--color-chart1)' },
+  seyahat: { icon: 'lucide:plane', label: 'Seyahat', labelKey: 'category.seyahat', ink: 'var(--color-primary)' },
+  iklim: { icon: 'lucide:cloud-sun', label: 'İklim', labelKey: 'category.iklim', ink: 'var(--color-success)' },
+  eğitim: { icon: 'lucide:graduation-cap', label: 'Eğitim', labelKey: 'category.eğitim', ink: 'var(--color-chart3)' },
   // Groups-only catch-all — not a real topic, so it's excluded from
   // CATEGORIES/CATEGORY_SLUGS below (predictions always pick a real topic).
   genel: { icon: 'lucide:sparkles', label: 'Genel', labelKey: 'category.genel', ink: 'var(--color-muted-foreground)' },

@@ -9,9 +9,17 @@ import { CATEGORY_META } from '../lib/categories.js'
 const RING_SIZE = { primary: 88, secondary: 68 }
 const STROKE_WIDTH = { primary: 7, secondary: 5.5 }
 
+// A category outside the fixed catalog (a user's own custom one, see
+// TahminOlustur.jsx's "Diğer" option) has no `meta.ink` — `stroke`'s own
+// initial value is `none`, not inherited/currentColor, so leaving it
+// unset would render an invisible progress arc, not just an uncolored
+// one. Falls back to the same muted tone as the ring's own track.
+const FALLBACK_INK = 'var(--color-muted-foreground)'
+
 function CategoryRing({ category, pct, count, primary }) {
   const { t } = useTranslation()
   const meta = CATEGORY_META[category]
+  const ink = meta?.ink || FALLBACK_INK
   const size = primary ? RING_SIZE.primary : RING_SIZE.secondary
   const strokeWidth = primary ? STROKE_WIDTH.primary : STROKE_WIDTH.secondary
   const radius = (size - strokeWidth) / 2
@@ -32,18 +40,18 @@ function CategoryRing({ category, pct, count, primary }) {
             strokeLinecap="round"
             strokeDasharray={circumference}
             strokeDashoffset={offset}
-            style={{ stroke: meta?.ink }}
+            style={{ stroke: ink }}
           />
         </svg>
         <div className="absolute inset-0 flex flex-col items-center justify-center">
-          <iconify-icon icon={meta?.icon || 'lucide:tag'} class={primary ? 'text-lg' : 'text-base'} style={{ color: meta?.ink }}></iconify-icon>
+          <iconify-icon icon={meta?.icon || 'lucide:tag'} class={primary ? 'text-lg' : 'text-base'} style={{ color: ink }}></iconify-icon>
           <span className={`font-heading font-extrabold leading-none ${primary ? 'mt-1 text-base' : 'mt-0.5 text-sm'}`}>
             %{pct}
           </span>
         </div>
       </div>
       <div className="text-center">
-        <p className={`font-bold leading-tight ${primary ? 'text-xs' : 'text-[11px] text-muted-foreground'}`}>
+        <p className={`font-bold capitalize leading-tight ${primary ? 'text-xs' : 'text-[11px] text-muted-foreground'}`}>
           {meta ? t(meta.labelKey) : category}
         </p>
         <p className="text-[10px] text-muted-foreground">{t('profile.topCategoryCount', { count })}</p>

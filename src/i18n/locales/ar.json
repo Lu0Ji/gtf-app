@@ -131,6 +131,8 @@
     "sealedPlaceholder": "سيفوز فنربخشة على غلطة سراي 3-2.",
     "sealedHint": "بعد الختم، لن يتمكن أحد — ولا حتى أنت — من رؤية المحتوى أو تغييره حتى لحظة الفتح.",
     "categoryTitle": "الفئة",
+    "customCategoryCta": "أخرى",
+    "customCategoryPlaceholder": "اكتب اسم فئة (مثلاً: طعام)",
     "sensitiveToggleTitle": "وضع علامة كمحتوى حساس",
     "sensitiveToggleBody": "يُعرض مع تسمية تحذير حسب تفضيل العرض لكل مشاهد.",
     "unlockTitle": "كيف سيتم فتحه؟",
@@ -182,6 +184,12 @@
     "kripto": "عملات رقمية",
     "eğlence": "ترفيه",
     "uzay": "فضاء",
+    "yapay-zeka": "الذكاء الاصطناعي",
+    "müzik": "موسيقى",
+    "otomotiv": "سيارات",
+    "seyahat": "سفر",
+    "iklim": "مناخ",
+    "eğitim": "تعليم",
     "genel": "عام"
   },
   "difficulty": {

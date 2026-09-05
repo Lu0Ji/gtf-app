@@ -127,6 +127,8 @@
     "sealedPlaceholder": "Fenerbahçe besiegt Galatasaray 3:2.",
     "sealedHint": "Nach dem Versiegeln kann niemand — auch du nicht — den Inhalt bis zur Öffnung sehen oder ändern.",
     "categoryTitle": "Kategorie",
+    "customCategoryCta": "Andere",
+    "customCategoryPlaceholder": "Kategorie eingeben (z. B. Essen)",
     "sensitiveToggleTitle": "Als sensiblen Inhalt markieren",
     "sensitiveToggleBody": "Wird je nach Anzeigeeinstellung des Betrachters mit einem Warnhinweis angezeigt.",
     "unlockTitle": "Wie soll es geöffnet werden?",
@@ -178,6 +180,12 @@
     "kripto": "Krypto",
     "eğlence": "Unterhaltung",
     "uzay": "Raumfahrt",
+    "yapay-zeka": "KI",
+    "müzik": "Musik",
+    "otomotiv": "Automobil",
+    "seyahat": "Reisen",
+    "iklim": "Klima",
+    "eğitim": "Bildung",
     "genel": "Allgemein"
   },
   "difficulty": {

@@ -126,6 +126,8 @@
     "sealedPlaceholder": "フェネルバフチェがガラタサライに3-2で勝利する。",
     "sealedHint": "封印すると、開封されるまであなたを含め誰も内容を見たり変更したりできません。",
     "categoryTitle": "カテゴリ",
+    "customCategoryCta": "その他",
+    "customCategoryPlaceholder": "カテゴリ名を入力（例: グルメ）",
     "sensitiveToggleTitle": "センシティブなコンテンツとしてマーク",
     "sensitiveToggleBody": "各閲覧者の表示設定に応じて警告ラベル付きで表示されます。",
     "unlockTitle": "どのように開封しますか？",
@@ -177,6 +179,12 @@
     "kripto": "暗号資産",
     "eğlence": "エンタメ",
     "uzay": "宇宙",
+    "yapay-zeka": "AI",
+    "müzik": "音楽",
+    "otomotiv": "自動車",
+    "seyahat": "旅行",
+    "iklim": "気候",
+    "eğitim": "教育",
     "genel": "一般"
   },
   "difficulty": {

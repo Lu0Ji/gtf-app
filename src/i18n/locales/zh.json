@@ -126,6 +126,8 @@
     "sealedPlaceholder": "费内巴切将以 3-2 击败加拉塔萨雷。",
     "sealedHint": "封存后，包括你在内的任何人在开启前都无法查看或修改内容。",
     "categoryTitle": "分类",
+    "customCategoryCta": "其他",
+    "customCategoryPlaceholder": "输入分类名称（例如：美食）",
     "sensitiveToggleTitle": "标记为敏感内容",
     "sensitiveToggleBody": "将根据每位查看者的显示偏好附带警示标签展示。",
     "unlockTitle": "如何开启？",
@@ -177,6 +179,12 @@
     "kripto": "加密货币",
     "eğlence": "娱乐",
     "uzay": "太空",
+    "yapay-zeka": "人工智能",
+    "müzik": "音乐",
+    "otomotiv": "汽车",
+    "seyahat": "旅行",
+    "iklim": "气候",
+    "eğitim": "教育",
     "genel": "综合"
   },
   "difficulty": {

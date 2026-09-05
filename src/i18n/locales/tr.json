@@ -127,6 +127,8 @@
     "sealedPlaceholder": "Fenerbahçe, Galatasaray'ı 3-2 yenecek.",
     "sealedHint": "Mühürledikten sonra sen dahil hiç kimse açılış anına kadar göremez veya değiştiremez.",
     "categoryTitle": "Kategori",
+    "customCategoryCta": "Diğer",
+    "customCategoryPlaceholder": "Kategori adı yaz (örn. Yemek)",
     "sensitiveToggleTitle": "Hassas içerik olarak işaretle",
     "sensitiveToggleBody": "Görenlerin gösterim tercihine göre bir uyarı etiketiyle gösterilir.",
     "unlockTitle": "Açılış nasıl olsun?",
@@ -178,6 +180,12 @@
     "kripto": "Kripto",
     "eğlence": "Eğlence",
     "uzay": "Uzay",
+    "yapay-zeka": "Yapay Zeka",
+    "müzik": "Müzik",
+    "otomotiv": "Otomotiv",
+    "seyahat": "Seyahat",
+    "iklim": "İklim",
+    "eğitim": "Eğitim",
     "genel": "Genel"
   },
   "difficulty": {

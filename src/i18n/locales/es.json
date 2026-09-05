@@ -127,6 +127,8 @@
     "sealedPlaceholder": "El Fenerbahçe vencerá al Galatasaray 3-2.",
     "sealedHint": "Una vez sellado, nadie —ni siquiera tú— puede verlo o cambiarlo hasta que se abra.",
     "categoryTitle": "Categoría",
+    "customCategoryCta": "Otra",
+    "customCategoryPlaceholder": "Escribe una categoría (p. ej. Comida)",
     "sensitiveToggleTitle": "Marcar como contenido sensible",
     "sensitiveToggleBody": "Se muestra con una etiqueta de advertencia según la preferencia de cada usuario.",
     "unlockTitle": "¿Cómo debería abrirse?",
@@ -178,6 +180,12 @@
     "kripto": "Cripto",
     "eğlence": "Entretenimiento",
     "uzay": "Espacio",
+    "yapay-zeka": "IA",
+    "müzik": "Música",
+    "otomotiv": "Automoción",
+    "seyahat": "Viajes",
+    "iklim": "Clima",
+    "eğitim": "Educación",
     "genel": "General"
   },
   "difficulty": {

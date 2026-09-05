@@ -40,6 +40,14 @@ export default function TahminOlustur() {
   const [category, setCategory] = useState(() =>
     prefill?.category && CATEGORY_META[prefill.category] ? prefill.category : 'spor'
   )
+  // A category outside the fixed catalog is a perfectly valid value here —
+  // the DB column has never actually restricted it to CATEGORY_SLUGS, that
+  // was always just this picker's own whitelist. This just gives the
+  // picker a second mode: pick a preset chip (`category` becomes that
+  // slug), or open this and type any name (`category` becomes exactly what
+  // they typed, trimmed/lowercased at submit time to match the lowercase-
+  // slug convention every preset already follows).
+  const [customCategoryOpen, setCustomCategoryOpen] = useState(false)
   const [title, setTitle] = useState(prefill?.title || '')
   const [sealedContent, setSealedContent] = useState('')
   const [eventDate, setEventDate] = useState(prefill?.eventDate || '')
@@ -58,7 +66,10 @@ export default function TahminOlustur() {
 
   const eventDateIsFuture = isFutureDate(eventDate)
   const canSubmit =
-    title.trim().length > 0 && sealedContent.trim().length > 0 && (unlockMode === 'manual' || eventDateIsFuture)
+    title.trim().length > 0 &&
+    sealedContent.trim().length > 0 &&
+    category.trim().length > 0 &&
+    (unlockMode === 'manual' || eventDateIsFuture)
 
   // Client-side check for fast feedback only — the storage bucket itself
   // enforces the real limit (see supabase/schema.sql's PREDICTION MEDIA —
@@ -108,7 +119,7 @@ export default function TahminOlustur() {
       const targetGroupId = !isCapsule ? groupId : null
       const basePayload = {
         author_id: user.id,
-        category,
+        category: category.trim().toLowerCase(),
         title: title.trim(),
         sealed_content: sealedContent.trim(),
         status: 'sealed',
@@ -224,7 +235,7 @@ export default function TahminOlustur() {
               ) : (
                 <Trans
                   i18nKey="createPrediction.scopePublicBody"
-                  values={{ category: t(CATEGORY_META[category].labelKey) }}
+                  values={{ category: CATEGORY_META[category] ? t(CATEGORY_META[category].labelKey) : category }}
                   components={{ b: <span className="font-semibold text-foreground" /> }}
                 />
               )}
@@ -320,11 +331,14 @@ export default function TahminOlustur() {
           </div>
           <div className="flex flex-wrap gap-2">
             {CATEGORY_SLUGS.map((slug) => {
-              const isActive = slug === category
+              const isActive = !customCategoryOpen && slug === category
               return (
                 <button
                   key={slug}
-                  onClick={() => setCategory(slug)}
+                  onClick={() => {
+                    setCustomCategoryOpen(false)
+                    setCategory(slug)
+                  }}
                   className={`rounded-full px-4 py-2.5 text-xs font-bold ${
                     isActive
                       ? 'bg-primary text-primary-foreground'
@@ -335,7 +349,31 @@ export default function TahminOlustur() {
                 </button>
               )
             })}
+            <button
+              onClick={() => {
+                setCustomCategoryOpen(true)
+                setCategory('')
+              }}
+              className={`flex items-center gap-1 rounded-full px-4 py-2.5 text-xs font-bold ${
+                customCategoryOpen
+                  ? 'bg-primary text-primary-foreground'
+                  : 'border border-dashed border-border bg-card text-muted-foreground'
+              }`}
+            >
+              <iconify-icon icon="lucide:plus" class="text-sm"></iconify-icon>
+              {t('createPrediction.customCategoryCta')}
+            </button>
           </div>
+          {customCategoryOpen && (
+            <input
+              autoFocus
+              value={category}
+              onChange={(e) => setCategory(e.target.value.slice(0, 24))}
+              placeholder={t('createPrediction.customCategoryPlaceholder')}
+              maxLength={24}
+              className="mt-2.5 w-full rounded-theme border border-border bg-input px-4 py-3 text-sm text-foreground outline-none"
+            />
+          )}
         </section>
 
         <section>
