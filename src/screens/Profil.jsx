@@ -7,6 +7,7 @@ import { useAuth } from '../contexts/AuthContext.jsx'
 import { formatDateLong, sealLabel, timeAgo } from '../lib/format.js'
 import { CATEGORY_META } from '../lib/categories.js'
 import BadgeShowcase from '../components/BadgeShowcase.jsx'
+import TopCategoriesShowcase from '../components/TopCategoriesShowcase.jsx'
 import DifficultyChip from '../components/DifficultyChip.jsx'
 import Chip from '../components/ui/Chip.jsx'
 import Card from '../components/ui/Card.jsx'
@@ -305,6 +306,8 @@ export default function Profil() {
         </section>
 
         <BadgeShowcase slugs={profile?.showcase_badges} totalEarned={earnedBadgeCount} isOwn />
+
+        <TopCategoriesShowcase predictions={predictions} />
 
         <section className="mx-5 mt-6 overflow-hidden rounded-theme bg-primary text-primary-foreground shadow-sm">
           <div className="flex items-start justify-between px-5 pt-5">

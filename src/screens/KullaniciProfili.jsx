@@ -8,6 +8,7 @@ import { useToast } from '../contexts/ToastContext.jsx'
 import { formatDateLong, sealLabel, timeAgo } from '../lib/format.js'
 import { CATEGORY_META } from '../lib/categories.js'
 import BadgeShowcase from '../components/BadgeShowcase.jsx'
+import TopCategoriesShowcase from '../components/TopCategoriesShowcase.jsx'
 import DifficultyChip from '../components/DifficultyChip.jsx'
 import Chip from '../components/ui/Chip.jsx'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
@@ -377,6 +378,8 @@ export default function KullaniciProfili() {
         </section>
 
         <BadgeShowcase slugs={profile.showcase_badges} totalEarned={earnedBadgeCount} isOwn={false} />
+
+        <TopCategoriesShowcase predictions={predictions} />
 
         {accuracyPct !== null && (
           <section className="mx-5 mt-6 overflow-hidden rounded-theme bg-primary text-primary-foreground shadow-sm">
