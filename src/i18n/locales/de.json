@@ -39,7 +39,7 @@
     "usernamePlaceholder": "elifdemir",
     "inviteCodeLabel": "Einladungscode (optional)",
     "inviteCodePlaceholder": "Benutzername deines Freundes",
-    "inviteCodeHint": "Bei einem gültigen Benutzernamen erhaltet ihr beide 100 Punkte.",
+    "inviteCodeHint": "Bei einem gültigen Benutzernamen wird dein Konto mit der einladenden Person verknüpft.",
     "emailLabel": "E-Mail",
     "emailPlaceholder": "du@beispiel.com",
     "passwordLabel": "Passwort",
@@ -512,8 +512,8 @@
       },
       {
         "topic": "tahmin",
-        "q": "Wie werden meine Punkte berechnet?",
-        "a": "Eine eingetroffene Vorhersage bringt +50 Punkte, eine nicht eingetroffene, aber ehrlich abgeschlossene Vorhersage bringt +5 Punkte. Wer mit einem gültigen Einladungscode beitritt, erhält +100 Punkte — genauso wie die einladende Person."
+        "q": "Wie werden meine Trefferquote und Rangliste berechnet?",
+        "a": "Die Bestenliste basiert nicht auf Punkten, sondern auf der echten Trefferquote: wie viele deiner bestätigten Vorhersagen eingetroffen sind, aufgeschlüsselt nach Kategorie und Zeitraum (kurz-/mittel-/langfristig). Um in einer Tabelle zu erscheinen, brauchst du mindestens 5 bestätigte Vorhersagen in dieser Kategorie-Zeitraum-Kombination."
       },
       {
         "topic": "hesap",
@@ -1293,8 +1293,16 @@
   },
   "leaderboard": {
     "title": "Bestenliste",
-    "subtitle": "Gesamtrangliste nach Punkten",
+    "subtitle": "Rangliste nach Trefferquote",
     "noUsersYet": "Noch niemand zum Ranken.",
+    "minSampleHint": "Nutzer brauchen mindestens {{count}} bestätigte Vorhersagen, um zu erscheinen.",
+    "accuracyStat": "{{correct}}/{{total}} richtig",
+    "duration": {
+      "all": "Alle Zeiträume",
+      "short": "Kurzfristig",
+      "medium": "Mittelfristig",
+      "long": "Langfristig"
+    },
     "rankingSectionTitle": "Rangliste",
     "yourRank": "Dein Rang"
   },
@@ -1522,7 +1530,7 @@
     "popularCategoriesSubtitle": "Vorhersagen nach Kategorie",
     "noCategorizedPredictions": "Noch keine kategorisierten Vorhersagen.",
     "leaderboardOpenAria": "Bestenliste öffnen",
-    "leaderboardTop3Subtitle": "Top 3 nach Punkten",
+    "leaderboardTop3Subtitle": "Top 3 nach Trefferquote",
     "noOneYet": "Noch niemand.",
     "recentHeading": "Zuletzt hinzugefügt",
     "recentSubtitle": "Die neuesten Einträge",
@@ -1585,9 +1593,9 @@
     "title": "App-Einstellungen",
     "subtitle": "Dein Konto, deine Erfahrung und deine Daten — unter deiner Kontrolle.",
     "inviteTitle": "Lade einen Freund ein",
-    "inviteSubtitle": "Ihr beide erhaltet 100 Punkte, sobald sie beitreten.",
+    "inviteSubtitle": "Lade deinen Freund ein, verfolgt eure Vorhersagen gemeinsam.",
     "inviteCopyCta": "Einladungscode kopieren",
-    "inviteMessage": "Tritt GTF bei, wir verdienen beide 100 Punkte! Mein Einladungscode: @{{username}}",
+    "inviteMessage": "Tritt GTF bei, lass uns gegenseitig unsere Vorhersagen verfolgen! Mein Einladungscode: @{{username}}",
     "inviteCopiedToast": "Einladungsnachricht kopiert, füge sie ein, wo du möchtest.",
     "copyFailedToast": "Konnte nicht kopiert werden, versuch's erneut.",
     "accountSecurityTitle": "Konto & Sicherheit",
@@ -1718,7 +1726,7 @@
     "communityEyebrow": "Community",
     "communityTitle": "Sag nicht allein voraus",
     "communityDesc": "Finde Menschen mit ähnlichen Interessen, sammelt gemeinsam Vorhersagen in derselben Gruppe — was ihr dort teilt, bleibt unter euch.",
-    "communityNoteTitle": "Verdiene Abzeichen und Punkte",
+    "communityNoteTitle": "Verdiene Abzeichen und wachse",
     "communityNoteDesc": "Jede richtige Vorhersage, jedes Like, jeder neue Follower bringt dich einen Schritt weiter."
   },
   "errorBoundary": {

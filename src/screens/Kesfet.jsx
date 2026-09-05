@@ -5,6 +5,7 @@ import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase, queryWithGroupIdFallback } from '../lib/supabase.js'
 import { timeAgo, formatTimeUntil } from '../lib/format.js'
 import { CATEGORY_META } from '../lib/categories.js'
+import { fetchLeaderboard } from '../lib/leaderboard.js'
 import { addSearchHistoryEntry } from '../lib/searchHistory.js'
 import DifficultyChip from '../components/DifficultyChip.jsx'
 import Chip from '../components/ui/Chip.jsx'
@@ -226,7 +227,7 @@ export default function Kesfet() {
 
     async function load() {
       const in48h = new Date(Date.now() + 48 * 60 * 60 * 1000).toISOString()
-      const [predictionsRes, profilesRes, openingSoonRes, eventsRes, newsRes] = await Promise.all([
+      const [predictionsRes, leaderboardRes, openingSoonRes, eventsRes, newsRes] = await Promise.all([
         queryWithGroupIdFallback((filterGroupId) => {
           let q = supabase
             .from('predictions')
@@ -237,7 +238,7 @@ export default function Kesfet() {
           if (filterGroupId) q = q.is('group_id', null)
           return q
         }),
-        supabase.from('profiles').select('id, display_name, points, avatar_url').order('points', { ascending: false }).limit(3),
+        fetchLeaderboard({ limit: 3 }),
         queryWithGroupIdFallback((filterGroupId) => {
           let q = supabase
             .from('predictions')
@@ -302,7 +303,7 @@ export default function Kesfet() {
         .slice(0, 5)
 
       setCategoryCounts(countsArr)
-      setTopRanked(profilesRes.data || [])
+      setTopRanked(leaderboardRes.rows || [])
       setRecentPredictions((predictionsRes.data || []).slice(0, 6))
       setTrending(trendingList)
       setOpeningSoon(openingSoonRes.data || [])
@@ -598,20 +599,20 @@ export default function Kesfet() {
                 <div className="mt-4 divide-y divide-border">
                   {topRanked.map((entry, i) => (
                     <button
-                      key={entry.id}
-                      onClick={() => navigate(`/kullanici/${entry.id}`)}
+                      key={entry.authorId}
+                      onClick={() => navigate(`/kullanici/${entry.authorId}`)}
                       className="flex w-full items-center gap-3 py-3 text-left"
                     >
                       <span className={`w-5 font-heading text-sm font-extrabold ${i === 0 ? 'text-accent' : 'text-muted-foreground'}`}>
                         {i + 1}
                       </span>
                       <div className="h-9 w-9 overflow-hidden rounded-full bg-muted">
-                        <img src={entry.avatar_url || fallbackAvatarFor(entry.id)} alt={entry.display_name} className="h-full w-full object-cover" />
+                        <img src={entry.profile?.avatar_url || fallbackAvatarFor(entry.authorId)} alt={entry.profile?.display_name} className="h-full w-full object-cover" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p className="text-sm font-bold">{entry.display_name}</p>
+                        <p className="text-sm font-bold">{entry.profile?.display_name}</p>
                       </div>
-                      <span className="font-heading text-sm font-extrabold text-primary">{entry.points}</span>
+                      <span className="font-heading text-sm font-extrabold text-primary">%{entry.accuracyPct}</span>
                     </button>
                   ))}
                 </div>

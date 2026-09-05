@@ -331,9 +331,6 @@ export default function KullaniciProfili() {
                 {profile.is_private && (
                   <iconify-icon icon="lucide:lock" class="shrink-0 text-sm text-muted-foreground"></iconify-icon>
                 )}
-                <span className="rounded-full bg-secondary px-2 py-1 text-[10px] font-bold text-secondary-foreground">
-                  {profile.points ?? 0} {t('nav.points')}
-                </span>
               </div>
               <p className="mt-1 text-[13px] text-muted-foreground">@{profile.username}</p>
               <div className="mt-3 flex gap-2">

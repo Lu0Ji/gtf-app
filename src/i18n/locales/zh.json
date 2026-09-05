@@ -39,7 +39,7 @@
     "usernamePlaceholder": "elifdemir",
     "inviteCodeLabel": "邀请码（选填）",
     "inviteCodePlaceholder": "好友的用户名",
-    "inviteCodeHint": "如果用户名有效，你们俩都将获得 100 积分。",
+    "inviteCodeHint": "如果用户名有效，你的账号将与邀请你的人关联。",
     "emailLabel": "邮箱",
     "emailPlaceholder": "you@example.com",
     "passwordLabel": "密码",
@@ -511,8 +511,8 @@
       },
       {
         "topic": "tahmin",
-        "q": "我的积分是如何计算的？",
-        "a": "预测正确可获得 +50 积分，预测错误但诚实标记可获得 +5 积分。使用有效邀请码加入的人可获得 +100 积分，邀请人同样获得 +100 积分。"
+        "q": "我的准确率和排名是如何计算的？",
+        "a": "排行榜不再基于积分，而是基于真实的准确率：你已验证的预测中有多少条正确，按类别和周期（短期/中期/长期）分别统计。要出现在某个榜单中，你在该类别-周期组合下至少需要 5 条已验证的预测。"
       },
       {
         "topic": "hesap",
@@ -1292,8 +1292,16 @@
   },
   "leaderboard": {
     "title": "排行榜",
-    "subtitle": "按积分排列的总排名",
+    "subtitle": "按准确率排名",
     "noUsersYet": "暂无可排名的用户。",
+    "minSampleHint": "至少有 {{count}} 条已验证的预测才会出现在榜单上。",
+    "accuracyStat": "{{correct}}/{{total}} 正确",
+    "duration": {
+      "all": "全部周期",
+      "short": "短期",
+      "medium": "中期",
+      "long": "长期"
+    },
     "rankingSectionTitle": "排名",
     "yourRank": "你的排名"
   },
@@ -1521,7 +1529,7 @@
     "popularCategoriesSubtitle": "按类别统计的预测数量",
     "noCategorizedPredictions": "暂时还没有归类的预测。",
     "leaderboardOpenAria": "打开排行榜",
-    "leaderboardTop3Subtitle": "积分前 3 名",
+    "leaderboardTop3Subtitle": "准确率前 3 名",
     "noOneYet": "暂时还没有人。",
     "recentHeading": "最新添加",
     "recentSubtitle": "最新记录",
@@ -1584,9 +1592,9 @@
     "title": "应用设置",
     "subtitle": "你的账户、体验和数据——尽在你的掌控之中。",
     "inviteTitle": "邀请好友",
-    "inviteSubtitle": "对方加入后，你们双方都能获得 100 积分。",
+    "inviteSubtitle": "邀请朋友，一起关注彼此的预测。",
     "inviteCopyCta": "复制邀请码",
-    "inviteMessage": "加入 GTF，我们一起赚 100 积分吧！我的邀请码：@{{username}}",
+    "inviteMessage": "加入 GTF，一起关注彼此的预测吧！我的邀请码：@{{username}}",
     "inviteCopiedToast": "邀请消息已复制，粘贴到你想要的地方吧。",
     "copyFailedToast": "复制失败，请重试。",
     "accountSecurityTitle": "账户与安全",
@@ -1717,7 +1725,7 @@
     "communityEyebrow": "社群",
     "communityTitle": "不要独自预测",
     "communityDesc": "找到和你兴趣相近的人，在同一个小组里一起积累预测——你们在那里分享的内容只属于彼此之间。",
-    "communityNoteTitle": "赢取徽章和积分",
+    "communityNoteTitle": "赢取徽章，不断进步",
     "communityNoteDesc": "每一个正确的预测、每一个点赞、每一位新关注者都会让你更进一步。"
   },
   "errorBoundary": {

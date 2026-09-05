@@ -5,6 +5,7 @@ import { supabase, queryWithGroupIdFallback } from '../lib/supabase.js'
 import { fallbackAvatarFor } from '../lib/images.js'
 import { formatTimeUntil } from '../lib/format.js'
 import { CATEGORY_META } from '../lib/categories.js'
+import { fetchLeaderboard } from '../lib/leaderboard.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 
@@ -32,7 +33,7 @@ export default function RightRail() {
     let cancelled = false
     async function load() {
       const [rankedRes, openingRes, followingRes, blockedRes] = await Promise.all([
-        supabase.from('profiles').select('id, display_name, points, avatar_url').order('points', { ascending: false }).limit(3),
+        fetchLeaderboard({ limit: 3 }),
         queryWithGroupIdFallback((filterGroupId) => {
           let q = supabase
             .from('predictions')
@@ -60,7 +61,7 @@ export default function RightRail() {
         .limit(20)
       if (cancelled) return
 
-      setTopRanked(rankedRes.data || [])
+      setTopRanked(rankedRes.rows || [])
       setOpeningSoon(openingRes.data || [])
       setPeople((candidates || []).filter((p) => !excludeSet.has(p.id)).slice(0, 3))
       setLoading(false)
@@ -173,10 +174,10 @@ export default function RightRail() {
             </button>
           </div>
           <div className="mt-4 flex flex-col gap-3.5">
-            {topRanked.map((p, i) => (
+            {topRanked.map((entry, i) => (
               <button
-                key={p.id}
-                onClick={() => navigate(`/kullanici/${p.id}`)}
+                key={entry.authorId}
+                onClick={() => navigate(`/kullanici/${entry.authorId}`)}
                 className="flex w-full items-center gap-3 rounded-theme text-left transition-colors duration-150 active:bg-muted"
               >
                 <span className={`w-5 shrink-0 font-heading text-sm font-extrabold ${i === 0 ? 'text-accent' : 'text-muted-foreground'}`}>
@@ -184,15 +185,15 @@ export default function RightRail() {
                 </span>
                 <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-muted">
                   <img
-                    src={p.avatar_url || fallbackAvatarFor(p.id)}
-                    alt={p.display_name}
+                    src={entry.profile?.avatar_url || fallbackAvatarFor(entry.authorId)}
+                    alt={entry.profile?.display_name}
                     className="h-full w-full object-cover"
                   />
                 </div>
                 <span className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">
-                  {p.display_name}
+                  {entry.profile?.display_name}
                 </span>
-                <span className="shrink-0 text-xs font-bold text-muted-foreground">{p.points} {t('nav.points')}</span>
+                <span className="shrink-0 text-xs font-bold text-muted-foreground">%{entry.accuracyPct}</span>
               </button>
             ))}
           </div>

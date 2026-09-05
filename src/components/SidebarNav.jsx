@@ -51,24 +51,16 @@ export default function SidebarNav() {
         )}
 
         {profile && (
-          <div className="mt-3 grid grid-cols-2 gap-2.5">
-            <div className="rounded-theme bg-muted px-3.5 py-3">
-              <p className="font-heading text-xl font-extrabold tracking-[-0.03em] text-foreground">
-                {profile.points ?? 0}
+          <div className="mt-3 flex items-center gap-3 rounded-theme bg-muted px-3.5 py-3">
+            <StreakFlame count={profile.streak_count ?? 0} size="lg" />
+            <div>
+              <p
+                className="font-heading text-xl font-extrabold leading-none tracking-[-0.03em]"
+                style={streakColor ? { color: streakColor } : undefined}
+              >
+                {profile.streak_count ?? 0}
               </p>
-              <p className="mt-0.5 text-[11px] font-medium text-muted-foreground">{t('nav.points')}</p>
-            </div>
-            <div className="flex items-center gap-2 rounded-theme bg-muted px-3.5 py-3">
-              <StreakFlame count={profile.streak_count ?? 0} size="lg" />
-              <div>
-                <p
-                  className="font-heading text-xl font-extrabold leading-none tracking-[-0.03em]"
-                  style={streakColor ? { color: streakColor } : undefined}
-                >
-                  {profile.streak_count ?? 0}
-                </p>
-                <p className="mt-0.5 text-[11px] font-medium text-muted-foreground">{t('nav.streakDays')}</p>
-              </div>
+              <p className="mt-0.5 text-[11px] font-medium text-muted-foreground">{t('nav.streakDays')}</p>
             </div>
           </div>
         )}

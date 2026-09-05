@@ -262,14 +262,9 @@ export default function Profil() {
               </span>
             </div>
             <div className="min-w-0 flex-1 pt-1">
-              <div className="flex items-center gap-2">
-                <h2 className="truncate font-heading text-[21px] font-extrabold tracking-[-0.05em]">
-                  {profile?.display_name || t('common.loading')}
-                </h2>
-                <span className="rounded-full bg-secondary px-2 py-1 text-[10px] font-bold text-secondary-foreground">
-                  {profile?.points ?? 0} {t('nav.points')}
-                </span>
-              </div>
+              <h2 className="truncate font-heading text-[21px] font-extrabold tracking-[-0.05em]">
+                {profile?.display_name || t('common.loading')}
+              </h2>
               <p className="mt-1 text-[13px] text-muted-foreground">@{profile?.username}</p>
             </div>
           </div>

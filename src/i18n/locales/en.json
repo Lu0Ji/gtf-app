@@ -39,7 +39,7 @@
     "usernamePlaceholder": "elifdemir",
     "inviteCodeLabel": "Invite code (optional)",
     "inviteCodePlaceholder": "your friend's username",
-    "inviteCodeHint": "If it's a valid username, you'll both earn 100 points.",
+    "inviteCodeHint": "If it's a valid username, your account will be linked to whoever invited you.",
     "emailLabel": "Email",
     "emailPlaceholder": "you@example.com",
     "passwordLabel": "Password",
@@ -512,8 +512,8 @@
       },
       {
         "topic": "tahmin",
-        "q": "How are my points calculated?",
-        "a": "A prediction that turns out right earns +50 points; one that turns out wrong but is closed honestly earns +5 points. Someone who joins with a valid invite code earns +100 points, and so does whoever invited them."
+        "q": "How is my accuracy and ranking calculated?",
+        "a": "The Leaderboard isn't based on points — it's based on real accuracy: how many of your verified predictions turned out right, broken down by category and timeframe (short/medium/long-term). To appear in a given table, you need at least 5 verified predictions in that category-timeframe combination."
       },
       {
         "topic": "hesap",
@@ -1293,8 +1293,16 @@
   },
   "leaderboard": {
     "title": "Leaderboard",
-    "subtitle": "Overall ranking by points",
+    "subtitle": "Ranked by accuracy",
     "noUsersYet": "No one to rank yet.",
+    "minSampleHint": "Users need at least {{count}} verified predictions to appear.",
+    "accuracyStat": "{{correct}}/{{total}} correct",
+    "duration": {
+      "all": "All timeframes",
+      "short": "Short-term",
+      "medium": "Medium-term",
+      "long": "Long-term"
+    },
     "rankingSectionTitle": "Ranking",
     "yourRank": "Your rank"
   },
@@ -1522,7 +1530,7 @@
     "popularCategoriesSubtitle": "Predictions by category",
     "noCategorizedPredictions": "No categorized predictions yet.",
     "leaderboardOpenAria": "Open the leaderboard",
-    "leaderboardTop3Subtitle": "Top 3 by points",
+    "leaderboardTop3Subtitle": "Top 3 by accuracy",
     "noOneYet": "No one yet.",
     "recentHeading": "Recently added",
     "recentSubtitle": "The newest records",
@@ -1585,9 +1593,9 @@
     "title": "App settings",
     "subtitle": "Your account, experience, and data — under your control.",
     "inviteTitle": "Invite a friend",
-    "inviteSubtitle": "You both earn 100 points when they join.",
+    "inviteSubtitle": "Invite a friend, follow each other's predictions.",
     "inviteCopyCta": "Copy invite code",
-    "inviteMessage": "Join GTF, let's both earn 100 points! My invite code: @{{username}}",
+    "inviteMessage": "Join GTF, let's follow each other's predictions! My invite code: @{{username}}",
     "inviteCopiedToast": "Invite message copied, paste it wherever you like.",
     "copyFailedToast": "Couldn't copy, try again.",
     "accountSecurityTitle": "Account & security",
@@ -1718,7 +1726,7 @@
     "communityEyebrow": "Community",
     "communityTitle": "Don't predict alone",
     "communityDesc": "Find people close to your interests, build up predictions together in the same group — what you share there stays between you.",
-    "communityNoteTitle": "Earn badges and points",
+    "communityNoteTitle": "Earn badges and level up",
     "communityNoteDesc": "Every correct prediction, every like, every new follower moves you one step forward."
   },
   "errorBoundary": {

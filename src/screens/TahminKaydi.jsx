@@ -10,15 +10,6 @@ import { difficultyMeta } from '../lib/difficulty.js'
 import Chip from '../components/ui/Chip.jsx'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
 
-const CORRECT_POINTS_REWARD = 50
-// Marking a sealed prediction is self-reported (honor system — there's no
-// independent check yet), so a $0 reward for "incorrect" made honesty
-// strictly worse than always claiming "correct": there was nothing to lose
-// by lying and nothing to gain by admitting a miss. This doesn't stop
-// dishonesty (only a dispute/verification system can), but it stops
-// punishing the honest close.
-const HONEST_CLOSE_REWARD = 5
-
 // Display-only mirror of the quorum enforced server-side in
 // cast_prediction_vote() (supabase/schema.sql) — purely for copy like "en
 // az {{count}} kişi oy verince…". The client never decides a result
@@ -46,7 +37,7 @@ export default function TahminKaydi() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
-  const { user, profile, refreshProfile } = useAuth()
+  const { user } = useAuth()
   const { showToast } = useToast()
   const [record, setRecord] = useState(location.state?.prediction || null)
   const [copied, setCopied] = useState(false)
@@ -186,14 +177,13 @@ export default function TahminKaydi() {
     const trimmedUrl = evidenceUrl.trim()
 
     // Real fix (see supabase/schema.sql's SECURITY REVIEW section): status
-    // + evidence + the points award now happen atomically inside a single
-    // server-side function that checks ownership/state itself, instead of
-    // the client updating profiles.points directly — a raw client update
-    // to points is now rejected by a trigger, so this RPC is the only way
-    // to actually award them. Falls back to the old direct-update path
-    // (no server-side validation, but still functional) only when that
-    // migration hasn't been run yet — PGRST202 is PostgREST's "function
-    // not found in schema cache".
+    // + evidence now change atomically inside a single server-side function
+    // that checks ownership/state itself, instead of a raw client update to
+    // predictions.status (which protect_prediction_immutability rejects
+    // outside this path anyway). Falls back to a direct update (no
+    // server-side validation, but still functional) only when the RPC
+    // hasn't been deployed yet — PGRST202 is PostgREST's "function not
+    // found in schema cache".
     const { error: rpcError } = await supabase.rpc('verify_prediction', {
       p_prediction_id: record.id,
       p_result: result,
@@ -209,7 +199,6 @@ export default function TahminKaydi() {
         evidence_note: trimmedNote || null,
         evidence_url: trimmedUrl || null,
       }))
-      await refreshProfile()
       setPendingResult(null)
       setVerifying(false)
       return
@@ -237,18 +226,6 @@ export default function TahminKaydi() {
     }
 
     if (!error) {
-      if (profile) {
-        const reward = result === 'correct' ? CORRECT_POINTS_REWARD : HONEST_CLOSE_REWARD
-        const { error: pointsError } = await supabase
-          .from('profiles')
-          .update({ points: profile.points + reward })
-          .eq('id', user.id)
-        if (pointsError) {
-          showToast(t('record.pointsAddFailed'))
-        } else {
-          await refreshProfile()
-        }
-      }
       setRecord((prev) => ({
         ...prev,
         status: newStatus,
@@ -566,9 +543,6 @@ export default function TahminKaydi() {
                     {t('record.incorrectCta')}
                   </button>
                 </div>
-                <p className="mt-2 text-[10px] text-muted-foreground">
-                  {t('record.rewardHint', { correct: CORRECT_POINTS_REWARD, honest: HONEST_CLOSE_REWARD })}
-                </p>
               </div>
             )}
 
@@ -729,9 +703,6 @@ export default function TahminKaydi() {
                       {t('record.incorrectCta')}
                     </button>
                   </div>
-                  <p className="mt-2 text-[10px] text-white/60">
-                    {t('record.rewardHint', { correct: CORRECT_POINTS_REWARD, honest: HONEST_CLOSE_REWARD })}
-                  </p>
                 </div>
               )}
 

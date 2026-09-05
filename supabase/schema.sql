@@ -2053,3 +2053,198 @@ end;
 $$ language plpgsql security definer set search_path = public;
 
 grant execute on function public.cast_prediction_vote(uuid, text) to authenticated;
+
+-- ─────────────────────────────────────────────────────────────────────────
+
+-- PUAN SİSTEMİNİN TAMAMEN KALDIRILMASI: kullanıcı isteği — "puan sistemini
+-- kaldıralım tamamen liderlik tablosu filan bunlar tuttuğumuz istatistiklere
+-- göre belirlensin." Puan artık hiçbir şekilde kazanılmıyor/harcanmıyor;
+-- Liderlik Tablosu doğrudan predictions'tan hesaplanan gerçek isabet
+-- oranına dayanıyor (kategori × vade kırılımıyla — bkz. src/lib/
+-- leaderboard.js, tamamen client-side hesaplanıyor, bunun için ayrı bir
+-- view/RPC'ye gerek yok, predictions zaten herkese açık okunabilir).
+--
+-- Sıra: önce points'e yazan/okuyan her fonksiyonu ödül mantığı olmadan
+-- yeniden bildir, SONRA sütunları sil.
+
+-- 1) verify_prediction(): ödül/çarpan hesaplaması tamamen kaldırıldı,
+--    geri kalan her şey (yetki/durum kontrolleri, kanıt kaydı, push
+--    bildirimi) aynı.
+create or replace function public.verify_prediction(
+  p_prediction_id uuid,
+  p_result text,
+  p_evidence_note text default null,
+  p_evidence_url text default null
+)
+returns void as $$
+declare
+  v_author_id uuid;
+  v_status text;
+  v_event_date timestamptz;
+  v_title text;
+begin
+  if p_result not in ('correct', 'incorrect') then
+    raise exception 'Geçersiz sonuç.';
+  end if;
+
+  select author_id, status, event_date, title
+    into v_author_id, v_status, v_event_date, v_title
+    from public.predictions where id = p_prediction_id for update;
+
+  if v_author_id is null then
+    raise exception 'Tahmin bulunamadı.';
+  end if;
+  if v_author_id <> auth.uid() then
+    raise exception 'Sadece tahminin sahibi sonucu işaretleyebilir.';
+  end if;
+  if v_status <> 'sealed' then
+    raise exception 'Bu tahmin zaten sonuçlandırılmış veya henüz mühürlenmemiş.';
+  end if;
+  if v_event_date is not null and v_event_date > now() then
+    raise exception 'Açılış zamanı henüz gelmedi.';
+  end if;
+
+  update public.predictions
+  set status = case when p_result = 'correct' then 'verified_correct' else 'verified_incorrect' end,
+      verified_at = now(),
+      resolved_by = 'author',
+      evidence_note = nullif(trim(coalesce(p_evidence_note, '')), ''),
+      evidence_url = nullif(trim(coalesce(p_evidence_url, '')), '')
+  where id = p_prediction_id;
+
+  perform private.send_push_notification(
+    v_author_id,
+    case when p_result = 'correct' then 'Tahmin doğrulandı!' else 'Tahmin sonuçlandı' end,
+    left(coalesce(v_title, ''), 60) || ' — ' || (case when p_result = 'correct' then 'gerçekleşti' else 'gerçekleşmedi' end),
+    '/tahmin-kaydi?id=' || p_prediction_id
+  );
+end;
+$$ language plpgsql security definer set search_path = public;
+
+grant execute on function public.verify_prediction(uuid, text, text, text) to authenticated;
+
+-- 2) cast_prediction_vote(): aynı şekilde — çoğunluk kuralı (eşik 10, yazar
+--    ağırlığı yok) ve gtf.allow_status_flip bypass'ı aynen kalıyor, yalnızca
+--    puan ödül/geri alma bloğu tamamen kaldırıldı.
+create or replace function public.cast_prediction_vote(
+  p_prediction_id uuid,
+  p_vote text
+)
+returns void as $$
+declare
+  v_author_id uuid;
+  v_status text;
+  v_event_date timestamptz;
+  v_title text;
+  v_correct_votes integer;
+  v_incorrect_votes integer;
+  v_new_status text;
+begin
+  if p_vote not in ('correct', 'incorrect') then
+    raise exception 'Geçersiz oy.';
+  end if;
+
+  select author_id, status, event_date, title
+    into v_author_id, v_status, v_event_date, v_title
+    from public.predictions where id = p_prediction_id for update;
+
+  if v_author_id is null then
+    raise exception 'Tahmin bulunamadı.';
+  end if;
+  if v_author_id = auth.uid() then
+    raise exception 'Kendi tahminine oy veremezsin, sonucu doğrudan işaretle.';
+  end if;
+  if v_status = 'open' then
+    raise exception 'Bu tahmin henüz mühürlenmemiş.';
+  end if;
+  if v_event_date is not null and v_event_date > now() then
+    raise exception 'Açılış zamanı henüz gelmedi.';
+  end if;
+
+  insert into public.prediction_votes (prediction_id, voter_id, vote)
+  values (p_prediction_id, auth.uid(), p_vote)
+  on conflict (prediction_id, voter_id) do update set vote = excluded.vote, created_at = now();
+
+  if v_status in ('verified_correct', 'verified_incorrect') then
+    if (p_vote = 'correct' and v_status = 'verified_incorrect')
+       or (p_vote = 'incorrect' and v_status = 'verified_correct') then
+      insert into public.prediction_disputes (prediction_id, user_id)
+      values (p_prediction_id, auth.uid())
+      on conflict (prediction_id, user_id) do nothing;
+    else
+      delete from public.prediction_disputes where prediction_id = p_prediction_id and user_id = auth.uid();
+    end if;
+  end if;
+
+  select count(*) filter (where vote = 'correct'), count(*) filter (where vote = 'incorrect')
+    into v_correct_votes, v_incorrect_votes
+    from public.prediction_votes where prediction_id = p_prediction_id;
+
+  v_new_status := null;
+  if (v_correct_votes + v_incorrect_votes) >= 10 and v_correct_votes <> v_incorrect_votes then
+    v_new_status := case when v_correct_votes > v_incorrect_votes then 'verified_correct' else 'verified_incorrect' end;
+  end if;
+
+  if v_new_status is not null and v_new_status <> v_status then
+    perform set_config('gtf.allow_status_flip', 'on', true);
+    update public.predictions
+    set status = v_new_status,
+        verified_at = coalesce(verified_at, now()),
+        disputed = true,
+        resolved_by = 'community'
+    where id = p_prediction_id;
+    perform set_config('gtf.allow_status_flip', 'off', true);
+
+    perform private.send_push_notification(
+      v_author_id,
+      case when v_new_status = 'verified_correct' then 'Tahmin doğrulandı!' else 'Tahmin sonuçlandı' end,
+      left(coalesce(v_title, ''), 60) || ' — topluluk oyuyla ' ||
+        (case when v_new_status = 'verified_correct' then 'gerçekleşti' else 'gerçekleşmedi' end),
+      '/tahmin-kaydi?id=' || p_prediction_id
+    );
+  end if;
+end;
+$$ language plpgsql security definer set search_path = public;
+
+grant execute on function public.cast_prediction_vote(uuid, text) to authenticated;
+
+-- 3) handle_new_user(): referral ilişkisi (referred_by) kalıyor — hâlâ
+--    anlamlı bir sosyal bağ — yalnızca +100/+100 puan bonusu kaldırıldı.
+create or replace function public.handle_new_user()
+returns trigger as $$
+declare
+  referrer_id uuid;
+begin
+  select id into referrer_id from public.profiles
+  where username = new.raw_user_meta_data->>'referred_by_username';
+
+  insert into public.profiles (id, username, display_name, referred_by)
+  values (
+    new.id,
+    coalesce(new.raw_user_meta_data->>'username', 'user_' || substr(new.id::text, 1, 8)),
+    coalesce(new.raw_user_meta_data->>'display_name', 'Yeni Kullanıcı'),
+    referrer_id
+  );
+
+  return new;
+end;
+$$ language plpgsql security definer set search_path = public;
+
+-- 4) protect_profile_integrity(): points koruması kaldırıldı (sütun hemen
+--    aşağıda tamamen siliniyor), id/created_at koruması aynı kalıyor.
+create or replace function public.protect_profile_integrity()
+returns trigger as $$
+begin
+  if old.id is distinct from new.id or old.created_at is distinct from new.created_at then
+    raise exception 'Bu alanlar değiştirilemez.';
+  end if;
+  return new;
+end;
+$$ language plpgsql;
+
+-- 5) Artık hiçbir yerden yazılmayan/okunmayan sütunları kaldır. stake_points
+--    hiç kullanılmamış ölü bir Faz 1 alanıydı (bir "bahis" özelliği hiç inşa
+--    edilmedi); points ise yukarıdaki değişikliklerle tamamen yetim kaldı.
+alter table public.profiles drop column points;
+alter table public.predictions drop column stake_points;
+-- ─────────────────────────────────────────────────────────────────────────

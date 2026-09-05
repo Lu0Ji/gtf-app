@@ -39,7 +39,7 @@
     "usernamePlaceholder": "elifdemir",
     "inviteCodeLabel": "Código de invitación (opcional)",
     "inviteCodePlaceholder": "usuario de tu amigo",
-    "inviteCodeHint": "Si es un nombre de usuario válido, ambos ganarán 100 puntos.",
+    "inviteCodeHint": "Si es un nombre de usuario válido, tu cuenta se vinculará con quien te invitó.",
     "emailLabel": "Correo electrónico",
     "emailPlaceholder": "tucorreo@ejemplo.com",
     "passwordLabel": "Contraseña",
@@ -512,8 +512,8 @@
       },
       {
         "topic": "tahmin",
-        "q": "¿Cómo se calculan mis puntos?",
-        "a": "Una predicción que resulta cierta otorga +50 puntos; una que resulta falsa pero se cierra con honestidad otorga +5 puntos. Quien se une con un código de invitación válido gana +100 puntos, igual que quien lo invitó."
+        "q": "¿Cómo se calculan mi precisión y mi clasificación?",
+        "a": "La Clasificación ya no se basa en puntos, sino en la precisión real: cuántas de tus predicciones verificadas resultaron ciertas, desglosado por categoría y plazo (corto/medio/largo). Para aparecer en una tabla necesitas al menos 5 predicciones verificadas en esa combinación de categoría y plazo."
       },
       {
         "topic": "hesap",
@@ -1293,8 +1293,16 @@
   },
   "leaderboard": {
     "title": "Clasificación",
-    "subtitle": "Clasificación general por puntos",
+    "subtitle": "Clasificación por precisión",
     "noUsersYet": "Aún no hay nadie que clasificar.",
+    "minSampleHint": "Se necesitan al menos {{count}} predicciones verificadas para aparecer.",
+    "accuracyStat": "{{correct}}/{{total}} correctas",
+    "duration": {
+      "all": "Todos los plazos",
+      "short": "Corto plazo",
+      "medium": "Medio plazo",
+      "long": "Largo plazo"
+    },
     "rankingSectionTitle": "Clasificación",
     "yourRank": "Tu posición"
   },
@@ -1522,7 +1530,7 @@
     "popularCategoriesSubtitle": "Predicciones por categoría",
     "noCategorizedPredictions": "Todavía no hay predicciones categorizadas.",
     "leaderboardOpenAria": "Abrir la clasificación",
-    "leaderboardTop3Subtitle": "Los 3 primeros por puntos",
+    "leaderboardTop3Subtitle": "Los 3 primeros por precisión",
     "noOneYet": "Todavía no hay nadie.",
     "recentHeading": "Añadidos recientemente",
     "recentSubtitle": "Los registros más nuevos",
@@ -1585,9 +1593,9 @@
     "title": "Ajustes de la app",
     "subtitle": "Tu cuenta, tu experiencia y tus datos, bajo tu control.",
     "inviteTitle": "Invita a un amigo",
-    "inviteSubtitle": "Ambos ganáis 100 puntos cuando se una.",
+    "inviteSubtitle": "Invita a un amigo y seguid vuestras predicciones juntos.",
     "inviteCopyCta": "Copiar código de invitación",
-    "inviteMessage": "Únete a GTF, ¡ganemos los dos 100 puntos! Mi código de invitación: @{{username}}",
+    "inviteMessage": "Únete a GTF, ¡sigamos nuestras predicciones juntos! Mi código de invitación: @{{username}}",
     "inviteCopiedToast": "Mensaje de invitación copiado, pégalo donde quieras.",
     "copyFailedToast": "No se pudo copiar, inténtalo de nuevo.",
     "accountSecurityTitle": "Cuenta y seguridad",
@@ -1718,7 +1726,7 @@
     "communityEyebrow": "Comunidad",
     "communityTitle": "No predigas solo",
     "communityDesc": "Encuentra a personas con intereses parecidos y acumulad predicciones juntos en el mismo grupo; lo que compartáis ahí queda solo entre vosotros.",
-    "communityNoteTitle": "Gana insignias y puntos",
+    "communityNoteTitle": "Gana insignias y progresa",
     "communityNoteDesc": "Cada predicción acertada, cada me gusta, cada nuevo seguidor te hace avanzar un paso más."
   },
   "errorBoundary": {

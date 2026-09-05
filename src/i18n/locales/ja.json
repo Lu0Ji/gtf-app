@@ -39,7 +39,7 @@
     "usernamePlaceholder": "elifdemir",
     "inviteCodeLabel": "招待コード（任意）",
     "inviteCodePlaceholder": "友達のユーザー名",
-    "inviteCodeHint": "正しいユーザー名であれば、二人とも100ポイント獲得できます。",
+    "inviteCodeHint": "正しいユーザー名であれば、あなたのアカウントは招待した人と紐づけられます。",
     "emailLabel": "メールアドレス",
     "emailPlaceholder": "you@example.com",
     "passwordLabel": "パスワード",
@@ -511,8 +511,8 @@
       },
       {
         "topic": "tahmin",
-        "q": "ポイントはどのように計算されますか？",
-        "a": "的中した予測は+50ポイント、外れたが正直に締めた予測は+5ポイントです。有効な招待コードで参加した人は+100ポイントを獲得し、招待した人も同様に+100ポイントを獲得します。"
+        "q": "的中率とランキングはどのように計算されますか？",
+        "a": "ランキングはポイントではなく実際の的中率に基づきます。確定した予測のうち的中した割合を、カテゴリーと期間（短期・中期・長期）ごとに集計します。ランキングに表示されるには、そのカテゴリー・期間の組み合わせで少なくとも5件の確定済み予測が必要です。"
       },
       {
         "topic": "hesap",
@@ -1292,8 +1292,16 @@
   },
   "leaderboard": {
     "title": "ランキング",
-    "subtitle": "ポイントによる総合ランキング",
+    "subtitle": "的中率によるランキング",
     "noUsersYet": "まだランキングできるユーザーがいません。",
+    "minSampleHint": "少なくとも{{count}}件の確定済み予測がないとランキングに表示されません。",
+    "accuracyStat": "{{correct}}/{{total}} 的中",
+    "duration": {
+      "all": "全期間",
+      "short": "短期",
+      "medium": "中期",
+      "long": "長期"
+    },
     "rankingSectionTitle": "ランキング",
     "yourRank": "あなたの順位"
   },
@@ -1521,7 +1529,7 @@
     "popularCategoriesSubtitle": "カテゴリー別の予測数",
     "noCategorizedPredictions": "まだ分類された予測がありません。",
     "leaderboardOpenAria": "リーダーボードを開く",
-    "leaderboardTop3Subtitle": "ポイント上位3名",
+    "leaderboardTop3Subtitle": "的中率上位3名",
     "noOneYet": "まだ誰もいません。",
     "recentHeading": "最近追加された",
     "recentSubtitle": "最新の記録",
@@ -1584,9 +1592,9 @@
     "title": "アプリ設定",
     "subtitle": "アカウント、体験、データ——すべてあなたの手の中に。",
     "inviteTitle": "友達を招待",
-    "inviteSubtitle": "相手が参加すると、二人とも100ポイント獲得できます。",
+    "inviteSubtitle": "友達を招待して、お互いの予測を一緒に見よう。",
     "inviteCopyCta": "招待コードをコピー",
-    "inviteMessage": "GTFに参加して、一緒に100ポイント稼ごう！招待コード：@{{username}}",
+    "inviteMessage": "GTFに参加して、お互いの予測を一緒に見よう！招待コード：@{{username}}",
     "inviteCopiedToast": "招待メッセージをコピーしました。好きな場所に貼り付けてください。",
     "copyFailedToast": "コピーできませんでした。もう一度お試しください。",
     "accountSecurityTitle": "アカウントとセキュリティ",
@@ -1717,7 +1725,7 @@
     "communityEyebrow": "コミュニティ",
     "communityTitle": "ひとりで予測しない",
     "communityDesc": "興味の近い人を見つけて、同じグループで一緒に予測を積み重ねよう——そこで共有したことはあなたたちの間だけに残ります。",
-    "communityNoteTitle": "バッジとポイントを獲得",
+    "communityNoteTitle": "バッジを獲得して成長しよう",
     "communityNoteDesc": "正解した予測、いいね、新しいフォロワー——そのひとつひとつがあなたを一歩前へ進めます。"
   },
   "errorBoundary": {

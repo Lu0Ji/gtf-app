@@ -39,7 +39,7 @@
     "usernamePlaceholder": "elifdemir",
     "inviteCodeLabel": "Davet kodu (opsiyonel)",
     "inviteCodePlaceholder": "arkadaşının kullanıcı adı",
-    "inviteCodeHint": "Doğru bir kullanıcı adıysa ikiniz de 100 puan kazanırsınız.",
+    "inviteCodeHint": "Geçerli bir kullanıcı adıysa hesabın davet eden kişiyle ilişkilendirilir.",
     "emailLabel": "E-posta",
     "emailPlaceholder": "ornek@eposta.com",
     "passwordLabel": "Parola",
@@ -512,8 +512,8 @@
       },
       {
         "topic": "tahmin",
-        "q": "Puanlarım nasıl hesaplanıyor?",
-        "a": "Doğru çıkan bir tahmin +50 puan kazandırır, yanlış çıkan ama dürüstçe kapatılan bir tahmin +5 puan kazandırır. Doğru bir davet koduyla katılan biri hem kendine hem seni davet edene +100 puan kazandırır."
+        "q": "Doğruluk oranım ve sıralamam nasıl hesaplanıyor?",
+        "a": "Liderlik Tablosu puana değil gerçek isabet oranına dayanır: doğrulanan tahminlerinin kaçının doğru çıktığı, kategori ve vadeye (kısa/orta/uzun) göre ayrı ayrı hesaplanır. Bir tabloda görünmek için o kategori-vade kombinasyonunda en az 5 doğrulanmış tahminin olması gerekir."
       },
       {
         "topic": "hesap",
@@ -1293,8 +1293,16 @@
   },
   "leaderboard": {
     "title": "Liderlik Tablosu",
-    "subtitle": "Puana göre genel sıralama",
+    "subtitle": "Doğruluk oranına göre sıralama",
     "noUsersYet": "Henüz sıralanacak kullanıcı yok.",
+    "minSampleHint": "En az {{count}} doğrulanmış tahmini olan kullanıcılar listelenir.",
+    "accuracyStat": "{{correct}}/{{total}} doğru",
+    "duration": {
+      "all": "Tüm vadeler",
+      "short": "Kısa vade",
+      "medium": "Orta vade",
+      "long": "Uzun vade"
+    },
     "rankingSectionTitle": "Sıralama",
     "yourRank": "Senin sıran"
   },
@@ -1522,7 +1530,7 @@
     "popularCategoriesSubtitle": "Kategoriye göre tahmin sayısı",
     "noCategorizedPredictions": "Henüz kategorilere ayrılmış tahmin yok.",
     "leaderboardOpenAria": "Liderlik tablosunu aç",
-    "leaderboardTop3Subtitle": "Puana göre en iyi 3",
+    "leaderboardTop3Subtitle": "Doğruluk oranına göre en iyi 3",
     "noOneYet": "Henüz kimse yok.",
     "recentHeading": "Son eklenenler",
     "recentSubtitle": "En yeni kayıtlar",
@@ -1585,9 +1593,9 @@
     "title": "Uygulama ayarları",
     "subtitle": "Hesabın, deneyimin ve verilerin senin kontrolünde.",
     "inviteTitle": "Arkadaşını davet et",
-    "inviteSubtitle": "Katıldığında ikiniz de 100 puan kazanır.",
+    "inviteSubtitle": "Arkadaşını davet et, tahminlerinizi birlikte takip edin.",
     "inviteCopyCta": "Davet kodunu kopyala",
-    "inviteMessage": "GTF'e katıl, ikimiz de 100 puan kazanalım! Davet kodum: @{{username}}",
+    "inviteMessage": "GTF'e katıl, tahminlerimizi birlikte takip edelim! Davet kodum: @{{username}}",
     "inviteCopiedToast": "Davet mesajı kopyalandı, dilediğin yere yapıştır.",
     "copyFailedToast": "Kopyalanamadı, tekrar dene.",
     "accountSecurityTitle": "Hesap ve güvenlik",
@@ -1718,7 +1726,7 @@
     "communityEyebrow": "Topluluk",
     "communityTitle": "Yalnız tahmin etme",
     "communityDesc": "İlgi alanına yakın insanları bul, aynı grupta tahmin biriktirin — orada paylaştıkların sadece aranızda kalır.",
-    "communityNoteTitle": "Rozet ve puan kazan",
+    "communityNoteTitle": "Rozet kazan ve ilerle",
     "communityNoteDesc": "Her doğru tahmin, her beğeni, her yeni takipçi seni bir adım ileri taşır."
   },
   "errorBoundary": {
