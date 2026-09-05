@@ -2,13 +2,6 @@ import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 import LanguageDetector from 'i18next-browser-languagedetector'
 import tr from './locales/tr.json'
-import en from './locales/en.json'
-import de from './locales/de.json'
-import zh from './locales/zh.json'
-import ja from './locales/ja.json'
-import ru from './locales/ru.json'
-import es from './locales/es.json'
-import ar from './locales/ar.json'
 
 // Every language this app ships translations for — single source of truth
 // for the language switcher (Bölge ve Tarih Biçimi) and the RTL check below.
@@ -40,24 +33,37 @@ function applyDocumentDirection(lng) {
   document.documentElement.dir = isRtl(lng) ? 'rtl' : 'ltr'
 }
 
-// Turkish is the app's own language and its only complete translation
-// today, so it's both the initial default (before any detector/user
-// preference applies) and the fallback for any key missing from a lighter
-// locale file — never a blank string.
+// Only Turkish ships in the main bundle (it's the app's own language, the
+// initial default before any detector/user preference applies, and the
+// fallback for any key missing from a lighter locale file — never a blank
+// string). Every other language used to be bundled eagerly too, which grew
+// the shared chunk to ~600KB/190KB gzip across all 8 locale JSONs combined
+// — most of it dead weight for any single viewer, who only ever needs one.
+// This backend dynamic-imports a language's JSON only once something
+// actually calls changeLanguage() into it, so Vite code-splits each
+// locale into its own chunk fetched on demand instead of upfront.
+const lazyLocaleBackend = {
+  type: 'backend',
+  read(language, _namespace, callback) {
+    import(`./locales/${language}.json`)
+      .then((mod) => callback(null, mod.default))
+      .catch((err) => callback(err, null))
+  },
+}
+
 i18n
   .use(LanguageDetector)
+  .use(lazyLocaleBackend)
   .use(initReactI18next)
   .init({
     resources: {
       tr: { translation: tr },
-      en: { translation: en },
-      de: { translation: de },
-      zh: { translation: zh },
-      ja: { translation: ja },
-      ru: { translation: ru },
-      es: { translation: es },
-      ar: { translation: ar },
     },
+    // Lets the two coexist: languages already in `resources` (just tr)
+    // are used as-is, and any other language i18next needs gets fetched
+    // through the backend above instead of i18next assuming "resources
+    // present, don't bother with a backend at all."
+    partialBundledLanguages: true,
     fallbackLng: 'tr',
     supportedLngs: SUPPORTED_LANGUAGES.map((l) => l.code),
     nonExplicitSupportedLngs: true, // 'en-US' resolves to the 'en' resource
