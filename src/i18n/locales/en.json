@@ -1715,6 +1715,10 @@
     "reloadCta": "Reload page",
     "goHomeCta": "Go to home"
   },
+  "notFound": {
+    "title": "Page not found",
+    "body": "The page you're looking for doesn't exist or may have moved."
+  },
   "languages": {
     "tr": "Turkish",
     "en": "English",

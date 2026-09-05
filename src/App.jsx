@@ -14,6 +14,7 @@ import AppShell from './layouts/AppShell.jsx'
 import TabLayout from './layouts/TabLayout.jsx'
 import Giris from './screens/Giris.jsx'
 import Anasayfa from './screens/Anasayfa.jsx'
+import NotFound from './screens/NotFound.jsx'
 
 // Everything reached by navigating further in is loaded on demand, so the
 // initial bundle only has to parse the login screen + home feed up front.
@@ -119,6 +120,14 @@ export default function App() {
                             <Route path="/ayarlar/topluluk-kurallari" element={<TopluluKurallari />} />
                           </Route>
                         </Route>
+
+                        {/* Catches any hash the routes above didn't match
+                            (stale bookmark, mistyped/dead deep link) — a
+                            top-level sibling of /giris, not nested under
+                            ProtectedRoute, so it renders the same regardless
+                            of auth state instead of bouncing through a
+                            redirect first. */}
+                        <Route path="*" element={<NotFound />} />
                       </Routes>
                     </Suspense>
                   </ErrorBoundary>

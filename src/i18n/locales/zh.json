@@ -1714,6 +1714,10 @@
     "reloadCta": "重新加载页面",
     "goHomeCta": "返回首页"
   },
+  "notFound": {
+    "title": "未找到页面",
+    "body": "你要找的页面不存在，或者可能已被移动。"
+  },
   "languages": {
     "tr": "土耳其语",
     "en": "英语",

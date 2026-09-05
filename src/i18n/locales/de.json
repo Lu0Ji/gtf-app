@@ -1715,6 +1715,10 @@
     "reloadCta": "Seite neu laden",
     "goHomeCta": "Zur Startseite"
   },
+  "notFound": {
+    "title": "Seite nicht gefunden",
+    "body": "Die gesuchte Seite existiert nicht oder wurde verschoben."
+  },
   "languages": {
     "tr": "Türkisch",
     "en": "Englisch",

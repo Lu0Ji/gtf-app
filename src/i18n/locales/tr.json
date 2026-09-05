@@ -1715,6 +1715,10 @@
     "reloadCta": "Sayfayı yenile",
     "goHomeCta": "Anasayfaya dön"
   },
+  "notFound": {
+    "title": "Sayfa bulunamadı",
+    "body": "Aradığın sayfa mevcut değil ya da taşınmış olabilir."
+  },
   "languages": {
     "tr": "Türkçe",
     "en": "İngilizce",
