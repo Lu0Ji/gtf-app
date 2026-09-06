@@ -61,7 +61,19 @@
     "backToSignIn": "Назад ко входу",
     "genericError": "Что-то пошло не так, попробуйте снова.",
     "googleError": "Не удалось начать вход через Google, попробуйте снова.",
-    "appleError": "Не удалось начать вход через Apple, попробуйте снова."
+    "appleError": "Не удалось начать вход через Apple, попробуйте снова.",
+    "forgotPasswordLink": "Забыли пароль",
+    "forgotPasswordTitle": "Забыли пароль?",
+    "forgotPasswordSubtitle": "Введите свой email, и мы отправим вам ссылку для сброса пароля.",
+    "resetSendCta": "Отправить ссылку для сброса",
+    "resetSending": "Отправка…",
+    "resetSentTitle": "Мы отправили вам ссылку",
+    "resetSentBody": "Мы отправили ссылку для сброса пароля на <b>{{email}}</b>. Проверьте почту (и папку со спамом).",
+    "newPasswordEyebrow": "Сброс пароля",
+    "newPasswordHeading": "Установите новый пароль",
+    "newPasswordBody": "Создайте новый надёжный пароль, чтобы снова получить доступ к аккаунту.",
+    "setNewPasswordCta": "Обновить пароль и продолжить",
+    "passwordResetSuccess": "Ваш пароль обновлён!"
   },
   "home": {
     "publicFeed": "Публичная лента",

@@ -61,7 +61,19 @@
     "backToSignIn": "ログインに戻る",
     "genericError": "問題が発生しました。もう一度お試しください。",
     "googleError": "Googleログインを開始できませんでした。もう一度お試しください。",
-    "appleError": "Appleログインを開始できませんでした。もう一度お試しください。"
+    "appleError": "Appleログインを開始できませんでした。もう一度お試しください。",
+    "forgotPasswordLink": "パスワードをお忘れですか",
+    "forgotPasswordTitle": "パスワードをお忘れですか？",
+    "forgotPasswordSubtitle": "メールアドレスを入力すると、リセット用のリンクをお送りします。",
+    "resetSendCta": "リセットリンクを送信",
+    "resetSending": "送信中…",
+    "resetSentTitle": "リンクを送信しました",
+    "resetSentBody": "<b>{{email}}</b> 宛にパスワードリセット用のリンクを送信しました。受信トレイ（迷惑メールフォルダも）をご確認ください。",
+    "newPasswordEyebrow": "パスワードリセット",
+    "newPasswordHeading": "新しいパスワードを設定",
+    "newPasswordBody": "アカウントに再度アクセスできるよう、新しい強力なパスワードを作成してください。",
+    "setNewPasswordCta": "パスワードを更新して続ける",
+    "passwordResetSuccess": "パスワードが更新されました！"
   },
   "home": {
     "publicFeed": "公開フィード",

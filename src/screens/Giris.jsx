@@ -31,8 +31,12 @@ export default function Giris() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
-  const { signIn, signUp, signInWithGoogle, signInWithApple } = useAuth()
+  const { signIn, signUp, signInWithGoogle, signInWithApple, requestPasswordReset } = useAuth()
   const [mode, setMode] = useState('signin') // 'signin' | 'signup'
+  const [forgotMode, setForgotMode] = useState(false)
+  const [resetEmail, setResetEmail] = useState('')
+  const [resetSent, setResetSent] = useState(false)
+  const [resetBusy, setResetBusy] = useState(false)
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [username, setUsername] = useState('')
@@ -137,6 +141,101 @@ export default function Giris() {
     } finally {
       setBusy(false)
     }
+  }
+
+  async function handleRequestReset(e) {
+    e.preventDefault()
+    if (resetBusy || !resetEmail.trim()) return
+    setResetBusy(true)
+    setError('')
+    try {
+      await requestPasswordReset(resetEmail.trim())
+      // Always show the same "sent" state whether or not that email is
+      // actually registered — Supabase itself doesn't reveal that either,
+      // and neither should this screen (an attacker probing which emails
+      // have accounts is exactly the info a differing response would leak).
+      setResetSent(true)
+    } catch (err) {
+      setError(err.message || t('auth.genericError'))
+    } finally {
+      setResetBusy(false)
+    }
+  }
+
+  if (forgotMode) {
+    return (
+      <div className="flex min-h-screen w-full flex-col justify-center bg-background px-6 font-body text-foreground">
+        <div className="mx-auto w-full max-w-[360px]">
+          {resetSent ? (
+            <div className="flex flex-col items-center text-center">
+              <div className="flex h-14 w-14 items-center justify-center rounded-theme bg-success text-success-foreground">
+                <iconify-icon icon="lucide:mail-check" class="text-2xl"></iconify-icon>
+              </div>
+              <h1 className="mt-5 font-heading text-xl font-extrabold tracking-tight">{t('auth.resetSentTitle')}</h1>
+              <p className="mt-2 text-sm leading-6 text-muted-foreground">
+                <Trans
+                  i18nKey="auth.resetSentBody"
+                  values={{ email: resetEmail.trim() }}
+                  components={{ b: <span className="font-semibold text-foreground" /> }}
+                />
+              </p>
+              <button
+                onClick={() => {
+                  setForgotMode(false)
+                  setResetSent(false)
+                }}
+                className="mt-6 rounded-theme bg-primary px-5 py-3 text-sm font-bold text-primary-foreground"
+              >
+                {t('auth.backToSignIn')}
+              </button>
+            </div>
+          ) : (
+            <>
+              <div className="flex flex-col items-center">
+                <div className="flex h-14 w-14 items-center justify-center rounded-theme bg-secondary text-primary">
+                  <iconify-icon icon="lucide:key-round" class="text-2xl"></iconify-icon>
+                </div>
+                <h1 className="mt-4 font-heading text-xl font-extrabold tracking-tight">{t('auth.forgotPasswordTitle')}</h1>
+                <p className="mt-2 text-center text-sm text-muted-foreground">{t('auth.forgotPasswordSubtitle')}</p>
+              </div>
+              <form onSubmit={handleRequestReset} className="mt-6 space-y-4">
+                <input
+                  autoFocus
+                  required
+                  type="email"
+                  value={resetEmail}
+                  onChange={(e) => setResetEmail(e.target.value)}
+                  placeholder={t('auth.emailPlaceholder')}
+                  className="w-full rounded-theme border border-border bg-input px-4 py-3 text-sm text-foreground shadow-sm outline-none"
+                />
+                {error && (
+                  <p className="rounded-theme bg-destructive/10 px-3 py-2.5 text-xs font-semibold text-destructive">
+                    {error}
+                  </p>
+                )}
+                <button
+                  type="submit"
+                  disabled={resetBusy}
+                  className="flex w-full items-center justify-center gap-2 rounded-theme bg-primary px-4 py-3.5 text-sm font-extrabold text-primary-foreground shadow-sm disabled:opacity-60"
+                >
+                  {resetBusy ? t('auth.resetSending') : t('auth.resetSendCta')}
+                </button>
+                <button
+                  type="button"
+                  onClick={() => {
+                    setForgotMode(false)
+                    setError('')
+                  }}
+                  className="w-full text-center text-xs font-bold text-muted-foreground"
+                >
+                  {t('auth.backToSignIn')}
+                </button>
+              </form>
+            </>
+          )}
+        </div>
+      </div>
+    )
   }
 
   if (mfaFactorId) {
@@ -288,7 +387,22 @@ export default function Giris() {
             />
           </div>
           <div>
-            <label className="mb-2 block text-sm font-bold text-foreground">{t('auth.passwordLabel')}</label>
+            <div className="mb-2 flex items-center justify-between">
+              <label className="text-sm font-bold text-foreground">{t('auth.passwordLabel')}</label>
+              {mode === 'signin' && (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setResetEmail(email)
+                    setForgotMode(true)
+                    setError('')
+                  }}
+                  className="text-xs font-bold text-primary"
+                >
+                  {t('auth.forgotPasswordLink')}
+                </button>
+              )}
+            </div>
             <input
               required
               type="password"

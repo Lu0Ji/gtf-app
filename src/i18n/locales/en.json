@@ -61,7 +61,19 @@
     "backToSignIn": "Back to sign in",
     "genericError": "Something went wrong, try again.",
     "googleError": "Couldn't start Google sign-in, try again.",
-    "appleError": "Couldn't start Apple sign-in, try again."
+    "appleError": "Couldn't start Apple sign-in, try again.",
+    "forgotPasswordLink": "Forgot password",
+    "forgotPasswordTitle": "Forgot your password?",
+    "forgotPasswordSubtitle": "Enter your email and we'll send you a reset link.",
+    "resetSendCta": "Send reset link",
+    "resetSending": "Sending…",
+    "resetSentTitle": "We sent you a link",
+    "resetSentBody": "We sent a password reset link to <b>{{email}}</b>. Check your inbox (and spam folder).",
+    "newPasswordEyebrow": "Password reset",
+    "newPasswordHeading": "Set a new password",
+    "newPasswordBody": "Create a new, strong password to get back into your account.",
+    "setNewPasswordCta": "Update password and continue",
+    "passwordResetSuccess": "Your password has been updated!"
   },
   "home": {
     "publicFeed": "Public feed",

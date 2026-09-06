@@ -61,7 +61,19 @@
     "backToSignIn": "العودة لتسجيل الدخول",
     "genericError": "حدث خطأ ما، حاول مرة أخرى.",
     "googleError": "تعذّر بدء تسجيل الدخول عبر Google، حاول مرة أخرى.",
-    "appleError": "تعذّر بدء تسجيل الدخول عبر Apple، حاول مرة أخرى."
+    "appleError": "تعذّر بدء تسجيل الدخول عبر Apple، حاول مرة أخرى.",
+    "forgotPasswordLink": "نسيت كلمة المرور",
+    "forgotPasswordTitle": "هل نسيت كلمة المرور؟",
+    "forgotPasswordSubtitle": "أدخل بريدك الإلكتروني وسنرسل لك رابط إعادة التعيين.",
+    "resetSendCta": "إرسال رابط إعادة التعيين",
+    "resetSending": "جارٍ الإرسال…",
+    "resetSentTitle": "أرسلنا لك رابطًا",
+    "resetSentBody": "أرسلنا رابط إعادة تعيين كلمة المرور إلى <b>{{email}}</b>. تحقق من بريدك الوارد (ومجلد الرسائل غير المرغوب فيها).",
+    "newPasswordEyebrow": "إعادة تعيين كلمة المرور",
+    "newPasswordHeading": "عيّن كلمة مرور جديدة",
+    "newPasswordBody": "أنشئ كلمة مرور جديدة وقوية لاستعادة الوصول إلى حسابك.",
+    "setNewPasswordCta": "تحديث كلمة المرور والمتابعة",
+    "passwordResetSuccess": "تم تحديث كلمة مرورك!"
   },
   "home": {
     "publicFeed": "التدفق العام",

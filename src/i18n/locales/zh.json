@@ -61,7 +61,19 @@
     "backToSignIn": "返回登录",
     "genericError": "出了点问题，请重试。",
     "googleError": "无法启动 Google 登录，请重试。",
-    "appleError": "无法启动 Apple 登录，请重试。"
+    "appleError": "无法启动 Apple 登录，请重试。",
+    "forgotPasswordLink": "忘记密码",
+    "forgotPasswordTitle": "忘记密码了吗？",
+    "forgotPasswordSubtitle": "输入你的邮箱，我们会发送一个重置链接给你。",
+    "resetSendCta": "发送重置链接",
+    "resetSending": "发送中…",
+    "resetSentTitle": "我们已发送链接给你",
+    "resetSentBody": "我们已向 <b>{{email}}</b> 发送了一封密码重置邮件。请查看收件箱（以及垃圾邮件文件夹）。",
+    "newPasswordEyebrow": "密码重置",
+    "newPasswordHeading": "设置新密码",
+    "newPasswordBody": "创建一个新的强密码，重新登录你的账号。",
+    "setNewPasswordCta": "更新密码并继续",
+    "passwordResetSuccess": "密码已更新！"
   },
   "home": {
     "publicFeed": "公开动态",

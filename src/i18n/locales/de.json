@@ -61,7 +61,19 @@
     "backToSignIn": "Zurück zur Anmeldung",
     "genericError": "Etwas ist schiefgelaufen, versuch es erneut.",
     "googleError": "Google-Anmeldung konnte nicht gestartet werden, versuch es erneut.",
-    "appleError": "Apple-Anmeldung konnte nicht gestartet werden, versuch es erneut."
+    "appleError": "Apple-Anmeldung konnte nicht gestartet werden, versuch es erneut.",
+    "forgotPasswordLink": "Passwort vergessen",
+    "forgotPasswordTitle": "Passwort vergessen?",
+    "forgotPasswordSubtitle": "Gib deine E-Mail-Adresse ein, wir senden dir einen Link zum Zurücksetzen.",
+    "resetSendCta": "Link zum Zurücksetzen senden",
+    "resetSending": "Wird gesendet…",
+    "resetSentTitle": "Wir haben dir einen Link geschickt",
+    "resetSentBody": "Wir haben einen Link zum Zurücksetzen des Passworts an <b>{{email}}</b> gesendet. Überprüfe dein Postfach (und den Spam-Ordner).",
+    "newPasswordEyebrow": "Passwort zurücksetzen",
+    "newPasswordHeading": "Neues Passwort festlegen",
+    "newPasswordBody": "Erstelle ein neues, starkes Passwort, um wieder Zugriff auf dein Konto zu erhalten.",
+    "setNewPasswordCta": "Passwort aktualisieren und fortfahren",
+    "passwordResetSuccess": "Dein Passwort wurde aktualisiert!"
   },
   "home": {
     "publicFeed": "Öffentlicher Feed",

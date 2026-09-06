@@ -61,7 +61,19 @@
     "backToSignIn": "Volver a iniciar sesión",
     "genericError": "Algo salió mal, inténtalo de nuevo.",
     "googleError": "No se pudo iniciar sesión con Google, inténtalo de nuevo.",
-    "appleError": "No se pudo iniciar sesión con Apple, inténtalo de nuevo."
+    "appleError": "No se pudo iniciar sesión con Apple, inténtalo de nuevo.",
+    "forgotPasswordLink": "Olvidé mi contraseña",
+    "forgotPasswordTitle": "¿Olvidaste tu contraseña?",
+    "forgotPasswordSubtitle": "Escribe tu correo y te enviaremos un enlace para restablecerla.",
+    "resetSendCta": "Enviar enlace de restablecimiento",
+    "resetSending": "Enviando…",
+    "resetSentTitle": "Te enviamos un enlace",
+    "resetSentBody": "Enviamos un enlace para restablecer tu contraseña a <b>{{email}}</b>. Revisa tu bandeja de entrada (y la carpeta de spam).",
+    "newPasswordEyebrow": "Restablecer contraseña",
+    "newPasswordHeading": "Establece una nueva contraseña",
+    "newPasswordBody": "Crea una contraseña nueva y segura para volver a acceder a tu cuenta.",
+    "setNewPasswordCta": "Actualizar contraseña y continuar",
+    "passwordResetSuccess": "¡Tu contraseña se actualizó!"
   },
   "home": {
     "publicFeed": "Feed público",

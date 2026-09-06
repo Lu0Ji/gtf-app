@@ -7,6 +7,15 @@ export function AuthProvider({ children }) {
   const [session, setSession] = useState(null)
   const [profile, setProfile] = useState(null)
   const [loading, setLoading] = useState(true)
+  // Set when Supabase's own client-side redirect handling detects a
+  // password-recovery link's token in the URL (see requestPasswordReset
+  // below) and fires this event — not something we trigger ourselves. App.jsx
+  // gates on this to show the "set a new password" screen regardless of
+  // whatever route the URL's hash happens to carry: HashRouter and
+  // Supabase's own auth redirect both want to own the URL fragment, so
+  // routing to a specific screen for this is unreliable — a top-level gate
+  // sidesteps that entirely instead of fighting it.
+  const [passwordRecovery, setPasswordRecovery] = useState(false)
 
   // Daily streak: bump once per calendar day (UTC) a session loads a
   // profile. Idempotent (checks last_active_date first) so calling it from
@@ -69,9 +78,10 @@ export function AuthProvider({ children }) {
       loadProfile(session?.user?.id).finally(() => setLoading(false))
     })
 
-    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+    const { data: listener } = supabase.auth.onAuthStateChange((event, session) => {
       setSession(session)
       loadProfile(session?.user?.id)
+      if (event === 'PASSWORD_RECOVERY') setPasswordRecovery(true)
     })
 
     return () => listener.subscription.unsubscribe()
@@ -132,6 +142,23 @@ export function AuthProvider({ children }) {
     if (error) throw error
   }
 
+  // No hash route in redirectTo on purpose — see the passwordRecovery
+  // comment above. Supabase appends its own token/code to whatever URL we
+  // give it; leaving ours bare (just origin+path, no "#/...") means there's
+  // nothing for its fragment/query to collide with.
+  async function requestPasswordReset(email) {
+    const { error } = await supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: window.location.origin + window.location.pathname,
+    })
+    if (error) throw error
+  }
+
+  async function updatePasswordAfterRecovery(newPassword) {
+    const { error } = await supabase.auth.updateUser({ password: newPassword })
+    if (error) throw error
+    setPasswordRecovery(false)
+  }
+
   async function refreshProfile() {
     await loadProfile(session?.user?.id)
   }
@@ -141,12 +168,15 @@ export function AuthProvider({ children }) {
     user: session?.user ?? null,
     profile,
     loading,
+    passwordRecovery,
     signUp,
     signIn,
     signInWithGoogle,
     signInWithApple,
     signOut,
     refreshProfile,
+    requestPasswordReset,
+    updatePasswordAfterRecovery,
   }
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>

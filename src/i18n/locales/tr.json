@@ -61,7 +61,19 @@
     "backToSignIn": "Girişe dön",
     "genericError": "Bir şeyler ters gitti, tekrar deneyin.",
     "googleError": "Google ile giriş başlatılamadı, tekrar deneyin.",
-    "appleError": "Apple ile giriş başlatılamadı, tekrar deneyin."
+    "appleError": "Apple ile giriş başlatılamadı, tekrar deneyin.",
+    "forgotPasswordLink": "Şifremi unuttum",
+    "forgotPasswordTitle": "Şifreni mi unuttun?",
+    "forgotPasswordSubtitle": "E-posta adresini gir, sana bir sıfırlama bağlantısı gönderelim.",
+    "resetSendCta": "Sıfırlama bağlantısı gönder",
+    "resetSending": "Gönderiliyor…",
+    "resetSentTitle": "E-postana bir bağlantı gönderdik",
+    "resetSentBody": "<b>{{email}}</b> adresine bir şifre sıfırlama bağlantısı gönderdik. Gelen kutunu (ve spam klasörünü) kontrol et.",
+    "newPasswordEyebrow": "Şifre sıfırlama",
+    "newPasswordHeading": "Yeni bir şifre belirle",
+    "newPasswordBody": "Hesabına tekrar erişebilmen için yeni ve güçlü bir şifre oluştur.",
+    "setNewPasswordCta": "Şifreyi güncelle ve devam et",
+    "passwordResetSuccess": "Şifren güncellendi!"
   },
   "home": {
     "publicFeed": "Herkese açık akış",

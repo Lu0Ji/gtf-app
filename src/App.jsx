@@ -1,6 +1,6 @@
 import { Suspense, lazy } from 'react'
 import { HashRouter, Routes, Route } from 'react-router-dom'
-import { AuthProvider } from './contexts/AuthContext.jsx'
+import { AuthProvider, useAuth } from './contexts/AuthContext.jsx'
 import { ToastProvider } from './contexts/ToastContext.jsx'
 import { ThemeProvider } from './contexts/ThemeContext.jsx'
 import { PresenceProvider } from './contexts/PresenceContext.jsx'
@@ -50,6 +50,7 @@ const Begeniler = lazy(() => import('./screens/Begeniler.jsx'))
 const YardimMerkezi = lazy(() => import('./screens/YardimMerkezi.jsx'))
 const TopluluKurallari = lazy(() => import('./screens/TopluluKurallari.jsx'))
 const IlkKullanimRehberi = lazy(() => import('./screens/IlkKullanimRehberi.jsx'))
+const YeniSifreBelirle = lazy(() => import('./screens/YeniSifreBelirle.jsx'))
 
 function ScreenFallback() {
   return (
@@ -59,6 +60,18 @@ function ScreenFallback() {
       </div>
     </div>
   )
+}
+
+// Gates the whole router on passwordRecovery instead of adding a route for
+// it — see AuthContext's passwordRecovery comment for why a route can't
+// reliably own this: HashRouter's own routing and Supabase's recovery-link
+// redirect both want to interpret the URL fragment, and they don't agree.
+// A component here, one level below AuthProvider, is what lets this call
+// useAuth() at all (App() itself renders AuthProvider, so it can't consume
+// the context it's declaring).
+function PasswordRecoveryGate({ children }) {
+  const { passwordRecovery } = useAuth()
+  return passwordRecovery ? <YeniSifreBelirle /> : children
 }
 
 export default function App() {
@@ -74,6 +87,7 @@ export default function App() {
                 <HashRouter>
                   <ErrorBoundary>
                     <Suspense fallback={<ScreenFallback />}>
+                      <PasswordRecoveryGate>
                       <Routes>
                         <Route path="/giris" element={<Giris />} />
 
@@ -129,6 +143,7 @@ export default function App() {
                             redirect first. */}
                         <Route path="*" element={<NotFound />} />
                       </Routes>
+                      </PasswordRecoveryGate>
                     </Suspense>
                   </ErrorBoundary>
                 </HashRouter>
