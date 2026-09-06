@@ -13,6 +13,20 @@ import { IMG } from '../lib/images.js'
 // use, per this screen's usual practice.
 const LOGIN_HERO = IMG('2485f89f-ddd3-4c79-ba33-e9df27be46ef')
 
+// 2026-09-06, beta-readiness pass: confirmed live (via /browse, hitting
+// Supabase's own /auth/v1/authorize endpoint directly) that neither
+// provider is actually enabled on this project — both return
+// `{"error_code":"validation_failed","msg":"Unsupported provider: provider
+// is not enabled"}`. The buttons/handlers below are fully wired and were
+// never fake, they just have nothing configured to talk to yet. Hiding them
+// rather than shipping a guaranteed-broken sign-in path to real beta
+// testers. Flip back to true once Google/Apple sign-in are actually
+// enabled in the Supabase Dashboard (Authentication → Providers) — each
+// also needs its own OAuth app registered with Google Cloud Console /
+// Apple Developer first, that's a one-time setup only the account owner
+// can do.
+const OAUTH_PROVIDERS_ENABLED = false
+
 export default function Giris() {
   const { t } = useTranslation()
   const navigate = useNavigate()
@@ -300,32 +314,36 @@ export default function Giris() {
             {busy ? t('auth.submitBusy') : mode === 'signin' ? t('auth.submitSignIn') : t('auth.submitSignUp')}
           </button>
 
-          <div className="flex items-center gap-3 py-1">
-            <div className="h-px flex-1 bg-border" />
-            <span className="text-[11px] font-medium text-muted-foreground">{t('common.or')}</span>
-            <div className="h-px flex-1 bg-border" />
-          </div>
+          {OAUTH_PROVIDERS_ENABLED && (
+            <>
+              <div className="flex items-center gap-3 py-1">
+                <div className="h-px flex-1 bg-border" />
+                <span className="text-[11px] font-medium text-muted-foreground">{t('common.or')}</span>
+                <div className="h-px flex-1 bg-border" />
+              </div>
 
-          <div className="space-y-3">
-            <button
-              type="button"
-              onClick={handleGoogleSignIn}
-              disabled={googleBusy || appleBusy || busy}
-              className="flex h-12 w-full items-center justify-center gap-3 rounded-theme border border-border bg-card text-sm font-bold text-foreground shadow-sm disabled:opacity-60"
-            >
-              <iconify-icon icon="simple-icons:google" class="text-[18px]"></iconify-icon>
-              {googleBusy ? t('auth.redirecting') : t('auth.googleContinue')}
-            </button>
-            <button
-              type="button"
-              onClick={handleAppleSignIn}
-              disabled={googleBusy || appleBusy || busy}
-              className="flex h-12 w-full items-center justify-center gap-3 rounded-theme border border-border bg-card text-sm font-bold text-foreground shadow-sm disabled:opacity-60"
-            >
-              <iconify-icon icon="simple-icons:apple" class="text-[19px]"></iconify-icon>
-              {appleBusy ? t('auth.redirecting') : t('auth.appleContinue')}
-            </button>
-          </div>
+              <div className="space-y-3">
+                <button
+                  type="button"
+                  onClick={handleGoogleSignIn}
+                  disabled={googleBusy || appleBusy || busy}
+                  className="flex h-12 w-full items-center justify-center gap-3 rounded-theme border border-border bg-card text-sm font-bold text-foreground shadow-sm disabled:opacity-60"
+                >
+                  <iconify-icon icon="simple-icons:google" class="text-[18px]"></iconify-icon>
+                  {googleBusy ? t('auth.redirecting') : t('auth.googleContinue')}
+                </button>
+                <button
+                  type="button"
+                  onClick={handleAppleSignIn}
+                  disabled={googleBusy || appleBusy || busy}
+                  className="flex h-12 w-full items-center justify-center gap-3 rounded-theme border border-border bg-card text-sm font-bold text-foreground shadow-sm disabled:opacity-60"
+                >
+                  <iconify-icon icon="simple-icons:apple" class="text-[19px]"></iconify-icon>
+                  {appleBusy ? t('auth.redirecting') : t('auth.appleContinue')}
+                </button>
+              </div>
+            </>
+          )}
         </form>
       </div>
     </div>
