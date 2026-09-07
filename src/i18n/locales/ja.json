@@ -73,7 +73,9 @@
     "newPasswordHeading": "新しいパスワードを設定",
     "newPasswordBody": "アカウントに再度アクセスできるよう、新しい強力なパスワードを作成してください。",
     "setNewPasswordCta": "パスワードを更新して続ける",
-    "passwordResetSuccess": "パスワードが更新されました！"
+    "passwordResetSuccess": "パスワードが更新されました！",
+    "heroHeadline": "今日予測し、その時が来たら証明する。",
+    "heroSubheadline": "予測を封印しよう — 的中するまでは誰にも見えない。的中した瞬間、みんなに見える。"
   },
   "home": {
     "publicFeed": "公開フィード",

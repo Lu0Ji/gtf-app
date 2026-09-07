@@ -73,7 +73,9 @@
     "newPasswordHeading": "عيّن كلمة مرور جديدة",
     "newPasswordBody": "أنشئ كلمة مرور جديدة وقوية لاستعادة الوصول إلى حسابك.",
     "setNewPasswordCta": "تحديث كلمة المرور والمتابعة",
-    "passwordResetSuccess": "تم تحديث كلمة مرورك!"
+    "passwordResetSuccess": "تم تحديث كلمة مرورك!",
+    "heroHeadline": "توقّع اليوم، وأثبت ذلك عندما يحين الوقت.",
+    "heroSubheadline": "اختم توقعك — لن يراه أحد حتى يتحقق. وعندها سيراه الجميع."
   },
   "home": {
     "publicFeed": "التدفق العام",

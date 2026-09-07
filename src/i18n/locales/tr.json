@@ -73,7 +73,9 @@
     "newPasswordHeading": "Yeni bir şifre belirle",
     "newPasswordBody": "Hesabına tekrar erişebilmen için yeni ve güçlü bir şifre oluştur.",
     "setNewPasswordCta": "Şifreyi güncelle ve devam et",
-    "passwordResetSuccess": "Şifren güncellendi!"
+    "passwordResetSuccess": "Şifren güncellendi!",
+    "heroHeadline": "Bugün tahmin et, zamanı gelince kanıtla.",
+    "heroSubheadline": "Tahminini mühürle — doğru çıkana kadar kimse göremez. O an geldiğinde herkes görür."
   },
   "home": {
     "publicFeed": "Herkese açık akış",

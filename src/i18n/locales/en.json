@@ -73,7 +73,9 @@
     "newPasswordHeading": "Set a new password",
     "newPasswordBody": "Create a new, strong password to get back into your account.",
     "setNewPasswordCta": "Update password and continue",
-    "passwordResetSuccess": "Your password has been updated!"
+    "passwordResetSuccess": "Your password has been updated!",
+    "heroHeadline": "Predict today. Prove it when the time comes.",
+    "heroSubheadline": "Seal your prediction — no one can see it until it's proven right. Then everyone does."
   },
   "home": {
     "publicFeed": "Public feed",

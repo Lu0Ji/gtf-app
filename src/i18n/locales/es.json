@@ -73,7 +73,9 @@
     "newPasswordHeading": "Establece una nueva contraseña",
     "newPasswordBody": "Crea una contraseña nueva y segura para volver a acceder a tu cuenta.",
     "setNewPasswordCta": "Actualizar contraseña y continuar",
-    "passwordResetSuccess": "¡Tu contraseña se actualizó!"
+    "passwordResetSuccess": "¡Tu contraseña se actualizó!",
+    "heroHeadline": "Predice hoy. Demuéstralo cuando llegue el momento.",
+    "heroSubheadline": "Sella tu predicción — nadie la ve hasta que se cumple. Entonces la ven todos."
   },
   "home": {
     "publicFeed": "Feed público",

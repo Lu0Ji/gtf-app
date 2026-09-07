@@ -73,7 +73,9 @@
     "newPasswordHeading": "Neues Passwort festlegen",
     "newPasswordBody": "Erstelle ein neues, starkes Passwort, um wieder Zugriff auf dein Konto zu erhalten.",
     "setNewPasswordCta": "Passwort aktualisieren und fortfahren",
-    "passwordResetSuccess": "Dein Passwort wurde aktualisiert!"
+    "passwordResetSuccess": "Dein Passwort wurde aktualisiert!",
+    "heroHeadline": "Heute vorhersagen. Beweisen, wenn es soweit ist.",
+    "heroSubheadline": "Versiegle deine Vorhersage — niemand sieht sie, bis sie sich bewahrheitet. Dann sehen es alle."
   },
   "home": {
     "publicFeed": "Öffentlicher Feed",

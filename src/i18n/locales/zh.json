@@ -73,7 +73,9 @@
     "newPasswordHeading": "设置新密码",
     "newPasswordBody": "创建一个新的强密码，重新登录你的账号。",
     "setNewPasswordCta": "更新密码并继续",
-    "passwordResetSuccess": "密码已更新！"
+    "passwordResetSuccess": "密码已更新！",
+    "heroHeadline": "今天预测，时机到时验证。",
+    "heroSubheadline": "封存你的预测——在应验之前无人可见，应验的那一刻，所有人都能看到。"
   },
   "home": {
     "publicFeed": "公开动态",
