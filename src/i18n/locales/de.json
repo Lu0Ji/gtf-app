@@ -104,7 +104,9 @@
     "noRecordsBody": "Starte den Feed mit deiner ersten Vorhersage.",
     "loadingMore": "Lädt…",
     "suggestedPeople": "Personen, die dir gefallen könnten",
-    "newOnGtf": "Neu bei GTF",
+    "suggestedPeopleSubtitle": "Leute, die du kennen könntest",
+    "mutualFollowsCount": "{{count}} gemeinsame Kontakte",
+    "newOnGtf": "Kürzlich beigetreten",
     "followAction": "Folgen",
     "yourGroups": "Deine Gruppen",
     "notJoinedYet": "Du bist noch keiner Gruppe beigetreten",
@@ -143,6 +145,7 @@
     "categoryTitle": "Kategorie",
     "customCategoryCta": "Andere",
     "customCategoryPlaceholder": "Kategorie eingeben (z. B. Essen)",
+    "customCategoryAddAria": "Kategorie hinzufügen",
     "sensitiveToggleTitle": "Als sensiblen Inhalt markieren",
     "sensitiveToggleBody": "Wird je nach Anzeigeeinstellung des Betrachters mit einem Warnhinweis angezeigt.",
     "unlockTitle": "Wie soll es geöffnet werden?",
@@ -1752,7 +1755,10 @@
     "communityTitle": "Sag nicht allein voraus",
     "communityDesc": "Finde Menschen mit ähnlichen Interessen, sammelt gemeinsam Vorhersagen in derselben Gruppe — was ihr dort teilt, bleibt unter euch.",
     "communityNoteTitle": "Verdiene Abzeichen und wachse",
-    "communityNoteDesc": "Jede richtige Vorhersage, jedes Like, jeder neue Follower bringt dich einen Schritt weiter."
+    "communityNoteDesc": "Jede richtige Vorhersage, jedes Like, jeder neue Follower bringt dich einen Schritt weiter.",
+    "interestsEyebrow": "Ein letzter Schritt",
+    "interestsTitle": "Wofür interessierst du dich?",
+    "interestsDesc": "Wir passen deinen Feed und die vorgeschlagenen Personen an deine Auswahl an. Du kannst das jederzeit in den Einstellungen ändern."
   },
   "errorBoundary": {
     "title": "Etwas ist schiefgelaufen",

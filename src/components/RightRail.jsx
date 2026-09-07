@@ -6,6 +6,7 @@ import { fallbackAvatarFor } from '../lib/images.js'
 import { formatTimeUntil } from '../lib/format.js'
 import { CATEGORY_META } from '../lib/categories.js'
 import { fetchLeaderboard } from '../lib/leaderboard.js'
+import { fetchPeopleSuggestions } from '../lib/peopleSuggestions.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 
@@ -32,7 +33,7 @@ export default function RightRail() {
     if (!user) return
     let cancelled = false
     async function load() {
-      const [rankedRes, openingRes, followingRes, blockedRes] = await Promise.all([
+      const [rankedRes, openingRes, peopleRes] = await Promise.all([
         fetchLeaderboard({ limit: 3 }),
         queryWithGroupIdFallback((filterGroupId) => {
           let q = supabase
@@ -46,24 +47,13 @@ export default function RightRail() {
           if (filterGroupId) q = q.is('group_id', null)
           return q
         }),
-        supabase.from('follows').select('following_id').eq('follower_id', user.id),
-        supabase.rpc('blocked_user_ids'),
+        fetchPeopleSuggestions(user.id, { limit: 3 }),
       ])
-      if (cancelled) return
-
-      const excludeSet = new Set((followingRes.data || []).map((f) => f.following_id))
-      excludeSet.add(user.id)
-      for (const row of blockedRes.data || []) excludeSet.add(row.blocked_user_ids ?? row)
-      const { data: candidates } = await supabase
-        .from('profiles')
-        .select('id, display_name, username, avatar_url')
-        .order('created_at', { ascending: false })
-        .limit(20)
       if (cancelled) return
 
       setTopRanked(rankedRes.rows || [])
       setOpeningSoon(openingRes.data || [])
-      setPeople((candidates || []).filter((p) => !excludeSet.has(p.id)).slice(0, 3))
+      setPeople(peopleRes)
       setLoading(false)
     }
     load()
@@ -127,7 +117,7 @@ export default function RightRail() {
             </span>
             <div>
               <h2 className="text-base font-bold tracking-[-0.04em] text-foreground">{t('home.suggestedPeople')}</h2>
-              <p className="text-[11px] text-muted-foreground">{t('home.newOnGtf')}</p>
+              <p className="text-[11px] text-muted-foreground">{t('home.suggestedPeopleSubtitle')}</p>
             </div>
           </div>
           <div className="mt-4 flex flex-col gap-3.5">
@@ -144,8 +134,11 @@ export default function RightRail() {
                       className="h-full w-full object-cover"
                     />
                   </div>
-                  <span className="min-w-0 flex-1 truncate text-sm font-semibold text-foreground">
-                    {person.display_name}
+                  <span className="min-w-0 flex-1 truncate text-left">
+                    <span className="block truncate text-sm font-semibold text-foreground">{person.display_name}</span>
+                    <span className="block truncate text-[10px] text-muted-foreground">
+                      {person.mutualCount > 0 ? t('home.mutualFollowsCount', { count: person.mutualCount }) : t('home.newOnGtf')}
+                    </span>
                   </span>
                 </button>
                 <button

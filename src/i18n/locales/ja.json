@@ -103,7 +103,9 @@
     "noRecordsBody": "最初の予測を作成してフィードを始めましょう。",
     "loadingMore": "読み込み中…",
     "suggestedPeople": "おすすめのユーザー",
-    "newOnGtf": "GTFに新しく参加した人",
+    "suggestedPeopleSubtitle": "知り合いかもしれない人",
+    "mutualFollowsCount": "共通のフォロー {{count}} 人",
+    "newOnGtf": "最近参加しました",
     "followAction": "フォロー",
     "yourGroups": "あなたのグループ",
     "notJoinedYet": "まだグループに参加していません",
@@ -142,6 +144,7 @@
     "categoryTitle": "カテゴリ",
     "customCategoryCta": "その他",
     "customCategoryPlaceholder": "カテゴリ名を入力（例: グルメ）",
+    "customCategoryAddAria": "カテゴリを追加",
     "sensitiveToggleTitle": "センシティブなコンテンツとしてマーク",
     "sensitiveToggleBody": "各閲覧者の表示設定に応じて警告ラベル付きで表示されます。",
     "unlockTitle": "どのように開封しますか？",
@@ -1751,7 +1754,10 @@
     "communityTitle": "ひとりで予測しない",
     "communityDesc": "興味の近い人を見つけて、同じグループで一緒に予測を積み重ねよう——そこで共有したことはあなたたちの間だけに残ります。",
     "communityNoteTitle": "バッジを獲得して成長しよう",
-    "communityNoteDesc": "正解した予測、いいね、新しいフォロワー——そのひとつひとつがあなたを一歩前へ進めます。"
+    "communityNoteDesc": "正解した予測、いいね、新しいフォロワー——そのひとつひとつがあなたを一歩前へ進めます。",
+    "interestsEyebrow": "最後のステップ",
+    "interestsTitle": "何に興味がありますか？",
+    "interestsDesc": "選んだトピックに合わせてフィードとおすすめのユーザーを調整します。いつでも設定から変更できます。"
   },
   "errorBoundary": {
     "title": "問題が発生しました",

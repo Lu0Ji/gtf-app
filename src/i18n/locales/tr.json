@@ -104,7 +104,9 @@
     "noRecordsBody": "İlk tahminini oluşturarak akışı başlat.",
     "loadingMore": "Yükleniyor…",
     "suggestedPeople": "Sana önerilen kişiler",
-    "newOnGtf": "GTF'e yeni katılanlar",
+    "suggestedPeopleSubtitle": "Tanıyor olabileceğin kişiler",
+    "mutualFollowsCount": "{{count}} ortak takip",
+    "newOnGtf": "Yeni katıldı",
     "followAction": "Takip et",
     "yourGroups": "Gruplarından",
     "notJoinedYet": "Henüz bir gruba katılmadın",
@@ -143,6 +145,7 @@
     "categoryTitle": "Kategori",
     "customCategoryCta": "Diğer",
     "customCategoryPlaceholder": "Kategori adı yaz (örn. Yemek)",
+    "customCategoryAddAria": "Kategori ekle",
     "sensitiveToggleTitle": "Hassas içerik olarak işaretle",
     "sensitiveToggleBody": "Görenlerin gösterim tercihine göre bir uyarı etiketiyle gösterilir.",
     "unlockTitle": "Açılış nasıl olsun?",
@@ -1752,7 +1755,10 @@
     "communityTitle": "Yalnız tahmin etme",
     "communityDesc": "İlgi alanına yakın insanları bul, aynı grupta tahmin biriktirin — orada paylaştıkların sadece aranızda kalır.",
     "communityNoteTitle": "Rozet kazan ve ilerle",
-    "communityNoteDesc": "Her doğru tahmin, her beğeni, her yeni takipçi seni bir adım ileri taşır."
+    "communityNoteDesc": "Her doğru tahmin, her beğeni, her yeni takipçi seni bir adım ileri taşır.",
+    "interestsEyebrow": "Son bir adım",
+    "interestsTitle": "Neyle ilgileniyorsun?",
+    "interestsDesc": "Seçtiğin konulara göre akışını ve sana önerdiğimiz kişileri düzenleriz. İstediğin zaman Ayarlar'dan değiştirebilirsin."
   },
   "errorBoundary": {
     "title": "Bir şeyler ters gitti",

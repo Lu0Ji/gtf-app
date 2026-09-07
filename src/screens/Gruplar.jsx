@@ -17,6 +17,12 @@ function CreateGroupModal({ onClose, onCreated }) {
   const [name, setName] = useState('')
   const [description, setDescription] = useState('')
   const [category, setCategory] = useState('genel')
+  // Same "Diğer" escape hatch TahminOlustur.jsx already has for predictions
+  // — the fixed catalog (now 19 incl. "Genel") still can't cover everything
+  // someone might want to name a group after, see categories.js's own note
+  // on why a few real-system colors have to repeat rather than keep growing
+  // this list forever.
+  const [customCategoryOpen, setCustomCategoryOpen] = useState(false)
   const [coverFile, setCoverFile] = useState(null)
   const [coverPreview, setCoverPreview] = useState(null)
   const [saving, setSaving] = useState(false)
@@ -39,7 +45,7 @@ function CreateGroupModal({ onClose, onCreated }) {
         .insert({
           name: name.trim(),
           description: description.trim() || null,
-          category,
+          category: category.trim().toLowerCase(),
           created_by: user.id,
         })
         .select()
@@ -127,20 +133,50 @@ function CreateGroupModal({ onClose, onCreated }) {
           <div>
             <label className="mb-2 block text-sm font-bold text-foreground">{t('createPrediction.categoryTitle')}</label>
             <div className="flex flex-wrap gap-2">
-              {GROUP_CATEGORY_SLUGS.map((slug) => (
-                <button
-                  key={slug}
-                  onClick={() => setCategory(slug)}
-                  className={`rounded-full px-3.5 py-2 text-xs font-bold ${
-                    slug === category
-                      ? 'bg-primary text-primary-foreground'
-                      : 'border border-border bg-card text-card-foreground'
-                  }`}
-                >
-                  {t(CATEGORY_META[slug].labelKey)}
-                </button>
-              ))}
+              {GROUP_CATEGORY_SLUGS.map((slug) => {
+                const isActive = !customCategoryOpen && slug === category
+                return (
+                  <button
+                    key={slug}
+                    onClick={() => {
+                      setCustomCategoryOpen(false)
+                      setCategory(slug)
+                    }}
+                    className={`rounded-full px-3.5 py-2 text-xs font-bold ${
+                      isActive
+                        ? 'bg-primary text-primary-foreground'
+                        : 'border border-border bg-card text-card-foreground'
+                    }`}
+                  >
+                    {t(CATEGORY_META[slug].labelKey)}
+                  </button>
+                )
+              })}
+              <button
+                onClick={() => {
+                  setCustomCategoryOpen(true)
+                  setCategory('')
+                }}
+                className={`flex items-center gap-1 rounded-full px-3.5 py-2 text-xs font-bold ${
+                  customCategoryOpen
+                    ? 'bg-primary text-primary-foreground'
+                    : 'border border-dashed border-border bg-card text-muted-foreground'
+                }`}
+              >
+                <iconify-icon icon="lucide:plus" class="text-sm"></iconify-icon>
+                {t('createPrediction.customCategoryCta')}
+              </button>
             </div>
+            {customCategoryOpen && (
+              <input
+                autoFocus
+                value={category}
+                onChange={(e) => setCategory(e.target.value.slice(0, 24))}
+                placeholder={t('createPrediction.customCategoryPlaceholder')}
+                maxLength={24}
+                className="mt-2.5 w-full rounded-theme border border-border bg-input px-4 py-3 text-sm text-foreground outline-none"
+              />
+            )}
           </div>
 
           {error && (
@@ -151,7 +187,7 @@ function CreateGroupModal({ onClose, onCreated }) {
 
           <button
             onClick={handleCreate}
-            disabled={!name.trim() || saving}
+            disabled={!name.trim() || !category.trim() || saving}
             className="flex w-full items-center justify-center gap-2 rounded-theme bg-primary px-4 py-3.5 text-sm font-extrabold text-primary-foreground shadow-sm disabled:opacity-50"
           >
             {saving ? t('groups.creating') : t('groups.createCta')}

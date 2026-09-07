@@ -28,13 +28,20 @@ function EditGroupModal({ group, onClose, onSaved }) {
   const [name, setName] = useState(group.name || '')
   const [description, setDescription] = useState(group.description || '')
   const [category, setCategory] = useState(group.category || 'genel')
+  // Same "Diğer" escape hatch as the create-group form (Gruplar.jsx) and
+  // TahminOlustur.jsx — opens pre-filled if the group's current category
+  // isn't one of the fixed slugs (an existing custom value, or one from
+  // before this option existed) so editing doesn't silently blank it out.
+  const [customCategoryOpen, setCustomCategoryOpen] = useState(
+    Boolean(group.category) && !GROUP_CATEGORY_SLUGS.includes(group.category)
+  )
   const [retention, setRetention] = useState(group.message_retention_minutes ?? null)
   const [saving, setSaving] = useState(false)
 
   async function handleSave() {
-    if (!name.trim() || saving) return
+    if (!name.trim() || !category.trim() || saving) return
     setSaving(true)
-    const basePayload = { name: name.trim(), description: description.trim() || null, category }
+    const basePayload = { name: name.trim(), description: description.trim() || null, category: category.trim().toLowerCase() }
     let { error } = await supabase
       .from('groups')
       .update({ ...basePayload, message_retention_minutes: retention })
@@ -87,20 +94,50 @@ function EditGroupModal({ group, onClose, onSaved }) {
           <div>
             <label className="mb-2 block text-sm font-bold text-foreground">{t('createPrediction.categoryTitle')}</label>
             <div className="flex flex-wrap gap-2">
-              {GROUP_CATEGORY_SLUGS.map((slug) => (
-                <button
-                  key={slug}
-                  onClick={() => setCategory(slug)}
-                  className={`rounded-full px-3.5 py-2 text-xs font-bold ${
-                    slug === category
-                      ? 'bg-primary text-primary-foreground'
-                      : 'border border-border bg-card text-card-foreground'
-                  }`}
-                >
-                  {t(CATEGORY_META[slug].labelKey)}
-                </button>
-              ))}
+              {GROUP_CATEGORY_SLUGS.map((slug) => {
+                const isActive = !customCategoryOpen && slug === category
+                return (
+                  <button
+                    key={slug}
+                    onClick={() => {
+                      setCustomCategoryOpen(false)
+                      setCategory(slug)
+                    }}
+                    className={`rounded-full px-3.5 py-2 text-xs font-bold ${
+                      isActive
+                        ? 'bg-primary text-primary-foreground'
+                        : 'border border-border bg-card text-card-foreground'
+                    }`}
+                  >
+                    {t(CATEGORY_META[slug].labelKey)}
+                  </button>
+                )
+              })}
+              <button
+                onClick={() => {
+                  setCustomCategoryOpen(true)
+                  setCategory('')
+                }}
+                className={`flex items-center gap-1 rounded-full px-3.5 py-2 text-xs font-bold ${
+                  customCategoryOpen
+                    ? 'bg-primary text-primary-foreground'
+                    : 'border border-dashed border-border bg-card text-muted-foreground'
+                }`}
+              >
+                <iconify-icon icon="lucide:plus" class="text-sm"></iconify-icon>
+                {t('createPrediction.customCategoryCta')}
+              </button>
             </div>
+            {customCategoryOpen && (
+              <input
+                autoFocus
+                value={category}
+                onChange={(e) => setCategory(e.target.value.slice(0, 24))}
+                placeholder={t('createPrediction.customCategoryPlaceholder')}
+                maxLength={24}
+                className="mt-2.5 w-full rounded-theme border border-border bg-input px-4 py-3 text-sm text-foreground outline-none"
+              />
+            )}
           </div>
           <div>
             <label className="mb-2 block text-sm font-bold text-foreground">{t('groups.messageRetentionTitle')}</label>
@@ -123,7 +160,7 @@ function EditGroupModal({ group, onClose, onSaved }) {
           </div>
           <button
             onClick={handleSave}
-            disabled={!name.trim() || saving}
+            disabled={!name.trim() || !category.trim() || saving}
             className="flex w-full items-center justify-center gap-2 rounded-theme bg-primary px-4 py-3.5 text-sm font-extrabold text-primary-foreground shadow-sm disabled:opacity-50"
           >
             {saving ? t('common.saving') : t('common.save')}

@@ -104,7 +104,9 @@
     "noRecordsBody": "Start the feed by creating your first prediction.",
     "loadingMore": "Loading…",
     "suggestedPeople": "People you might like",
-    "newOnGtf": "New on GTF",
+    "suggestedPeopleSubtitle": "People you may know",
+    "mutualFollowsCount": "{{count}} mutual follows",
+    "newOnGtf": "Recently joined",
     "followAction": "Follow",
     "yourGroups": "Your groups",
     "notJoinedYet": "You haven't joined a group yet",
@@ -143,6 +145,7 @@
     "categoryTitle": "Category",
     "customCategoryCta": "Other",
     "customCategoryPlaceholder": "Type a category (e.g. Food)",
+    "customCategoryAddAria": "Add category",
     "sensitiveToggleTitle": "Mark as sensitive content",
     "sensitiveToggleBody": "Shown with a warning label based on each viewer's display preference.",
     "unlockTitle": "How should it open?",
@@ -1752,7 +1755,10 @@
     "communityTitle": "Don't predict alone",
     "communityDesc": "Find people close to your interests, build up predictions together in the same group — what you share there stays between you.",
     "communityNoteTitle": "Earn badges and level up",
-    "communityNoteDesc": "Every correct prediction, every like, every new follower moves you one step forward."
+    "communityNoteDesc": "Every correct prediction, every like, every new follower moves you one step forward.",
+    "interestsEyebrow": "One last step",
+    "interestsTitle": "What are you into?",
+    "interestsDesc": "We'll tailor your feed and the people we suggest around what you pick. You can change this anytime in Settings."
   },
   "errorBoundary": {
     "title": "Something went wrong",

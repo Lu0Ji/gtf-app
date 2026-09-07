@@ -104,7 +104,9 @@
     "noRecordsBody": "Inicia el feed creando tu primera predicción.",
     "loadingMore": "Cargando…",
     "suggestedPeople": "Personas que te pueden interesar",
-    "newOnGtf": "Nuevos en GTF",
+    "suggestedPeopleSubtitle": "Personas que quizá conozcas",
+    "mutualFollowsCount": "{{count}} amigos en común",
+    "newOnGtf": "Se unió recientemente",
     "followAction": "Seguir",
     "yourGroups": "Tus grupos",
     "notJoinedYet": "Aún no te has unido a ningún grupo",
@@ -143,6 +145,7 @@
     "categoryTitle": "Categoría",
     "customCategoryCta": "Otra",
     "customCategoryPlaceholder": "Escribe una categoría (p. ej. Comida)",
+    "customCategoryAddAria": "Añadir categoría",
     "sensitiveToggleTitle": "Marcar como contenido sensible",
     "sensitiveToggleBody": "Se muestra con una etiqueta de advertencia según la preferencia de cada usuario.",
     "unlockTitle": "¿Cómo debería abrirse?",
@@ -1752,7 +1755,10 @@
     "communityTitle": "No predigas solo",
     "communityDesc": "Encuentra a personas con intereses parecidos y acumulad predicciones juntos en el mismo grupo; lo que compartáis ahí queda solo entre vosotros.",
     "communityNoteTitle": "Gana insignias y progresa",
-    "communityNoteDesc": "Cada predicción acertada, cada me gusta, cada nuevo seguidor te hace avanzar un paso más."
+    "communityNoteDesc": "Cada predicción acertada, cada me gusta, cada nuevo seguidor te hace avanzar un paso más.",
+    "interestsEyebrow": "Un último paso",
+    "interestsTitle": "¿Qué te interesa?",
+    "interestsDesc": "Adaptaremos tu feed y las personas que te sugerimos según lo que elijas. Puedes cambiarlo cuando quieras desde Ajustes."
   },
   "errorBoundary": {
     "title": "Algo salió mal",

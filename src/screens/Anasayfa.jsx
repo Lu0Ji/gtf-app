@@ -13,6 +13,7 @@ import Chip from '../components/ui/Chip.jsx'
 import Card from '../components/ui/Card.jsx'
 import StreakFlame from '../components/StreakFlame.jsx'
 import { rankFeed } from '../lib/feedRanking.js'
+import { fetchPeopleSuggestions } from '../lib/peopleSuggestions.js'
 
 // 'all' is a UI-only sentinel (never stored/queried) — every real entry is
 // a stable DB slug (see categories.js), translated for display via
@@ -632,28 +633,17 @@ function SuggestedPeople() {
   const [people, setPeople] = useState([])
   const [loading, setLoading] = useState(true)
 
-  async function load() {
-    const [{ data: following }, { data: blockedIds }] = await Promise.all([
-      supabase.from('follows').select('following_id').eq('follower_id', user.id),
-      supabase.rpc('blocked_user_ids'),
-    ])
-    const excludeSet = new Set((following || []).map((f) => f.following_id))
-    excludeSet.add(user.id)
-    for (const row of blockedIds || []) excludeSet.add(row.blocked_user_ids ?? row)
-
-    const { data: profiles } = await supabase
-      .from('profiles')
-      .select('id, display_name, username, avatar_url')
-      .order('created_at', { ascending: false })
-      .limit(20)
-
-    setPeople((profiles || []).filter((p) => !excludeSet.has(p.id)).slice(0, 5))
-    setLoading(false)
-  }
-
   useEffect(() => {
-    if (user) load()
-    // eslint-disable-next-line react-hooks/exhaustive-deps
+    if (!user) return
+    let cancelled = false
+    fetchPeopleSuggestions(user.id, { limit: 5 }).then((result) => {
+      if (cancelled) return
+      setPeople(result)
+      setLoading(false)
+    })
+    return () => {
+      cancelled = true
+    }
   }, [user])
 
   async function handleFollow(personId) {
@@ -673,7 +663,7 @@ function SuggestedPeople() {
       <div className="flex items-end justify-between px-5">
         <div>
           <h2 className="font-heading text-lg font-bold tracking-tight">{t('home.suggestedPeople')}</h2>
-          <p className="mt-0.5 text-xs text-muted-foreground">{t('home.newOnGtf')}</p>
+          <p className="mt-0.5 text-xs text-muted-foreground">{t('home.suggestedPeopleSubtitle')}</p>
         </div>
       </div>
       <div className="mt-4 flex gap-3 overflow-x-auto px-5 pb-1">
@@ -684,7 +674,9 @@ function SuggestedPeople() {
                 <img src={person.avatar_url || fallbackAvatarFor(person.id)} alt={person.display_name} className="h-full w-full object-cover" />
               </div>
               <h3 className="mt-3 text-sm font-bold">{person.display_name}</h3>
-              <p className="mt-1 text-[10px] text-muted-foreground">@{person.username}</p>
+              <p className="mt-1 text-[10px] text-muted-foreground">
+                {person.mutualCount > 0 ? t('home.mutualFollowsCount', { count: person.mutualCount }) : t('home.newOnGtf')}
+              </p>
             </button>
             <button
               onClick={() => handleFollow(person.id)}
@@ -813,6 +805,15 @@ export default function Anasayfa() {
         <OpeningTodayBanner />
         <CategoryTabs active={activeCategory} onSelect={setActiveCategory} />
         <StatsBanner />
+        {/* RightRail (AppShell) carries its own "Sana önerilen kişiler" at
+            xl+ — a standing widget beats one more scroll stop, so skip the
+            duplicate there. Placed here rather than after PredictionFeed
+            (its old spot): "kaydırdıktan sonra" — a BIT of scroll, not
+            however long the whole ~15-card feed runs — so it sits right
+            before the feed starts instead of after it ends. */}
+        <div className="xl:hidden">
+          <SuggestedPeople />
+        </div>
         <section className="mt-7">
           <div className="flex items-center justify-between px-5">
             <div>
@@ -822,13 +823,6 @@ export default function Anasayfa() {
           </div>
           <PredictionFeed category={activeCategory} />
         </section>
-        {/* RightRail (AppShell) carries its own "Sana önerilen kişiler" at
-            xl+ — a standing widget beats these buried below a long feed,
-            so skip the duplicate there. FollowedGroups has no rail
-            equivalent yet, stays visible at every width. */}
-        <div className="xl:hidden">
-          <SuggestedPeople />
-        </div>
         <FollowedGroups />
       </main>
     </div>

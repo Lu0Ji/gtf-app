@@ -103,7 +103,9 @@
     "noRecordsBody": "创建你的第一条预测，开启这条动态流吧。",
     "loadingMore": "加载中…",
     "suggestedPeople": "为你推荐的用户",
-    "newOnGtf": "GTF 新用户",
+    "suggestedPeopleSubtitle": "你可能认识的人",
+    "mutualFollowsCount": "{{count}} 个共同关注",
+    "newOnGtf": "最近加入",
     "followAction": "关注",
     "yourGroups": "你的群组",
     "notJoinedYet": "你还没有加入任何群组",
@@ -142,6 +144,7 @@
     "categoryTitle": "分类",
     "customCategoryCta": "其他",
     "customCategoryPlaceholder": "输入分类名称（例如：美食）",
+    "customCategoryAddAria": "添加分类",
     "sensitiveToggleTitle": "标记为敏感内容",
     "sensitiveToggleBody": "将根据每位查看者的显示偏好附带警示标签展示。",
     "unlockTitle": "如何开启？",
@@ -1751,7 +1754,10 @@
     "communityTitle": "不要独自预测",
     "communityDesc": "找到和你兴趣相近的人，在同一个小组里一起积累预测——你们在那里分享的内容只属于彼此之间。",
     "communityNoteTitle": "赢取徽章，不断进步",
-    "communityNoteDesc": "每一个正确的预测、每一个点赞、每一位新关注者都会让你更进一步。"
+    "communityNoteDesc": "每一个正确的预测、每一个点赞、每一位新关注者都会让你更进一步。",
+    "interestsEyebrow": "最后一步",
+    "interestsTitle": "你对什么感兴趣？",
+    "interestsDesc": "我们会根据你选择的内容为你定制信息流和推荐好友，随时可以在设置中修改。"
   },
   "errorBoundary": {
     "title": "出现了一些问题",

@@ -2,6 +2,8 @@ import { useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/AuthContext.jsx'
+import { useUserSettings } from '../hooks/useUserSettings.js'
+import { CATEGORY_META, CATEGORY_SLUGS } from '../lib/categories.js'
 import { IMG } from '../lib/images.js'
 
 // FireVibe-generated illustration set (this session, 2026-09-02) — one per
@@ -21,7 +23,20 @@ export default function IlkKullanimRehberi() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { profile } = useAuth()
+  const { update } = useUserSettings()
   const [step, setStep] = useState(0)
+  // Kullanıcı geri bildirimi: "Tutorialda kişinin ilgi alanlarını da
+  // sorabiliriz ona göre içerikler çıkar ilk kayıttan sonra." Bu yüzden
+  // bilgilendirme slaytlarından sonra gerçek bir son adım olarak eklendi —
+  // ayrı/isteğe bağlı bir ekran değil, "Atla" ile hâlâ tamamen atlanabilir
+  // (bkz. finish()), ama sonuna kadar gidenler settings.content.interests'i
+  // buradan dolduruyor, Ayarlar'a hiç girmeden. Aynı ilgi alanı seçici
+  // burada da (UygulamaAyarlari.jsx) tam kategori kataloğunu + "Diğer" özel
+  // giriş seçeneğini kullanıyor — orada neden 6 kategoriyle sınırlı
+  // kalmaması gerektiği açıklanmıştı, aynı mantık burada da geçerli.
+  const [interests, setInterests] = useState([])
+  const [customCategoryOpen, setCustomCategoryOpen] = useState(false)
+  const [customDraft, setCustomDraft] = useState('')
 
   // Profile hasn't necessarily finished loading the instant this screen
   // mounts (it lands here straight off signUp) — an unnamed greeting reads
@@ -79,8 +94,28 @@ export default function IlkKullanimRehberi() {
     },
   ]
 
+  // One virtual extra step past the last illustrated slide — the interest
+  // picker. TOTAL_STEPS/isInterestsStep drive the header counter, progress
+  // dots, and footer button the same way a real SLIDES entry would, without
+  // forcing the picker's completely different layout into the slide shape.
+  const TOTAL_STEPS = SLIDES.length + 1
+  const isInterestsStep = step === SLIDES.length
   const slide = SLIDES[step]
-  const isLast = step === SLIDES.length - 1
+  const isLast = step === TOTAL_STEPS - 1
+
+  function toggleInterest(value) {
+    setInterests((prev) => {
+      const isSelected = prev.some((v) => v.toLowerCase() === value.toLowerCase())
+      return isSelected ? prev.filter((v) => v.toLowerCase() !== value.toLowerCase()) : [...prev, value]
+    })
+  }
+
+  function submitCustomInterest() {
+    const value = customDraft.trim().slice(0, 24)
+    if (!value) return
+    toggleInterest(value)
+    setCustomDraft('')
+  }
 
   function finish() {
     try {
@@ -88,6 +123,10 @@ export default function IlkKullanimRehberi() {
     } catch {
       // localStorage unavailable — worst case the guide shows again next time.
     }
+    // Only someone who actually reached/used the picker has anything to
+    // save — an early "Atla" from slide 1 shouldn't overwrite whatever's
+    // already in settings.content.interests with an empty array.
+    if (interests.length > 0) update('content', { interests })
     navigate('/', { replace: true })
   }
 
@@ -108,7 +147,7 @@ export default function IlkKullanimRehberi() {
         <div className="flex items-center gap-2">
           <span className="font-heading text-sm font-extrabold tracking-[-0.08em]">GTF</span>
           <span className="h-4 w-px bg-border" />
-          <span className="text-[11px] font-bold text-muted-foreground">{step + 1} / {SLIDES.length}</span>
+          <span className="text-[11px] font-bold text-muted-foreground">{step + 1} / {TOTAL_STEPS}</span>
         </div>
 
         <button onClick={finish} className="min-w-10 text-right text-sm font-bold text-primary">
@@ -118,39 +157,124 @@ export default function IlkKullanimRehberi() {
 
       <main className="relative z-10 flex flex-1 flex-col px-5 pb-44 pt-7">
         <div className="flex items-center gap-2" aria-label={t('onboarding.progressAria')}>
-          {SLIDES.map((_, i) => (
+          {Array.from({ length: TOTAL_STEPS }, (_, i) => (
             <div key={i} className={`h-1.5 flex-1 rounded-full ${i <= step ? 'bg-primary' : 'bg-border'}`} />
           ))}
         </div>
 
-        <section className="relative mt-8 flex min-h-[280px] items-center justify-center overflow-hidden rounded-[28px] border border-border bg-card shadow-sm">
-          <span className="absolute left-4 top-4 rounded-full bg-secondary px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-secondary-foreground">
-            {slide.eyebrow}
-          </span>
-          <img key={slide.hero} src={slide.hero} alt="" className="h-44 w-44 object-contain" />
-          <div className="absolute bottom-4 right-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-border bg-card text-primary shadow-md">
-            <iconify-icon icon={slide.icon} class="text-2xl"></iconify-icon>
-          </div>
-        </section>
+        {isInterestsStep ? (
+          <>
+            <section className="mt-9">
+              <span className="rounded-full bg-secondary px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-secondary-foreground">
+                {t('onboarding.interestsEyebrow')}
+              </span>
+              <h1 className="mt-3 font-heading text-[27px] font-extrabold leading-[1.1] tracking-[-0.055em]">
+                {t('onboarding.interestsTitle')}
+              </h1>
+              <p className="mt-3 max-w-[342px] text-[14px] leading-6 text-muted-foreground">
+                {t('onboarding.interestsDesc')}
+              </p>
+            </section>
 
-        <section className="mt-9">
-          <h1 className="font-heading text-[27px] font-extrabold leading-[1.1] tracking-[-0.055em]">
-            {slide.title}
-          </h1>
-          <p className="mt-3 max-w-[342px] text-[14px] leading-6 text-muted-foreground">{slide.desc}</p>
-        </section>
+            <section className="mt-6">
+              <div className="flex flex-wrap gap-2">
+                {CATEGORY_SLUGS.map((slug) => {
+                  const selected = interests.some((v) => v.toLowerCase() === slug)
+                  return (
+                    <button
+                      key={slug}
+                      onClick={() => toggleInterest(slug)}
+                      className={`flex items-center gap-1.5 rounded-full px-4 py-2.5 text-xs font-bold ${
+                        selected
+                          ? 'bg-primary text-primary-foreground'
+                          : 'border border-border bg-card text-card-foreground'
+                      }`}
+                    >
+                      <iconify-icon icon={CATEGORY_META[slug].icon} class="text-sm"></iconify-icon>
+                      {t(CATEGORY_META[slug].labelKey)}
+                    </button>
+                  )
+                })}
+                {interests
+                  .filter((v) => !CATEGORY_SLUGS.includes(v.toLowerCase()))
+                  .map((value) => (
+                    <button
+                      key={value}
+                      onClick={() => toggleInterest(value)}
+                      className="flex items-center gap-1.5 rounded-full bg-primary px-4 py-2.5 text-xs font-bold text-primary-foreground"
+                    >
+                      {value}
+                      <iconify-icon icon="lucide:x" class="text-xs"></iconify-icon>
+                    </button>
+                  ))}
+                <button
+                  onClick={() => setCustomCategoryOpen((prev) => !prev)}
+                  className={`flex items-center gap-1 rounded-full px-4 py-2.5 text-xs font-bold ${
+                    customCategoryOpen
+                      ? 'bg-primary text-primary-foreground'
+                      : 'border border-dashed border-border bg-card text-muted-foreground'
+                  }`}
+                >
+                  <iconify-icon icon="lucide:plus" class="text-sm"></iconify-icon>
+                  {t('createPrediction.customCategoryCta')}
+                </button>
+              </div>
+              {customCategoryOpen && (
+                <div className="mt-2.5 flex gap-2">
+                  <input
+                    autoFocus
+                    value={customDraft}
+                    onChange={(e) => setCustomDraft(e.target.value.slice(0, 24))}
+                    onKeyDown={(e) => {
+                      if (e.key === 'Enter') submitCustomInterest()
+                    }}
+                    placeholder={t('createPrediction.customCategoryPlaceholder')}
+                    maxLength={24}
+                    className="h-11 flex-1 rounded-theme border border-border bg-input px-3.5 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+                  />
+                  <button
+                    onClick={submitCustomInterest}
+                    aria-label={t('createPrediction.customCategoryAddAria')}
+                    className="flex h-11 w-11 shrink-0 items-center justify-center rounded-theme bg-primary text-primary-foreground"
+                  >
+                    <iconify-icon icon="lucide:plus" class="text-lg"></iconify-icon>
+                  </button>
+                </div>
+              )}
+            </section>
+          </>
+        ) : (
+          <>
+            <section className="relative mt-8 flex min-h-[280px] items-center justify-center overflow-hidden rounded-[28px] border border-border bg-card shadow-sm">
+              <span className="absolute left-4 top-4 rounded-full bg-secondary px-3 py-1.5 text-[10px] font-bold uppercase tracking-[0.1em] text-secondary-foreground">
+                {slide.eyebrow}
+              </span>
+              <img key={slide.hero} src={slide.hero} alt="" className="h-44 w-44 object-contain" />
+              <div className="absolute bottom-4 right-4 flex h-12 w-12 items-center justify-center rounded-2xl border border-border bg-card text-primary shadow-md">
+                <iconify-icon icon={slide.icon} class="text-2xl"></iconify-icon>
+              </div>
+            </section>
 
-        <section className="mt-7 rounded-theme border border-border bg-card p-4">
-          <div className="flex items-start gap-3">
-            <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-muted text-primary">
-              <iconify-icon icon={slide.note.icon} class="text-base"></iconify-icon>
-            </div>
-            <div>
-              <p className="text-xs font-bold text-foreground">{slide.note.title}</p>
-              <p className="mt-1 text-[11px] leading-4 text-muted-foreground">{slide.note.desc}</p>
-            </div>
-          </div>
-        </section>
+            <section className="mt-9">
+              <h1 className="font-heading text-[27px] font-extrabold leading-[1.1] tracking-[-0.055em]">
+                {slide.title}
+              </h1>
+              <p className="mt-3 max-w-[342px] text-[14px] leading-6 text-muted-foreground">{slide.desc}</p>
+            </section>
+
+            <section className="mt-7 rounded-theme border border-border bg-card p-4">
+              <div className="flex items-start gap-3">
+                <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-xl bg-muted text-primary">
+                  <iconify-icon icon={slide.note.icon} class="text-base"></iconify-icon>
+                </div>
+                <div>
+                  <p className="text-xs font-bold text-foreground">{slide.note.title}</p>
+                  <p className="mt-1 text-[11px] leading-4 text-muted-foreground">{slide.note.desc}</p>
+                </div>
+              </div>
+            </section>
+          </>
+        )}
       </main>
 
       <footer className="fixed inset-x-0 bottom-0 z-20 border-t border-border bg-background/95 px-5 pb-7 pt-4 backdrop-blur-md">

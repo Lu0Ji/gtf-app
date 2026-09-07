@@ -27,12 +27,6 @@ const FONT_SCALE_OPTIONS = [
   { value: 125, labelKey: 'appSettings.fontScaleExtraLarge' },
 ]
 
-// Curated subset (not the full CATEGORY_SLUGS list) — matches the six
-// real_world_events kinds actually live so far (see Kesfet.jsx's ranking
-// comment). Stored as stable slugs in settings.content.interests, not
-// display labels, same labelKey pattern as CATEGORY_META elsewhere.
-const INTEREST_SLUGS = CATEGORY_SLUGS.slice(0, 6)
-
 function Toggle({ on }) {
   return (
     <span
@@ -142,8 +136,24 @@ function PickerSheet({ title, options, value, onSelect, onClose }) {
 // options entries can be a plain string (rendered as-is) or a
 // { value, label } pair (for slug-backed pickers like interests, where the
 // stored value must stay a stable slug but the shown text is translated).
-function TagPickerSheet({ title, subtitle, options, values, onToggle, onClose }) {
+// allowCustom (interests only, so far) adds a free-text "+ ekle" row below
+// the grid, same escape hatch TahminOlustur/Gruplar already give category
+// pickers — a value already in `values` but not in `options` (something an
+// earlier custom entry added) renders as its own removable chip so it
+// doesn't just silently vanish from view.
+function TagPickerSheet({ title, subtitle, options, values, onToggle, onClose, allowCustom = false }) {
   const { t } = useTranslation()
+  const [customDraft, setCustomDraft] = useState('')
+  const optionValueSet = new Set(options.map((opt) => (typeof opt === 'string' ? opt : opt.value).toLowerCase()))
+  const customValues = values.filter((v) => !optionValueSet.has(v.toLowerCase()))
+
+  function submitCustom() {
+    const value = customDraft.trim().slice(0, 24)
+    if (!value) return
+    onToggle(value)
+    setCustomDraft('')
+  }
+
   return (
     <div className="fixed inset-0 z-50 flex items-end bg-black/40" onClick={onClose}>
       <div onClick={(e) => e.stopPropagation()} className="w-full rounded-t-theme bg-background p-5 pb-8">
@@ -171,7 +181,38 @@ function TagPickerSheet({ title, subtitle, options, values, onToggle, onClose })
               </button>
             )
           })}
+          {customValues.map((value) => (
+            <button
+              key={value}
+              onClick={() => onToggle(value)}
+              className="flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-xs font-bold text-primary-foreground"
+            >
+              {value}
+              <iconify-icon icon="lucide:x" class="text-[11px]"></iconify-icon>
+            </button>
+          ))}
         </div>
+        {allowCustom && (
+          <div className="mt-3 flex gap-2">
+            <input
+              value={customDraft}
+              onChange={(e) => setCustomDraft(e.target.value.slice(0, 24))}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') submitCustom()
+              }}
+              placeholder={t('createPrediction.customCategoryPlaceholder')}
+              maxLength={24}
+              className="h-11 flex-1 rounded-theme border border-border bg-input px-3.5 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+            />
+            <button
+              onClick={submitCustom}
+              aria-label={t('createPrediction.customCategoryAddAria')}
+              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-theme bg-primary text-primary-foreground"
+            >
+              <iconify-icon icon="lucide:plus" class="text-lg"></iconify-icon>
+            </button>
+          </div>
+        )}
       </div>
     </div>
   )
@@ -842,13 +883,24 @@ export default function UygulamaAyarlari() {
           />
         )}
         {openPicker === 'interests' && (
+          // 2026-09-07: used to be a curated 6-slug subset ("matches the six
+          // real_world_events kinds live so far") — but feedRanking.js's
+          // interestBoost already matched against any prediction category,
+          // not just those six, and the gündem feed itself grew from 5 to 9
+          // categories since (fetch-news-headlines/index.ts). The cap was
+          // just stopping people from marking siyaset/kripto/oyun etc as an
+          // interest despite everything downstream already supporting it —
+          // now the full catalog, plus allowCustom for anything not listed
+          // (interests is a plain string array, no CHECK ties it to
+          // CATEGORY_SLUGS, same as predictions.category already allows).
           <TagPickerSheet
             title={t('appSettings.interestsTitle')}
             subtitle={t('appSettings.interestsPickerSubtitle')}
-            options={INTEREST_SLUGS.map((slug) => ({ value: slug, label: t(CATEGORY_META[slug].labelKey) }))}
+            options={CATEGORY_SLUGS.map((slug) => ({ value: slug, label: t(CATEGORY_META[slug].labelKey) }))}
             values={settings.content.interests}
             onToggle={toggleInterest}
             onClose={() => setOpenPicker(null)}
+            allowCustom
           />
         )}
         {openPicker === 'mutedWords' && (

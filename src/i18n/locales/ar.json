@@ -108,7 +108,9 @@
     "noRecordsBody": "ابدأ التدفق بإنشاء أول توقع لك.",
     "loadingMore": "جارٍ التحميل…",
     "suggestedPeople": "أشخاص مقترحون لك",
-    "newOnGtf": "منضمّون جدد إلى GTF",
+    "suggestedPeopleSubtitle": "أشخاص قد تعرفهم",
+    "mutualFollowsCount": "{{count}} متابعة مشتركة",
+    "newOnGtf": "انضم مؤخرًا",
     "followAction": "متابعة",
     "yourGroups": "مجموعاتك",
     "notJoinedYet": "لم تنضم إلى أي مجموعة بعد",
@@ -147,6 +149,7 @@
     "categoryTitle": "الفئة",
     "customCategoryCta": "أخرى",
     "customCategoryPlaceholder": "اكتب اسم فئة (مثلاً: طعام)",
+    "customCategoryAddAria": "إضافة فئة",
     "sensitiveToggleTitle": "وضع علامة كمحتوى حساس",
     "sensitiveToggleBody": "يُعرض مع تسمية تحذير حسب تفضيل العرض لكل مشاهد.",
     "unlockTitle": "كيف سيتم فتحه؟",
@@ -1756,7 +1759,10 @@
     "communityTitle": "لا تتوقع وحدك",
     "communityDesc": "ابحث عن أشخاص قريبين من اهتماماتك، واجمعوا التوقعات معًا في نفس المجموعة — ما تشاركونه هناك يبقى بينكم فقط.",
     "communityNoteTitle": "اكسب الشارات وتقدّم",
-    "communityNoteDesc": "كل توقع صحيح، وكل إعجاب، وكل متابع جديد يقربك خطوة إلى الأمام."
+    "communityNoteDesc": "كل توقع صحيح، وكل إعجاب، وكل متابع جديد يقربك خطوة إلى الأمام.",
+    "interestsEyebrow": "خطوة أخيرة",
+    "interestsTitle": "بماذا تهتم؟",
+    "interestsDesc": "سنخصص لك المحتوى والأشخاص الذين نقترحهم بناءً على اختيارك. يمكنك تغيير هذا في أي وقت من الإعدادات."
   },
   "errorBoundary": {
     "title": "حدث خطأ ما",
