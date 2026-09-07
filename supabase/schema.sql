@@ -2291,3 +2291,38 @@ begin
 end;
 $$ language plpgsql;
 -- ─────────────────────────────────────────────────────────────────────────
+
+-- ADMIN PANEL: platformdaki toplam kullanıcı sayısı, anlık online, tahmin
+-- itirazları gibi metrikleri yalnızca uygulamanın sahibinin görebileceği
+-- bir panel (src/screens/AdminPanel.jsx). Bilinçli olarak global bir bayrak
+-- — group_members.role='admin' ile karışmasın, o yalnızca TEK bir grubun
+-- içinde geçerli, bu ise tüm platform için.
+alter table public.profiles add column is_admin boolean not null default false;
+
+-- İlk (ve şu an tek) platform admin'i — protect_profile_integrity is_admin'i
+-- kilitlemeden ÖNCE çalışmalı, yoksa bu UPDATE'in kendisi de birazdan
+-- eklenecek tetikleyici tarafından reddedilir (aşağıdaki create or replace
+-- attığı anda o tetikleyici zaten devrede olur).
+update public.profiles set is_admin = true
+where id = (select id from auth.users where email = 'aliyusufbusiness1@gmail.com');
+
+-- Var olan "Users can update own profile" politikası (using (auth.uid() =
+-- id), with check yok) herkese kendi satırının HER sütununu güncelleme
+-- izni veriyordu — is_admin eklenince bu, herkesin kendini admin
+-- yapabilmesi anlamına gelirdi. protect_profile_integrity zaten
+-- id/created_at'i koruyordu; is_admin'i de aynı şekilde koruyacak şekilde
+-- genişletildi — artık bu sütun hiçbir normal profil güncellemesiyle
+-- (adminin kendisininki dahil) değiştirilemez, yalnızca doğrudan SQL ile.
+create or replace function public.protect_profile_integrity()
+returns trigger as $$
+begin
+  if old.id is distinct from new.id or old.created_at is distinct from new.created_at then
+    raise exception 'Bu alanlar değiştirilemez.';
+  end if;
+  if old.is_admin is distinct from new.is_admin then
+    raise exception 'is_admin bu şekilde değiştirilemez.';
+  end if;
+  return new;
+end;
+$$ language plpgsql;
+-- ─────────────────────────────────────────────────────────────────────────

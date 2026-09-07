@@ -51,6 +51,7 @@ const YardimMerkezi = lazy(() => import('./screens/YardimMerkezi.jsx'))
 const TopluluKurallari = lazy(() => import('./screens/TopluluKurallari.jsx'))
 const IlkKullanimRehberi = lazy(() => import('./screens/IlkKullanimRehberi.jsx'))
 const YeniSifreBelirle = lazy(() => import('./screens/YeniSifreBelirle.jsx'))
+const AdminPanel = lazy(() => import('./screens/AdminPanel.jsx'))
 
 function ScreenFallback() {
   return (
@@ -132,6 +133,7 @@ export default function App() {
                             <Route path="/begeniler" element={<Begeniler />} />
                             <Route path="/ayarlar/yardim-merkezi" element={<YardimMerkezi />} />
                             <Route path="/ayarlar/topluluk-kurallari" element={<TopluluKurallari />} />
+                            <Route path="/admin" element={<AdminPanel />} />
                           </Route>
                         </Route>
 

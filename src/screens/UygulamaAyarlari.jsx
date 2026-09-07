@@ -555,6 +555,21 @@ export default function UygulamaAyarlari() {
           </button>
         </section>
 
+        {profile?.is_admin && (
+          <section className="mt-8">
+            <SectionHeader icon="lucide:layout-dashboard" title={t('appSettings.adminSectionTitle')} subtitle={t('appSettings.adminSectionSubtitle')} />
+            <div className="overflow-hidden rounded-theme border border-border bg-card shadow-sm">
+              <Row
+                icon="lucide:layout-dashboard"
+                title={t('appSettings.adminPanelTitle')}
+                subtitle={t('appSettings.adminPanelSubtitle')}
+                onClick={() => navigate('/admin')}
+                right={<iconify-icon icon="lucide:chevron-right" class="text-lg text-muted-foreground"></iconify-icon>}
+              />
+            </div>
+          </section>
+        )}
+
         <section className="mt-8">
           <SectionHeader icon="lucide:shield-check" title={t('appSettings.accountSecurityTitle')} subtitle={t('appSettings.accountSecuritySubtitle')} />
           <RowList rows={accountRows} />
