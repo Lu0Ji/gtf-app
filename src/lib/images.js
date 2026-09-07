@@ -2,42 +2,50 @@
 export const IMG = (id) =>
   `https://fwtngjyirchhhysukjxi.supabase.co/storage/v1/object/public/project-images/9fceca91-95c2-49a9-805b-297fd498bdfb/${id}.png`
 
-// Fallback avatar pool: every screen used to fall back to a single fixed
-// DEFAULT_AVATAR photo, so any two profiles without their own avatar_url
-// showed up as the exact same face — a feed of "different" people that all
-// look identical reads as fake/empty rather than like an active community.
-// FireVibe's design had ~20 distinct portrait photos generated for exactly
-// this kind of variety, but only 2 were ever wired in; the rest were never
-// checked before this pass — downloaded and inspected every one, and half
-// turned out to be broken (a person's photo boxed in by an unrelated tiled
-// collage of robot illustrations, a recurring artifact of this project's
-// image generation). Only the ones that render as one coherent photo are
-// listed here.
-const AVATAR_POOL_IDS = [
-  'fc4eb4df-87ce-4cd9-bdd3-80a434cd8ddd',
-  'a97f3f05-c665-4b5c-94c7-c83149118bc9',
-  '2ebd8673-cdb6-436f-8c55-6f6cb7489059',
-  '86e36643-3023-4f68-ba1c-4d2addba5617',
-  '3494e856-c763-439f-b959-54faed7982c2',
-  'd0ba0d80-c26c-40af-bdd9-875561dc4ae5',
-  '373eb324-cbb6-4578-b81a-266c3459b694',
-  'f344a36f-c08a-43ed-9fdd-515f4a0dd025',
-  'eb6705b4-d387-49ff-8ebc-1f69976d9a8e',
-  '37ea8988-d2bb-4bc4-8a11-d69241776152',
-  '019082da-d2f3-4096-8312-568469ae8714',
-  'd017d967-cf31-4c33-bd50-b42767685f5c',
+// 2026-09-07: the fallback used to be one of ~12 FireVibe-generated
+// portrait *photos* of real-looking (but fake) faces, picked deterministically
+// by hashing the profile id — flagged during a beta pass as a real bug, not
+// cosmetic: a brand-new user who never uploaded anything got handed what
+// looks like an actual photo of a stranger, which reads as deceptive
+// ("is this a real person's picture?") rather than as an obvious
+// placeholder. Replaced with a generated identicon-style mark instead — a
+// solid color (from the app's own real theme palette, not an invented one)
+// plus a simple keyhole glyph, the same shape this app's own icon uses
+// (see public/favicon.svg) so an unset avatar reads as "this app's mark",
+// never as a face. Self-contained SVG data URI: no network request, no
+// external avatar service dependency, works offline, same instant
+// determinism as before (same id -> same color, every render).
+const AVATAR_COLORS = [
+  '#356a8a', // primary
+  '#183b5b', // chart1
+  '#167c80', // chart2
+  '#a76522', // chart3
+  '#6b5a97', // chart4
+  '#9d3b51', // chart5
+  '#267050', // success
+  '#6f9fba', // accent
 ]
 
-// Deterministic, not random: the same profile always gets the same
-// fallback avatar across renders/reloads instead of flickering between
-// different faces. `key` should be the profile's id (or any other stable,
-// reasonably-unique string — username works too); undefined/empty just
-// lands on the first pool entry rather than throwing.
-export function fallbackAvatarFor(key) {
-  const str = key || ''
+function hashString(str) {
   let hash = 0
   for (let i = 0; i < str.length; i++) {
     hash = (hash * 31 + str.charCodeAt(i)) >>> 0
   }
-  return IMG(AVATAR_POOL_IDS[hash % AVATAR_POOL_IDS.length])
+  return hash
+}
+
+// Same keyhole silhouette as the app icon, scaled into a 100x100 viewBox.
+function avatarSvg(color) {
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="${color}"/><circle cx="50" cy="40" r="13" fill="#fff" fill-opacity="0.92"/><path d="M38 49 L62 49 L53 82 L47 82 Z" fill="#fff" fill-opacity="0.92"/></svg>`
+}
+
+// Deterministic, not random: the same profile always gets the same
+// fallback avatar across renders/reloads instead of flickering between
+// different marks. `key` should be the profile's id (or any other stable,
+// reasonably-unique string — username works too); undefined/empty just
+// lands on the first palette entry rather than throwing.
+export function fallbackAvatarFor(key) {
+  const hash = hashString(key || '')
+  const color = AVATAR_COLORS[hash % AVATAR_COLORS.length]
+  return `data:image/svg+xml,${encodeURIComponent(avatarSvg(color))}`
 }
