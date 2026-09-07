@@ -20,15 +20,25 @@ const TYPING_TIMEOUT_MS = 3000
 // online (PresenceContext, already shared app-wide) get a strip of avatars
 // up top so people can see who's actually here to talk right now, not just
 // who's a member on paper.
-export default function GrupSohbeti() {
+//
+// Two variants (2026-09, per beta feedback on the old header icon button):
+// 'page' (default) is the original full-screen mobile route, reading
+// groupId/groupName from location.state like before. 'drawer' is rendered
+// directly by GroupChatFab.jsx with groupId/groupName/onClose as props
+// (desktop's in-place quarter-screen panel — "basınca başka sayfaya
+// gitmesin... çeyreği kadar açılıp görünsün") — no route involved, so it
+// never reads location.state and closes via onClose() instead of
+// navigate(-1).
+export default function GrupSohbeti({ groupId: groupIdProp, groupName: groupNameProp, variant = 'page', onClose }) {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const { user } = useAuth()
   const { showToast } = useToast()
   const onlineIds = useOnlineUsers()
-  const groupId = location.state?.groupId
-  const groupName = location.state?.groupName || t('chat.defaultGroupName')
+  const isDrawer = variant === 'drawer'
+  const groupId = isDrawer ? groupIdProp : location.state?.groupId
+  const groupName = (isDrawer ? groupNameProp : location.state?.groupName) || t('chat.defaultGroupName')
 
   const [members, setMembers] = useState([])
   const [messages, setMessages] = useState([])
@@ -47,10 +57,14 @@ export default function GrupSohbeti() {
   const typingTimeoutsRef = useRef({})
 
   useEffect(() => {
+    // Drawer's groupId comes straight from a prop the parent already
+    // guarantees (GroupChatFab renders nothing without one) — no route to
+    // bounce away from, and no /gruplar to send a floating panel to.
+    if (isDrawer) return
     if (!groupId) {
       navigate('/gruplar', { replace: true })
     }
-  }, [groupId, navigate])
+  }, [groupId, navigate, isDrawer])
 
   useEffect(() => {
     if (!groupId) return
@@ -60,6 +74,21 @@ export default function GrupSohbeti() {
       .eq('group_id', groupId)
       .then(({ data }) => setMembers((data || []).map((m) => m.profiles).filter(Boolean)))
   }, [groupId])
+
+  // Fire-and-forget: stamps this member's group_members.last_read_at to
+  // now, which is what GroupChatFab's unread badge compares new messages
+  // against. Needs the 2026-09 migration (supabase/schema.sql) — a 42703
+  // on an undeployed DB just means the badge stays untracked, not that the
+  // chat itself should break, so any error here is silently swallowed.
+  function markRead() {
+    if (!user || !groupId) return
+    supabase
+      .from('group_members')
+      .update({ last_read_at: new Date().toISOString() })
+      .eq('group_id', groupId)
+      .eq('user_id', user.id)
+      .then(() => {})
+  }
 
   useEffect(() => {
     if (!user || !groupId) return
@@ -90,6 +119,7 @@ export default function GrupSohbeti() {
       if (!cancelled) {
         if (!error) setMessages(data || [])
         setLoading(false)
+        markRead()
       }
     }
     load()
@@ -112,6 +142,9 @@ export default function GrupSohbeti() {
           // copy would double it up on the realtime echo.
           if (payload.new.sender_id === user.id) return
           setMessages((prev) => [...prev, payload.new])
+          // The thread is open right now, so this message never counts as
+          // unread for GroupChatFab's badge even though it just arrived.
+          markRead()
         }
       )
       .on('broadcast', { event: 'typing' }, ({ payload }) => {
@@ -185,6 +218,8 @@ export default function GrupSohbeti() {
 
   if (!groupId) return null
 
+  const handleClose = isDrawer ? onClose : () => navigate(-1)
+
   const retentionNoticeKey =
     retentionMinutes === 60
       ? 'chat.retentionNoticeHour'
@@ -205,16 +240,16 @@ export default function GrupSohbeti() {
           : t('chat.typingMany', { count: typingNames.length })
 
   return (
-    <div className="min-h-screen w-full bg-background text-foreground font-body">
-      <div className="relative flex min-h-screen flex-col overflow-hidden">
-        <header className="sticky top-0 z-20 border-b border-border bg-background/95 px-5 pb-4 pt-12 backdrop-blur-md">
+    <div className={isDrawer ? 'flex h-full w-full flex-col bg-background text-foreground font-body' : 'min-h-screen w-full bg-background text-foreground font-body'}>
+      <div className={isDrawer ? 'relative flex min-h-0 flex-1 flex-col overflow-hidden' : 'relative flex min-h-screen flex-col overflow-hidden'}>
+        <header className={`sticky top-0 z-20 border-b border-border bg-background/95 px-5 pb-4 backdrop-blur-md ${isDrawer ? 'pt-4' : 'pt-12'}`}>
           <div className="flex items-center justify-between">
             <button
-              aria-label={t('common.backAria')}
-              onClick={() => navigate(-1)}
+              aria-label={isDrawer ? t('common.close') : t('common.backAria')}
+              onClick={handleClose}
               className="flex h-10 w-10 items-center justify-center rounded-theme bg-secondary text-secondary-foreground"
             >
-              <iconify-icon icon="lucide:arrow-left" class="text-xl"></iconify-icon>
+              <iconify-icon icon={isDrawer ? 'lucide:x' : 'lucide:arrow-left'} class="text-xl"></iconify-icon>
             </button>
             <div className="min-w-0 flex-1 px-3 text-center">
               <p className="truncate font-heading text-sm font-extrabold tracking-tight">{groupName}</p>
@@ -259,7 +294,7 @@ export default function GrupSohbeti() {
           </p>
         )}
 
-        <main className="flex-1 px-5 pb-36 pt-6">
+        <main className={isDrawer ? 'min-h-0 flex-1 overflow-y-auto px-4 pb-4 pt-4' : 'flex-1 px-5 pb-36 pt-6'}>
           {loading ? (
             <p className="text-center text-xs text-muted-foreground">{t('common.loading')}</p>
           ) : messages.length === 0 ? (
@@ -340,8 +375,14 @@ export default function GrupSohbeti() {
           )}
         </main>
 
-        <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-background/95 px-4 pb-5 pt-3 backdrop-blur-md">
-          <div className="mx-auto flex max-w-[393px] items-end gap-2">
+        <div
+          className={
+            isDrawer
+              ? 'shrink-0 border-t border-border bg-background/95 px-3 pb-3 pt-3'
+              : 'fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-background/95 px-4 pb-5 pt-3 backdrop-blur-md'
+          }
+        >
+          <div className={isDrawer ? 'flex items-end gap-2' : 'mx-auto flex max-w-[393px] items-end gap-2'}>
             <div className="flex h-12 min-w-0 flex-1 items-center rounded-theme border border-border bg-input px-4 shadow-sm">
               <input
                 value={draft}

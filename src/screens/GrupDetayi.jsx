@@ -9,6 +9,7 @@ import { useOnlineUsers } from '../contexts/PresenceContext.jsx'
 import { formatDateLong, formatTimeUntil, sealLabel, timeAgo } from '../lib/format.js'
 import { CATEGORY_META, GROUP_CATEGORY_SLUGS } from '../lib/categories.js'
 import DifficultyChip from '../components/DifficultyChip.jsx'
+import GroupChatFab from '../components/GroupChatFab.jsx'
 
 
 // Fixed set an admin can pick from — null means "no limit" (today's
@@ -320,15 +321,6 @@ export default function GrupDetayi() {
           <iconify-icon icon="lucide:arrow-left" class="text-[19px]"></iconify-icon>
         </button>
         <div className="flex items-center gap-2">
-          {isMember && (
-            <button
-              aria-label={t('groups.chatAria')}
-              onClick={() => navigate('/grup-sohbeti', { state: { groupId: group.id, groupName: group.name } })}
-              className="flex h-10 w-10 items-center justify-center rounded-theme border border-border bg-card/90 text-foreground shadow-sm backdrop-blur-sm"
-            >
-              <iconify-icon icon="lucide:message-circle" class="text-[17px]"></iconify-icon>
-            </button>
-          )}
           {isAdmin && (
             <button
               aria-label={t('groups.editTitle')}
@@ -582,6 +574,8 @@ export default function GrupDetayi() {
           }}
         />
       )}
+
+      {isMember && <GroupChatFab groupId={group.id} groupName={group.name} />}
     </div>
   )
 }

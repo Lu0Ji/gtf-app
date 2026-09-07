@@ -2248,3 +2248,46 @@ $$ language plpgsql;
 alter table public.profiles drop column points;
 alter table public.predictions drop column stake_points;
 -- ─────────────────────────────────────────────────────────────────────────
+
+-- GRUP SOHBETİ: OKUNMAMIŞ SAYACI ────────────────────────────────────────
+-- Beta geri bildirimi: sohbet butonu artık her grup ekranında sağ altta
+-- sabit bir buton (bkz. GroupChatFab.jsx) ve "insanlar mesaj attıkça
+-- kırmızı sayı bildirimi" istendi — bunun için group_members'ta hiç
+-- okuma takibi yoktu (yalnızca 1:1 messages.read_at vardı). not null
+-- default now() burada bilinçli bir seçim: var olan satırlar bu migrasyon
+-- anında "okunmuş" sayılır (aniden herkese eski mesajlar için kırmızı
+-- rozet çıkmaz), yeni bir üyelik satırı da her zaman "şu an" ile başlar
+-- (katılan biri katılmadan önceki mesajlar için "okunmamış" görmemeli).
+alter table public.group_members add column last_read_at timestamptz not null default now();
+
+-- Var olan "Admins can change member roles" politikası yalnızca
+-- yöneticilere güncelleme izni veriyor — sıradan bir üye kendi
+-- last_read_at'ini işaretleyemiyordu. Bu yeni politika herkese kendi
+-- satırını güncelleme izni açıyor; group_id/user_id zaten
+-- protect_group_membership_identity tetikleyicisiyle korunuyordu, ama
+-- role bu ana kadar yalnızca RLS'in (yöneticiyseniz) izin vermesiyle
+-- korunuyordu — bu yeni politika role'ü de dolaylı olarak açığa
+-- çıkarabilirdi, o yüzden aynı tetikleyici aşağıda role'ü de kontrol
+-- edecek şekilde genişletildi (bir üye kendini yönetici yapamaz).
+create policy "Users can mark their own membership read" on public.group_members for update
+  using (auth.uid() = user_id)
+  with check (auth.uid() = user_id);
+
+create or replace function public.protect_group_membership_identity()
+returns trigger as $$
+begin
+  if old.group_id is distinct from new.group_id or old.user_id is distinct from new.user_id then
+    raise exception 'Bir üyeliğin grubu veya kullanıcısı değiştirilemez, sadece rolü.';
+  end if;
+  if old.role is distinct from new.role and not exists (
+    select 1 from public.group_members admin_check
+    where admin_check.group_id = new.group_id
+      and admin_check.user_id = auth.uid()
+      and admin_check.role = 'admin'
+  ) then
+    raise exception 'Sadece grup yöneticileri rol değiştirebilir.';
+  end if;
+  return new;
+end;
+$$ language plpgsql;
+-- ─────────────────────────────────────────────────────────────────────────
