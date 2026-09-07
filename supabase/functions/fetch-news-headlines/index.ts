@@ -12,12 +12,25 @@ const STALE_AFTER_MINUTES = 20;
 const ITEMS_PER_FEED = 8;
 
 // Hürriyet's URL slug -> this app's own category key (lib/categories.js).
+// 2026-09-07: expanded from 5 to 9 — a beta pass flagged the gündem feed
+// as too thin ("dünya ve spor... fazlalaştırmamız lazım"). Every candidate
+// slug below was hit directly first (curl, not guessed from memory) to
+// confirm it's a real feed and not Hürriyet's generic redirect-to-
+// "son-dakika-haberleri" fallback that a dead slug 301s to (kultur-sanat,
+// saglik, otomobil, bilim-teknoloji, gastro, kripto, bilim all do this —
+// tried, none are real feeds, left out on purpose). "kelebek" (lifestyle)
+// and "astroloji" (horoscope) are real feeds too but don't map cleanly to
+// any category here, so skipped rather than force-fit.
 const FEEDS: Record<string, string> = {
   ekonomi: "ekonomi",
   dunya: "dünya",
   teknoloji: "teknoloji",
   spor: "spor",
   siyaset: "siyaset",
+  magazin: "eğlence",
+  seyahat: "seyahat",
+  egitim: "eğitim",
+  oyun: "oyun",
 };
 
 export default {
