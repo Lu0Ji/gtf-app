@@ -22,18 +22,26 @@
     justify-content: center;
     box-shadow: 0 20px 60px rgba(23, 43, 58, 0.18);
   }
-  #mark {
-    font-family: Arial, Helvetica, sans-serif;
-    font-weight: 800;
-    font-size: 150px;
-    line-height: 1;
-    letter-spacing: -6px;
-    color: #ffffff;
-    transform: translateY(-9px);
-  }
 </style>
 </head>
 <body>
-<div id="canvas"><div id="badge"><span id="mark">GTF</span></div></div>
+<div id="canvas"><div id="badge">
+  <svg width="300" height="300" viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg">
+    <defs>
+      <radialGradient id="ball" cx="35%" cy="28%" r="78%">
+        <stop offset="0%" stop-color="#eaf5fb"/>
+        <stop offset="35%" stop-color="#9fd0e6"/>
+        <stop offset="70%" stop-color="#4a86a8"/>
+        <stop offset="100%" stop-color="#1d3f54"/>
+      </radialGradient>
+    </defs>
+    <circle cx="100" cy="98" r="74" fill="url(#ball)"/>
+    <circle cx="100" cy="98" r="74" fill="none" stroke="#ffffff" stroke-opacity="0.25" stroke-width="2"/>
+    <path d="M48 100 Q75 78 100 100 T152 100" stroke="#ffffff" stroke-opacity="0.4" stroke-width="7" fill="none" stroke-linecap="round"/>
+    <path d="M56 122 Q82 108 106 123 T146 116" stroke="#ffffff" stroke-opacity="0.22" stroke-width="5" fill="none" stroke-linecap="round"/>
+    <ellipse cx="72" cy="64" rx="21" ry="13" fill="#ffffff" fill-opacity="0.55" transform="rotate(-30 72 64)"/>
+    <path d="M166 40 L170 53 L183 57 L170 61 L166 74 L162 61 L149 57 L162 53 Z" fill="#ffffff" fill-opacity="0.9"/>
+  </svg>
+</div></div>
 </body>
 </html>
