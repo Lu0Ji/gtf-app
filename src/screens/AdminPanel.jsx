@@ -11,10 +11,12 @@ import DetailHeader from '../components/ui/DetailHeader.jsx'
 
 // Kullanıcı geri bildirimi: "admin paneli de lazım şimdi kaç kişi
 // kullanıyor anlık online kaç kişi, şikayet, istek falan var mı gibi bir
-// şeyler." Şikayet/istek tarafı şu an tek gerçek veri kaynağı
-// prediction_disputes (bir tahminin doğrulama sonucuna itiraz) — genel bir
-// "raporla" veya geri bildirim gönderme mekanizması henüz yok, o yüzden
-// burada yalnızca gerçekten var olan veri gösteriliyor.
+// şeyler." İki gerçek şikayet kaynağı var: prediction_disputes (bir
+// tahminin doğrulama sonucuna itiraz) ve user_reports (kullanıcı taklit/
+// taciz/spam bildirimi — bkz. docs/designs/verified-badge-strategy.md,
+// Approach A). user_reports SADECE görünürlük sağlıyor; hesap askıya
+// alma gibi bir yaptırım mekanizması şemada yok, "işlem yapıldı" durumu
+// bunu garanti etmiyor.
 //
 // Erişim: profiles.is_admin (yeni, global — group_members.role='admin' ile
 // karıştırılmasın, o sadece bir grubun içinde geçerli). Bu bayrak normal
@@ -29,6 +31,8 @@ export default function AdminPanel() {
   const onlineIds = useOnlineUsers()
   const [stats, setStats] = useState(null)
   const [disputes, setDisputes] = useState([])
+  const [reports, setReports] = useState([])
+  const [reportBusyId, setReportBusyId] = useState(null)
   const [loading, setLoading] = useState(true)
 
   useEffect(() => {
@@ -49,6 +53,7 @@ export default function AdminPanel() {
         totalGroupsRes,
         recentSignupsRes,
         disputesRes,
+        reportsRes,
       ] = await Promise.all([
         supabase.from('profiles').select('*', { count: 'exact', head: true }),
         supabase.from('profiles').select('*', { count: 'exact', head: true }).gte('created_at', todayStart.toISOString()),
@@ -60,6 +65,13 @@ export default function AdminPanel() {
         supabase
           .from('prediction_disputes')
           .select('prediction_id, user_id, created_at, disputer:user_id(display_name, username, avatar_url), prediction:prediction_id(id, title, status, category, event_date, author:author_id(display_name, username))')
+          .order('created_at', { ascending: false })
+          .limit(50),
+        // user_reports henüz çalıştırılmamış bir migrasyona ait olabilir
+        // (bkz. supabase/schema.sql) — tablo yoksa sessizce boş liste.
+        supabase
+          .from('user_reports')
+          .select('id, reason, detail, status, created_at, reporter:reporter_id(display_name, username, avatar_url), target:target_id(display_name, username, avatar_url)')
           .order('created_at', { ascending: false })
           .limit(50),
       ])
@@ -89,6 +101,7 @@ export default function AdminPanel() {
         dayBuckets,
       })
       setDisputes(disputesRes.data || [])
+      setReports(reportsRes.data || [])
       setLoading(false)
     }
     load()
@@ -96,6 +109,20 @@ export default function AdminPanel() {
       cancelled = true
     }
   }, [profile])
+
+  // 'open' -> 'reviewed' -> 'action_taken', ama admin 'reviewed'i atlayıp
+  // doğrudan 'action_taken'a geçebilir (bkz. verified-badge-strategy.md).
+  // Geri alma yok — yanlış tıklanan bir durum şu an sadece manuel SQL ile
+  // düzeltilebilir, bu turun bilinçli sınırı.
+  async function advanceReportStatus(report) {
+    const next = report.status === 'open' ? 'reviewed' : 'action_taken'
+    setReportBusyId(report.id)
+    const { error } = await supabase.from('user_reports').update({ status: next }).eq('id', report.id)
+    if (!error) {
+      setReports((prev) => prev.map((r) => (r.id === report.id ? { ...r, status: next } : r)))
+    }
+    setReportBusyId(null)
+  }
 
   if (authLoading) {
     return (
@@ -248,6 +275,68 @@ export default function AdminPanel() {
                       </button>
                     )
                   })}
+                </div>
+              )}
+            </section>
+
+            <section className="mt-8">
+              <div className="flex items-center gap-2">
+                <span className="flex h-8 w-8 items-center justify-center rounded-theme bg-secondary text-primary">
+                  <iconify-icon icon="lucide:shield-alert" class="text-base"></iconify-icon>
+                </span>
+                <div>
+                  <h2 className="text-base font-bold tracking-[-0.02em]">{t('admin.reportsTitle')}</h2>
+                  <p className="text-[11px] text-muted-foreground">{t('admin.reportsSubtitle')}</p>
+                </div>
+              </div>
+
+              {reports.length === 0 ? (
+                <div className="mt-3 rounded-theme border border-dashed border-border bg-muted/60 p-6 text-center">
+                  <p className="text-xs text-muted-foreground">{t('admin.reportsEmpty')}</p>
+                </div>
+              ) : (
+                <div className="mt-3 space-y-2.5">
+                  {reports.map((r) => (
+                    <div key={r.id} className="rounded-theme border border-border bg-card p-3.5 shadow-sm">
+                      <div className="flex items-center gap-2">
+                        <div className="h-6 w-6 shrink-0 overflow-hidden rounded-full">
+                          <img
+                            src={r.target?.avatar_url || fallbackAvatarFor(r.id)}
+                            alt={r.target?.display_name}
+                            className="h-full w-full object-cover"
+                          />
+                        </div>
+                        <p className="min-w-0 flex-1 truncate text-xs font-semibold text-muted-foreground">
+                          {t('admin.reportedUser', { name: r.target?.display_name || t('common.unknownUser') })} · {timeAgo(r.created_at)}
+                        </p>
+                        <span
+                          className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-bold ${
+                            r.status === 'open'
+                              ? 'bg-destructive/10 text-destructive'
+                              : r.status === 'reviewed'
+                                ? 'bg-primary/10 text-primary'
+                                : 'bg-muted text-muted-foreground'
+                          }`}
+                        >
+                          {t(`admin.reportStatus_${r.status}`)}
+                        </span>
+                      </div>
+                      <p className="mt-2 text-sm font-bold leading-5">{t(`admin.reportReason_${r.reason}`)}</p>
+                      {r.detail && <p className="mt-1 text-xs leading-5 text-muted-foreground">{r.detail}</p>}
+                      <p className="mt-2 text-[11px] text-muted-foreground">
+                        {t('admin.reportedBy', { name: r.reporter?.display_name || t('common.unknownUser') })}
+                      </p>
+                      {r.status !== 'action_taken' && (
+                        <button
+                          onClick={() => advanceReportStatus(r)}
+                          disabled={reportBusyId === r.id}
+                          className="mt-3 rounded-theme border border-border bg-background px-3 py-1.5 text-[11px] font-bold text-foreground disabled:opacity-60"
+                        >
+                          {r.status === 'open' ? t('admin.markReviewed') : t('admin.markActionTaken')}
+                        </button>
+                      )}
+                    </div>
+                  ))}
                 </div>
               )}
             </section>

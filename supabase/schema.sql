@@ -2326,3 +2326,67 @@ begin
 end;
 $$ language plpgsql;
 -- ─────────────────────────────────────────────────────────────────────────
+
+-- KULLANICI ŞİKAYETLERİ (docs/designs/verified-badge-strategy.md, Approach A):
+-- GTF'de şu ana kadar hiçbir kullanıcı-seviyesi şikayet/taklit bildirme
+-- mekanizması yoktu, sadece engelleme (blocks) vardı. Bu tur BİLİNÇLİ
+-- olarak sadece GÖRÜNÜRLÜK sağlıyor — biri bir hesabı bildirebiliyor,
+-- admin görebiliyor. Hesap askıya alma/adını değiştirtme gibi bir
+-- YAPTIRIM mekanizması şemada yok ve bu turun kapsamı dışında; "işlem
+-- yapıldı" durumu şu an hiçbir gerçek işlemi garanti etmiyor, sadece
+-- admin'in raporu kapalı saydığını işaretliyor.
+create table public.user_reports (
+  id uuid primary key default gen_random_uuid(),
+  reporter_id uuid not null references public.profiles(id) on delete cascade,
+  target_id uuid not null references public.profiles(id) on delete cascade,
+  reason text not null check (reason in ('impersonation', 'harassment', 'spam')),
+  detail text,
+  status text not null default 'open' check (status in ('open', 'reviewed', 'action_taken')),
+  created_at timestamptz not null default now(),
+  check (reporter_id <> target_id)
+);
+
+-- Tek açık rapor kısıtı: reporter+target başına en fazla bir 'open'/
+-- 'reviewed' kayıt. Kısmi (partial) bir index olması bilinçli — düz bir
+-- unique(reporter_id, target_id) kullanılsaydı, bir rapor 'action_taken'a
+-- ulaştıktan sonra aynı kişi aynı hedefi bir daha hiç raporlayamazdı.
+create unique index user_reports_one_open_per_pair
+  on public.user_reports (reporter_id, target_id)
+  where status != 'action_taken';
+
+alter table public.user_reports enable row level security;
+
+-- is_admin(): profiles.is_admin kontrolünü tek yerden yapan security-
+-- definer helper — is_blocked()/blocked_user_ids() ile aynı kalıp,
+-- birden fazla RLS politikasında aynı exists() sorgusunu tekrarlamamak
+-- için. Sadece bu tabloda değil, ileride admin kontrolü gereken her
+-- yeni tabloda yeniden kullanılabilir.
+create or replace function public.is_admin()
+returns boolean
+language sql
+security definer
+set search_path = public
+as $$
+  select exists (
+    select 1 from public.profiles where id = auth.uid() and is_admin
+  );
+$$;
+
+grant execute on function public.is_admin() to authenticated;
+
+-- Raporu sadece raporlayan + admin görebilir — prediction_disputes'ın
+-- "herkese açık okuma" politikası buraya BİLİNÇLİ olarak taşınmadı, bu
+-- tablo kullanıcılar hakkında suçlama içeriyor.
+create policy "Reporters and admins can view reports" on public.user_reports
+  for select using (auth.uid() = reporter_id or public.is_admin());
+create policy "Users can report others" on public.user_reports
+  for insert with check (auth.uid() = reporter_id and reporter_id <> target_id);
+create policy "Admins can update report status" on public.user_reports
+  for update using (public.is_admin()) with check (public.is_admin());
+-- prediction_disputes'ın "Users can retract their own dispute" politikasıyla
+-- aynı mantık — ama sadece rapor henüz incelenmemişken.
+create policy "Reporters can retract their own open report" on public.user_reports
+  for delete using (auth.uid() = reporter_id and status = 'open');
+
+grant select, insert, update, delete on public.user_reports to authenticated;
+-- ─────────────────────────────────────────────────────────────────────────

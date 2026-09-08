@@ -102,6 +102,7 @@ export default function KullaniciProfili() {
   const [isBlocked, setIsBlocked] = useState(false)
   const [blockBusy, setBlockBusy] = useState(false)
   const [showMenu, setShowMenu] = useState(false)
+  const [showReportSheet, setShowReportSheet] = useState(false)
   const [earnedBadgeCount, setEarnedBadgeCount] = useState(0)
   const [loading, setLoading] = useState(true)
 
@@ -219,6 +220,23 @@ export default function KullaniciProfili() {
     setBlockBusy(false)
   }
 
+  // Görünürlük katmanı — bir yaptırım mekanizması yok, sadece raporu
+  // admin panelinde görünür kılıyor (bkz. docs/designs/verified-badge-
+  // strategy.md, Approach A). unique index 'action_taken' hariç tüm
+  // durumlarda tekil olduğu için, zaten açık bir raporun üstüne ikinci
+  // bir rapor atmayı 23505 ile karşılıyoruz.
+  async function submitReport(reason, detail) {
+    const { error } = await supabase
+      .from('user_reports')
+      .insert({ reporter_id: currentUser.id, target_id: userId, reason, detail: detail || null })
+    if (error) {
+      showToast(error.code === '23505' ? t('userProfile.reportAlreadyOpen') : t('userProfile.reportFailed'))
+      return false
+    }
+    showToast(t('userProfile.reportSuccess'))
+    return true
+  }
+
   if (loading) {
     return (
       <div className="flex min-h-screen w-full items-center justify-center bg-background font-body text-foreground">
@@ -278,15 +296,28 @@ export default function KullaniciProfili() {
             <div className="fixed inset-0 z-30" onClick={() => setShowMenu(false)} />
             <div className="absolute right-5 top-[92px] z-40 w-48 overflow-hidden rounded-theme border border-border bg-card shadow-lg">
               <button
+                onClick={() => {
+                  setShowMenu(false)
+                  setShowReportSheet(true)
+                }}
+                className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-semibold text-foreground"
+              >
+                <iconify-icon icon="lucide:flag" class="text-base"></iconify-icon>
+                {t('userProfile.report')}
+              </button>
+              <button
                 onClick={handleToggleBlock}
                 disabled={blockBusy}
-                className="flex w-full items-center gap-2 px-4 py-3 text-left text-sm font-semibold text-destructive disabled:opacity-60"
+                className="flex w-full items-center gap-2 border-t border-border px-4 py-3 text-left text-sm font-semibold text-destructive disabled:opacity-60"
               >
                 <iconify-icon icon="lucide:ban" class="text-base"></iconify-icon>
                 {isBlocked ? t('userProfile.unblock') : t('userProfile.block')}
               </button>
             </div>
           </>
+        )}
+        {showReportSheet && (
+          <ReportUserSheet onClose={() => setShowReportSheet(false)} onSubmit={submitReport} />
         )}
       </div>
 
@@ -445,6 +476,68 @@ export default function KullaniciProfili() {
       </main>
         </>
       )}
+    </div>
+  )
+}
+
+const REPORT_REASONS = ['impersonation', 'harassment', 'spam']
+
+function ReportUserSheet({ onClose, onSubmit }) {
+  const { t } = useTranslation()
+  const [reason, setReason] = useState(null)
+  const [detail, setDetail] = useState('')
+  const [submitting, setSubmitting] = useState(false)
+
+  async function handleSubmit() {
+    if (!reason || submitting) return
+    setSubmitting(true)
+    const ok = await onSubmit(reason, detail.trim())
+    setSubmitting(false)
+    if (ok) onClose()
+  }
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-end bg-black/40" onClick={onClose}>
+      <div onClick={(e) => e.stopPropagation()} className="w-full rounded-t-theme bg-background p-5 pb-8">
+        <div className="mb-1 flex items-center justify-between">
+          <h2 className="font-heading text-lg font-bold">{t('userProfile.reportSheetTitle')}</h2>
+          <button onClick={onClose} aria-label={t('common.close')} className="text-muted-foreground">
+            <iconify-icon icon="lucide:x" class="text-xl"></iconify-icon>
+          </button>
+        </div>
+        <p className="mb-4 text-xs text-muted-foreground">{t('userProfile.reportSheetSubtitle')}</p>
+
+        <div className="space-y-2">
+          {REPORT_REASONS.map((r) => (
+            <button
+              key={r}
+              onClick={() => setReason(r)}
+              className={`flex w-full items-center justify-between rounded-theme border px-4 py-3 text-left text-sm font-semibold ${
+                reason === r ? 'border-primary bg-secondary text-primary' : 'border-border bg-card text-foreground'
+              }`}
+            >
+              {t(`userProfile.reportReason_${r}`)}
+              {reason === r && <iconify-icon icon="lucide:check" class="text-base"></iconify-icon>}
+            </button>
+          ))}
+        </div>
+
+        <textarea
+          value={detail}
+          onChange={(e) => setDetail(e.target.value.slice(0, 300))}
+          placeholder={t('userProfile.reportDetailPlaceholder')}
+          rows={3}
+          className="mt-3 w-full resize-none rounded-theme border border-border bg-card p-3 text-sm text-foreground placeholder:text-muted-foreground"
+        />
+
+        <button
+          onClick={handleSubmit}
+          disabled={!reason || submitting}
+          className="mt-4 w-full rounded-theme bg-primary px-4 py-3 text-sm font-bold text-primary-foreground disabled:opacity-60"
+        >
+          {t('userProfile.reportSubmit')}
+        </button>
+      </div>
     </div>
   )
 }
