@@ -23,7 +23,7 @@ const LOGIN_HERO = IMG('2485f89f-ddd3-4c79-ba33-e9df27be46ef')
 // timelines: Google only needs a Cloud Console OAuth client (self-serve,
 // ~10 minutes), Apple needs a paid Developer Program membership — flip
 // each independently once its Supabase Dashboard provider is actually on.
-const GOOGLE_OAUTH_ENABLED = false
+const GOOGLE_OAUTH_ENABLED = true
 const APPLE_OAUTH_ENABLED = false
 
 // Shared shell for every state this screen can be in (the sign-in/up form,
