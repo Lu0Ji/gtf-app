@@ -100,8 +100,19 @@ alınabilir seçenek. B ve C, A'nın üzerine kurulacak gelecek adımlar.
 
 ## Open Questions
 
-- **Gating risk, kod öncesi çözülmeli:** AdMob/Meta içerik politikaları GTF'nin tahmin
-  mekaniğine izin veriyor mu? (bkz. Constraints).
+- ~~**Gating risk, kod öncesi çözülmeli:** AdMob/Meta içerik politikaları GTF'nin tahmin
+  mekaniğine izin veriyor mu?~~ **ÇÖZÜLDÜ (2026-09-09):** Üç kaynak da (AdMob'un
+  prediction-markets politikası, Google Play'in Real-Money Gambling politikası, Apple'ın
+  Guideline 5.3'ü) ortak bir çizgide birleşiyor — hedefledikleri şey "tahmin" kelimesi
+  değil, gerçek para/gerçek dünya ödülü. GTF'de puan sistemi tamamen kaldırıldığından
+  (bkz. `2202e12` commit) hiçbir bahis/ödül/gerçek para mekaniği yok — üçü için de düşük
+  risk. Kaynaklar: support.google.com/adspolicy/answer/16757872 (prediction markets),
+  support.google.com/googleplay/android-developer/answer/9877032 (real-money gambling —
+  gerçek para/ödül olmayan uygulamaları kapsam dışı bırakıyor), Apple Guideline 5.3
+  (esas olarak gerçek değerde ödülü hedefliyor). İnce nokta: inceleme kısmen insan
+  gözünden geçiyor, "tahmin/isabet oranı" gibi kelimeler otomatik/manuel incelemede
+  yanlış bayrak kaldırabilir — başvuru formunda "ücretsiz sosyal tahmin uygulaması,
+  gerçek para veya ödül yok" ifadesini net yazmak öneriliyor.
 - Rewarded video'ya ne zaman geçilecek (v1 sadece banner) ve feed'e banner ne zaman
   eklenecek — v2 kapsam kararı, /plan-eng-review'da netleştirilmeli.
 - iOS App Tracking Transparency (ATT) ve KVKK/GDPR rıza akışı: nerede tetiklenecek
@@ -144,11 +155,11 @@ SDK entegrasyonu mevcut build/deploy sürecine ekleniyor.
 
 ## Dependencies
 
-- **Gating:** AdMob içerik politikasının GTF'nin tahmin mekaniğine izin verdiğinin
-  doğrulanması — hesap başvurusundan önce. Ayrıca Apple App Store ve Google Play'in kendi
-  kumar/tahmin-içerik politikaları da ayrıca kontrol edilmeli (AdMob onayı bunu garanti
-  etmez).
-- Reklam ağı hesabı açılması (AdMob) — kullanıcı tarafında, kod dışı bir adım.
+- ~~**Gating:** AdMob içerik politikasının GTF'nin tahmin mekaniğine izin verdiğinin
+  doğrulanması~~ **ÇÖZÜLDÜ (2026-09-09)** — bkz. Open Questions. Üç kaynak da (AdMob,
+  Google Play, Apple) düşük risk gösteriyor; GTF'de gerçek para/ödül olmaması belirleyici.
+- Reklam ağı hesabı açılması (AdMob) — kullanıcı tarafında, kod dışı bir adım. Artık
+  önündeki tek engel bu, kod ve içerik-politikası kontrolü tamam.
 - Rıza/ATT akışı tasarımı (KVKK + GDPR uyumu — GTF 8 dilde/uluslararası erişilebilir
   olduğu için ikisi de eşit ağırlıkta) — henüz tasarlanmadı, ayrı bir iş kalemi. AdMob'un
   EEA/UK için şart koştuğu UMP/TCF-sertifikalı CMP gereksinimiyle uyumlu olmalı — sıfırdan
@@ -164,13 +175,15 @@ SDK entegrasyonu mevcut build/deploy sürecine ekleniyor.
 
 ## The Assignment
 
-Bu hafta içinde iki şeyi paralel yap: (1) AdMob'un içerik politikasını GTF'nin tahmin
-mekaniğine karşı oku ve gerçekten bir sorun olup olmadığını doğrula — bu, kanıt değil
-pattern-eşleşmesiyle "sorun olur/olmaz" varsaymaktan daha ucuz ve 10 dakika sürer; (2)
-sorun yoksa AdMob hesap açma/onay sürecini başlat (gerçek trafik olmadan test moduyla
-kurulabilir). Onay süreci günler sürebiliyor — beklerken kod entegrasyonu paralel
-ilerleyebilir, ama hesap onaylanmadan hiçbir gerçek gelir akmaz. Bu, "reklam nasıl
-entegre edilir" sorusunun kod kısmından önce gelen gerçek darboğaz.
+~~Bu hafta içinde iki şeyi paralel yap: (1) AdMob'un içerik politikasını GTF'nin tahmin
+mekaniğine karşı oku...~~ **(1) tamamlandı (2026-09-09) — bkz. Open Questions.** Kod
+tarafı da bitti (`src/lib/ads.js`, `TahminKaydi.jsx`, native config — test kimlikleriyle).
+Kalan tek adım: **AdMob hesap açma/onay sürecini başlat** (gerçek trafik olmadan test
+moduyla kurulabilir, kullanıcı tarafında, kod dışı bir adım). Onay süreci günler
+sürebiliyor. Onaylandıktan sonra: test ID'leri gerçek AdMob app/ad-unit ID'leriyle
+değiştir (`src/lib/ads.js`, `android/.../strings.xml`, `ios/.../Info.plist`), rıza/ATT
+akışını tasarla (hâlâ ayrı, açık bir iş kalemi — bkz. Open Questions), ve `app_config.
+ads_enabled`'ı `true`'ya çevir.
 
 ## What I noticed about how you think
 
