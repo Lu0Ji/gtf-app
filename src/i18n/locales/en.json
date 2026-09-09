@@ -1400,6 +1400,8 @@
     "headerTitle": "Prediction Record",
     "shareAria": "Share the record",
     "sealedRecord": "Sealed record",
+    "createdOn": "Created · {{datetime}}",
+    "openedOn": "Opened · {{datetime}}",
     "contentLockedNote": "The content is saved and can't be changed.",
     "disputedTag": "DISPUTED",
     "pendingBanner": "Pending",

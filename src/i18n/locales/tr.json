@@ -1400,6 +1400,8 @@
     "headerTitle": "Tahmin Kaydı",
     "shareAria": "Kaydı paylaş",
     "sealedRecord": "Mühürlü kayıt",
+    "createdOn": "Oluşturuldu · {{datetime}}",
+    "openedOn": "Açıldı · {{datetime}}",
     "contentLockedNote": "İçerik kaydedildi ve değiştirilemez.",
     "disputedTag": "TARTIŞMALI",
     "pendingBanner": "Beklemede",

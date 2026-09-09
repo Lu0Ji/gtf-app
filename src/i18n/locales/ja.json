@@ -1399,6 +1399,8 @@
     "headerTitle": "予測記録",
     "shareAria": "記録を共有",
     "sealedRecord": "封印された記録",
+    "createdOn": "作成日時 · {{datetime}}",
+    "openedOn": "開封日時 · {{datetime}}",
     "contentLockedNote": "内容は保存され、変更できません。",
     "disputedTag": "異議あり",
     "pendingBanner": "保留中",

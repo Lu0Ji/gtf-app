@@ -1399,6 +1399,8 @@
     "headerTitle": "预测记录",
     "shareAria": "分享记录",
     "sealedRecord": "封存记录",
+    "createdOn": "创建于 · {{datetime}}",
+    "openedOn": "开启于 · {{datetime}}",
     "contentLockedNote": "内容已保存，无法更改。",
     "disputedTag": "有争议",
     "pendingBanner": "待定",

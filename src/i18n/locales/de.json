@@ -1400,6 +1400,8 @@
     "headerTitle": "Vorhersage-Eintrag",
     "shareAria": "Eintrag teilen",
     "sealedRecord": "Versiegelter Eintrag",
+    "createdOn": "Erstellt · {{datetime}}",
+    "openedOn": "Geöffnet · {{datetime}}",
     "contentLockedNote": "Der Inhalt ist gespeichert und kann nicht geändert werden.",
     "disputedTag": "UMSTRITTEN",
     "pendingBanner": "Ausstehend",

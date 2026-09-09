@@ -1404,6 +1404,8 @@
     "headerTitle": "سجل التوقع",
     "shareAria": "مشاركة السجل",
     "sealedRecord": "سجل مختوم",
+    "createdOn": "أُنشئ · {{datetime}}",
+    "openedOn": "فُتح · {{datetime}}",
     "contentLockedNote": "تم حفظ المحتوى ولا يمكن تغييره.",
     "disputedTag": "محل خلاف",
     "pendingBanner": "قيد الانتظار",

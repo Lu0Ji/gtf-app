@@ -151,6 +151,12 @@ export default function TahminKaydi() {
   // says it's open, show it — a manual seal ("Ben açarım") has no clock to
   // pass, so it stays locked until the author's own action either way.
   const isRevealed = isVerified || (!isManualSeal && countdown.isPast)
+  // "Açıldığı tarih": manuel mühürler sadece yazarın doğrulamasıyla açılır
+  // (yukarıdaki isRevealed mantığı), o an verified_at'e eşit — takvimli
+  // mühürler ise kimse oy vermese/doğrulamasa bile event_date geçince
+  // açılır, o yüzden event_date kullanılıyor (verified_at çok daha geç,
+  // hatta hiç olmayabilir).
+  const openedAt = isManualSeal ? record.verified_at : record.event_date
   // Anyone but the author: once content is actually revealed, voting on it
   // is fair game — either agreeing/disputing an existing verdict, or (pre-
   // quorum) helping decide one. Never before it's revealed: voting blind
@@ -396,7 +402,9 @@ export default function TahminKaydi() {
                   <iconify-icon icon="lucide:badge-check" class="text-base text-primary"></iconify-icon>
                 </div>
                 <p className="mt-0.5 text-xs text-muted-foreground">
-                  {t('record.sealedRecord')} · {formatDateLong(record.created_at)}
+                  {isRevealed
+                    ? t('record.createdOn', { datetime: formatDateTimeLong(record.created_at) })
+                    : `${t('record.sealedRecord')} · ${formatDateLong(record.created_at)}`}
                 </p>
               </button>
               <div className="flex shrink-0 flex-col items-end gap-1.5">
@@ -485,9 +493,17 @@ export default function TahminKaydi() {
               {isVerified && <span className="text-xs font-semibold">{formatDateLong(record.verified_at)}</span>}
             </div>
             <div className="p-5">
-              <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
-                {t('home.sealedPrediction')}
-              </p>
+              <div className="flex items-center justify-between gap-2">
+                <p className="text-[10px] font-bold uppercase tracking-[0.12em] text-muted-foreground">
+                  {t('home.sealedPrediction')}
+                </p>
+                {openedAt && (
+                  <p className="flex items-center gap-1 text-[11px] font-semibold text-muted-foreground">
+                    <iconify-icon icon="lucide:lock-open" class="text-xs"></iconify-icon>
+                    {t('record.openedOn', { datetime: formatDateTimeLong(openedAt) })}
+                  </p>
+                )}
+              </div>
               <p className="mt-2 font-heading text-lg font-bold leading-6">
                 &ldquo;{record.sealed_content}&rdquo;
               </p>

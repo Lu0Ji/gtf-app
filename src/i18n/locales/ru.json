@@ -1402,6 +1402,8 @@
     "headerTitle": "Запись прогноза",
     "shareAria": "Поделиться записью",
     "sealedRecord": "Запечатанная запись",
+    "createdOn": "Создано · {{datetime}}",
+    "openedOn": "Открыто · {{datetime}}",
     "contentLockedNote": "Содержимое сохранено и не может быть изменено.",
     "disputedTag": "СПОРНО",
     "pendingBanner": "В ожидании",

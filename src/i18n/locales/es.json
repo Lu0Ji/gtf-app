@@ -1400,6 +1400,8 @@
     "headerTitle": "Registro de la Predicción",
     "shareAria": "Compartir el registro",
     "sealedRecord": "Registro sellado",
+    "createdOn": "Creado · {{datetime}}",
+    "openedOn": "Abierto · {{datetime}}",
     "contentLockedNote": "El contenido está guardado y no se puede cambiar.",
     "disputedTag": "EN DISPUTA",
     "pendingBanner": "Pendiente",
