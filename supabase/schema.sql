@@ -2390,3 +2390,31 @@ create policy "Reporters can retract their own open report" on public.user_repor
 
 grant select, insert, update, delete on public.user_reports to authenticated;
 -- ─────────────────────────────────────────────────────────────────────────
+
+-- REKLAM KILL SWITCH (docs/designs/ad-monetization-strategy.md, Approach A):
+-- genel amaçlı bir "app_config" tablosu, tek satırı reklamların açık/kapalı
+-- olduğunu tutuyor. Kod deploy'u gerektirmeden anında kapatılabilmesi
+-- Success Criteria'nın şartıydı — bir Supabase satırı bu yüzden bilinçli
+-- olarak yeterli, ayrı bir remote-config servisi değil. Varsayılan `false`:
+-- gerçek bir AdMob hesabı onaylanana ve rıza/ATT akışı kurulana kadar
+-- reklamlar kapalı kalmalı (bkz. dokümanın Gating bağımlılığı).
+create table public.app_config (
+  key text primary key,
+  value jsonb not null,
+  updated_at timestamptz not null default now()
+);
+
+alter table public.app_config enable row level security;
+-- Herkese açık okuma: istemci tarafında (src/lib/ads.js) auth gerektirmeden
+-- kontrol edilebilmesi lazım, hassas bir veri değil.
+create policy "Config is viewable by everyone" on public.app_config for select using (true);
+create policy "Admins can insert config" on public.app_config
+  for insert with check (public.is_admin());
+create policy "Admins can update config" on public.app_config
+  for update using (public.is_admin()) with check (public.is_admin());
+
+grant select on public.app_config to anon, authenticated;
+grant insert, update on public.app_config to authenticated;
+
+insert into public.app_config (key, value) values ('ads_enabled', 'false'::jsonb);
+-- ─────────────────────────────────────────────────────────────────────────

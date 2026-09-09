@@ -33,6 +33,14 @@
                 android:name="android.support.FILE_PROVIDER_PATHS"
                 android:resource="@xml/file_paths"></meta-data>
         </provider>
+
+        <!-- @capacitor-community/admob (docs/designs/ad-monetization-strategy.md).
+             @string/admob_app_id is Google's public TEST app ID for now — swap
+             for the real AdMob app ID once the account is approved, never test
+             with a real ID (see the design doc's account-approval gating). -->
+        <meta-data
+            android:name="com.google.android.gms.ads.APPLICATION_ID"
+            android:value="@string/admob_app_id" />
     </application>
 
     <!-- Permissions -->

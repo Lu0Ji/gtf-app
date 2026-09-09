@@ -7,6 +7,7 @@ import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import { formatDateLong, formatDateTimeLong } from '../lib/format.js'
 import { difficultyMeta } from '../lib/difficulty.js'
+import { hideSealBanner, showSealBanner } from '../lib/ads.js'
 import Chip from '../components/ui/Chip.jsx'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
 
@@ -130,6 +131,28 @@ export default function TahminKaydi() {
   }, [record?.id, user])
 
   const countdown = useCountdown(record?.event_date || '1970-01-01T00:00:00Z')
+
+  // Banner reklamı isRevealed'a bağlı (bkz. docs/designs/ad-monetization-
+  // strategy.md), ama bu efekt component'in "record yok" erken dönüşünden
+  // (aşağıda) ÖNCE çağrılmalı — React'in hook kuralları koşullu hook
+  // çağrısına izin vermiyor. isRevealed'ın kendisi aşağıda, gerçek `record`
+  // garanti varken tekrar hesaplanıyor; buradaki tekrar sadece bu değere
+  // hook-güvenli şekilde erişmenin yolu, davranış kaynağı hep aynı mantık.
+  const isRevealedForAds = record
+    ? record.status === 'verified_correct' ||
+      record.status === 'verified_incorrect' ||
+      (!!record.event_date && countdown.isPast)
+    : false
+  useEffect(() => {
+    if (isRevealedForAds) {
+      showSealBanner()
+    } else {
+      hideSealBanner()
+    }
+    return () => {
+      hideSealBanner()
+    }
+  }, [isRevealedForAds])
 
   if (!record) return null
 

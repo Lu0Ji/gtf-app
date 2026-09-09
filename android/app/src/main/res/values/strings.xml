@@ -4,4 +4,8 @@
     <string name="title_activity_main">GTF</string>
     <string name="package_name">com.gtf.app</string>
     <string name="custom_url_scheme">com.gtf.app</string>
+    <!-- Google'ın herkese açık, resmi TEST AdMob app ID'si — gerçek hesap
+         onaylanana kadar bunu değiştirme (bkz. docs/designs/
+         ad-monetization-strategy.md). -->
+    <string name="admob_app_id">ca-app-pub-3940256099942544~3347511713</string>
 </resources>
