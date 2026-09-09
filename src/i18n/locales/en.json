@@ -1777,6 +1777,17 @@
     "interestsTitle": "What are you into?",
     "interestsDesc": "We'll tailor your feed and the people we suggest around what you pick. You can change this anytime in Settings."
   },
+  "sealStyles": {
+    "sectionEyebrow": "Customization",
+    "sectionTitle": "Seal Style",
+    "equipped": "Equipped",
+    "tapToEquip": "Tap to equip",
+    "lockedWithBadge": "Unlocks with the {{badge}} badge",
+    "featureDisabled": "This feature isn't available yet.",
+    "updateFailed": "Couldn't change seal style, try again.",
+    "basic": { "title": "Classic" },
+    "ferman": { "title": "Royal Decree" }
+  },
   "admin": {
     "title": "Admin Panel",
     "subtitle": "Only visible to you",

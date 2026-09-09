@@ -1777,6 +1777,17 @@
     "interestsTitle": "Neyle ilgileniyorsun?",
     "interestsDesc": "Seçtiğin konulara göre akışını ve sana önerdiğimiz kişileri düzenleriz. İstediğin zaman Ayarlar'dan değiştirebilirsin."
   },
+  "sealStyles": {
+    "sectionEyebrow": "Kişiselleştirme",
+    "sectionTitle": "Mühür Kostümü",
+    "equipped": "Takılı",
+    "tapToEquip": "Dokun, tak",
+    "lockedWithBadge": "{{badge}} rozetiyle açılır",
+    "featureDisabled": "Bu özellik henüz aktif değil.",
+    "updateFailed": "Kostüm değiştirilemedi, tekrar dene.",
+    "basic": { "title": "Klasik" },
+    "ferman": { "title": "Padişah Fermanı" }
+  },
   "admin": {
     "title": "Admin Paneli",
     "subtitle": "Sadece sen görebiliyorsun",

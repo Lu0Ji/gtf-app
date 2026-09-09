@@ -2418,3 +2418,21 @@ grant insert, update on public.app_config to authenticated;
 
 insert into public.app_config (key, value) values ('ads_enabled', 'false'::jsonb);
 -- ─────────────────────────────────────────────────────────────────────────
+
+-- MÜHÜR KOSTÜMÜ (docs/designs/seal-customization-strategy.md, Approach A):
+-- src/lib/seal-styles.js kataloğunun ikizi — check constraint'i kataloğu DB
+-- seviyesinde kilitliyor (mention_permission/showcase_badges_max_3 ile aynı
+-- emsal). GİZLİ BAKIM MALİYETİ: seal-styles.js'e ileride yeni bir kostüm
+-- eklendiğinde, bu constraint'i genişleten İKİNCİ bir migrasyon da gerekir
+-- (bkz. tasarım dokümanının Dependencies bölümü) — unutulursa kullanıcı
+-- equipped_seal_style'ı güncellemeye çalışınca açık bir constraint-ihlali
+-- hatası alır.
+alter table public.profiles add column equipped_seal_style text not null default 'basic';
+alter table public.profiles add constraint equipped_seal_style_known_value
+  check (equipped_seal_style in ('basic', 'ferman'));
+-- RLS: protect_profile_integrity'nin genel "kendi profilini
+-- güncelleyebilirsin" kapsamına giriyor, is_admin gibi ekstra bir korumaya
+-- ihtiyacı yok. Kilit açma kontrolü showcase_badges ile aynı güven
+-- modelinde: tamamen istemci tarafında, sunucu tarafında "bu rozeti
+-- gerçekten kazandı mı" yeniden doğrulaması yok.
+-- ─────────────────────────────────────────────────────────────────────────

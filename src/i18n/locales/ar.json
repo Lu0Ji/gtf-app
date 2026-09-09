@@ -1781,6 +1781,17 @@
     "interestsTitle": "بماذا تهتم؟",
     "interestsDesc": "سنخصص لك المحتوى والأشخاص الذين نقترحهم بناءً على اختيارك. يمكنك تغيير هذا في أي وقت من الإعدادات."
   },
+  "sealStyles": {
+    "sectionEyebrow": "التخصيص",
+    "sectionTitle": "نمط الختم",
+    "equipped": "مُفعّل",
+    "tapToEquip": "اضغط للتفعيل",
+    "lockedWithBadge": "يُفتح بشارة {{badge}}",
+    "featureDisabled": "هذه الميزة غير متاحة بعد.",
+    "updateFailed": "تعذّر تغيير نمط الختم، حاول مرة أخرى.",
+    "basic": { "title": "كلاسيكي" },
+    "ferman": { "title": "الفرمان السلطاني" }
+  },
   "admin": {
     "title": "لوحة الإدارة",
     "subtitle": "مرئية لك فقط",

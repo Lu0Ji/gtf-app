@@ -1776,6 +1776,17 @@
     "interestsTitle": "你对什么感兴趣？",
     "interestsDesc": "我们会根据你选择的内容为你定制信息流和推荐好友，随时可以在设置中修改。"
   },
+  "sealStyles": {
+    "sectionEyebrow": "个性化",
+    "sectionTitle": "封印样式",
+    "equipped": "已装备",
+    "tapToEquip": "点击装备",
+    "lockedWithBadge": "通过「{{badge}}」徽章解锁",
+    "featureDisabled": "该功能尚未开放。",
+    "updateFailed": "无法更改封印样式，请重试。",
+    "basic": { "title": "经典" },
+    "ferman": { "title": "御旨圣令" }
+  },
   "admin": {
     "title": "管理面板",
     "subtitle": "仅你可见",

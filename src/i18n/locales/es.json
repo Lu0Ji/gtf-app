@@ -1777,6 +1777,17 @@
     "interestsTitle": "¿Qué te interesa?",
     "interestsDesc": "Adaptaremos tu feed y las personas que te sugerimos según lo que elijas. Puedes cambiarlo cuando quieras desde Ajustes."
   },
+  "sealStyles": {
+    "sectionEyebrow": "Personalización",
+    "sectionTitle": "Estilo del sello",
+    "equipped": "Equipado",
+    "tapToEquip": "Toca para equipar",
+    "lockedWithBadge": "Se desbloquea con la insignia {{badge}}",
+    "featureDisabled": "Esta función aún no está disponible.",
+    "updateFailed": "No se pudo cambiar el estilo del sello, intenta de nuevo.",
+    "basic": { "title": "Clásico" },
+    "ferman": { "title": "Decreto real" }
+  },
   "admin": {
     "title": "Panel de administración",
     "subtitle": "Solo visible para ti",

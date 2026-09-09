@@ -8,6 +8,7 @@ import { useToast } from '../contexts/ToastContext.jsx'
 import { formatDateLong, formatDateTimeLong } from '../lib/format.js'
 import { difficultyMeta } from '../lib/difficulty.js'
 import { hideSealBanner, showSealBanner } from '../lib/ads.js'
+import { findSealStyle } from '../lib/seal-styles.js'
 import Chip from '../components/ui/Chip.jsx'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
 
@@ -59,6 +60,14 @@ export default function TahminKaydi() {
   const [pendingResult, setPendingResult] = useState(null)
   const [evidenceNote, setEvidenceNote] = useState('')
   const [evidenceUrl, setEvidenceUrl] = useState('')
+  // Ayrı, izole bir sorgu — ana kayıt sorgusuna eklenmiyor. equipped_seal_
+  // style henüz deploy edilmemiş bir migrasyona ait (bkz. supabase/
+  // schema.sql) — ana sorgunun EXPLICIT sütun listesine eklenseydi, migrasyon
+  // çalışmadığı sürece PostgREST tüm sorguyu (dolayısıyla bütün ekranı)
+  // reddederdi. Bu yüzden kendi başına başarısız olabilen, bağımsız bir
+  // efekt: hata olursa equippedSealStyle null kalır, findSealStyle(null)
+  // güvenli şekilde 'basic'e döner.
+  const [equippedSealStyle, setEquippedSealStyle] = useState(null)
 
   // Arriving from a push notification deep link (or any bare URL) means
   // there's no navigation state to read the prediction from — only the
@@ -86,6 +95,23 @@ export default function TahminKaydi() {
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [record])
+
+  useEffect(() => {
+    if (!record?.author_id) return
+    let cancelled = false
+    supabase
+      .from('profiles')
+      .select('equipped_seal_style')
+      .eq('id', record.author_id)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (cancelled || error || !data) return
+        setEquippedSealStyle(data.equipped_seal_style)
+      })
+    return () => {
+      cancelled = true
+    }
+  }, [record?.author_id])
 
   useEffect(() => {
     if (!record) return
@@ -157,6 +183,10 @@ export default function TahminKaydi() {
   if (!record) return null
 
   const author = record.profiles
+  // Sadece henüz-açılmamış mühür kartını temalandırır (bkz. docs/designs/
+  // seal-customization-strategy.md) — açılmış haldeki durum banner'ı
+  // (bg-success/bg-destructive) bilinçli olarak buna dokunmaz.
+  const sealStyle = findSealStyle(equippedSealStyle)
   const isVerified = record.status === 'verified_correct' || record.status === 'verified_incorrect'
   const isCorrect = record.status === 'verified_correct'
   const isOwner = user?.id === record.author_id
@@ -669,14 +699,14 @@ export default function TahminKaydi() {
             )}
           </section>
         ) : (
-          <section className="mx-5 mt-5 overflow-hidden rounded-theme bg-primary text-primary-foreground shadow-sm">
+          <section className={`mx-5 mt-5 overflow-hidden rounded-theme shadow-sm ${sealStyle.containerClassName}`}>
             <div className="relative px-5 pb-5 pt-6">
-              <div className="absolute right-[-18px] top-[-18px] h-28 w-28 rounded-full border border-white/10" />
-              <div className="absolute right-6 top-7 h-16 w-16 rounded-full border border-white/10" />
+              <div className={`absolute right-[-18px] top-[-18px] h-28 w-28 rounded-full border ${sealStyle.accentBorderClassName}`} />
+              <div className={`absolute right-6 top-7 h-16 w-16 rounded-full border ${sealStyle.accentBorderClassName}`} />
               <div className="relative flex items-start justify-between">
                 <div className="flex items-center gap-2">
                   <span className="flex h-9 w-9 items-center justify-center rounded-theme bg-white/15">
-                    <iconify-icon icon="lucide:lock-keyhole" class="text-lg"></iconify-icon>
+                    <iconify-icon icon={sealStyle.lockIcon} class="text-lg"></iconify-icon>
                   </span>
                   <div>
                     <p className="font-heading text-xl font-extrabold tracking-tight">{t('profile.sealedShort')}</p>

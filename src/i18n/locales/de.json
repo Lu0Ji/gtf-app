@@ -1777,6 +1777,17 @@
     "interestsTitle": "Wofür interessierst du dich?",
     "interestsDesc": "Wir passen deinen Feed und die vorgeschlagenen Personen an deine Auswahl an. Du kannst das jederzeit in den Einstellungen ändern."
   },
+  "sealStyles": {
+    "sectionEyebrow": "Personalisierung",
+    "sectionTitle": "Siegelstil",
+    "equipped": "Ausgerüstet",
+    "tapToEquip": "Tippen zum Anlegen",
+    "lockedWithBadge": "Wird mit dem Abzeichen „{{badge}}“ freigeschaltet",
+    "featureDisabled": "Diese Funktion ist noch nicht verfügbar.",
+    "updateFailed": "Siegelstil konnte nicht geändert werden, versuch es erneut.",
+    "basic": { "title": "Klassisch" },
+    "ferman": { "title": "Sultansedikt" }
+  },
   "admin": {
     "title": "Admin-Panel",
     "subtitle": "Nur für dich sichtbar",

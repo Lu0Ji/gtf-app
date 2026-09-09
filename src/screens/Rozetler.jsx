@@ -5,6 +5,7 @@ import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
 import { formatDateLong } from '../lib/format.js'
 import { TIERS, computeBadgeStats, evaluateBadges } from '../lib/badges.js'
+import { SEAL_STYLES, isSealStyleUnlocked } from '../lib/seal-styles.js'
 import BadgeMedallion from '../components/BadgeMedallion.jsx'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
 import Card from '../components/ui/Card.jsx'
@@ -110,10 +111,18 @@ export default function Rozetler() {
   // viewers, not just this device.
   const [showcase, setShowcase] = useState([])
   const [editingShowcase, setEditingShowcase] = useState(false)
+  // docs/designs/seal-customization-strategy.md — showcase_badges'le aynı
+  // desen: profile'dan aynalanır, sunucuya yazılır.
+  const [equippedSealStyle, setEquippedSealStyle] = useState('basic')
+  const [equippingStyle, setEquippingStyle] = useState(false)
 
   useEffect(() => {
     setShowcase(profile?.showcase_badges || [])
   }, [profile?.showcase_badges])
+
+  useEffect(() => {
+    setEquippedSealStyle(profile?.equipped_seal_style || 'basic')
+  }, [profile?.equipped_seal_style])
 
   useEffect(() => {
     if (!user || !profile) return
@@ -231,9 +240,26 @@ export default function Rozetler() {
     refreshProfile()
   }
 
+  async function equipSealStyle(slug) {
+    if (equippingStyle || equippedSealStyle === slug) return
+    const prev = equippedSealStyle
+    setEquippingStyle(true)
+    setEquippedSealStyle(slug)
+    const { error } = await supabase.from('profiles').update({ equipped_seal_style: slug }).eq('id', user.id)
+    if (error) {
+      setEquippedSealStyle(prev)
+      showToast(error.code === 'PGRST204' ? t('sealStyles.featureDisabled') : t('sealStyles.updateFailed'))
+      setEquippingStyle(false)
+      return
+    }
+    refreshProfile()
+    setEquippingStyle(false)
+  }
+
   const earnedCount = badges.filter((b) => b.earned).length
   const percent = badges.length > 0 ? (earnedCount / badges.length) * 100 : 0
   const showcaseBadges = showcase.map((slug) => badges.find((b) => b.slug === slug)).filter(Boolean)
+  const earnedSlugSet = new Set(Object.keys(earnedAtBySlug))
 
   const trimmedQuery = query.trim().toLowerCase()
   const filtered = badges.filter((b) => {
@@ -341,6 +367,39 @@ export default function Rozetler() {
               {editingShowcase && (
                 <p className="mt-2 text-[11px] text-muted-foreground">{t('badges.showcaseEditHint')}</p>
               )}
+            </section>
+
+            <section className="mt-6">
+              <p className="text-[11px] font-bold uppercase tracking-[0.14em] text-primary">{t('sealStyles.sectionEyebrow')}</p>
+              <h2 className="mt-1 font-heading text-xl font-extrabold tracking-[-0.04em]">{t('sealStyles.sectionTitle')}</h2>
+              <div className="mt-3 flex gap-2.5 overflow-x-auto pb-2 pr-5">
+                {SEAL_STYLES.map((style) => {
+                  const unlocked = isSealStyleUnlocked(style, earnedSlugSet)
+                  const isEquipped = equippedSealStyle === style.slug
+                  return (
+                    <button
+                      key={style.slug}
+                      onClick={() => unlocked && equipSealStyle(style.slug)}
+                      disabled={!unlocked || equippingStyle}
+                      className={`flex min-w-[128px] flex-col items-center gap-2 rounded-theme border px-4 py-3.5 text-center disabled:cursor-default ${
+                        isEquipped ? 'border-primary bg-secondary' : 'border-border bg-card'
+                      } ${!unlocked ? 'opacity-50' : ''}`}
+                    >
+                      <span className={`flex h-11 w-11 items-center justify-center rounded-theme ${style.containerClassName}`}>
+                        <iconify-icon icon={unlocked ? style.lockIcon : 'lucide:lock'} class="text-lg"></iconify-icon>
+                      </span>
+                      <p className="text-xs font-bold">{t(style.titleKey)}</p>
+                      <p className="text-[10px] font-semibold text-muted-foreground">
+                        {isEquipped
+                          ? t('sealStyles.equipped')
+                          : unlocked
+                            ? t('sealStyles.tapToEquip')
+                            : t('sealStyles.lockedWithBadge', { badge: t(`badges.items.${style.unlockBadgeSlug}.title`) })}
+                      </p>
+                    </button>
+                  )
+                })}
+              </div>
             </section>
 
             <section className="mt-6">

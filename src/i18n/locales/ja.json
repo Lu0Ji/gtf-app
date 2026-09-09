@@ -1776,6 +1776,17 @@
     "interestsTitle": "何に興味がありますか？",
     "interestsDesc": "選んだトピックに合わせてフィードとおすすめのユーザーを調整します。いつでも設定から変更できます。"
   },
+  "sealStyles": {
+    "sectionEyebrow": "カスタマイズ",
+    "sectionTitle": "封印スタイル",
+    "equipped": "装着中",
+    "tapToEquip": "タップして装着",
+    "lockedWithBadge": "「{{badge}}」バッジで解放",
+    "featureDisabled": "この機能はまだ利用できません。",
+    "updateFailed": "封印スタイルを変更できませんでした。もう一度お試しください。",
+    "basic": { "title": "クラシック" },
+    "ferman": { "title": "勅令" }
+  },
   "admin": {
     "title": "管理パネル",
     "subtitle": "あなたにしか見えません",
