@@ -11,6 +11,7 @@ import { hideSealBanner, showSealBanner } from '../lib/ads.js'
 import { findSealStyle } from '../lib/seal-styles.js'
 import Chip from '../components/ui/Chip.jsx'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
+import SealDecoration from '../components/SealDecoration.jsx'
 
 // Display-only mirror of the quorum enforced server-side in
 // cast_prediction_vote() (supabase/schema.sql) — purely for copy like "en
@@ -731,22 +732,45 @@ export default function TahminKaydi() {
         ) : (
           <section className={`mx-5 mt-5 overflow-hidden rounded-theme shadow-sm ${sealStyle.containerClassName}`}>
             <div className="relative px-5 pb-5 pt-6">
-              <div className={`absolute right-[-18px] top-[-18px] h-28 w-28 rounded-full border ${sealStyle.accentBorderClassName}`} />
-              <div className={`absolute right-6 top-7 h-16 w-16 rounded-full border ${sealStyle.accentBorderClassName}`} />
-              <div className="relative flex items-start justify-between">
-                <div className="flex items-center gap-2">
-                  <span className="flex h-9 w-9 items-center justify-center rounded-theme bg-white/15">
-                    <iconify-icon icon={sealStyle.lockIcon} class="text-lg"></iconify-icon>
-                  </span>
-                  <div>
-                    <p className="font-heading text-xl font-extrabold tracking-tight">{t('profile.sealedShort')}</p>
+              {sealStyle.decorated ? (
+                <SealDecoration style={sealStyle} />
+              ) : (
+                <>
+                  <div className={`absolute right-[-18px] top-[-18px] h-28 w-28 rounded-full border ${sealStyle.accentBorderClassName}`} />
+                  <div className={`absolute right-6 top-7 h-16 w-16 rounded-full border ${sealStyle.accentBorderClassName}`} />
+                </>
+              )}
+              {sealStyle.decorated ? (
+                // Balmumu mühür madalyonu sağ üstte yer kaplıyor — "Henüz
+                // açılmadı" etiketi, başlıkla aynı satırda kalırsa madalyonla
+                // çakışıyor. Bu yüzden decorated stillerde etiket başlığın
+                // altına, alt yazının yanına iniyor (bkz. sealDecoration
+                // tasarım kontrolü, 2026-09-10).
+                <div className="relative mt-9">
+                  <p className="font-heading text-xl font-extrabold tracking-tight">{t('profile.sealedShort')}</p>
+                  <div className="mt-1.5 flex items-center justify-between">
                     <p className="text-[11px] text-white/65">{t('record.savedSecurely')}</p>
+                    <span className="rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-bold">
+                      {isManualSeal ? t('record.upToYouTag') : t('record.notOpenedTag')}
+                    </span>
                   </div>
                 </div>
-                <span className="rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-bold">
-                  {isManualSeal ? t('record.upToYouTag') : t('record.notOpenedTag')}
-                </span>
-              </div>
+              ) : (
+                <div className="relative flex items-start justify-between">
+                  <div className="flex items-center gap-2">
+                    <span className="flex h-9 w-9 items-center justify-center rounded-theme bg-white/15">
+                      <iconify-icon icon={sealStyle.lockIcon} class="text-lg"></iconify-icon>
+                    </span>
+                    <div>
+                      <p className="font-heading text-xl font-extrabold tracking-tight">{t('profile.sealedShort')}</p>
+                      <p className="text-[11px] text-white/65">{t('record.savedSecurely')}</p>
+                    </div>
+                  </div>
+                  <span className="rounded-full bg-white/15 px-2.5 py-1 text-[10px] font-bold">
+                    {isManualSeal ? t('record.upToYouTag') : t('record.notOpenedTag')}
+                  </span>
+                </div>
+              )}
 
               <div className="relative mt-6 rounded-theme border border-white/15 bg-white/10 p-4">
                 <div className="flex items-center justify-between">

@@ -7,9 +7,13 @@
 //
 // 'basic', bugünkü mevcut görünümün birebir aynısı — Success Criteria'nın
 // şartı, yeni sistemin bir yan etkisi olarak burada hiçbir şey değişmedi.
-// 'ferman', ilk kostüm (padişah fermanı teması) — renk/motif seçimi bu
-// turun bir tasarım yer tutucusu, pikselde kesinleşmiş bir karar değil;
-// istenirse /design-review ile ayrıca inceltilebilir.
+// 'ferman', ilk kostüm (padişah fermanı teması). Kullanıcı ilk sürümün sadece
+// renk değiştirdiğini, gerçekten mühürlü bir ferman gibi bir GÖRSEL istediğini
+// belirtti (2026-09-10) — `decorated: true` + `medallionIcon`, TahminKaydi.jsx'te
+// SealDecoration.jsx'in çizdiği balmumu mühür madalyonu + kurdele + doku
+// katmanını tetikliyor (bkz. o dosyanın başındaki not). `decorated` olmayan
+// bir stil (basic) bu katmanı hiç görmez — SealDecoration `style.decorated`
+// yoksa null döner.
 export const SEAL_STYLES = [
   {
     slug: 'basic',
@@ -26,6 +30,8 @@ export const SEAL_STYLES = [
     containerClassName: 'bg-[#6b1f2a] text-[#f6e9c9]',
     accentBorderClassName: 'border-[#c9a227]/25',
     lockIcon: 'lucide:scroll-text',
+    decorated: true,
+    medallionIcon: 'lucide:stamp',
   },
 ]
 
