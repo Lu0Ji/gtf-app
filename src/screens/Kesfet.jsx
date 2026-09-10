@@ -190,7 +190,7 @@ function CategoryTile({ category, count, variant, navigate }) {
 }
 
 export default function Kesfet() {
-  const { t } = useTranslation()
+  const { t, i18n } = useTranslation()
   const navigate = useNavigate()
   const location = useLocation()
   const { settings } = useUserSettings()
@@ -264,11 +264,17 @@ export default function Kesfet() {
           .limit(20),
         // News rows use event_date as publish time, not a future point —
         // see the GÜNDEM comment in supabase/schema.sql — so this is a
-        // plain "most recent first" query, no gte() cutoff.
+        // plain "most recent first" query, no gte() cutoff. Scoped to the
+        // viewer's own app language (2026-09-10: "sadece Türkiye için
+        // düşünmemek lazım") — fetch-news-headlines now sources every
+        // i18next language separately, and language is the only "where is
+        // this person" signal this app has (see the GÜNDEM: ÇOK DİLLİ
+        // comment in schema.sql for why not real geolocation).
         supabase
           .from('real_world_events')
           .select('*')
           .eq('kind', 'news')
+          .eq('language', i18n.resolvedLanguage || i18n.language || 'tr')
           .order('event_date', { ascending: false })
           .limit(20),
       ])

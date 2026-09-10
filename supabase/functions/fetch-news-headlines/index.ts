@@ -4,23 +4,28 @@
 // — see that function and supabase/schema.sql's GÜNDEM section for why
 // there's no real cron here.
 //
-// 2026-09-10: was Hürriyet-only. User feedback: "daha fazla tarafsız kaynak
-// ekleyelim" (let's add more impartial sources) — a single domestic outlet
-// is one newsroom's editorial lens on everything a user sees here. Added
-// BBC Türkçe and DW Türkçe: both foreign public-service broadcasters'
-// Turkish-language services, edited outside Turkey's own domestic press
-// pressures — the two most commonly cited "genuinely independent of
-// Turkish politics" Turkish-language newsrooms, as opposed to AA/TRT
-// (state-owned) or the openly partisan domestic press on either side.
-// Neither publishes real per-category feeds (every category slug guessed
-// and curled either 301-redirects to the same general feed [BBC] or 200s
-// with an empty channel [DW] — same "looks real, isn't" trap the Hürriyet
-// feeds comment below already warns about), so both are wired in as a
-// single general feed tagged 'dünya' rather than force-fit into a category
-// matrix that doesn't exist. DW's feed is also RSS 1.0/RDF, not RSS 2.0
-// like the other two (curled and diffed directly, not assumed) — items are
-// flat siblings of <channel> under <rdf:RDF>, dated via <dc:date> instead
-// of <pubDate>, hence the `format` field below.
+// 2026-09-10, two rounds of user feedback:
+// 1. "daha fazla tarafsız kaynak ekleyelim" (more impartial sources) — was
+//    Hürriyet-only. Added BBC Türkçe and DW Türkçe: foreign public-service
+//    broadcasters' Turkish services, edited outside Turkey's own domestic
+//    press pressures, as opposed to AA/TRT (state-owned) or partisan
+//    domestic press on either side.
+// 2. "sadece Türkiye için düşünmemek lazım" (don't just think about
+//    Turkey) — every user saw the same Turkish sources regardless of their
+//    app language. Every SOURCES entry now carries the `language` it's
+//    tagged with (real_world_events.language, see schema.sql) so Kesfet.jsx
+//    can scope its query to the viewer's own language instead of always
+//    querying Turkish rows. One same-caliber public broadcaster per
+//    language, same "foreign/public-service = independent of domestic
+//    politics" reasoning as round 1 — BBC's language services cover
+//    en/ru/ar/zh/es; neither BBC nor DW run German or Japanese services,
+//    so those two use each country's own flagship public broadcaster
+//    instead (Tagesschau/ARD for de, NHK for ja) — still public-service,
+//    just domestic since no foreign-language equivalent exists to reuse.
+// None of the non-Turkish sources publish real per-category feeds (unlike
+// Hürriyet) — every one is wired in as a single general feed tagged
+// 'dünya', the closest existing category to "general/world news", rather
+// than force-fit into a category matrix that doesn't exist for them.
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { withSupabase } from "@supabase/server";
 import { XMLParser } from "npm:fast-xml-parser@4";
@@ -30,6 +35,7 @@ const ITEMS_PER_FEED = 8;
 
 interface SourceDef {
   source: string;
+  language: string;
   format: "rss2" | "rdf";
   feeds: { url: string; category: string }[];
 }
@@ -37,6 +43,7 @@ interface SourceDef {
 const SOURCES: SourceDef[] = [
   {
     source: "hurriyet-rss",
+    language: "tr",
     format: "rss2",
     // Hürriyet's URL slug -> this app's own category key (lib/categories.js).
     // 2026-09-07: expanded from 5 to 9 — a beta pass flagged the gündem feed
@@ -63,13 +70,61 @@ const SOURCES: SourceDef[] = [
   },
   {
     source: "bbc-turkce-rss",
+    language: "tr",
     format: "rss2",
     feeds: [{ url: "https://feeds.bbci.co.uk/turkce/rss.xml", category: "dünya" }],
   },
   {
     source: "dw-turkce-rss",
+    language: "tr",
+    // RSS 1.0/RDF, not RSS 2.0 like every other feed here (curled and
+    // diffed directly, not assumed) — items are flat siblings of <channel>
+    // under <rdf:RDF>, dated via <dc:date> instead of <pubDate>.
     format: "rdf",
     feeds: [{ url: "https://rss.dw.com/rdf/rss-tur-all", category: "dünya" }],
+  },
+  {
+    source: "bbc-news-rss",
+    language: "en",
+    format: "rss2",
+    feeds: [{ url: "https://feeds.bbci.co.uk/news/rss.xml", category: "dünya" }],
+  },
+  {
+    source: "bbc-russian-rss",
+    language: "ru",
+    format: "rss2",
+    feeds: [{ url: "https://feeds.bbci.co.uk/russian/rss.xml", category: "dünya" }],
+  },
+  {
+    source: "bbc-arabic-rss",
+    language: "ar",
+    format: "rss2",
+    feeds: [{ url: "https://feeds.bbci.co.uk/arabic/rss.xml", category: "dünya" }],
+  },
+  {
+    source: "bbc-chinese-rss",
+    language: "zh",
+    format: "rss2",
+    // Simplified Chinese — matches this app's own zh.json locale.
+    feeds: [{ url: "https://feeds.bbci.co.uk/zhongwen/simp/rss.xml", category: "dünya" }],
+  },
+  {
+    source: "bbc-mundo-rss",
+    language: "es",
+    format: "rss2",
+    feeds: [{ url: "https://feeds.bbci.co.uk/mundo/rss.xml", category: "dünya" }],
+  },
+  {
+    source: "tagesschau-rss",
+    language: "de",
+    format: "rss2",
+    feeds: [{ url: "https://www.tagesschau.de/infoservices/alle-meldungen-100~rss2.xml", category: "dünya" }],
+  },
+  {
+    source: "nhk-rss",
+    language: "ja",
+    format: "rss2",
+    feeds: [{ url: "https://www3.nhk.or.jp/rss/news/cat0.xml", category: "dünya" }],
   },
 ];
 
@@ -93,7 +148,7 @@ export default {
     const skipped: string[] = [];
 
     await Promise.all(
-      SOURCES.map(async ({ source, format, feeds }) => {
+      SOURCES.map(async ({ source, language, format, feeds }) => {
         // Staleness is checked per source, not globally — one slow/stale
         // feed shouldn't block the others from refreshing, and a brand-new
         // source (nothing fetched yet) always runs.
@@ -135,6 +190,7 @@ export default {
                   external_id: link,
                   kind: "news",
                   category,
+                  language,
                   title: String(item.title).trim(),
                   subtitle: item.description ? String(item.description).trim().slice(0, 200) : null,
                   // Repurposed for news: publish time, not a future decision

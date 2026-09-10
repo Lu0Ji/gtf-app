@@ -2501,3 +2501,20 @@ create policy "Group admins can update group cover" on storage.objects for updat
     )
   );
 -- ─────────────────────────────────────────────────────────────────────────
+
+-- GÜNDEM: ÇOK DİLLİ HABER KAYNAKLARI (2026-09-10 kullanıcı bildirimi):
+-- "sadece Türkiye için düşünmemek lazım" — GÜNDEM bölümü (yukarı bakın)
+-- her dilde aynı Türkçe Hürriyet/BBC Türkçe/DW Türkçe üçlüsünü gösteriyordu.
+-- Uygulamanın zaten "bölge" sinyali olarak kullandığı tek şey seçili dil
+-- (bkz. UserSettingsContext.jsx'in region.language'ı, lib/format.js'in
+-- locale()'ı) — gerçek GPS/IP konumu değil, yeni bir izin/servis gerektirir,
+-- kapsam dışı bırakıldı. `language` sütunu bu yüzden i18next'in 8 dilini
+-- (tr/en/de/zh/ja/ru/es/ar) sınırlayan bir check constraint ile ekleniyor.
+-- Var olan tüm satırlar (sports + bugüne kadarki news) 'tr' varsayılanına
+-- düşüyor — hepsi zaten Türkçe/Türkiye bağlamlı kaynaklardan geldiği için
+-- bu doğru bir varsayılan, geriye dönük veri bozulmuyor.
+alter table public.real_world_events add column language text not null default 'tr';
+alter table public.real_world_events add constraint real_world_events_language_known_value
+  check (language in ('tr', 'en', 'de', 'zh', 'ja', 'ru', 'es', 'ar'));
+create index real_world_events_language_idx on public.real_world_events (language);
+-- ─────────────────────────────────────────────────────────────────────────
