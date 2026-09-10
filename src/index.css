@@ -35,6 +35,14 @@ body {
   margin: 0;
   background-color: var(--color-background);
   color: var(--color-foreground);
+  /* Every tappable element already gets its own pressed-state via Tailwind
+     active: utilities (active:scale-[0.98], active:bg-muted, etc. — ~40
+     screens use this). Without this reset, mobile WebViews additionally
+     flash their own translucent gray rectangle over the whole tap target on
+     top of that, fighting the app's own feedback — most noticeable on wide
+     flex-1 buttons like a group member row. One global suppression instead
+     of patching it screen by screen. */
+  -webkit-tap-highlight-color: transparent;
 }
 
 @media (prefers-color-scheme: dark) {
