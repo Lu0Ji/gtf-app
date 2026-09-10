@@ -1525,7 +1525,10 @@
     "retentionAll": "すべて",
     "retentionLastHour": "直近1時間",
     "retentionLast30Min": "直近30分",
-    "retentionLast15Min": "直近15分"
+    "retentionLast15Min": "直近15分",
+    "settingsTitle": "グループ設定",
+    "manageMembersTitle": "メンバーを管理",
+    "coverChangeCta": "カバー写真を変更"
   },
   "chat": {
     "sendAria": "メッセージを送信",
@@ -1788,8 +1791,12 @@
     "lockedWithBadge": "「{{badge}}」バッジで解放",
     "featureDisabled": "この機能はまだ利用できません。",
     "updateFailed": "封印スタイルを変更できませんでした。もう一度お試しください。",
-    "basic": { "title": "クラシック" },
-    "ferman": { "title": "勅令" }
+    "basic": {
+      "title": "クラシック"
+    },
+    "ferman": {
+      "title": "勅令"
+    }
   },
   "admin": {
     "title": "管理パネル",

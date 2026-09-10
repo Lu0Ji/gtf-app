@@ -1526,7 +1526,10 @@
     "retentionAll": "All",
     "retentionLastHour": "Last hour",
     "retentionLast30Min": "Last 30 minutes",
-    "retentionLast15Min": "Last 15 minutes"
+    "retentionLast15Min": "Last 15 minutes",
+    "settingsTitle": "Group Settings",
+    "manageMembersTitle": "Manage members",
+    "coverChangeCta": "Change cover photo"
   },
   "chat": {
     "sendAria": "Send message",
@@ -1789,8 +1792,12 @@
     "lockedWithBadge": "Unlocks with the {{badge}} badge",
     "featureDisabled": "This feature isn't available yet.",
     "updateFailed": "Couldn't change seal style, try again.",
-    "basic": { "title": "Classic" },
-    "ferman": { "title": "Royal Decree" }
+    "basic": {
+      "title": "Classic"
+    },
+    "ferman": {
+      "title": "Royal Decree"
+    }
   },
   "admin": {
     "title": "Admin Panel",

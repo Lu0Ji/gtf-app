@@ -1526,7 +1526,10 @@
     "retentionAll": "Todos",
     "retentionLastHour": "Última hora",
     "retentionLast30Min": "Últimos 30 minutos",
-    "retentionLast15Min": "Últimos 15 minutos"
+    "retentionLast15Min": "Últimos 15 minutos",
+    "settingsTitle": "Ajustes del grupo",
+    "manageMembersTitle": "Gestionar miembros",
+    "coverChangeCta": "Cambiar foto de portada"
   },
   "chat": {
     "sendAria": "Enviar mensaje",
@@ -1789,8 +1792,12 @@
     "lockedWithBadge": "Se desbloquea con la insignia {{badge}}",
     "featureDisabled": "Esta función aún no está disponible.",
     "updateFailed": "No se pudo cambiar el estilo del sello, intenta de nuevo.",
-    "basic": { "title": "Clásico" },
-    "ferman": { "title": "Decreto real" }
+    "basic": {
+      "title": "Clásico"
+    },
+    "ferman": {
+      "title": "Decreto real"
+    }
   },
   "admin": {
     "title": "Panel de administración",

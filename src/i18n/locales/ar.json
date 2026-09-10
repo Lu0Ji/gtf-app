@@ -1530,7 +1530,10 @@
     "retentionAll": "الكل",
     "retentionLastHour": "آخر ساعة",
     "retentionLast30Min": "آخر 30 دقيقة",
-    "retentionLast15Min": "آخر 15 دقيقة"
+    "retentionLast15Min": "آخر 15 دقيقة",
+    "settingsTitle": "إعدادات المجموعة",
+    "manageMembersTitle": "إدارة الأعضاء",
+    "coverChangeCta": "تغيير صورة الغلاف"
   },
   "chat": {
     "sendAria": "إرسال الرسالة",
@@ -1793,8 +1796,12 @@
     "lockedWithBadge": "يُفتح بشارة {{badge}}",
     "featureDisabled": "هذه الميزة غير متاحة بعد.",
     "updateFailed": "تعذّر تغيير نمط الختم، حاول مرة أخرى.",
-    "basic": { "title": "كلاسيكي" },
-    "ferman": { "title": "الفرمان السلطاني" }
+    "basic": {
+      "title": "كلاسيكي"
+    },
+    "ferman": {
+      "title": "الفرمان السلطاني"
+    }
   },
   "admin": {
     "title": "لوحة الإدارة",

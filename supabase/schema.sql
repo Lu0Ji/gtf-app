@@ -2436,3 +2436,68 @@ alter table public.profiles add constraint equipped_seal_style_known_value
 -- modelinde: tamamen istemci tarafında, sunucu tarafında "bu rozeti
 -- gerçekten kazandı mı" yeniden doğrulaması yok.
 -- ─────────────────────────────────────────────────────────────────────────
+
+-- GRUP ROLÜ: KURUCU HER ZAMAN YÖNETİCİ (2026-09-10 kullanıcı bildirimi):
+-- Kurucu üye gruptan çıkıp tekrar girince "member" olarak görünüyordu —
+-- istemci (GrupDetayi.jsx) yeniden katılırken role hiç göndermiyor, sütun
+-- varsayılanı 'member'. Bunu istemci tarafında "eğer kurucuysan role:
+-- 'admin' gönder" diye düzeltmek yerine sunucuda kilitliyoruz: aşağıdaki
+-- trigger her INSERT'te NEW.role'u YOK SAYIP grubun created_by'ı ise
+-- 'admin', değilse 'member' olarak zorluyor. Bunun ikinci, daha önemli bir
+-- nedeni var: "Users can join groups" insert policy'si (satır ~175)
+-- sadece auth.uid() = user_id kontrol ediyor, role'e hiç bakmıyor — yani
+-- bu trigger olmadan HERHANGİ bir istemci, herhangi bir gruba role: 'admin'
+-- göndererek kendini direkt yönetici yapabilirdi. Trigger hem kurucu-tekrar-
+-- katılma hatasını çözüyor hem de bu açığı kapatıyor.
+create or replace function public.set_group_member_role()
+returns trigger
+language plpgsql
+security definer
+set search_path = public
+as $$
+begin
+  if new.user_id = (select created_by from public.groups where id = new.group_id) then
+    new.role := 'admin';
+  else
+    new.role := 'member';
+  end if;
+  return new;
+end;
+$$;
+
+drop trigger if exists group_members_role_on_insert on public.group_members;
+create trigger group_members_role_on_insert
+  before insert on public.group_members
+  for each row execute function public.set_group_member_role();
+-- ─────────────────────────────────────────────────────────────────────────
+
+-- GRUP AYARLARI: kapak fotoğrafı artık kuruluştan SONRA da değiştirilebiliyor
+-- (GrupDetayi.jsx'in yeni GroupSettingsSheet'i), ve "Admins can update their
+-- groups" (satır ~675) zaten kurucu dışındaki yöneticilere de grup satırını
+-- düzenleme hakkı veriyor — ama storage.objects üzerindeki "Group creators
+-- can upload/update group cover" politikaları (satır ~287) hâlâ SADECE
+-- g.created_by = auth.uid() diyordu. Yani kurucu olmayan bir yönetici ismi/
+-- açıklamayı değiştirebiliyor ama kapak fotoğrafını değiştiremiyordu —
+-- sessiz bir tutarsızlık. group_members.role = 'admin' kontrolüne çevirerek
+-- groups tablosundaki yetkiyle eşitliyoruz.
+drop policy "Group creators can upload group cover" on storage.objects;
+create policy "Group admins can upload group cover" on storage.objects for insert
+  with check (
+    bucket_id = 'covers'
+    and (storage.foldername(name))[1] = 'group'
+    and exists (
+      select 1 from public.group_members gm
+      where gm.group_id::text = (storage.foldername(name))[2] and gm.user_id = auth.uid() and gm.role = 'admin'
+    )
+  );
+drop policy "Group creators can update group cover" on storage.objects;
+create policy "Group admins can update group cover" on storage.objects for update
+  using (
+    bucket_id = 'covers'
+    and (storage.foldername(name))[1] = 'group'
+    and exists (
+      select 1 from public.group_members gm
+      where gm.group_id::text = (storage.foldername(name))[2] and gm.user_id = auth.uid() and gm.role = 'admin'
+    )
+  );
+-- ─────────────────────────────────────────────────────────────────────────

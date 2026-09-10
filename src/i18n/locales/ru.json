@@ -1528,7 +1528,10 @@
     "retentionAll": "Все",
     "retentionLastHour": "Последний час",
     "retentionLast30Min": "Последние 30 минут",
-    "retentionLast15Min": "Последние 15 минут"
+    "retentionLast15Min": "Последние 15 минут",
+    "settingsTitle": "Настройки группы",
+    "manageMembersTitle": "Управление участниками",
+    "coverChangeCta": "Изменить обложку"
   },
   "chat": {
     "sendAria": "Отправить сообщение",
@@ -1791,8 +1794,12 @@
     "lockedWithBadge": "Открывается значком «{{badge}}»",
     "featureDisabled": "Эта функция пока недоступна.",
     "updateFailed": "Не удалось изменить стиль печати, попробуйте снова.",
-    "basic": { "title": "Классический" },
-    "ferman": { "title": "Султанский указ" }
+    "basic": {
+      "title": "Классический"
+    },
+    "ferman": {
+      "title": "Султанский указ"
+    }
   },
   "admin": {
     "title": "Панель администратора",

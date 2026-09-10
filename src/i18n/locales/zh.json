@@ -1525,7 +1525,10 @@
     "retentionAll": "全部",
     "retentionLastHour": "最近 1 小时",
     "retentionLast30Min": "最近 30 分钟",
-    "retentionLast15Min": "最近 15 分钟"
+    "retentionLast15Min": "最近 15 分钟",
+    "settingsTitle": "群组设置",
+    "manageMembersTitle": "管理成员",
+    "coverChangeCta": "更换封面图片"
   },
   "chat": {
     "sendAria": "发送消息",
@@ -1788,8 +1791,12 @@
     "lockedWithBadge": "通过「{{badge}}」徽章解锁",
     "featureDisabled": "该功能尚未开放。",
     "updateFailed": "无法更改封印样式，请重试。",
-    "basic": { "title": "经典" },
-    "ferman": { "title": "御旨圣令" }
+    "basic": {
+      "title": "经典"
+    },
+    "ferman": {
+      "title": "御旨圣令"
+    }
   },
   "admin": {
     "title": "管理面板",

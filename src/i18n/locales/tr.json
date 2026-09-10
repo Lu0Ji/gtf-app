@@ -1526,7 +1526,10 @@
     "retentionAll": "Tümü",
     "retentionLastHour": "Son 1 saat",
     "retentionLast30Min": "Son 30 dakika",
-    "retentionLast15Min": "Son 15 dakika"
+    "retentionLast15Min": "Son 15 dakika",
+    "settingsTitle": "Grup Ayarları",
+    "manageMembersTitle": "Üyeleri yönet",
+    "coverChangeCta": "Kapak fotoğrafını değiştir"
   },
   "chat": {
     "sendAria": "Mesaj gönder",
@@ -1789,8 +1792,12 @@
     "lockedWithBadge": "{{badge}} rozetiyle açılır",
     "featureDisabled": "Bu özellik henüz aktif değil.",
     "updateFailed": "Kostüm değiştirilemedi, tekrar dene.",
-    "basic": { "title": "Klasik" },
-    "ferman": { "title": "Padişah Fermanı" }
+    "basic": {
+      "title": "Klasik"
+    },
+    "ferman": {
+      "title": "Padişah Fermanı"
+    }
   },
   "admin": {
     "title": "Admin Paneli",

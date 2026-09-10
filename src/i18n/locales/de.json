@@ -1526,7 +1526,10 @@
     "retentionAll": "Alle",
     "retentionLastHour": "Letzte Stunde",
     "retentionLast30Min": "Letzte 30 Minuten",
-    "retentionLast15Min": "Letzte 15 Minuten"
+    "retentionLast15Min": "Letzte 15 Minuten",
+    "settingsTitle": "Gruppeneinstellungen",
+    "manageMembersTitle": "Mitglieder verwalten",
+    "coverChangeCta": "Titelbild ändern"
   },
   "chat": {
     "sendAria": "Nachricht senden",
@@ -1789,8 +1792,12 @@
     "lockedWithBadge": "Wird mit dem Abzeichen „{{badge}}“ freigeschaltet",
     "featureDisabled": "Diese Funktion ist noch nicht verfügbar.",
     "updateFailed": "Siegelstil konnte nicht geändert werden, versuch es erneut.",
-    "basic": { "title": "Klassisch" },
-    "ferman": { "title": "Sultansedikt" }
+    "basic": {
+      "title": "Klassisch"
+    },
+    "ferman": {
+      "title": "Sultansedikt"
+    }
   },
   "admin": {
     "title": "Admin-Panel",

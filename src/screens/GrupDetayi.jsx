@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useNavigate, useParams } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { fallbackAvatarFor } from '../lib/images.js'
@@ -22,9 +22,23 @@ const RETENTION_OPTIONS = [
   { value: 15, labelKey: 'groups.retentionLast15Min' },
 ]
 
-function EditGroupModal({ group, onClose, onSaved }) {
+function GroupSettingsSheet({
+  group,
+  members,
+  currentUserId,
+  onClose,
+  onSaved,
+  onToggleAdmin,
+  onKickMember,
+  memberActionBusy,
+  openMemberMenu,
+  setOpenMemberMenu,
+}) {
   const { t } = useTranslation()
   const { showToast } = useToast()
+  const coverInputRef = useRef(null)
+  const [coverFile, setCoverFile] = useState(null)
+  const [coverPreview, setCoverPreview] = useState(group.cover_image_url || null)
   const [name, setName] = useState(group.name || '')
   const [description, setDescription] = useState(group.description || '')
   const [category, setCategory] = useState(group.category || 'genel')
@@ -38,10 +52,38 @@ function EditGroupModal({ group, onClose, onSaved }) {
   const [retention, setRetention] = useState(group.message_retention_minutes ?? null)
   const [saving, setSaving] = useState(false)
 
+  function handlePickCover(e) {
+    const file = e.target.files?.[0]
+    if (!file) return
+    setCoverFile(file)
+    setCoverPreview(URL.createObjectURL(file))
+  }
+
   async function handleSave() {
     if (!name.trim() || !category.trim() || saving) return
     setSaving(true)
-    const basePayload = { name: name.trim(), description: description.trim() || null, category: category.trim().toLowerCase() }
+
+    let coverImageUrl = group.cover_image_url
+    if (coverFile) {
+      const ext = coverFile.name.split('.').pop()
+      const path = `group/${group.id}/cover.${ext}`
+      // upsert: true — unlike group creation (Gruplar.jsx's CreateGroupModal,
+      // always a brand-new path), this can overwrite an existing cover at
+      // the same path. Storage RLS: "Group admins can update group cover"
+      // (supabase/schema.sql) — any current admin, not just the founder.
+      const { error: uploadError } = await supabase.storage.from('covers').upload(path, coverFile, { upsert: true })
+      if (!uploadError) {
+        const { data: publicUrlData } = supabase.storage.from('covers').getPublicUrl(path)
+        coverImageUrl = publicUrlData.publicUrl
+      }
+    }
+
+    const basePayload = {
+      name: name.trim(),
+      description: description.trim() || null,
+      category: category.trim().toLowerCase(),
+      cover_image_url: coverImageUrl,
+    }
     let { error } = await supabase
       .from('groups')
       .update({ ...basePayload, message_retention_minutes: retention })
@@ -71,12 +113,37 @@ function EditGroupModal({ group, onClose, onSaved }) {
         className="flex max-h-[85vh] w-full flex-col overflow-y-auto rounded-t-theme bg-background p-5 pb-8"
       >
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-heading text-lg font-bold">{t('groups.editTitle')}</h2>
+          <h2 className="font-heading text-lg font-bold">{t('groups.settingsTitle')}</h2>
           <button onClick={onClose} aria-label={t('common.close')} className="text-muted-foreground">
             <iconify-icon icon="lucide:x" class="text-xl"></iconify-icon>
           </button>
         </div>
         <div className="space-y-4">
+          <div>
+            <label className="mb-2 block text-sm font-bold text-foreground">{t('groups.coverLabel')}</label>
+            <input ref={coverInputRef} type="file" accept="image/*" className="hidden" onChange={handlePickCover} />
+            <button
+              onClick={() => coverInputRef.current?.click()}
+              className="flex h-24 w-full items-center justify-center overflow-hidden rounded-theme border border-dashed border-border bg-muted"
+            >
+              {coverPreview ? (
+                <img src={coverPreview} alt={t('groups.coverPreviewAlt')} className="h-full w-full object-cover" />
+              ) : (
+                <span className="flex items-center gap-1.5 text-xs font-bold text-muted-foreground">
+                  <iconify-icon icon="lucide:image-plus" class="text-base"></iconify-icon>
+                  {t('groups.coverAddCta')}
+                </span>
+              )}
+            </button>
+            {coverPreview && (
+              <button
+                onClick={() => coverInputRef.current?.click()}
+                className="mt-2 text-[11px] font-bold text-primary"
+              >
+                {t('groups.coverChangeCta')}
+              </button>
+            )}
+          </div>
           <div>
             <label className="mb-2 block text-sm font-bold text-foreground">{t('groups.nameLabel')}</label>
             <input
@@ -168,7 +235,122 @@ function EditGroupModal({ group, onClose, onSaved }) {
           >
             {saving ? t('common.saving') : t('common.save')}
           </button>
+
+          <div className="border-t border-border pt-4">
+            <h3 className="mb-2 text-sm font-bold text-foreground">{t('groups.manageMembersTitle')}</h3>
+            {members.length === 0 ? (
+              <p className="text-xs text-muted-foreground">{t('groups.noMembersYet')}</p>
+            ) : (
+              <div className="divide-y divide-border rounded-theme border border-border bg-card shadow-sm">
+                {members.map((m) => (
+                  <div key={m.user_id}>
+                    <div className="flex w-full items-center gap-3 p-3.5 text-left">
+                      <div className="h-9 w-9 shrink-0 overflow-hidden rounded-full bg-muted">
+                        <img
+                          src={m.profiles.avatar_url || fallbackAvatarFor(m.user_id)}
+                          alt={m.profiles.display_name}
+                          className="h-full w-full object-cover"
+                        />
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <p className="truncate text-sm font-bold">{m.profiles.display_name}</p>
+                        <p className="truncate text-[11px] text-muted-foreground">@{m.profiles.username}</p>
+                      </div>
+                      {m.role === 'admin' && (
+                        <span className="shrink-0 rounded-full bg-secondary px-2 py-1 text-[9px] font-bold text-secondary-foreground">
+                          {t('groups.adminBadge')}
+                        </span>
+                      )}
+                      {m.user_id !== currentUserId && (
+                        <button
+                          aria-label={t('groups.memberOptionsAria')}
+                          onClick={() => setOpenMemberMenu((prev) => (prev === m.user_id ? null : m.user_id))}
+                          className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground"
+                        >
+                          <iconify-icon icon="lucide:more-vertical" class="text-base"></iconify-icon>
+                        </button>
+                      )}
+                    </div>
+                    {openMemberMenu === m.user_id && (
+                      <div className="flex gap-2 border-t border-border bg-muted/60 px-3.5 py-3">
+                        <button
+                          onClick={() => onToggleAdmin(m)}
+                          disabled={memberActionBusy}
+                          className="flex-1 rounded-theme bg-card px-3 py-2 text-[11px] font-bold text-foreground shadow-sm disabled:opacity-60"
+                        >
+                          {m.role === 'admin' ? t('groups.demoteFromAdmin') : t('groups.promoteToAdmin')}
+                        </button>
+                        <button
+                          onClick={() => onKickMember(m)}
+                          disabled={memberActionBusy}
+                          className="flex-1 rounded-theme bg-destructive/10 px-3 py-2 text-[11px] font-bold text-destructive disabled:opacity-60"
+                        >
+                          {t('groups.removeFromGroup')}
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
+      </div>
+    </div>
+  )
+}
+
+// Public, view-only — tapping "Üyeleri gör" opens this instead of the old
+// always-rendered inline member list. Role/kick controls live only in
+// GroupSettingsSheet now (admin-only); this sheet is for browsing who's in
+// the group, same as before minus the moderation menu.
+function MembersSheet({ members, onlineIds, onClose, onOpenProfile }) {
+  const { t } = useTranslation()
+  return (
+    <div className="fixed inset-0 z-50 flex items-end bg-black/40" onClick={onClose}>
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="flex max-h-[85vh] w-full flex-col overflow-y-auto rounded-t-theme bg-background p-5 pb-8"
+      >
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="font-heading text-lg font-bold">{t('groups.membersCount', { count: members.length })}</h2>
+          <button onClick={onClose} aria-label={t('common.close')} className="text-muted-foreground">
+            <iconify-icon icon="lucide:x" class="text-xl"></iconify-icon>
+          </button>
+        </div>
+        {members.length === 0 ? (
+          <p className="text-xs text-muted-foreground">{t('groups.noMembersYet')}</p>
+        ) : (
+          <div className="divide-y divide-border rounded-theme border border-border bg-card shadow-sm">
+            {members.map((m) => (
+              <button
+                key={m.user_id}
+                onClick={() => onOpenProfile(m.user_id)}
+                className="flex w-full items-center gap-3 p-3.5 text-left"
+              >
+                <div className="relative h-10 w-10 shrink-0 overflow-hidden rounded-full bg-muted">
+                  <img
+                    src={m.profiles.avatar_url || fallbackAvatarFor(m.user_id)}
+                    alt={m.profiles.display_name}
+                    className="h-full w-full object-cover"
+                  />
+                  {onlineIds.has(m.user_id) && (
+                    <span className="absolute bottom-0 right-0 h-2 w-2 rounded-full border border-background bg-success" />
+                  )}
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-bold">{m.profiles.display_name}</p>
+                  <p className="truncate text-[11px] text-muted-foreground">@{m.profiles.username}</p>
+                </div>
+                {m.role === 'admin' && (
+                  <span className="shrink-0 rounded-full bg-secondary px-2 py-1 text-[9px] font-bold text-secondary-foreground">
+                    {t('groups.adminBadge')}
+                  </span>
+                )}
+              </button>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   )
@@ -234,7 +416,8 @@ export default function GrupDetayi() {
   const [predictions, setPredictions] = useState([])
   const [loading, setLoading] = useState(true)
   const [membershipBusy, setMembershipBusy] = useState(false)
-  const [showEdit, setShowEdit] = useState(false)
+  const [showSettings, setShowSettings] = useState(false)
+  const [showMembers, setShowMembers] = useState(false)
   const [openMemberMenu, setOpenMemberMenu] = useState(null)
   const [memberActionBusy, setMemberActionBusy] = useState(false)
 
@@ -363,11 +546,11 @@ export default function GrupDetayi() {
         <div className="flex items-center gap-2">
           {isAdmin && (
             <button
-              aria-label={t('groups.editTitle')}
-              onClick={() => setShowEdit(true)}
+              aria-label={t('groups.settingsTitle')}
+              onClick={() => setShowSettings(true)}
               className="flex h-10 w-10 items-center justify-center rounded-theme border border-border bg-card/90 text-foreground shadow-sm backdrop-blur-sm"
             >
-              <iconify-icon icon="lucide:pencil" class="text-[17px]"></iconify-icon>
+              <iconify-icon icon="lucide:settings" class="text-[17px]"></iconify-icon>
             </button>
           )}
         </div>
@@ -431,10 +614,7 @@ export default function GrupDetayi() {
         )}
 
         {members.length > 0 && (
-          <button
-            onClick={() => document.getElementById('grup-uyeler')?.scrollIntoView({ behavior: 'smooth' })}
-            className="mt-4 flex items-center gap-2"
-          >
+          <button onClick={() => setShowMembers(true)} className="mt-4 flex items-center gap-2">
             <div className="flex -space-x-2">
               {members.slice(0, 5).map((m) => (
                 <div key={m.user_id} className="relative h-8 w-8 overflow-hidden rounded-full border-2 border-background bg-muted">
@@ -459,6 +639,7 @@ export default function GrupDetayi() {
                 <span className="ml-1.5 text-success">· {t('groups.onlineNow', { count: onlineCount })}</span>
               )}
             </span>
+            <iconify-icon icon="lucide:chevron-right" class="text-sm text-muted-foreground"></iconify-icon>
           </button>
         )}
 
@@ -539,79 +720,32 @@ export default function GrupDetayi() {
           )}
         </section>
 
-        <section id="grup-uyeler" className="mt-7 scroll-mt-5">
-          <h2 className="font-heading text-base font-bold tracking-tight">{t('groups.membersCount', { count: members.length })}</h2>
-          {members.length === 0 ? (
-            <p className="mt-3 text-xs text-muted-foreground">{t('groups.noMembersYet')}</p>
-          ) : (
-            <div className="mt-3 divide-y divide-border rounded-theme border border-border bg-card shadow-sm">
-              {members.map((m) => (
-                <div key={m.user_id}>
-                  <div className="flex w-full items-center gap-3 p-3.5 text-left">
-                    <button
-                      onClick={() => navigate(`/kullanici/${m.user_id}`)}
-                      className="flex min-w-0 flex-1 items-center gap-3 text-left"
-                    >
-                      <div className="h-10 w-10 shrink-0 overflow-hidden rounded-full bg-muted">
-                        <img
-                          src={m.profiles.avatar_url || fallbackAvatarFor(m.user_id)}
-                          alt={m.profiles.display_name}
-                          className="h-full w-full object-cover"
-                        />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-bold">{m.profiles.display_name}</p>
-                        <p className="truncate text-[11px] text-muted-foreground">@{m.profiles.username}</p>
-                      </div>
-                    </button>
-                    {m.role === 'admin' && (
-                      <span className="shrink-0 rounded-full bg-secondary px-2 py-1 text-[9px] font-bold text-secondary-foreground">
-                        {t('groups.adminBadge')}
-                      </span>
-                    )}
-                    {isAdmin && m.user_id !== user?.id && (
-                      <button
-                        aria-label={t('groups.memberOptionsAria')}
-                        onClick={() => setOpenMemberMenu((prev) => (prev === m.user_id ? null : m.user_id))}
-                        className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-muted-foreground"
-                      >
-                        <iconify-icon icon="lucide:more-vertical" class="text-base"></iconify-icon>
-                      </button>
-                    )}
-                  </div>
-                  {openMemberMenu === m.user_id && (
-                    <div className="flex gap-2 border-t border-border bg-muted/60 px-3.5 py-3">
-                      <button
-                        onClick={() => handleToggleAdmin(m)}
-                        disabled={memberActionBusy}
-                        className="flex-1 rounded-theme bg-card px-3 py-2 text-[11px] font-bold text-foreground shadow-sm disabled:opacity-60"
-                      >
-                        {m.role === 'admin' ? t('groups.demoteFromAdmin') : t('groups.promoteToAdmin')}
-                      </button>
-                      <button
-                        onClick={() => handleKickMember(m)}
-                        disabled={memberActionBusy}
-                        className="flex-1 rounded-theme bg-destructive/10 px-3 py-2 text-[11px] font-bold text-destructive disabled:opacity-60"
-                      >
-                        {t('groups.removeFromGroup')}
-                      </button>
-                    </div>
-                  )}
-                </div>
-              ))}
-            </div>
-          )}
-        </section>
       </main>
 
-      {showEdit && (
-        <EditGroupModal
+      {showMembers && (
+        <MembersSheet
+          members={members}
+          onlineIds={onlineIds}
+          onClose={() => setShowMembers(false)}
+          onOpenProfile={(userId) => navigate(`/kullanici/${userId}`)}
+        />
+      )}
+
+      {showSettings && (
+        <GroupSettingsSheet
           group={group}
-          onClose={() => setShowEdit(false)}
+          members={members}
+          currentUserId={user?.id}
+          onClose={() => setShowSettings(false)}
           onSaved={(updates) => {
             setGroup((prev) => ({ ...prev, ...updates }))
-            setShowEdit(false)
+            setShowSettings(false)
           }}
+          onToggleAdmin={handleToggleAdmin}
+          onKickMember={handleKickMember}
+          memberActionBusy={memberActionBusy}
+          openMemberMenu={openMemberMenu}
+          setOpenMemberMenu={setOpenMemberMenu}
         />
       )}
 
