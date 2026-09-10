@@ -69,6 +69,36 @@ export default function TahminKaydi() {
   // güvenli şekilde 'basic'e döner.
   const [equippedSealStyle, setEquippedSealStyle] = useState(null)
 
+  // React Router doesn't remount this screen just because navigate() was
+  // called again with a new `state` — same pathname, same component
+  // instance, so the `useState` initializer above (which only runs once,
+  // on first mount) never sees the new prediction. Symptom: click one
+  // "Yaklaşan açılışlar" sidebar item (RightRail.jsx) while already on this
+  // screen from a previous click, and nothing happens until you leave and
+  // come back. `location.state` gets a new object identity on every
+  // navigate() call — even to the same path — so syncing on it here is what
+  // makes a second click actually work.
+  useEffect(() => {
+    const incoming = location.state?.prediction
+    if (incoming && incoming.id !== record?.id) {
+      setRecord(incoming)
+      // Likes/comments/votes/seal style all reload on their own (keyed off
+      // record.id/author_id elsewhere) — but these are pure UI-transient
+      // states for a verify-in-progress flow, tied to whichever record was
+      // on screen a moment ago. Left alone, switching records mid-flow would
+      // carry stale text/selections into the new one.
+      setPendingResult(null)
+      setEvidenceNote('')
+      setEvidenceUrl('')
+      setCopied(false)
+    }
+    // record?.id is read only to decide whether this is actually a new
+    // record, not to resync when it changes on its own (e.g. after a
+    // verify) — including it here would refire this effect on every such
+    // update and stomp the in-progress evidence fields above.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state])
+
   // Arriving from a push notification deep link (or any bare URL) means
   // there's no navigation state to read the prediction from — only the
   // ?id= query param. Fetch it once before giving up and redirecting home.

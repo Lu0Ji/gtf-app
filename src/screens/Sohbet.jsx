@@ -35,6 +35,26 @@ export default function Sohbet() {
   const typingSentAtRef = useRef(0)
   const partnerTypingTimeoutRef = useRef(null)
 
+  // Same class of bug as TahminKaydi.jsx's record-sync effect: navigate()
+  // to this same path with a different partner (e.g. picking another
+  // conversation from Mesajlar while this chat is already open) doesn't
+  // remount the screen, so the useState initializer above never sees the
+  // new partner without this. location.state gets a fresh object identity
+  // on every navigate() call, even to the same pathname.
+  useEffect(() => {
+    const incoming = location.state?.partner
+    if (incoming && incoming.id !== partner?.id) {
+      setPartner(incoming)
+      // An unsent draft for the old partner has no business appearing in
+      // the new conversation.
+      setDraft('')
+    }
+    // partner?.id is read only to decide whether this is actually a new
+    // partner, not to resync when it changes on its own — including it here
+    // would refire this effect on every such update and stomp the draft.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [location.state])
+
   // Arriving from a push notification deep link means there's no navigation
   // state to read the chat partner from — only ?userId=. Fetch the profile
   // once before giving up and bouncing back to Mesajlar.
