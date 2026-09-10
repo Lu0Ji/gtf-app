@@ -323,13 +323,21 @@ export default function Kesfet() {
       })
       setUpcomingEvents(rankedEvents)
 
+      // News gets an actual filter, not just a re-sort like events above —
+      // user feedback (2026-09-10): seeing categories you never picked as
+      // an interest, over and over, wears on people more for a fast-moving
+      // feed like news than it does for the sparser events list. Safe to
+      // filter here specifically because news is no longer thin: 3 sources
+      // now (see fetch-news-headlines) means every real interest has
+      // enough volume to not go empty. Still falls back to the unfiltered
+      // list if the filter WOULD be empty (an interest with no fresh items
+      // right now, or no interests picked at all) — an empty section reads
+      // as broken, a slightly-off-topic one doesn't.
       const news = newsRes.error ? [] : newsRes.data || []
-      const rankedNews = [...news].sort((a, b) => {
-        const aMatch = interests.has(a.category) ? 0 : 1
-        const bMatch = interests.has(b.category) ? 0 : 1
-        if (aMatch !== bMatch) return aMatch - bMatch
-        return new Date(b.event_date) - new Date(a.event_date)
-      })
+      const interestedNews = interests.size > 0 ? news.filter((n) => interests.has(n.category)) : []
+      const rankedNews = [...(interestedNews.length > 0 ? interestedNews : news)].sort(
+        (a, b) => new Date(b.event_date) - new Date(a.event_date)
+      )
       setNewsHeadlines(rankedNews)
       setLoading(false)
     }
