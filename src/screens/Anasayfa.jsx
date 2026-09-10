@@ -22,6 +22,13 @@ import { fetchPeopleSuggestions } from '../lib/peopleSuggestions.js'
 // language at once.
 const CATEGORY_TABS = ['all', ...CATEGORY_SLUGS]
 
+// Kullanıcı isteği: "Mühürlü tahminler, Yakında açılacaklar, Açılmış tahminler
+// diye kullanıcı aratabilsin." 'all' burada da UI-only bir sentinel.
+// 'opening_soon' ve 'sealed'in tanımları RightRail.jsx'in "Yaklaşan açılışlar"
+// widget'ıyla bilinçli olarak aynı (status='sealed' + event_date gelecekte) —
+// aynı "yakında" kavramının uygulama içinde iki farklı tanımı olmasın diye.
+const STATUS_TABS = ['all', 'sealed', 'opening_soon', 'opened']
+
 function Header() {
   const { t } = useTranslation()
   const { profile } = useAuth()
@@ -176,6 +183,45 @@ function CategoryTabs({ active, onSelect }) {
               }
             >
               {label}
+            </button>
+          )
+        })}
+      </div>
+    </section>
+  )
+}
+
+function StatusTabs({ active, onSelect }) {
+  const { t } = useTranslation()
+  return (
+    <section className="mt-3">
+      <div className="flex gap-2 overflow-x-auto px-5 pb-1">
+        {STATUS_TABS.map((key) => {
+          const isActive = key === active
+          return (
+            <button
+              key={key}
+              type="button"
+              onClick={() => onSelect(key)}
+              className={
+                isActive
+                  ? 'flex shrink-0 items-center gap-1.5 rounded-full bg-secondary px-3.5 py-1.5 text-[11px] font-bold text-secondary-foreground'
+                  : 'flex shrink-0 items-center gap-1.5 rounded-full border border-dashed border-border px-3.5 py-1.5 text-[11px] font-semibold text-muted-foreground'
+              }
+            >
+              <iconify-icon
+                icon={
+                  key === 'all'
+                    ? 'lucide:list-filter'
+                    : key === 'sealed'
+                      ? 'lucide:lock-keyhole'
+                      : key === 'opening_soon'
+                        ? 'lucide:hourglass'
+                        : 'lucide:lock-open'
+                }
+                class="text-xs"
+              ></iconify-icon>
+              {t(`home.statusFilter_${key}`)}
             </button>
           )
         })}
@@ -397,7 +443,7 @@ function PredictionCard({ prediction, social, onToggleLike, onToggleSave }) {
 const EMPTY_SOCIAL = { liked: false, likeCount: 0, saved: false, commentCount: 0 }
 const FEED_PAGE_SIZE = 15
 
-function PredictionFeed({ category }) {
+function PredictionFeed({ category, statusFilter = 'all' }) {
   const { t } = useTranslation()
   const { user, profile } = useAuth()
   const { showToast } = useToast()
@@ -468,11 +514,27 @@ function PredictionFeed({ category }) {
           .from('predictions')
           .select('*, profiles:author_id(display_name, username, avatar_url)')
           .eq('is_private', false)
-          .order('created_at', { ascending: false })
-          .range(from, to)
         if (filterGroupId) q = q.is('group_id', null)
         if (category !== 'all') q = q.eq('category', category)
-        return q
+        // Kullanıcı isteği: "Mühürlü tahminler, Yakında açılacaklar, Açılmış
+        // tahminler diye aratabilsin." 'opening_soon'un tanımı RightRail'in
+        // "Yaklaşan açılışlar" widget'ıyla bilinçli olarak aynı (bkz. STATUS_TABS
+        // yorumu). 'opened' = TahminKaydi.jsx'in isRevealed mantığıyla aynı:
+        // ya doğrulanmış, ya da takvimli bir mühürün süresi geçmiş — henüz kimse
+        // doğrulamamış olsa bile içerik zaten görünür durumda.
+        const nowIso = new Date().toISOString()
+        if (statusFilter === 'sealed') {
+          q = q.eq('status', 'sealed')
+        } else if (statusFilter === 'opening_soon') {
+          q = q.eq('status', 'sealed').gte('event_date', nowIso)
+        } else if (statusFilter === 'opened') {
+          q = q.or(`status.in.(verified_correct,verified_incorrect),event_date.lte.${nowIso}`)
+        }
+        q =
+          statusFilter === 'opening_soon'
+            ? q.order('event_date', { ascending: true })
+            : q.order('created_at', { ascending: false })
+        return q.range(from, to)
       }),
       user ? supabase.rpc('blocked_user_ids') : Promise.resolve({ data: [] }),
     ])
@@ -514,7 +576,7 @@ function PredictionFeed({ category }) {
       cancelled = true
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [category, user, settings.content.mutedWords, profile?.content_filter_level, followingIds])
+  }, [category, statusFilter, user, settings.content.mutedWords, profile?.content_filter_level, followingIds])
 
   async function handleLoadMore() {
     if (loadingMore || !hasMore) return
@@ -775,6 +837,7 @@ export default function Anasayfa() {
   // chosen — someone tapping "Ekonomi" there wants Ekonomi predictions,
   // not to land on the "all" tab and have to find the tab themselves.
   const [activeCategory, setActiveCategory] = useState(() => location.state?.category || 'all')
+  const [activeStatus, setActiveStatus] = useState('all')
   const { settings } = useUserSettings()
   // Already-satisfied by the state above when arriving with a category —
   // the interest-based default below is a fallback for a plain visit, not
@@ -804,6 +867,7 @@ export default function Anasayfa() {
         <ComposeCard />
         <OpeningTodayBanner />
         <CategoryTabs active={activeCategory} onSelect={setActiveCategory} />
+        <StatusTabs active={activeStatus} onSelect={setActiveStatus} />
         <StatsBanner />
         {/* RightRail (AppShell) carries its own "Sana önerilen kişiler" at
             xl+ — a standing widget beats one more scroll stop, so skip the
@@ -821,7 +885,7 @@ export default function Anasayfa() {
               <p className="mt-1 text-xs text-muted-foreground">{t('home.feedSubtitle')}</p>
             </div>
           </div>
-          <PredictionFeed category={activeCategory} />
+          <PredictionFeed category={activeCategory} statusFilter={activeStatus} />
         </section>
         <FollowedGroups />
       </main>
