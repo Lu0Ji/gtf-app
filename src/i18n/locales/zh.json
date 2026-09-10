@@ -1796,6 +1796,12 @@
     },
     "ferman": {
       "title": "御旨圣令"
+    },
+    "noter": {
+      "title": "公证印章"
+    },
+    "altin": {
+      "title": "金印"
     }
   },
   "admin": {

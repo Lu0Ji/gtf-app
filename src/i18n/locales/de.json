@@ -1797,6 +1797,12 @@
     },
     "ferman": {
       "title": "Sultansedikt"
+    },
+    "noter": {
+      "title": "Notarsiegel"
+    },
+    "altin": {
+      "title": "Goldenes Siegel"
     }
   },
   "admin": {

@@ -1797,6 +1797,12 @@
     },
     "ferman": {
       "title": "Decreto real"
+    },
+    "noter": {
+      "title": "Sello Notarial"
+    },
+    "altin": {
+      "title": "Sello Dorado"
     }
   },
   "admin": {

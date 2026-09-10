@@ -1797,6 +1797,12 @@
     },
     "ferman": {
       "title": "Royal Decree"
+    },
+    "noter": {
+      "title": "Notary Seal"
+    },
+    "altin": {
+      "title": "Golden Seal"
     }
   },
   "admin": {

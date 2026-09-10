@@ -2518,3 +2518,13 @@ alter table public.real_world_events add constraint real_world_events_language_k
   check (language in ('tr', 'en', 'de', 'zh', 'ja', 'ru', 'es', 'ar'));
 create index real_world_events_language_idx on public.real_world_events (language);
 -- ─────────────────────────────────────────────────────────────────────────
+
+-- MÜHÜR KOSTÜMÜ — İKİ YENİ KOSTÜM (2026-09-10 kullanıcı bildirimi:
+-- "kişiselleştirmeyi arttıralım, birkaç tane daha mühürleme kostümü
+-- ekleyelim"): tam olarak yukarıdaki MÜHÜR KOSTÜMÜ bölümünün kendi
+-- öngördüğü "gizli bakım maliyeti" — seal-styles.js'e 'noter' ve 'altin'
+-- eklendi, bu constraint'i genişleten ikinci migrasyon bu.
+alter table public.profiles drop constraint equipped_seal_style_known_value;
+alter table public.profiles add constraint equipped_seal_style_known_value
+  check (equipped_seal_style in ('basic', 'ferman', 'noter', 'altin'));
+-- ─────────────────────────────────────────────────────────────────────────

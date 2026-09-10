@@ -1796,6 +1796,12 @@
     },
     "ferman": {
       "title": "勅令"
+    },
+    "noter": {
+      "title": "公証印"
+    },
+    "altin": {
+      "title": "金の印章"
     }
   },
   "admin": {
