@@ -66,7 +66,10 @@ function EditGroupModal({ group, onClose, onSaved }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end bg-black/40" onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} className="w-full rounded-t-theme bg-background p-5 pb-8">
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="flex max-h-[85vh] w-full flex-col overflow-y-auto rounded-t-theme bg-background p-5 pb-8"
+      >
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-heading text-lg font-bold">{t('groups.editTitle')}</h2>
           <button onClick={onClose} aria-label={t('common.close')} className="text-muted-foreground">

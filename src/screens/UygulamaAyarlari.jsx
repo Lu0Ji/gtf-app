@@ -93,7 +93,10 @@ function PickerSheet({ title, options, value, onSelect, onClose }) {
   const { t } = useTranslation()
   return (
     <div className="fixed inset-0 z-50 flex items-end bg-black/40" onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} className="w-full rounded-t-theme bg-background p-5 pb-8">
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="flex max-h-[85vh] w-full flex-col overflow-y-auto rounded-t-theme bg-background p-5 pb-8"
+      >
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-heading text-lg font-bold">{title}</h2>
           <button onClick={onClose} aria-label={t('common.close')} className="text-muted-foreground">
@@ -156,7 +159,10 @@ function TagPickerSheet({ title, subtitle, options, values, onToggle, onClose, a
 
   return (
     <div className="fixed inset-0 z-50 flex items-end bg-black/40" onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} className="w-full rounded-t-theme bg-background p-5 pb-8">
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="flex max-h-[85vh] w-full flex-col overflow-y-auto rounded-t-theme bg-background p-5 pb-8"
+      >
         <div className="mb-1 flex items-center justify-between">
           <h2 className="font-heading text-lg font-bold">{title}</h2>
           <button onClick={onClose} aria-label={t('common.close')} className="text-muted-foreground">
@@ -231,7 +237,10 @@ function WordListSheet({ title, subtitle, words, onAdd, onRemove, onClose }) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-end bg-black/40" onClick={onClose}>
-      <div onClick={(e) => e.stopPropagation()} className="w-full rounded-t-theme bg-background p-5 pb-8">
+      <div
+        onClick={(e) => e.stopPropagation()}
+        className="flex max-h-[85vh] w-full flex-col overflow-y-auto rounded-t-theme bg-background p-5 pb-8"
+      >
         <div className="mb-1 flex items-center justify-between">
           <h2 className="font-heading text-lg font-bold">{title}</h2>
           <button onClick={onClose} aria-label={t('common.close')} className="text-muted-foreground">

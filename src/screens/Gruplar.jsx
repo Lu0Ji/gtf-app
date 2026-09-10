@@ -81,7 +81,7 @@ function CreateGroupModal({ onClose, onCreated }) {
     <div className="fixed inset-0 z-50 flex items-end bg-black/40" onClick={onClose}>
       <div
         onClick={(e) => e.stopPropagation()}
-        className="w-full rounded-t-theme bg-background p-5 pb-8"
+        className="flex max-h-[85vh] w-full flex-col overflow-y-auto rounded-t-theme bg-background p-5 pb-8"
       >
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-heading text-lg font-bold">{t('groups.newGroup')}</h2>
