@@ -307,7 +307,7 @@ export default function Profil() {
 
         <BadgeShowcase slugs={profile?.showcase_badges} totalEarned={earnedBadgeCount} isOwn />
 
-        <TopCategoriesShowcase predictions={predictions} />
+        <TopCategoriesShowcase categoryAccuracy={categoryAccuracy} />
 
         <section className="mx-5 mt-6 overflow-hidden rounded-theme bg-primary text-primary-foreground shadow-sm">
           <div className="flex items-start justify-between px-5 pt-5">

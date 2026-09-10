@@ -60,22 +60,22 @@ function CategoryRing({ category, pct, count, primary }) {
   )
 }
 
-// Own or someone else's — just needs their prediction list (any status;
-// "en çok tahmin yaptığı kategori" is about activity/volume, not accuracy,
-// so unlike the categoryAccuracy widget above it this counts everything,
-// not just resolved records). Both Profil.jsx and KullaniciProfili.jsx
-// already load the full predictions array for other reasons, so this needs
-// no query of its own.
-export default function TopCategoriesShowcase({ predictions }) {
+// Kullanıcı geri bildirimi: "yüzdelikler en çok tahmin yaptığı kategoriye göre
+// dağılıyor bu yanlış — en çok doğruluk oranına sahip kategoriler ve
+// yüzdelikleri olmalı." Önceden burası saf aktivite/hacimdi (en çok tahmin
+// yapılan 3 kategori); artık categoryAccuracy'yi (KullaniciProfili.jsx/
+// Profil.jsx'in zaten hesapladığı {category, pct, total} dizisi — sadece
+// sonuçlanmış kayıtlardan, aynı doğruluk oranı aşağıdaki tam listeyle bire
+// bir aynı kalsın diye burada AYRICA hesaplanmıyor) alıp en yüksek doğruluk
+// oranına göre sıralıyor. Hiç sonuçlanmış kaydı olmayan biri için boş dizi
+// gelir, aşağıdaki "top.length === 0" zaten bunu doğru karşılıyor.
+export default function TopCategoriesShowcase({ categoryAccuracy }) {
   const { t } = useTranslation()
 
   const top = (() => {
-    const counts = new Map()
-    for (const p of predictions) counts.set(p.category, (counts.get(p.category) || 0) + 1)
-    const total = predictions.length
-    return Array.from(counts.entries())
-      .map(([category, count]) => ({ category, count, pct: total > 0 ? Math.round((count / total) * 100) : 0 }))
-      .sort((a, b) => b.count - a.count)
+    return [...categoryAccuracy]
+      .map(({ category, pct, total }) => ({ category, pct, count: total }))
+      .sort((a, b) => b.pct - a.pct)
       .slice(0, 3)
   })()
 
