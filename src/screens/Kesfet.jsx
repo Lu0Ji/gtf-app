@@ -206,10 +206,10 @@ export default function Kesfet() {
   const [loading, setLoading] = useState(true)
 
   // Fire-and-forget: each function checks whether its own cache is
-  // actually stale before calling out (football-data.org / Hürriyet's RSS),
-  // so it's cheap to just ask on every visit rather than wiring up a real
-  // cron job (see supabase/schema.sql's notes on why there isn't one). Not
-  // awaited — the screen renders off whatever's already in
+  // actually stale before calling out (football-data.org / Hürriyet's RSS /
+  // The Space Devs), so it's cheap to just ask on every visit rather than
+  // wiring up a real cron job (see supabase/schema.sql's notes on why there
+  // isn't one). Not awaited — the screen renders off whatever's already in
   // real_world_events, and picks up anything newer on the next visit/reload.
   useEffect(() => {
     supabase.functions.invoke('fetch-sports-fixtures').then(
@@ -217,6 +217,14 @@ export default function Kesfet() {
       () => {}
     )
     supabase.functions.invoke('fetch-news-headlines').then(
+      () => {},
+      () => {}
+    )
+    // 2026-09-11: "yaklaşan etkinlikler" tek kaynaktı (football-data.org,
+    // ve Süper Lig'i bile kapsamıyor — ücretsiz katman TIER_ONE, Süper Lig
+    // TIER_THREE). Uzay fırlatmaları eklendi: genuinely açık, anahtar
+    // gerektirmeyen bir kaynak, 'uzay' kategorisine tam oturuyor.
+    supabase.functions.invoke('fetch-space-launches').then(
       () => {},
       () => {}
     )
@@ -255,13 +263,20 @@ export default function Kesfet() {
         // real_world_events may not exist yet (see supabase/schema.sql) —
         // the section just quietly doesn't render until the migration and
         // Edge Function are both deployed.
+        // Limit raised 20 -> 40 (2026-09-11, uzay fırlatmaları eklenince):
+        // spor satırları (152 güncel) fırlatma satırlarını (19) event_date
+        // sıralamasında ezip 20'lik pencereden hiç geçirmeyebiliyordu —
+        // aşağıdaki interest-ranking'in "uzay" ilgi alanı seçmiş birine
+        // bunları öne çıkarabilmesi için önce havuza girmeleri lazım.
+        // Gösterilen kart sayısı hâlâ küçük (bkz. render'daki slice) —
+        // bu sadece ranking'in seçebileceği havuzu büyütüyor.
         supabase
           .from('real_world_events')
           .select('*')
           .eq('kind', 'sports')
           .gte('event_date', new Date().toISOString())
           .order('event_date', { ascending: true })
-          .limit(20),
+          .limit(40),
         // News rows use event_date as publish time, not a future point —
         // see the GÜNDEM comment in supabase/schema.sql — so this is a
         // plain "most recent first" query, no gte() cutoff. Scoped to the
@@ -316,9 +331,9 @@ export default function Kesfet() {
 
       // Personalized: an event in a category you've marked as an interest
       // (Uygulama Ayarları) sorts first; soonest-first within each group.
-      // Not a filter — with only football fixtures live so far, hiding
-      // "spor" for anyone who hasn't picked it as an interest would leave
-      // this empty for most people instead of just deprioritized.
+      // Not a filter — hiding a category for anyone who hasn't picked it as
+      // an interest would leave this empty for most people instead of just
+      // deprioritized.
       const interests = new Set((settings.content.interests || []).map((i) => i.toLowerCase()))
       const events = eventsRes.error ? [] : eventsRes.data || []
       const rankedEvents = [...events].sort((a, b) => {
@@ -327,7 +342,29 @@ export default function Kesfet() {
         if (aMatch !== bMatch) return aMatch - bMatch
         return new Date(a.event_date) - new Date(b.event_date)
       })
-      setUpcomingEvents(rankedEvents)
+      // 2026-09-11, uzay fırlatmaları eklenince: spor satırları (150+)
+      // fırlatma satırlarını (~20) saf event_date sıralamasında tamamen
+      // ezebiliyordu — ilgi alanı seçilmemiş biri için gösterilen
+      // pencerede hiç uzay hiç çıkmayabiliyordu. Round-robin: her
+      // kategoriden sırayla bir tane alarak birleştiriyor (kategori içi
+      // sıra yukarıdaki ranking'ten geliyor) — az sayıda kategori varken
+      // (bugün: spor + uzay) her ikisi de görünür kalıyor, kategori sayısı
+      // artsa da kod değişmeden aynı şekilde çalışır.
+      const byCategory = new Map()
+      for (const ev of rankedEvents) {
+        if (!byCategory.has(ev.category)) byCategory.set(ev.category, [])
+        byCategory.get(ev.category).push(ev)
+      }
+      const categoryQueues = Array.from(byCategory.values())
+      const interleaved = []
+      let i = 0
+      while (interleaved.length < rankedEvents.length) {
+        const queue = categoryQueues[i % categoryQueues.length]
+        if (queue.length > 0) interleaved.push(queue.shift())
+        i++
+        if (categoryQueues.every((q) => q.length === 0)) break
+      }
+      setUpcomingEvents(interleaved)
 
       // News gets an actual filter, not just a re-sort like events above —
       // user feedback (2026-09-10): seeing categories you never picked as
@@ -397,7 +434,7 @@ export default function Kesfet() {
                   </p>
                 </div>
                 <div className="mt-3 flex gap-3 overflow-x-auto px-5 pb-2">
-                  {upcomingEvents.map((ev) => {
+                  {upcomingEvents.slice(0, 12).map((ev) => {
                     const meta = CATEGORY_META[ev.category] || { icon: 'lucide:tag', label: ev.category }
                     return (
                       <div
