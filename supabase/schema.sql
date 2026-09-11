@@ -2528,3 +2528,51 @@ alter table public.profiles drop constraint equipped_seal_style_known_value;
 alter table public.profiles add constraint equipped_seal_style_known_value
   check (equipped_seal_style in ('basic', 'ferman', 'noter', 'altin'));
 -- ─────────────────────────────────────────────────────────────────────────
+
+-- ROZET KAZANMA BİLDİRİMİ (2026-09-11 kullanıcı bildirimi: "kişiselleştirmeyi
+-- arttıralım" tavsiyesinden #3 — rozet kazanınca hiçbir bildirim yoktu,
+-- kullanıcı Rozetler.jsx'e tekrar girip fark etmedikçe hiç görmüyordu).
+-- earned_badges satırı Rozetler.jsx'te SADECE gerçekten yeni kazanılan
+-- rozetler için insert ediliyor (bkz. o dosyadaki !known.has(b.slug) filtresi
+-- ve primary key (user_id, badge_slug) — aynı rozet ikinci kez insert
+-- edilemez), yani bu tablodaki her INSERT gerçek bir "az önce kazanıldı"
+-- anı — plain bir AFTER INSERT trigger, push_new_follower/
+-- push_prediction_comment/push_new_message ile aynı desen, private.
+-- send_push_notification zaten var olan aynı fire-and-forget fonksiyonu.
+--
+-- badges.js kataloğunun 160 rozetinin başlığını burada tekrarlamak (Türkçe
+-- adları SQL'de ikinci bir kopya olarak tutmak) tam da seal-styles.js'in
+-- kendi check constraint'i için yukarıda belgelenen "gizli bakım maliyeti"
+-- tuzağı — bunun yerine bildirim metni kasıtlı olarak jenerik: "hangisini
+-- kazandığını görmek için dokun", rozet adını SQL'e hiç taşımadan. Tek
+-- istisna: onay-damgasi/surec-muhru (mühür kostümü açan iki rozet, bkz.
+-- seal-styles.js) — bunlar sadece 2 slug, tüm kataloğu değil, o yüzden
+-- özel bir mesajı hak ediyor ve bakım maliyeti ihmal edilebilir düzeyde.
+--
+-- Var olan diğer push trigger'ları gibi (follows/comments/messages) bu da
+-- Uygulama Ayarları'ndaki bildirim tercihi anahtarlarına bakmıyor — hiçbiri
+-- bakmıyor (user_settings hiçbir trigger fonksiyonunda okunmuyor), o
+-- tutarlılığı bu migrasyonla değiştirmek kapsam dışı.
+create or replace function private.notify_badge_earned() returns trigger
+language plpgsql security definer set search_path = public as $$
+declare
+  v_title text;
+  v_body text;
+begin
+  if new.badge_slug in ('onay-damgasi', 'surec-muhru') then
+    v_title := 'Yeni bir mühür kostümü açıldı! 🎉';
+    v_body := 'Az önce kazandığın rozetle birlikte yeni bir mühür kostümünün kilidi açıldı.';
+  else
+    v_title := 'Yeni bir rozet kazandın! 🎉';
+    v_body := 'Hangisi olduğunu görmek için dokun.';
+  end if;
+  perform private.send_push_notification(new.user_id, v_title, v_body, '/rozetler');
+  return new;
+end;
+$$;
+
+drop trigger if exists push_badge_earned on public.earned_badges;
+create trigger push_badge_earned
+  after insert on public.earned_badges
+  for each row execute function private.notify_badge_earned();
+-- ─────────────────────────────────────────────────────────────────────────
