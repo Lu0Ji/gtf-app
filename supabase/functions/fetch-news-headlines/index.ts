@@ -22,10 +22,18 @@
 //    so those two use each country's own flagship public broadcaster
 //    instead (Tagesschau/ARD for de, NHK for ja) — still public-service,
 //    just domestic since no foreign-language equivalent exists to reuse.
-// None of the non-Turkish sources publish real per-category feeds (unlike
-// Hürriyet) — every one is wired in as a single general feed tagged
-// 'dünya', the closest existing category to "general/world news", rather
-// than force-fit into a category matrix that doesn't exist for them.
+// 2026-09-11: "kişiselleştirmeyi arttıralım" tavsiyesinin #6'sı — non-tr
+// dillerin hepsi tek genel feed'e (kategori filtresi için işe yaramaz)
+// düşüyordu. Her URL yeniden, tek tek curl edildi (redirect mi gerçek mi
+// diye): BBC'nin sadece İngilizce servisi (feeds.bbci.co.uk/news/... ve
+// /sport/rss.xml) gerçek kategori feed'leri yayınlıyor — russian/arabic/
+// zhongwen/mundo'nun hepsindeki kategori tahminleri genel feed'e
+// yönlendiriyor (Türkçe'de bulunan aynı tuzak). Ama Tagesschau (de) ve NHK
+// (ja) — ayrı yayıncılar, BBC değil — kendi gerçek kategori feed'lerine
+// sahip çıktı. Sonuç: tr/en/de/ja artık gerçek kategori kırılımı alıyor,
+// ru/ar/zh/es hâlâ tek genel 'dünya' feed'inde (bu dillerde gerçek bir
+// kategori feed'i bulunamadı, force-fit yapılmadı — dürüst bir sınır,
+// gizlenmedi).
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { withSupabase } from "@supabase/server";
 import { XMLParser } from "npm:fast-xml-parser@4";
@@ -87,7 +95,21 @@ const SOURCES: SourceDef[] = [
     source: "bbc-news-rss",
     language: "en",
     format: "rss2",
-    feeds: [{ url: "https://feeds.bbci.co.uk/news/rss.xml", category: "dünya" }],
+    // BBC's English service is the only one of its language editions that
+    // publishes real per-category feeds — every one below curled to
+    // genuinely distinct content, not the redirect-to-general trap the
+    // other BBC language services (and Turkish Hürriyet dead slugs) hit.
+    // Sport lives under a different subdomain path than the rest.
+    feeds: [
+      { url: "https://feeds.bbci.co.uk/news/business/rss.xml", category: "ekonomi" },
+      { url: "https://feeds.bbci.co.uk/news/technology/rss.xml", category: "teknoloji" },
+      { url: "https://feeds.bbci.co.uk/news/science_and_environment/rss.xml", category: "bilim" },
+      { url: "https://feeds.bbci.co.uk/news/politics/rss.xml", category: "siyaset" },
+      { url: "https://feeds.bbci.co.uk/news/health/rss.xml", category: "sağlık" },
+      { url: "https://feeds.bbci.co.uk/news/entertainment_and_arts/rss.xml", category: "eğlence" },
+      { url: "https://feeds.bbci.co.uk/news/world/rss.xml", category: "dünya" },
+      { url: "https://feeds.bbci.co.uk/sport/rss.xml", category: "spor" },
+    ],
   },
   {
     source: "bbc-russian-rss",
@@ -118,13 +140,36 @@ const SOURCES: SourceDef[] = [
     source: "tagesschau-rss",
     language: "de",
     format: "rss2",
-    feeds: [{ url: "https://www.tagesschau.de/infoservices/alle-meldungen-100~rss2.xml", category: "dünya" }],
+    // Real per-category feeds, verified by content (curled and diffed —
+    // not the ".../index~rss2.xml" URL shape alone, which would've been
+    // a guess). "inland" (domestic Germany) skews heavily political in
+    // practice (tagesschau is Germany's flagship politics/current-affairs
+    // broadcast), mapped to siyaset rather than left out.
+    feeds: [
+      { url: "https://www.tagesschau.de/wirtschaft/index~rss2.xml", category: "ekonomi" },
+      { url: "https://www.tagesschau.de/inland/index~rss2.xml", category: "siyaset" },
+      { url: "https://www.tagesschau.de/ausland/index~rss2.xml", category: "dünya" },
+      { url: "https://www.tagesschau.de/sport/index~rss2.xml", category: "spor" },
+      { url: "https://www.tagesschau.de/wissen/index~rss2.xml", category: "bilim" },
+    ],
   },
   {
     source: "nhk-rss",
     language: "ja",
     format: "rss2",
-    feeds: [{ url: "https://www3.nhk.or.jp/rss/news/cat0.xml", category: "dünya" }],
+    // NHK's numbered category feeds (cat1-cat7, undocumented but each
+    // curled and confirmed genuinely distinct Japanese content, not a
+    // shared fallback). cat1 (社会 "society/local affairs") skipped —
+    // doesn't map cleanly onto any category here, same "skip rather than
+    // force-fit" call as Hürriyet's kelebek/astroloji.
+    feeds: [
+      { url: "https://www3.nhk.or.jp/rss/news/cat5.xml", category: "ekonomi" },
+      { url: "https://www3.nhk.or.jp/rss/news/cat4.xml", category: "siyaset" },
+      { url: "https://www3.nhk.or.jp/rss/news/cat6.xml", category: "dünya" },
+      { url: "https://www3.nhk.or.jp/rss/news/cat7.xml", category: "spor" },
+      { url: "https://www3.nhk.or.jp/rss/news/cat3.xml", category: "bilim" },
+      { url: "https://www3.nhk.or.jp/rss/news/cat2.xml", category: "eğlence" },
+    ],
   },
 ];
 
@@ -216,14 +261,31 @@ export default {
       );
     }
 
+    // A real category split (2026-09-11) means the same story can legitimately
+    // appear in more than one section feed of the same publisher (a big
+    // world story often runs in both "world" and "politics", say) — two
+    // rows with the same (source, external_id) in one batch makes Postgres
+    // reject the whole upsert ("ON CONFLICT DO UPDATE command cannot affect
+    // row a second time"), not just the duplicate. Keep the first
+    // occurrence per key — the feed order above lists the more specific
+    // categories (ekonomi, teknoloji, ...) before the catch-all ones
+    // (dünya), so a cross-posted story keeps its more specific category.
+    const seen = new Set<string>();
+    const dedupedRows = rows.filter((row) => {
+      const key = `${row.source}:${row.external_id}`;
+      if (seen.has(key)) return false;
+      seen.add(key);
+      return true;
+    });
+
     const { error } = await ctx.supabaseAdmin
       .from("real_world_events")
-      .upsert(rows, { onConflict: "source,external_id" });
+      .upsert(dedupedRows, { onConflict: "source,external_id" });
 
     if (error) {
       return Response.json({ error: error.message }, { status: 500 });
     }
 
-    return Response.json({ upserted: rows.length, skipped, errors });
+    return Response.json({ upserted: dedupedRows.length, skipped, errors });
   }),
 };
