@@ -7,6 +7,7 @@ import { useAuth } from '../contexts/AuthContext.jsx'
 import { formatDateLong, sealLabel, timeAgo } from '../lib/format.js'
 import { CATEGORY_META } from '../lib/categories.js'
 import BadgeShowcase from '../components/BadgeShowcase.jsx'
+import SealStyleChip from '../components/SealStyleChip.jsx'
 import TopCategoriesShowcase from '../components/TopCategoriesShowcase.jsx'
 import DifficultyChip from '../components/DifficultyChip.jsx'
 import Chip from '../components/ui/Chip.jsx'
@@ -267,6 +268,7 @@ export default function Profil() {
                 {profile?.display_name || t('common.loading')}
               </h2>
               <p className="mt-1 text-[13px] text-muted-foreground">@{profile?.username}</p>
+              <SealStyleChip slug={profile?.equipped_seal_style} />
             </div>
           </div>
 
