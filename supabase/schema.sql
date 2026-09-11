@@ -2576,3 +2576,12 @@ create trigger push_badge_earned
   after insert on public.earned_badges
   for each row execute function private.notify_badge_earned();
 -- ─────────────────────────────────────────────────────────────────────────
+
+-- MÜHÜR KOSTÜMÜ — İSTİKRAR KATMANI (2026-09-11 kullanıcı bildirimi:
+-- "kişiselleştirmeyi arttıralım" tavsiyesinden #5): seal-styles.js'e
+-- 'sadakat' eklendi, yine aynı öngörülen "gizli bakım maliyeti" — bu
+-- constraint'i genişleten üçüncü migrasyon.
+alter table public.profiles drop constraint equipped_seal_style_known_value;
+alter table public.profiles add constraint equipped_seal_style_known_value
+  check (equipped_seal_style in ('basic', 'ferman', 'sadakat', 'noter', 'altin'));
+-- ─────────────────────────────────────────────────────────────────────────

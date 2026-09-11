@@ -25,10 +25,16 @@
 // (rastgele/yeni rozet icat etmek yerine — badges.js'te 'onay-damgasi' ve
 // 'surec-muhru' zaten "mühür/damga" temalı, lucide:stamp ikonlu): ustalık
 // katmanında 'noter' (Onay Damgası rozetiyle açılıyor), efsane katmanında
-// 'altin' (Süreç Mührü rozetiyle açılıyor, en yüksek eşik). 'ferman'
-// (başlangıç katmanı) ile birlikte artık 3 katmanlı bir ilerleme var —
-// rozet sisteminin kendi başlangıç/ustalık/efsane katmanlarıyla eşleşiyor
-// (istikrar katmanında "mühür" temalı bir rozet yoktu, zorla uydurulmadı).
+// 'altin' (Süreç Mührü rozetiyle açılıyor, en yüksek eşik).
+//
+// 2026-09-11, aynı tavsiyenin #5'i: istikrar katmanında "mühür/damga"
+// temalı bir rozet yoktu (önceki turda bilerek zorla uydurulmadı) — bu
+// sefer badge adına değil, kostümün KENDİ temasına (istikrar = düzenli
+// gelmek, seriyi bozmamak) uyan bir rozet seçildi: 'otuz-gun' (30 gün
+// üst üste aktif ol, istikrar katmanının üst ucu). 'ferman' (başlangıç) →
+// 'sadakat' (istikrar) → 'noter' (ustalık) → 'altin' (efsane): artık 4
+// katmanlı bir ilerleme var, rozet sisteminin kendi 4 katmanıyla birebir
+// eşleşiyor.
 export const SEAL_STYLES = [
   {
     slug: 'basic',
@@ -50,6 +56,24 @@ export const SEAL_STYLES = [
     medallionGradient: 'radial-gradient(circle at 35% 30%, #d9b04a, #a9791f 70%, #8a611a 100%)',
     medallionIconColor: '#3d2a0a',
     ribbonGradient: 'linear-gradient(180deg, #c9a227, #8a611a)',
+  },
+  {
+    // "Sadakat Mührü" — otuz-gun rozetiyle açılıyor (istikrar, 30 gün üst
+    // üste aktiflik). Diğer üç kostümün bordo/yeşil/mor paletinden uzak,
+    // sıcak bakır/alev tonları — "seriyi bozmadın" hissi, sönmeyen bir ateş.
+    // Madalyon ikonu bilerek başka bir kostümle çakışmıyor (stamp/crown
+    // zaten kullanıldı) — otuz-gun rozetinin kendi ikonuyla aynı: lucide:flame.
+    slug: 'sadakat',
+    titleKey: 'sealStyles.sadakat.title',
+    unlockBadgeSlug: 'otuz-gun',
+    containerClassName: 'bg-[#7a3b12] text-[#fbe6c8]',
+    accentBorderClassName: 'border-[#d98a3d]/25',
+    lockIcon: 'lucide:flame',
+    decorated: true,
+    medallionIcon: 'lucide:flame',
+    medallionGradient: 'radial-gradient(circle at 35% 30%, #e8a856, #c07a2e 60%, #8f5518 100%)',
+    medallionIconColor: '#3d2408',
+    ribbonGradient: 'linear-gradient(180deg, #d98a3d, #8f5518)',
   },
   {
     // "Noter Mührü" — onay-damgasi rozetiyle açılıyor (ustalık, 40 doğru
