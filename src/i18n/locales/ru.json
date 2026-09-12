@@ -1760,7 +1760,9 @@
     "deleteConfirmTitle": "Ты собираешься удалить свой аккаунт",
     "deleteConfirmBody": "Это необратимо. Все твои прогнозы, сообщения, членства в группах и данные профиля будут удалены навсегда.",
     "deleting": "Удаление…",
-    "confirmDelete": "Да, удалить"
+    "confirmDelete": "Да, удалить",
+    "inviteMilestoneProgress": "Приглашено {{count}}/{{target}} — до значка «{{badge}}»",
+    "inviteAllMilestonesDone": "Ты пригласил {{count}} друзей, спасибо!"
   },
   "onboarding": {
     "progressAria": "Прогресс введения",

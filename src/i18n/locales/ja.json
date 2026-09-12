@@ -1757,7 +1757,9 @@
     "deleteConfirmTitle": "アカウントを削除しようとしています",
     "deleteConfirmBody": "この操作は取り消せません。予測、メッセージ、グループへの参加状況、プロフィール情報がすべて完全に削除されます。",
     "deleting": "削除中…",
-    "confirmDelete": "はい、削除します"
+    "confirmDelete": "はい、削除します",
+    "inviteMilestoneProgress": "{{count}}/{{target}} 人招待 — 「{{badge}}」バッジまで",
+    "inviteAllMilestonesDone": "{{count}}人の友達を招待してくれてありがとう！"
   },
   "onboarding": {
     "progressAria": "オンボーディングの進行状況",

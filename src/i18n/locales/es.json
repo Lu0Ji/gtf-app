@@ -1758,7 +1758,9 @@
     "deleteConfirmTitle": "Estás a punto de eliminar tu cuenta",
     "deleteConfirmBody": "Esto no se puede deshacer. Todas tus predicciones, mensajes, membresías de grupo e información de perfil se eliminarán permanentemente.",
     "deleting": "Eliminando…",
-    "confirmDelete": "Sí, eliminar"
+    "confirmDelete": "Sí, eliminar",
+    "inviteMilestoneProgress": "{{count}}/{{target}} invitados — hacia la insignia {{badge}}",
+    "inviteAllMilestonesDone": "¡Invitaste a {{count}} amigos, gracias!"
   },
   "onboarding": {
     "progressAria": "Progreso de la introducción",

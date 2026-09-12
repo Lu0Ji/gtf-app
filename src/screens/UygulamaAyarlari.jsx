@@ -77,6 +77,17 @@ function buildAccountRows(t, email, onChangePassword, onOpenContact, onOpenMfa, 
   ]
 }
 
+// badges.js'teki gerçek eşikler — davetiye/acik-miras/buyuk-elci. Ayrı bir
+// sayı olarak burada tekrarlanıyor (badges.js'in tüm 160 rozet kataloğunu
+// import etmek yerine) çünkü bu üçü zaten sabit, referral-temalı ve
+// değişmesi beklenmiyor; seal-styles.js'teki gibi büyük bir kataloğun
+// tekrarı değil, sadece 3 sayı.
+const REFERRAL_MILESTONES = [
+  { count: 1, badgeSlug: 'davetiye' },
+  { count: 10, badgeSlug: 'acik-miras' },
+  { count: 20, badgeSlug: 'buyuk-elci' },
+]
+
 const LEGAL_URL = 'https://lu0ji.github.io/gtf-app/legal.html'
 
 function buildSupportRows(t) {
@@ -366,6 +377,7 @@ export default function UygulamaAyarlari() {
   const [exporting, setExporting] = useState(false)
   const [cacheBytes, setCacheBytes] = useState(0)
   const [inviteCopied, setInviteCopied] = useState(false)
+  const [referralsCount, setReferralsCount] = useState(0)
   // 'unsupported' | 'denied' | 'subscribed' | 'unsubscribed' | null (still checking)
   const [pushState, setPushState] = useState(null)
   const [pushBusy, setPushBusy] = useState(false)
@@ -373,6 +385,18 @@ export default function UygulamaAyarlari() {
   useEffect(() => {
     getPushSubscriptionState().then(setPushState)
   }, [])
+
+  // Davet ilerlemesi (2026-09-12, öneri #6 — "davet akışını ödüllendirmek").
+  // Rozetler.jsx'in kendi referralsCount sorgusuyla birebir aynı desen —
+  // yeni bir sayaç sütunu değil, aynı referred_by ilişkisinin canlı sayısı.
+  useEffect(() => {
+    if (!user) return
+    supabase
+      .from('profiles')
+      .select('*', { count: 'exact', head: true })
+      .eq('referred_by', user.id)
+      .then(({ count }) => setReferralsCount(count || 0))
+  }, [user])
 
   async function handleTogglePush() {
     if (pushBusy || !user) return
@@ -555,6 +579,33 @@ export default function UygulamaAyarlari() {
               <p className="mt-0.5 text-[11px] text-muted-foreground">{t('appSettings.inviteSubtitle')}</p>
             </div>
           </div>
+          {(() => {
+            const nextMilestone = REFERRAL_MILESTONES.find((m) => referralsCount < m.count)
+            if (!nextMilestone) {
+              return referralsCount > 0 ? (
+                <p className="mt-3 text-[11px] font-semibold text-accent-foreground">
+                  {t('appSettings.inviteAllMilestonesDone', { count: referralsCount })}
+                </p>
+              ) : null
+            }
+            return (
+              <div className="mt-3">
+                <p className="text-[11px] font-semibold text-accent-foreground">
+                  {t('appSettings.inviteMilestoneProgress', {
+                    count: referralsCount,
+                    target: nextMilestone.count,
+                    badge: t(`badges.items.${nextMilestone.badgeSlug}.title`),
+                  })}
+                </p>
+                <div className="mt-1.5 h-1.5 w-full overflow-hidden rounded-full bg-accent/20">
+                  <div
+                    className="h-full rounded-full bg-accent"
+                    style={{ width: `${Math.min(100, (referralsCount / nextMilestone.count) * 100)}%` }}
+                  />
+                </div>
+              </div>
+            )
+          })()}
           <button
             onClick={handleCopyInvite}
             className="mt-3 flex w-full items-center justify-center gap-2 rounded-theme bg-accent py-2.5 text-xs font-bold text-accent-foreground"

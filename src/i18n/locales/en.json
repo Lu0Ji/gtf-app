@@ -1758,7 +1758,9 @@
     "deleteConfirmTitle": "You're about to delete your account",
     "deleteConfirmBody": "This can't be undone. All your predictions, messages, group memberships, and profile info will be permanently deleted.",
     "deleting": "Deleting…",
-    "confirmDelete": "Yes, delete"
+    "confirmDelete": "Yes, delete",
+    "inviteMilestoneProgress": "{{count}}/{{target}} invited — toward the {{badge}} badge",
+    "inviteAllMilestonesDone": "You invited {{count}} friends, thank you!"
   },
   "onboarding": {
     "progressAria": "Onboarding progress",

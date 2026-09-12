@@ -1757,7 +1757,9 @@
     "deleteConfirmTitle": "你即将删除账户",
     "deleteConfirmBody": "此操作无法撤销。你的所有预测、消息、小组成员身份和资料信息都将被永久删除。",
     "deleting": "正在删除…",
-    "confirmDelete": "是的，删除"
+    "confirmDelete": "是的，删除",
+    "inviteMilestoneProgress": "已邀请 {{count}}/{{target}} 人 — 距离「{{badge}}」徽章",
+    "inviteAllMilestonesDone": "你已邀请 {{count}} 位好友，谢谢！"
   },
   "onboarding": {
     "progressAria": "引导进度",

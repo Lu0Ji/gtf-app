@@ -1758,7 +1758,9 @@
     "deleteConfirmTitle": "Du bist dabei, dein Konto zu löschen",
     "deleteConfirmBody": "Das kann nicht rückgängig gemacht werden. Alle deine Vorhersagen, Nachrichten, Gruppenmitgliedschaften und Profildaten werden dauerhaft gelöscht.",
     "deleting": "Wird gelöscht…",
-    "confirmDelete": "Ja, löschen"
+    "confirmDelete": "Ja, löschen",
+    "inviteMilestoneProgress": "{{count}}/{{target}} eingeladen — für das Abzeichen {{badge}}",
+    "inviteAllMilestonesDone": "Du hast {{count}} Freunde eingeladen, danke!"
   },
   "onboarding": {
     "progressAria": "Einführungsfortschritt",

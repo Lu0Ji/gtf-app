@@ -1758,7 +1758,9 @@
     "deleteConfirmTitle": "Hesabını silmek üzeresin",
     "deleteConfirmBody": "Bu işlem geri alınamaz. Tüm tahminlerin, mesajların, grup üyeliklerin ve profil bilgilerin kalıcı olarak silinir.",
     "deleting": "Siliniyor…",
-    "confirmDelete": "Evet, sil"
+    "confirmDelete": "Evet, sil",
+    "inviteMilestoneProgress": "{{count}}/{{target}} davet — {{badge}} rozeti için",
+    "inviteAllMilestonesDone": "{{count}} arkadaşını davet ettin, teşekkürler!"
   },
   "onboarding": {
     "progressAria": "Rehber ilerlemesi",

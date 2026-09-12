@@ -2783,3 +2783,50 @@ $$;
 
 select cron.schedule('send-opening-soon-notifications', '*/10 * * * *', $$select private.send_opening_soon_notifications()$$);
 -- ─────────────────────────────────────────────────────────────────────────
+
+-- DAVET AKIŞINI ÖDÜLLENDİRMEK (2026-09-12, öneri #6 — davet linki kopyalama
+-- zaten vardı (UygulamaAyarlari.jsx) ama karşılığında hiçbir şey yoktu,
+-- sadece 1/10/20 davette sessizce açılan rozetler (davetiye/acik-miras/
+-- buyuk-elci, bkz. badges.js). En ucuz, en somut iyileştirme: birisi
+-- gerçekten SENİN linkinle katıldığında anında haber almak — şu an bu
+-- sessizce oluyor, davet eden biri ancak Rozetler.jsx'e girip rozet
+-- sayısına bakarsa fark ediyordu.
+--
+-- handle_new_user() (append-only — yeniden tam tanımlanıyor, en son hâli
+-- satır ~2213) tek eklenen satır: referrer_id doluysa bir push.
+-- security definer olduğu için private.send_push_notification'ı
+-- çağırabiliyor (fonksiyon zaten public şemada, search_path public'i
+-- kapsıyor — private.send_push_notification de security definer, iç içe
+-- security definer çağrısı schema.sql'de zaten cast_prediction_vote'un
+-- kendi push çağrılarında kullanılan aynı desen).
+create or replace function public.handle_new_user()
+returns trigger as $$
+declare
+  referrer_id uuid;
+  v_name text;
+begin
+  select id into referrer_id from public.profiles
+  where username = new.raw_user_meta_data->>'referred_by_username';
+
+  insert into public.profiles (id, username, display_name, referred_by)
+  values (
+    new.id,
+    coalesce(new.raw_user_meta_data->>'username', 'user_' || substr(new.id::text, 1, 8)),
+    coalesce(new.raw_user_meta_data->>'display_name', 'Yeni Kullanıcı'),
+    referrer_id
+  );
+
+  if referrer_id is not null then
+    v_name := coalesce(new.raw_user_meta_data->>'display_name', 'Yeni bir kullanıcı');
+    perform private.send_push_notification(
+      referrer_id,
+      'Davetin kabul edildi! 🎉',
+      v_name || ' senin davetinle GTF''e katıldı.',
+      '/uygulama-ayarlari'
+    );
+  end if;
+
+  return new;
+end;
+$$ language plpgsql security definer set search_path = public;
+-- ─────────────────────────────────────────────────────────────────────────

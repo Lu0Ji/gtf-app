@@ -1762,7 +1762,9 @@
     "deleteConfirmTitle": "أنت على وشك حذف حسابك",
     "deleteConfirmBody": "لا يمكن التراجع عن هذا الإجراء. سيتم حذف جميع توقعاتك ورسائلك وعضوياتك في المجموعات ومعلومات ملفك الشخصي نهائيًا.",
     "deleting": "جارٍ الحذف…",
-    "confirmDelete": "نعم، احذف"
+    "confirmDelete": "نعم، احذف",
+    "inviteMilestoneProgress": "تمت دعوة {{count}}/{{target}} — نحو شارة {{badge}}",
+    "inviteAllMilestonesDone": "دعوت {{count}} صديق، شكرًا لك!"
   },
   "onboarding": {
     "progressAria": "تقدّم التعريف بالتطبيق",
