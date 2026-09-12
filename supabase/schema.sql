@@ -2715,3 +2715,71 @@ $$;
 -- açarım" için gerçek bir pencere bırakarak.
 select cron.schedule('send-streak-reminders', '0 17 * * *', $$select private.send_streak_reminders()$$);
 -- ─────────────────────────────────────────────────────────────────────────
+
+-- "BİRAZDAN AÇILIYOR" BİLDİRİMİ (2026-09-12, öneri #5): "takip ettiğin/
+-- beğendiğin bir tahmin birazdan açılacaksa push" — şu ana kadar sadece
+-- ekranda bir geri sayım vardı, uygulamayı kapatmış birine "şimdi dön"
+-- diyen anlık bir tetikleyici yoktu.
+--
+-- Hedef kitle: tahminin yazarı + beğenenler (prediction_likes) + kaydedenler
+-- (prediction_saves) — "ilgi göstermiş" sinyali zaten var olan iki
+-- tablodan geliyor, yeni bir "takip listesi" kavramı icat edilmedi.
+-- Sadece event_date'i olan (manuel mühürlerin "Ben açarım" modunda sabit
+-- bir açılış saati yok, "birazdan açılıyor" onlar için anlamsız) ve hâlâ
+-- 'sealed' durumunda olan tahminler için. Her 10 dakikada bir çalışıyor
+-- (diğer görevlerden çok daha sık — "birazdan" dakika hassasiyeti
+-- gerektiriyor), event_date'i şu andan sonraki 15 dakika içinde olanları
+-- yakalıyor. opening_soon_notifications_sent (prediction_id tek başına
+-- primary key, tarih yok) — bu bildirim bir tahmin için EN FAZLA bir kez
+-- gönderilir, günlük tekrar eden diğer görevlerden farklı.
+create table private.opening_soon_notifications_sent (
+  prediction_id uuid primary key references public.predictions(id) on delete cascade
+);
+
+create or replace function private.send_opening_soon_notifications() returns void
+language plpgsql security definer set search_path = public as $$
+declare
+  p record;
+  liker record;
+begin
+  for p in
+    select id, title, author_id
+    from public.predictions
+    where status = 'sealed'
+      and event_date is not null
+      and event_date between now() and now() + interval '15 minutes'
+  loop
+    insert into private.opening_soon_notifications_sent (prediction_id)
+    values (p.id)
+    on conflict do nothing;
+    if not found then
+      continue;
+    end if;
+
+    perform private.send_push_notification(
+      p.author_id,
+      'Tahminin birazdan açılıyor! ⏳',
+      left(p.title, 80) || ' — sonucu merakla bekleniyor.',
+      '/tahmin-kaydi?id=' || p.id
+    );
+
+    for liker in
+      select user_id from public.prediction_likes where prediction_id = p.id
+      union
+      select user_id from public.prediction_saves where prediction_id = p.id
+    loop
+      if liker.user_id <> p.author_id then
+        perform private.send_push_notification(
+          liker.user_id,
+          'Birazdan açılıyor! ⏳',
+          left(p.title, 80),
+          '/tahmin-kaydi?id=' || p.id
+        );
+      end if;
+    end loop;
+  end loop;
+end;
+$$;
+
+select cron.schedule('send-opening-soon-notifications', '*/10 * * * *', $$select private.send_opening_soon_notifications()$$);
+-- ─────────────────────────────────────────────────────────────────────────
