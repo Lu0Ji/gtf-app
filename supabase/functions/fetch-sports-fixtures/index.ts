@@ -12,6 +12,20 @@ const STALE_AFTER_MINUTES = 30;
 // days (learned by hitting the real 400 first, not documented up front).
 const DAYS_AHEAD = 10;
 
+// 2026-09-12 kullanıcı bildirimi: "her veriyi de insanların önüne
+// atmayalım öyle, en çok ilgi duyulanları çıkaralım, sonra talep oldukça
+// arttırırız". Filtre öncesi bu uç nokta anahtarın erişebildiği HER
+// competition'ı dönüyordu — canlı veride Brasileirão/Eredivisie/Primeira
+// Liga/Championship/Copa Libertadores gibi Türkiye'deki bir kullanıcının
+// büyük çoğunluğunun takip etmediği ligler de vardı, hepsi aynı ağırlıkta
+// karışıyordu. Bilinçli, dar bir liste: Türkiye'de en çok izlenen 4 büyük
+// Avrupa ligi + Şampiyonlar Ligi + iki büyük milli takım turnuvası (o
+// turnuvaların pencere dışında hiçbir maliyeti yok — sadece o dönemde
+// gerçekten maç varsa satır dönüyorlar). Genişletmek (competitions.org'un
+// competitions listesindeki TIER_ONE kod'larından biri daha eklemek)
+// tek satırlık bir değişiklik — talep geldikçe buraya eklenir.
+const COMPETITIONS = ["PL", "CL", "PD", "SA", "BL1", "WC", "EC"].join(",");
+
 export default {
   fetch: withSupabase({ auth: ["publishable", "secret"] }, async (_req, ctx) => {
     const apiKey = Deno.env.get("FOOTBALL_DATA_API_KEY");
@@ -37,7 +51,7 @@ export default {
 
     const dateFrom = new Date().toISOString().slice(0, 10);
     const dateTo = new Date(Date.now() + DAYS_AHEAD * 86400000).toISOString().slice(0, 10);
-    const url = `${FOOTBALL_DATA_URL}?dateFrom=${dateFrom}&dateTo=${dateTo}&status=SCHEDULED`;
+    const url = `${FOOTBALL_DATA_URL}?dateFrom=${dateFrom}&dateTo=${dateTo}&status=SCHEDULED&competitions=${COMPETITIONS}`;
 
     const apiRes = await fetch(url, { headers: { "X-Auth-Token": apiKey } });
     if (!apiRes.ok) {
