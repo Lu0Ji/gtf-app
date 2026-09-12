@@ -9,6 +9,8 @@ import { formatDateLong, formatDateTimeLong } from '../lib/format.js'
 import { difficultyMeta } from '../lib/difficulty.js'
 import { hideSealBanner, showSealBanner } from '../lib/ads.js'
 import { findSealStyle } from '../lib/seal-styles.js'
+import { generateResultShareCard } from '../lib/shareCard.js'
+import { CATEGORY_META } from '../lib/categories.js'
 import Chip from '../components/ui/Chip.jsx'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
 import SealDecoration from '../components/SealDecoration.jsx'
@@ -69,6 +71,7 @@ export default function TahminKaydi() {
   // efekt: hata olursa equippedSealStyle null kalır, findSealStyle(null)
   // güvenli şekilde 'basic'e döner.
   const [equippedSealStyle, setEquippedSealStyle] = useState(null)
+  const [sharing, setSharing] = useState(false)
 
   // React Router doesn't remount this screen just because navigate() was
   // called again with a new `state` — same pathname, same component
@@ -255,6 +258,44 @@ export default function TahminKaydi() {
       setTimeout(() => setCopied(false), 2000)
     } catch {
       // clipboard unavailable — silently ignore, share is a nice-to-have
+    }
+  }
+
+  // Sonucu paylaş (2026-09-12, öneri #2) — Wordle'ın paylaşılabilir sonuç
+  // kartı modeli: doğrulanmış bir tahmini görsel bir kart olarak dışarı
+  // taşımak, yukarıdaki handleShare'in (başlığı panoya kopyalar, her
+  // durumda görünür) yerini almıyor, ayrı ve sadece isVerified'ta çıkan bir
+  // CTA. navigator.share dosya desteklemiyorsa (canShare kontrolü) native
+  // paylaşım sayfası yerine indirme linkine düşülüyor — hiçbir platformda
+  // sessizce hiçbir şey olmuyor.
+  async function handleShareResult() {
+    if (sharing) return
+    setSharing(true)
+    try {
+      const blob = await generateResultShareCard({
+        sealedContent: record.sealed_content,
+        categoryLabel: t(CATEGORY_META[record.category]?.labelKey || 'category.genel'),
+        isCorrect,
+        verifiedDateLabel: t('record.openedOn', { datetime: formatDateTimeLong(record.verified_at) }),
+        username: author?.username,
+      })
+      const file = new File([blob], 'gtf-sonuc.png', { type: 'image/png' })
+      if (navigator.canShare?.({ files: [file] })) {
+        await navigator.share({ files: [file], title: t('record.shareResultTitle') })
+      } else {
+        const url = URL.createObjectURL(blob)
+        const link = document.createElement('a')
+        link.href = url
+        link.download = 'gtf-sonuc.png'
+        link.click()
+        URL.revokeObjectURL(url)
+      }
+    } catch (err) {
+      // AbortError: kullanıcı native paylaşım sayfasını kapattı — bu bir
+      // hata değil, sessizce bırak.
+      if (err?.name !== 'AbortError') showToast(t('record.shareResultFailed'))
+    } finally {
+      setSharing(false)
     }
   }
 
@@ -617,6 +658,16 @@ export default function TahminKaydi() {
                     </a>
                   )}
                 </div>
+              )}
+              {isVerified && (
+                <button
+                  onClick={handleShareResult}
+                  disabled={sharing}
+                  className="mt-3 flex w-full items-center justify-center gap-1.5 rounded-theme bg-secondary py-2.5 text-xs font-bold text-secondary-foreground disabled:opacity-60"
+                >
+                  <iconify-icon icon={sharing ? 'lucide:loader-2' : 'lucide:share'} class={`text-sm ${sharing ? 'animate-spin' : ''}`}></iconify-icon>
+                  {t('record.shareResultCta')}
+                </button>
               )}
             </div>
 

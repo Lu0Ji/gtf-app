@@ -1462,7 +1462,10 @@
     "pointsAddFailed": "تم حفظ النتيجة لكن تعذّرت إضافة النقاط.",
     "votingDisabled": "تصويت المجتمع غير مفعّل بعد.",
     "voteFailed": "تعذّر حفظ تصويتك، حاول مرة أخرى.",
-    "commentFailed": "تعذّر نشر التعليق، حاول مرة أخرى."
+    "commentFailed": "تعذّر نشر التعليق، حاول مرة أخرى.",
+    "shareResultCta": "مشاركة النتيجة",
+    "shareResultTitle": "نتيجتي في GTF",
+    "shareResultFailed": "تعذّر إنشاء بطاقة المشاركة، حاول مرة أخرى."
   },
   "groups": {
     "eyebrow": "المجتمعات",

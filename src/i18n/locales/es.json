@@ -1458,7 +1458,10 @@
     "pointsAddFailed": "El resultado se guardó pero no se pudieron añadir puntos.",
     "votingDisabled": "La votación comunitaria aún no está activa.",
     "voteFailed": "No se pudo guardar tu voto, inténtalo de nuevo.",
-    "commentFailed": "No se pudo publicar el comentario, inténtalo de nuevo."
+    "commentFailed": "No se pudo publicar el comentario, inténtalo de nuevo.",
+    "shareResultCta": "Compartir resultado",
+    "shareResultTitle": "Mi resultado en GTF",
+    "shareResultFailed": "No se pudo crear la tarjeta, inténtalo de nuevo."
   },
   "groups": {
     "eyebrow": "Comunidades",

@@ -1458,7 +1458,10 @@
     "pointsAddFailed": "Das Ergebnis wurde gespeichert, aber Punkte konnten nicht hinzugefügt werden.",
     "votingDisabled": "Die Community-Abstimmung ist noch nicht aktiv.",
     "voteFailed": "Deine Stimme konnte nicht gespeichert werden, versuch es erneut.",
-    "commentFailed": "Kommentar konnte nicht gesendet werden, versuch es erneut."
+    "commentFailed": "Kommentar konnte nicht gesendet werden, versuch es erneut.",
+    "shareResultCta": "Ergebnis teilen",
+    "shareResultTitle": "Mein GTF-Ergebnis",
+    "shareResultFailed": "Freigabekarte konnte nicht erstellt werden, versuch es erneut."
   },
   "groups": {
     "eyebrow": "Communitys",

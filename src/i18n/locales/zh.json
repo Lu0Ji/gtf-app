@@ -1457,7 +1457,10 @@
     "pointsAddFailed": "结果已保存，但积分添加失败。",
     "votingDisabled": "社区投票功能尚未启用。",
     "voteFailed": "投票保存失败，请重试。",
-    "commentFailed": "评论发送失败，请重试。"
+    "commentFailed": "评论发送失败，请重试。",
+    "shareResultCta": "分享结果",
+    "shareResultTitle": "我的 GTF 结果",
+    "shareResultFailed": "无法生成分享卡片，请重试。"
   },
   "groups": {
     "eyebrow": "社群",

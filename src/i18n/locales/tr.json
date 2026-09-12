@@ -1458,7 +1458,10 @@
     "pointsAddFailed": "Sonuç kaydedildi ama puan eklenemedi.",
     "votingDisabled": "Topluluk oylaması özelliği henüz etkin değil.",
     "voteFailed": "Oy kaydedilemedi, tekrar dene.",
-    "commentFailed": "Yorum gönderilemedi, tekrar dene."
+    "commentFailed": "Yorum gönderilemedi, tekrar dene.",
+    "shareResultCta": "Sonucu paylaş",
+    "shareResultTitle": "GTF sonucum",
+    "shareResultFailed": "Paylaşım kartı oluşturulamadı, tekrar dene."
   },
   "groups": {
     "eyebrow": "Topluluklar",

@@ -1458,7 +1458,10 @@
     "pointsAddFailed": "The outcome was saved but points couldn't be added.",
     "votingDisabled": "Community voting isn't active yet.",
     "voteFailed": "Couldn't save your vote, try again.",
-    "commentFailed": "Couldn't post the comment, try again."
+    "commentFailed": "Couldn't post the comment, try again.",
+    "shareResultCta": "Share result",
+    "shareResultTitle": "My GTF result",
+    "shareResultFailed": "Could not create the share card, try again."
   },
   "groups": {
     "eyebrow": "Communities",

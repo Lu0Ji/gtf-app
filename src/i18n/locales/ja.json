@@ -1457,7 +1457,10 @@
     "pointsAddFailed": "結果は保存されましたが、ポイントを追加できませんでした。",
     "votingDisabled": "コミュニティ投票はまだ有効になっていません。",
     "voteFailed": "投票を保存できませんでした。もう一度お試しください。",
-    "commentFailed": "コメントを送信できませんでした。もう一度お試しください。"
+    "commentFailed": "コメントを送信できませんでした。もう一度お試しください。",
+    "shareResultCta": "結果をシェア",
+    "shareResultTitle": "私のGTF結果",
+    "shareResultFailed": "シェアカードを作成できませんでした。もう一度お試しください。"
   },
   "groups": {
     "eyebrow": "コミュニティ",
