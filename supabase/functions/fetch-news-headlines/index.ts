@@ -34,6 +34,23 @@
 // ru/ar/zh/es hâlâ tek genel 'dünya' feed'inde (bu dillerde gerçek bir
 // kategori feed'i bulunamadı, force-fit yapılmadı — dürüst bir sınır,
 // gizlenmedi).
+//
+// 2026-09-12: "bizim eklediğimiz diğer kategoriler için de tarafsız ve
+// telifsiz kaynaklar bulalım" — ekonomi/teknoloji/spor/siyaset/eğlence/
+// seyahat/eğitim/oyun hâlâ tek kaynaktı (Hürriyet), sadece 'dünya' 3
+// kaynağa çıkmıştı. Üçüncü bir Türkçe tarafsız kaynak eklendi: Euronews
+// Türkçe (pan-Avrupa, tek bir ülkenin hükümetine bağlı değil — BBC/DW ile
+// aynı "yabancı/kamu yayıncısı = yerli siyasetten bağımsız" mantığı).
+// Ama BBC Türkçe/DW Türkçe gibi Euronews Türkçe'nin de gerçek kategori
+// feed'i yok (?section=... parametresi denendi, hepsi aynı genel feed'e
+// düşüyor — yine "gerçek görünüp gerçek olmayan" tuzağı). Üçünü de tek
+// 'dünya' kovasına atmak yerine (dürüst ama tembel bir sınır) Türkçe bir
+// anahtar kelime sınıflandırıcısı eklendi (classifyTurkishCategory) — her
+// haber kendi başlık+açıklamasına göre spor/siyaset/ekonomi/teknoloji/
+// sağlık/eğlence'ye ayrılıyor, eşleşmeyen 'dünya'da kalıyor. Sadece Türkçe
+// için yapıldı (İngilizce/Almanca/Japonca'da zaten gerçek kategori
+// feed'leri var; 8 dilin hepsi için güvenilir anahtar kelime listesi
+// yazmak ayrı, çok daha büyük bir araştırma turu gerektirir).
 import "@supabase/functions-js/edge-runtime.d.ts";
 import { withSupabase } from "@supabase/server";
 import { XMLParser } from "npm:fast-xml-parser@4";
@@ -41,10 +58,87 @@ import { XMLParser } from "npm:fast-xml-parser@4";
 const STALE_AFTER_MINUTES = 20;
 const ITEMS_PER_FEED = 8;
 
+// Sırayla en spesifik kategoriden en genele — ilk eşleşen kazanıyor.
+// `words`: TAM token eşleşmesi gerekiyor (aşağıdaki containsWord()), ham
+// substring değil — ilk denemede (canlı veriye bakılıp) `text.includes()`
+// kullanılmıştı ve gerçek, ciddi yanlış eşleşmeler çıktı: "maç" (spor)
+// "amaçlı"/"amaçları" (çok sık kullanılan "amaç" kelimesinin ekli hali)
+// içinde geçiyor diye bir yapay zeka güvenliği haberini "spor" yaptı;
+// "aşı" (sağlık) aynı şekilde "aşırı" (extreme) kelimesinin içinde
+// yakalanıp bir güvenlik haberini "sağlık" yaptı. `phrases`: birden çok
+// kelimeli veya zaten kendi başına çakışma riski taşımayan terimler,
+// boşlukla dolgulu tam ifade eşleşmesiyle kontrol ediliyor (bkz.
+// containsPhrase) — "yapay zeka"/"süper lig" gibi ifadelerin başka bir
+// kelimenin içine yanlışlıkla sığması pratikte imkansız. Tekil kelimeler
+// çekim ekleriyle (ör. "maçı", "aşısı") eşleşmeyebilir — bu bilinçli bir
+// ödün: kaçırılan bir eşleşme sessizce 'dünya'ya düşer (zaten var olan
+// dürüst varsayılan), yanlış bir eşleşme kullanıcıya güvenliği ilgili bir
+// haberi "spor" diye gösterir — ikincisi çok daha kötü.
+const TURKISH_CATEGORY_RULES: { category: string; words?: string[]; phrases?: string[] }[] = [
+  {
+    category: "spor",
+    words: ["futbol", "basketbol", "voleybol", "maç", "gol", "transfer", "tenis", "olimpiyat", "galatasaray", "fenerbahçe", "beşiktaş", "trabzonspor"],
+    phrases: ["süper lig", "şampiyonlar ligi", "milli takım", "formula 1", "teknik direktör"],
+  },
+  {
+    category: "siyaset",
+    words: ["hükümet", "meclis", "seçim", "muhalefet", "chp", "mhp", "tbmm", "referandum", "anayasa", "diplomasi", "büyükelçi", "cumhurbaşkanı", "cumhurbaşkanlığı", "başbakan"],
+    phrases: ["ak parti"],
+  },
+  {
+    category: "ekonomi",
+    words: ["ekonomi", "dolar", "euro", "borsa", "enflasyon", "faiz", "ihracat", "ithalat", "zam", "bütçe", "yatırım", "işsizlik", "vergi"],
+    phrases: ["merkez bankası", "asgari ücret"],
+  },
+  {
+    category: "teknoloji",
+    words: ["teknoloji", "telefon", "uygulama", "internet", "siber", "yazılım", "google", "apple", "microsoft", "çip"],
+    phrases: ["yapay zeka", "elon musk"],
+  },
+  {
+    category: "sağlık",
+    words: ["sağlık", "hastane", "doktor", "aşı", "virüs", "salgın", "tedavi", "ilaç", "kanser", "hastalık"],
+  },
+  {
+    category: "eğlence",
+    words: ["dizi", "film", "sinema", "sanatçı", "şarkıcı", "konser", "oyuncu", "ünlü", "magazin", "netflix", "albüm"],
+  },
+];
+
+// toLocaleLowerCase("tr") — Türkçe'nin noktalı/noktasız I sorunu (İ/I,
+// i/ı) yüzünden düz .toLowerCase() burada yanlış sonuç verir (ör. "İş"
+// "i̇ş" olur, "iş" değil), token eşleşmesini sessizce bozardı.
+function normalizeTr(text: string): string {
+  return text.toLocaleLowerCase("tr").replace(/\s+/g, " ").trim();
+}
+
+function containsWord(tokens: Set<string>, word: string): boolean {
+  return tokens.has(word);
+}
+
+function containsPhrase(paddedText: string, phrase: string): boolean {
+  return paddedText.includes(` ${phrase} `);
+}
+
+function classifyTurkishCategory(title: string, description: string | null): string {
+  const raw = normalizeTr(`${title} ${description || ""}`);
+  // \p{L}/\p{N} (Unicode letter/number) yerine [a-z] kullanmak ğ/ş/ı/ö/ü/ç
+  // gibi harfleri de ayırıcı sayardı, kelimeleri ortadan bölerdi.
+  const tokens = new Set(raw.replace(/[^\p{L}\p{N}\s]/gu, " ").split(" ").filter(Boolean));
+  const padded = ` ${raw.replace(/[^\p{L}\p{N}\s]/gu, " ").replace(/\s+/g, " ").trim()} `;
+  for (const rule of TURKISH_CATEGORY_RULES) {
+    if (rule.words?.some((w) => containsWord(tokens, w))) return rule.category;
+    if (rule.phrases?.some((p) => containsPhrase(padded, p))) return rule.category;
+  }
+  return "dünya";
+}
+
 interface SourceDef {
   source: string;
   language: string;
   format: "rss2" | "rdf";
+  // category: "auto" -> classifyTurkishCategory() decides per item, for a
+  // source whose only real feed is one general mixed-topic stream.
   feeds: { url: string; category: string }[];
 }
 
@@ -80,7 +174,7 @@ const SOURCES: SourceDef[] = [
     source: "bbc-turkce-rss",
     language: "tr",
     format: "rss2",
-    feeds: [{ url: "https://feeds.bbci.co.uk/turkce/rss.xml", category: "dünya" }],
+    feeds: [{ url: "https://feeds.bbci.co.uk/turkce/rss.xml", category: "auto" }],
   },
   {
     source: "dw-turkce-rss",
@@ -89,7 +183,16 @@ const SOURCES: SourceDef[] = [
     // diffed directly, not assumed) — items are flat siblings of <channel>
     // under <rdf:RDF>, dated via <dc:date> instead of <pubDate>.
     format: "rdf",
-    feeds: [{ url: "https://rss.dw.com/rdf/rss-tur-all", category: "dünya" }],
+    feeds: [{ url: "https://rss.dw.com/rdf/rss-tur-all", category: "auto" }],
+  },
+  {
+    // Pan-Avrupa, tek bir hükümete bağlı değil — 2026-09-12 eklendi (bkz.
+    // dosya başındaki not). ?section=... query param'ı denendi, hepsi aynı
+    // genel feed'e düşüyor (BBC/DW ile aynı tuzak) — "auto" ile sınıflandırma.
+    source: "euronews-turkce-rss",
+    language: "tr",
+    format: "rss2",
+    feeds: [{ url: "https://tr.euronews.com/rss", category: "auto" }],
   },
   {
     source: "bbc-news-rss",
@@ -230,14 +333,16 @@ export default {
                 if (!item.title || !link) continue;
                 const thumbnail = item["media:thumbnail"]?.["@_url"] || null;
                 const dateStr = format === "rdf" ? item["dc:date"] : item.pubDate;
+                const title = String(item.title).trim();
+                const subtitle = item.description ? String(item.description).trim().slice(0, 200) : null;
                 rows.push({
                   source,
                   external_id: link,
                   kind: "news",
-                  category,
+                  category: category === "auto" ? classifyTurkishCategory(title, subtitle) : category,
                   language,
-                  title: String(item.title).trim(),
-                  subtitle: item.description ? String(item.description).trim().slice(0, 200) : null,
+                  title,
+                  subtitle,
                   // Repurposed for news: publish time, not a future decision
                   // point — see the GÜNDEM comment in supabase/schema.sql.
                   event_date: dateStr ? new Date(dateStr).toISOString() : now,
