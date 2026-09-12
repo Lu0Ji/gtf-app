@@ -2585,3 +2585,78 @@ alter table public.profiles drop constraint equipped_seal_style_known_value;
 alter table public.profiles add constraint equipped_seal_style_known_value
   check (equipped_seal_style in ('basic', 'ferman', 'sadakat', 'noter', 'altin'));
 -- ─────────────────────────────────────────────────────────────────────────
+
+-- "O GÜN NE DEMİŞTİN" HATIRLATMASI (2026-09-12 kullanıcı bildirimi:
+-- "kullanıcıları içerde tutup zaman geçirtmek için ne yapabiliriz...
+-- diğer sosyal medya araçlarından esinlenebiliriz" — Facebook/Snapchat'in
+-- "anılar" özelliği, ama GTF için ödünç alınmış hissi vermiyor çünkü
+-- uygulamanın kendi teması zaten "zaman kapsülü").
+--
+-- ÖNEMLİ KEŞİF: pending-supabase-migration.md ve fetch-sports-fixtures/
+-- fetch-news-headlines'ın kendi yorumları, bu ortamda gerçek bir
+-- zamanlanmış görev (cron) kurulamayacağını, sadece "refresh-on-view"
+-- yapılabileceğini varsayıyordu ("Dashboard access this session doesn't
+-- have"). Bu varsayım YANLIŞ çıktı — `create extension pg_cron` ve
+-- `cron.schedule(...)` doğrudan bir db query bağlantısından çalıştı,
+-- Dashboard'a hiç gerek kalmadan. Bu, bu turdan itibaren gerçek bir
+-- arka plan görevi kurabileceğimiz anlamına geliyor (bkz. aşağıdaki
+-- cron.schedule çağrısı) — ileride push_new_follower gibi anlık
+-- trigger'lara ek olarak, zamana dayalı bildirimler de mümkün.
+--
+-- Her gün bir kez: created_at'ın ay/günü bugünkü ay/güne denk gelen (ve
+-- en az 1 yıl geçmiş) her tahmin için yazara bir hatırlatma push'u
+-- gönderiliyor. Aynı tahmin birden fazla yılda tetiklenebilir (1. yıl,
+-- 2. yıl, ...) — her biri gerçek bir "o gün ne demiştin" anı. Idempotency:
+-- memory_notifications_sent (prediction_id, anniversary_date) — aynı gün
+-- cron ikinci kez çalışsa bile (ör. bir redeploy sonrası) ON CONFLICT DO
+-- NOTHING tekrar göndermeyi engelliyor.
+create extension if not exists pg_cron;
+
+create table private.memory_notifications_sent (
+  prediction_id uuid not null references public.predictions(id) on delete cascade,
+  anniversary_date date not null,
+  primary key (prediction_id, anniversary_date)
+);
+
+create or replace function private.send_memory_notifications() returns void
+language plpgsql security definer set search_path = public as $$
+declare
+  r record;
+  v_years_ago integer;
+  v_title text;
+  v_body text;
+begin
+  for r in
+    select p.id, p.author_id, p.title, p.status, p.created_at
+    from public.predictions p
+    where extract(month from p.created_at) = extract(month from current_date)
+      and extract(day from p.created_at) = extract(day from current_date)
+      and extract(year from p.created_at) < extract(year from current_date)
+  loop
+    insert into private.memory_notifications_sent (prediction_id, anniversary_date)
+    values (r.id, current_date)
+    on conflict do nothing;
+    if not found then
+      continue;
+    end if;
+
+    v_years_ago := extract(year from current_date) - extract(year from r.created_at);
+    v_title := case
+      when v_years_ago = 1 then 'Tam 1 yıl önce bugün...'
+      else 'Tam ' || v_years_ago || ' yıl önce bugün...'
+    end;
+    v_body := case
+      when r.status = 'verified_correct' then 'Bunu tahmin etmiştin ve haklı çıkmışsın: ' || left(r.title, 80)
+      when r.status = 'verified_incorrect' then 'Bunu tahmin etmiştin. Sonucu şimdi hatırlıyor musun: ' || left(r.title, 80)
+      else 'Bunu mühürlemiştin, hâlâ duruyor: ' || left(r.title, 80)
+    end;
+
+    perform private.send_push_notification(r.author_id, v_title, v_body, '/tahmin-kaydi?id=' || r.id);
+  end loop;
+end;
+$$;
+
+-- 07:00 UTC ≈ Türkiye saatiyle sabah 10:00 — "günün başında yakala" için
+-- makul bir zaman, uyku saatlerinin ortasına denk gelmiyor.
+select cron.schedule('send-memory-notifications', '0 7 * * *', $$select private.send_memory_notifications()$$);
+-- ─────────────────────────────────────────────────────────────────────────
