@@ -1332,7 +1332,11 @@
       "long": "長期"
     },
     "rankingSectionTitle": "ランキング",
-    "yourRank": "あなたの順位"
+    "yourRank": "あなたの順位",
+    "period": {
+      "week": "今週",
+      "all": "全期間"
+    }
   },
   "profile": {
     "eyebrow": "プロフィール",

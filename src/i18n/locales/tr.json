@@ -1333,7 +1333,11 @@
       "long": "Uzun vade"
     },
     "rankingSectionTitle": "Sıralama",
-    "yourRank": "Senin sıran"
+    "yourRank": "Senin sıran",
+    "period": {
+      "week": "Bu Hafta",
+      "all": "Tüm Zamanlar"
+    }
   },
   "profile": {
     "eyebrow": "Profil",

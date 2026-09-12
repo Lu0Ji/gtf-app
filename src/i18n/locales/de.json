@@ -1333,7 +1333,11 @@
       "long": "Langfristig"
     },
     "rankingSectionTitle": "Rangliste",
-    "yourRank": "Dein Rang"
+    "yourRank": "Dein Rang",
+    "period": {
+      "week": "Diese Woche",
+      "all": "Aller Zeiten"
+    }
   },
   "profile": {
     "eyebrow": "Profil",

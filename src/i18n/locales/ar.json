@@ -1337,7 +1337,11 @@
       "long": "طويلة المدى"
     },
     "rankingSectionTitle": "الترتيب",
-    "yourRank": "ترتيبك"
+    "yourRank": "ترتيبك",
+    "period": {
+      "week": "هذا الأسبوع",
+      "all": "كل الأوقات"
+    }
   },
   "profile": {
     "eyebrow": "الملف الشخصي",

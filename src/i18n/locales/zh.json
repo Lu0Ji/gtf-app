@@ -1332,7 +1332,11 @@
       "long": "长期"
     },
     "rankingSectionTitle": "排名",
-    "yourRank": "你的排名"
+    "yourRank": "你的排名",
+    "period": {
+      "week": "本周",
+      "all": "历史总榜"
+    }
   },
   "profile": {
     "eyebrow": "个人主页",

@@ -2,13 +2,19 @@ import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { fallbackAvatarFor } from '../lib/images.js'
-import { fetchLeaderboard, MIN_VERIFIED_FOR_RANKING } from '../lib/leaderboard.js'
+import { fetchLeaderboard, MIN_VERIFIED_FOR_RANKING, MIN_VERIFIED_FOR_WEEKLY_RANKING } from '../lib/leaderboard.js'
 import { CATEGORY_META, CATEGORY_SLUGS } from '../lib/categories.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
 import SectionHeader from '../components/ui/SectionHeader.jsx'
 
 const PODIUM_ACCENTS = ['#9A5C14', '#B87935', '#C18B57']
+// 2026-09-12, öneri #4 ("diğer sosyal medya araçlarından esinlenebiliriz"
+// — Duolingo Ligleri): tüm-zamanlar tablosu yeni/orta seviye kullanıcıyı
+// asla göstermiyordu — haftalık sıfırlanan bir görünüm herkese "bu hafta
+// yükselebilirim" hissi veriyor. Ayrı bir eşik (MIN_VERIFIED_FOR_WEEKLY_
+// RANKING) olmadan bu görünüm de boş kalırdı, bkz. leaderboard.js.
+const PERIOD_TABS = ['week', 'all']
 const DURATION_TABS = ['all', 'short', 'medium', 'long']
 const CATEGORY_TABS = ['all', ...CATEGORY_SLUGS]
 
@@ -25,6 +31,7 @@ export default function LiderlikTablosu() {
   const { t } = useTranslation()
   const navigate = useNavigate()
   const { user } = useAuth()
+  const [period, setPeriod] = useState('week')
   const [category, setCategory] = useState('all')
   const [bucket, setBucket] = useState('all')
   const [rankings, setRankings] = useState([])
@@ -36,6 +43,7 @@ export default function LiderlikTablosu() {
     fetchLeaderboard({
       category: category === 'all' ? null : category,
       bucket: bucket === 'all' ? null : bucket,
+      period,
       limit: 100,
     }).then(({ rows }) => {
       if (!cancelled) {
@@ -46,7 +54,7 @@ export default function LiderlikTablosu() {
     return () => {
       cancelled = true
     }
-  }, [category, bucket])
+  }, [category, bucket, period])
 
   const podium = rankings.slice(0, 3)
   const rest = rankings.slice(3)
@@ -61,7 +69,24 @@ export default function LiderlikTablosu() {
       <DetailHeader title={t('leaderboard.title')} subtitle={t('leaderboard.subtitle')} />
 
       <section className="mt-4">
-        <div className="flex gap-2 overflow-x-auto px-5 pb-1">
+        <div className="flex gap-2 px-5 pb-1">
+          {PERIOD_TABS.map((tab) => {
+            const isActive = tab === period
+            return (
+              <button
+                key={tab}
+                type="button"
+                onClick={() => setPeriod(tab)}
+                className={`flex-1 rounded-theme py-2.5 text-sm font-bold ${
+                  isActive ? 'bg-primary text-primary-foreground' : 'border border-border bg-card text-muted-foreground'
+                }`}
+              >
+                {t(`leaderboard.period.${tab}`)}
+              </button>
+            )
+          })}
+        </div>
+        <div className="mt-3 flex gap-2 overflow-x-auto px-5 pb-1">
           {DURATION_TABS.map((tab) => {
             const isActive = tab === bucket
             return (
@@ -112,7 +137,9 @@ export default function LiderlikTablosu() {
                 <div className="rounded-theme border border-dashed border-border bg-muted/60 p-5 text-center">
                   <p className="text-xs text-muted-foreground">{t('leaderboard.noUsersYet')}</p>
                   <p className="mt-1.5 text-[11px] text-muted-foreground">
-                    {t('leaderboard.minSampleHint', { count: MIN_VERIFIED_FOR_RANKING })}
+                    {t('leaderboard.minSampleHint', {
+                      count: period === 'week' ? MIN_VERIFIED_FOR_WEEKLY_RANKING : MIN_VERIFIED_FOR_RANKING,
+                    })}
                   </p>
                 </div>
               ) : (

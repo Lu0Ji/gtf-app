@@ -1333,7 +1333,11 @@
       "long": "Largo plazo"
     },
     "rankingSectionTitle": "Clasificación",
-    "yourRank": "Tu posición"
+    "yourRank": "Tu posición",
+    "period": {
+      "week": "Esta semana",
+      "all": "Siempre"
+    }
   },
   "profile": {
     "eyebrow": "Perfil",

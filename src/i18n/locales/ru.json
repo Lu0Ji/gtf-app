@@ -1335,7 +1335,11 @@
       "long": "Долгосрочные"
     },
     "rankingSectionTitle": "Рейтинг",
-    "yourRank": "Твоё место"
+    "yourRank": "Твоё место",
+    "period": {
+      "week": "На этой неделе",
+      "all": "За всё время"
+    }
   },
   "profile": {
     "eyebrow": "Профиль",
