@@ -2660,3 +2660,58 @@ $$;
 -- makul bir zaman, uyku saatlerinin ortasına denk gelmiyor.
 select cron.schedule('send-memory-notifications', '0 7 * * *', $$select private.send_memory_notifications()$$);
 -- ─────────────────────────────────────────────────────────────────────────
+
+-- STREAK KAYBETME HATIRLATMASI (2026-09-12, öneri #3 — Duolingo'nun en
+-- meşhur retention mekaniği). StreakFlame.jsx + streak_count/
+-- last_active_date altyapısı zaten vardı (bkz. "ENGAGEMENT MECHANICS"
+-- bölümü, satır ~501) ama günün sonuna doğru hiç dürtmüyorduk — biri
+-- serisini SessizCE kaybediyordu, ancak bir sonraki girişinde fark
+-- ediyordu. Artık pg_cron kullanılabildiği doğrulandığı için (bkz. "O GÜN
+-- NE DEMİŞTİN" bölümündeki not) bu artık gerçek, zamanlanmış bir görev.
+--
+-- Hedef: last_active_date TAM OLARAK dün olan (bugün henüz hiç açılmamış
+-- ama seri hâlâ kurtarılabilir durumda — last_active_date bundan daha eski
+-- olan biri için seri zaten bumpStreak()'in bir sonraki girişte sıfırlayacağı
+-- şekilde fiilen bitmiş demektir, "kaybetme!" demek yanlış/kafa karıştırıcı
+-- olurdu) ve streak_count >= 2 olan (1 günlük bir seriyi "kaybetme"
+-- demek gereksiz erken bir dürtme). streak_reminders_sent aynı gün
+-- tekrar göndermeyi engelliyor (memory_notifications_sent ile aynı desen).
+create table private.streak_reminders_sent (
+  user_id uuid not null references public.profiles(id) on delete cascade,
+  reminder_date date not null,
+  primary key (user_id, reminder_date)
+);
+
+create or replace function private.send_streak_reminders() returns void
+language plpgsql security definer set search_path = public as $$
+declare
+  r record;
+begin
+  for r in
+    select id, streak_count
+    from public.profiles
+    where last_active_date = current_date - interval '1 day'
+      and streak_count >= 2
+  loop
+    insert into private.streak_reminders_sent (user_id, reminder_date)
+    values (r.id, current_date)
+    on conflict do nothing;
+    if not found then
+      continue;
+    end if;
+
+    perform private.send_push_notification(
+      r.id,
+      r.streak_count || ' günlük serin bitmek üzere! 🔥',
+      'Bugün henüz açılmadın — seni kaybetmeden uygulamayı aç.',
+      '/'
+    );
+  end loop;
+end;
+$$;
+
+-- 17:00 UTC ≈ Türkiye saatiyle akşam 20:00 — Duolingo'nun kendi zamanlaması
+-- da aynı mantıkla akşam saatleri: gün bitmeden önce ama hâlâ "bu akşam
+-- açarım" için gerçek bir pencere bırakarak.
+select cron.schedule('send-streak-reminders', '0 17 * * *', $$select private.send_streak_reminders()$$);
+-- ─────────────────────────────────────────────────────────────────────────
