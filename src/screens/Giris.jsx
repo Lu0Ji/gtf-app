@@ -4,6 +4,7 @@ import { useTranslation, Trans } from 'react-i18next'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { supabase } from '../lib/supabase.js'
 import { IMG } from '../lib/images.js'
+import { CRITERIA } from '../lib/passwordStrength.js'
 
 // FireVibe-generated hero, swapped 2026-09-02: the previous asset was a
 // recognizable Istanbul mosque skyline, which read as a Turkey-only app;
@@ -150,6 +151,7 @@ export default function Giris() {
   // be enrollable but never actually checked at login.
   const [mfaFactorId, setMfaFactorId] = useState(null)
   const [mfaCode, setMfaCode] = useState('')
+  const passwordScore = CRITERIA.filter((c) => c.test(password)).length
 
   async function handleVerifyMfa(e) {
     e.preventDefault()
@@ -204,6 +206,12 @@ export default function Giris() {
   async function handleSubmit(e) {
     e.preventDefault()
     setError('')
+    // Sadece kayıtta — giriş yapan biri var olan (belki daha eski, daha
+    // gevşek kuralla oluşturulmuş) şifresiyle engellenmemeli.
+    if (mode === 'signup' && passwordScore < CRITERIA.length) {
+      setError(t('auth.passwordTooWeak'))
+      return
+    }
     setBusy(true)
     try {
       if (mode === 'signin') {
@@ -496,12 +504,44 @@ export default function Giris() {
           <input
             required
             type="password"
-            minLength={6}
+            // Var olan hesaplar eski (daha gevşek) kuralla kayıt oldu — giriş
+            // formunda bu şartı sıkılaştırmak onları hesaplarından kilitler.
+            // Sadece kayıt tarafı yeni minimumu görüyor.
+            minLength={mode === 'signup' ? 10 : 6}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            placeholder={t('auth.passwordPlaceholder')}
+            placeholder={t(mode === 'signup' ? 'auth.passwordPlaceholderSignup' : 'auth.passwordPlaceholder')}
             className="w-full rounded-theme border border-border bg-input px-4 py-3 text-sm text-foreground shadow-sm outline-none transition-colors focus:border-primary"
           />
+          {mode === 'signup' && password.length > 0 && (
+            <div className="mt-3">
+              <div className="flex items-center justify-between">
+                <p className="text-[11px] font-medium text-muted-foreground">{t('settings.changePassword.strengthTitle')}</p>
+                <p className={`text-[11px] font-bold ${passwordScore === CRITERIA.length ? 'text-success' : 'text-muted-foreground'}`}>
+                  {t('settings.changePassword.strengthLevels', { returnObjects: true })[passwordScore]}
+                </p>
+              </div>
+              <div className="mt-2 flex gap-1.5">
+                {CRITERIA.map((c) => (
+                  <div key={c.key} className={`h-1.5 flex-1 rounded-full ${c.test(password) ? 'bg-success' : 'bg-muted'}`} />
+                ))}
+              </div>
+              <div className="mt-2.5 grid grid-cols-2 gap-x-3 gap-y-1.5">
+                {CRITERIA.map((c) => {
+                  const met = c.test(password)
+                  return (
+                    <div
+                      key={c.key}
+                      className={`flex items-center gap-1.5 text-[10px] font-medium ${met ? 'text-success' : 'text-muted-foreground'}`}
+                    >
+                      <iconify-icon icon={met ? 'lucide:check-circle-2' : 'lucide:circle'} class="text-[13px]"></iconify-icon>
+                      {t(c.labelKey)}
+                    </div>
+                  )
+                })}
+              </div>
+            </div>
+          )}
         </div>
 
         {error && (

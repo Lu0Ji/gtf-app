@@ -4,20 +4,9 @@ import { useTranslation } from 'react-i18next'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
+import { CRITERIA } from '../lib/passwordStrength.js'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
 import Card from '../components/ui/Card.jsx'
-
-// Unicode-aware, not script-specific — \p{Lu} matches an uppercase letter
-// in any language (Latin, Cyrillic, Greek, etc.), and excluding \p{L}/\p{N}
-// (any letter/digit in any script) for "special" is what keeps a Cyrillic
-// or Arabic password's own letters from being miscounted as special
-// characters, the way a hand-picked ASCII+Turkish-only class would.
-const CRITERIA = [
-  { key: 'length', labelKey: 'settings.changePassword.criteriaLength', test: (v) => v.length >= 10 },
-  { key: 'upper', labelKey: 'settings.changePassword.criteriaUpper', test: (v) => /\p{Lu}/u.test(v) },
-  { key: 'digit', labelKey: 'settings.changePassword.criteriaDigit', test: (v) => /[0-9]/.test(v) },
-  { key: 'special', labelKey: 'settings.changePassword.criteriaSpecial', test: (v) => /[^\p{L}\p{N}]/u.test(v) },
-]
 
 export default function SifreDegistir() {
   const { t } = useTranslation()

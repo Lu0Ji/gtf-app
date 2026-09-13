@@ -78,7 +78,9 @@
     "heroSubheadline": "封存你的预测——在应验之前无人可见，应验的那一刻，所有人都能看到。",
     "stepSealLabel": "封存",
     "stepWaitLabel": "等待",
-    "stepProveLabel": "证明"
+    "stepProveLabel": "证明",
+    "passwordTooWeak": "你的密码未满足所有安全条件——请查看下方列表。",
+    "passwordPlaceholderSignup": "至少 10 个字符"
   },
   "home": {
     "publicFeed": "公开动态",
@@ -1793,7 +1795,13 @@
     "communityNoteDesc": "每一个正确的预测、每一个点赞、每一位新关注者都会让你更进一步。",
     "interestsEyebrow": "最后一步",
     "interestsTitle": "你对什么感兴趣？",
-    "interestsDesc": "我们会根据你选择的内容为你定制信息流和推荐好友，随时可以在设置中修改。"
+    "interestsDesc": "我们会根据你选择的内容为你定制信息流和推荐好友，随时可以在设置中修改。",
+    "twoFactorEyebrow": "可选",
+    "twoFactorTitle": "让你的账户更安全一点",
+    "twoFactorDesc": "即使密码泄露，双重验证也能阻止他人登录。现在设置，或稍后在设置中完成。",
+    "twoFactorEnrolledTitle": "双重验证已开启",
+    "twoFactorEnrolledDesc": "你的账户现在有额外保护。",
+    "twoFactorSkipHint": "你可以跳过此步骤——随时可在设置 > 双重验证中开启。"
   },
   "sealStyles": {
     "sectionEyebrow": "个性化",

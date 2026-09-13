@@ -78,7 +78,9 @@
     "heroSubheadline": "予測を封印しよう — 的中するまでは誰にも見えない。的中した瞬間、みんなに見える。",
     "stepSealLabel": "封印",
     "stepWaitLabel": "待つ",
-    "stepProveLabel": "証明"
+    "stepProveLabel": "証明",
+    "passwordTooWeak": "パスワードがすべてのセキュリティ基準を満たしていません — 下のリストを確認してください。",
+    "passwordPlaceholderSignup": "10文字以上"
   },
   "home": {
     "publicFeed": "公開フィード",
@@ -1793,7 +1795,13 @@
     "communityNoteDesc": "正解した予測、いいね、新しいフォロワー——そのひとつひとつがあなたを一歩前へ進めます。",
     "interestsEyebrow": "最後のステップ",
     "interestsTitle": "何に興味がありますか？",
-    "interestsDesc": "選んだトピックに合わせてフィードとおすすめのユーザーを調整します。いつでも設定から変更できます。"
+    "interestsDesc": "選んだトピックに合わせてフィードとおすすめのユーザーを調整します。いつでも設定から変更できます。",
+    "twoFactorEyebrow": "任意",
+    "twoFactorTitle": "アカウントをもう少し安全に",
+    "twoFactorDesc": "二段階認証を設定すると、パスワードが漏れてもログインをブロックできます。今すぐ、または後で設定から設定できます。",
+    "twoFactorEnrolledTitle": "二段階認証が有効です",
+    "twoFactorEnrolledDesc": "アカウントが追加で保護されました。",
+    "twoFactorSkipHint": "このステップはスキップできます — いつでも設定 > 二段階認証から設定できます。"
   },
   "sealStyles": {
     "sectionEyebrow": "カスタマイズ",

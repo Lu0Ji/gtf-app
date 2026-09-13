@@ -2,18 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
-
-// Same 4-criteria strength check as SifreDegistir.jsx (kept in sync
-// manually — small enough that a shared import would cost more than it
-// saves). Unicode-aware, not script-specific: \p{Lu} matches an uppercase
-// letter in any language, and \p{L}/\p{N} exclusion for "special" keeps a
-// Cyrillic/Arabic password's own letters from being miscounted.
-const CRITERIA = [
-  { key: 'length', labelKey: 'settings.changePassword.criteriaLength', test: (v) => v.length >= 10 },
-  { key: 'upper', labelKey: 'settings.changePassword.criteriaUpper', test: (v) => /\p{Lu}/u.test(v) },
-  { key: 'digit', labelKey: 'settings.changePassword.criteriaDigit', test: (v) => /[0-9]/.test(v) },
-  { key: 'special', labelKey: 'settings.changePassword.criteriaSpecial', test: (v) => /[^\p{L}\p{N}]/u.test(v) },
-]
+import { CRITERIA } from '../lib/passwordStrength.js'
 
 // Rendered as a top-level gate in App.jsx, not a routed screen — see
 // AuthContext's passwordRecovery comment for why (HashRouter and

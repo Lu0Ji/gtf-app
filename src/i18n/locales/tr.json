@@ -78,7 +78,9 @@
     "heroSubheadline": "Tahminini mühürle — doğru çıkana kadar kimse göremez. O an geldiğinde herkes görür.",
     "stepSealLabel": "Mühürle",
     "stepWaitLabel": "Bekle",
-    "stepProveLabel": "Kanıtla"
+    "stepProveLabel": "Kanıtla",
+    "passwordTooWeak": "Şifren tüm güvenlik ölçütlerini karşılamıyor — aşağıdaki listeye bak.",
+    "passwordPlaceholderSignup": "En az 10 karakter"
   },
   "home": {
     "publicFeed": "Herkese açık akış",
@@ -1794,7 +1796,13 @@
     "communityNoteDesc": "Her doğru tahmin, her beğeni, her yeni takipçi seni bir adım ileri taşır.",
     "interestsEyebrow": "Son bir adım",
     "interestsTitle": "Neyle ilgileniyorsun?",
-    "interestsDesc": "Seçtiğin konulara göre akışını ve sana önerdiğimiz kişileri düzenleriz. İstediğin zaman Ayarlar'dan değiştirebilirsin."
+    "interestsDesc": "Seçtiğin konulara göre akışını ve sana önerdiğimiz kişileri düzenleriz. İstediğin zaman Ayarlar'dan değiştirebilirsin.",
+    "twoFactorEyebrow": "İsteğe bağlı",
+    "twoFactorTitle": "Hesabını bir adım daha güvenli yap",
+    "twoFactorDesc": "İki aşamalı doğrulama, şifren ele geçirilse bile hesabına girişi engeller. İstersen şimdi kur, istersen daha sonra Ayarlar'dan.",
+    "twoFactorEnrolledTitle": "İki aşamalı doğrulama aktif",
+    "twoFactorEnrolledDesc": "Hesabın artık ekstra korumalı.",
+    "twoFactorSkipHint": "Bu adımı atlayabilirsin — istediğin zaman Ayarlar > İki Aşamalı Doğrulama'dan kurabilirsin."
   },
   "sealStyles": {
     "sectionEyebrow": "Kişiselleştirme",

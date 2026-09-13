@@ -78,7 +78,9 @@
     "heroSubheadline": "Sella tu predicción — nadie la ve hasta que se cumple. Entonces la ven todos.",
     "stepSealLabel": "Sella",
     "stepWaitLabel": "Espera",
-    "stepProveLabel": "Demuestra"
+    "stepProveLabel": "Demuestra",
+    "passwordTooWeak": "Tu contraseña no cumple todos los criterios de seguridad — revisa la lista de abajo.",
+    "passwordPlaceholderSignup": "Al menos 10 caracteres"
   },
   "home": {
     "publicFeed": "Feed público",
@@ -1794,7 +1796,13 @@
     "communityNoteDesc": "Cada predicción acertada, cada me gusta, cada nuevo seguidor te hace avanzar un paso más.",
     "interestsEyebrow": "Un último paso",
     "interestsTitle": "¿Qué te interesa?",
-    "interestsDesc": "Adaptaremos tu feed y las personas que te sugerimos según lo que elijas. Puedes cambiarlo cuando quieras desde Ajustes."
+    "interestsDesc": "Adaptaremos tu feed y las personas que te sugerimos según lo que elijas. Puedes cambiarlo cuando quieras desde Ajustes.",
+    "twoFactorEyebrow": "Opcional",
+    "twoFactorTitle": "Haz tu cuenta un poco más segura",
+    "twoFactorDesc": "La verificación en dos pasos bloquea el inicio de sesión incluso si tu contraseña se ve comprometida. Configúrala ahora o más tarde desde Ajustes.",
+    "twoFactorEnrolledTitle": "Verificación en dos pasos activada",
+    "twoFactorEnrolledDesc": "Tu cuenta ahora tiene protección adicional.",
+    "twoFactorSkipHint": "Puedes omitir este paso — actívalo cuando quieras desde Ajustes > Verificación en dos pasos."
   },
   "sealStyles": {
     "sectionEyebrow": "Personalización",

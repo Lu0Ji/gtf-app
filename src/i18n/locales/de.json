@@ -78,7 +78,9 @@
     "heroSubheadline": "Versiegle deine Vorhersage — niemand sieht sie, bis sie sich bewahrheitet. Dann sehen es alle.",
     "stepSealLabel": "Versiegeln",
     "stepWaitLabel": "Warten",
-    "stepProveLabel": "Beweisen"
+    "stepProveLabel": "Beweisen",
+    "passwordTooWeak": "Dein Passwort erfüllt nicht alle Sicherheitskriterien — sieh dir die Liste unten an.",
+    "passwordPlaceholderSignup": "Mindestens 10 Zeichen"
   },
   "home": {
     "publicFeed": "Öffentlicher Feed",
@@ -1794,7 +1796,13 @@
     "communityNoteDesc": "Jede richtige Vorhersage, jedes Like, jeder neue Follower bringt dich einen Schritt weiter.",
     "interestsEyebrow": "Ein letzter Schritt",
     "interestsTitle": "Wofür interessierst du dich?",
-    "interestsDesc": "Wir passen deinen Feed und die vorgeschlagenen Personen an deine Auswahl an. Du kannst das jederzeit in den Einstellungen ändern."
+    "interestsDesc": "Wir passen deinen Feed und die vorgeschlagenen Personen an deine Auswahl an. Du kannst das jederzeit in den Einstellungen ändern.",
+    "twoFactorEyebrow": "Optional",
+    "twoFactorTitle": "Mach dein Konto etwas sicherer",
+    "twoFactorDesc": "Die Zwei-Faktor-Authentifizierung blockiert die Anmeldung selbst dann, wenn dein Passwort kompromittiert wird. Richte sie jetzt ein oder später in den Einstellungen.",
+    "twoFactorEnrolledTitle": "Zwei-Faktor-Authentifizierung aktiv",
+    "twoFactorEnrolledDesc": "Dein Konto ist jetzt zusätzlich geschützt.",
+    "twoFactorSkipHint": "Du kannst diesen Schritt überspringen — richte es jederzeit unter Einstellungen > Zwei-Faktor-Authentifizierung ein."
   },
   "sealStyles": {
     "sectionEyebrow": "Personalisierung",

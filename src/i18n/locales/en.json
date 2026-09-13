@@ -78,7 +78,9 @@
     "heroSubheadline": "Seal your prediction — no one can see it until it's proven right. Then everyone does.",
     "stepSealLabel": "Seal",
     "stepWaitLabel": "Wait",
-    "stepProveLabel": "Prove"
+    "stepProveLabel": "Prove",
+    "passwordTooWeak": "Your password doesn’t meet all the security criteria — check the list below.",
+    "passwordPlaceholderSignup": "At least 10 characters"
   },
   "home": {
     "publicFeed": "Public feed",
@@ -1794,7 +1796,13 @@
     "communityNoteDesc": "Every correct prediction, every like, every new follower moves you one step forward.",
     "interestsEyebrow": "One last step",
     "interestsTitle": "What are you into?",
-    "interestsDesc": "We'll tailor your feed and the people we suggest around what you pick. You can change this anytime in Settings."
+    "interestsDesc": "We'll tailor your feed and the people we suggest around what you pick. You can change this anytime in Settings.",
+    "twoFactorEyebrow": "Optional",
+    "twoFactorTitle": "Make your account a bit more secure",
+    "twoFactorDesc": "Two-factor authentication blocks sign-in even if your password is compromised. Set it up now, or later from Settings.",
+    "twoFactorEnrolledTitle": "Two-factor authentication is on",
+    "twoFactorEnrolledDesc": "Your account now has extra protection.",
+    "twoFactorSkipHint": "You can skip this — set it up anytime from Settings > Two-Factor Authentication."
   },
   "sealStyles": {
     "sectionEyebrow": "Customization",
