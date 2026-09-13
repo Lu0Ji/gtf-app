@@ -1,92 +1,39 @@
-import { useEffect, useState } from 'react'
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { supabase } from '../lib/supabase.js'
 import { useToast } from '../contexts/ToastContext.jsx'
+import { useTotpEnrollment } from '../hooks/useTotpEnrollment.js'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
 import Card from '../components/ui/Card.jsx'
 
 export default function IkiAsamaliDogrulama() {
   const { t } = useTranslation()
   const { showToast } = useToast()
-  const [factor, setFactor] = useState(null) // verified TOTP factor, or null
-  const [loading, setLoading] = useState(true)
-  const [enrolling, setEnrolling] = useState(false)
-  const [enrollData, setEnrollData] = useState(null) // { id, qrCode, secret }
-  const [code, setCode] = useState('')
-  const [busy, setBusy] = useState(false)
+  const { factor, loading, enrolling, enrollData, code, setCode, busy, startEnroll, verifyEnroll, cancelEnroll, disable } =
+    useTotpEnrollment()
   const [showDisableConfirm, setShowDisableConfirm] = useState(false)
 
-  async function loadFactors() {
-    const { data, error } = await supabase.auth.mfa.listFactors()
-    if (!error) {
-      setFactor((data?.totp || []).find((f) => f.status === 'verified') || null)
-    }
-    setLoading(false)
-  }
-
-  useEffect(() => {
-    loadFactors()
-  }, [])
-
   async function handleStartEnroll() {
-    setBusy(true)
-    const { data, error } = await supabase.auth.mfa.enroll({ factorType: 'totp' })
-    setBusy(false)
-    if (error) {
-      showToast(error.message || t('settings.twoFactor.enrollFailed'))
-      return
-    }
-    setEnrollData({ id: data.id, qrCode: data.totp.qr_code, secret: data.totp.secret })
-    setEnrolling(true)
+    const { error } = await startEnroll()
+    if (error) showToast(error.message || t('settings.twoFactor.enrollFailed'))
   }
 
   async function handleVerifyEnroll() {
-    if (code.trim().length !== 6 || busy) return
-    setBusy(true)
-    const { data: challenge, error: challengeError } = await supabase.auth.mfa.challenge({
-      factorId: enrollData.id,
-    })
-    if (challengeError) {
-      showToast(challengeError.message || t('settings.twoFactor.verifyChallengeFailed'))
-      setBusy(false)
-      return
-    }
-    const { error: verifyError } = await supabase.auth.mfa.verify({
-      factorId: enrollData.id,
-      challengeId: challenge.id,
-      code: code.trim(),
-    })
-    setBusy(false)
-    if (verifyError) {
+    const { error } = await verifyEnroll()
+    if (error) {
       showToast(t('settings.twoFactor.codeWrong'))
       return
     }
     showToast(t('settings.twoFactor.enrollSuccess'), 'success')
-    setEnrolling(false)
-    setEnrollData(null)
-    setCode('')
-    await loadFactors()
-  }
-
-  async function handleCancelEnroll() {
-    if (enrollData) await supabase.auth.mfa.unenroll({ factorId: enrollData.id }).catch(() => {})
-    setEnrolling(false)
-    setEnrollData(null)
-    setCode('')
   }
 
   async function handleDisable() {
-    if (!factor || busy) return
-    setBusy(true)
-    const { error } = await supabase.auth.mfa.unenroll({ factorId: factor.id })
-    setBusy(false)
+    const { error } = await disable()
     setShowDisableConfirm(false)
     if (error) {
       showToast(error.message || t('settings.twoFactor.disableFailed'))
       return
     }
     showToast(t('settings.twoFactor.disableSuccess'), 'success')
-    await loadFactors()
   }
 
   if (loading) {
@@ -122,10 +69,14 @@ export default function IkiAsamaliDogrulama() {
             <h2 className="font-heading text-[15px] font-bold">{t('settings.twoFactor.connectAppTitle')}</h2>
             <p className="mt-1 text-xs leading-5 text-muted-foreground">{t('settings.twoFactor.connectAppBody')}</p>
             {enrollData?.qrCode && (
-              <div
-                className="mx-auto mt-4 h-48 w-48 rounded-theme border border-border bg-white p-2"
-                dangerouslySetInnerHTML={{ __html: enrollData.qrCode }}
-              />
+              // Supabase'in totp.qr_code alanı zaten tam bir data: URL'i
+              // (ham SVG markup değil) — dangerouslySetInnerHTML burada
+              // yanlıştı, string'in "data:image/svg+xml;utf-8," başlangıcı
+              // literal metin olarak render oluyordu (görsel bir bug,
+              // /browse ile ekran görüntüsü alınana kadar fark edilmemiş).
+              <div className="mx-auto mt-4 flex h-48 w-48 items-center justify-center rounded-theme border border-border bg-white p-2">
+                <img src={enrollData.qrCode} alt={t('settings.twoFactor.connectAppTitle')} className="h-full w-full" />
+              </div>
             )}
             <p className="mt-3 break-all rounded-theme bg-muted px-3 py-2 text-center text-[11px] font-mono text-muted-foreground">
               {enrollData?.secret}
@@ -140,7 +91,7 @@ export default function IkiAsamaliDogrulama() {
             />
             <div className="mt-4 flex gap-2">
               <button
-                onClick={handleCancelEnroll}
+                onClick={cancelEnroll}
                 className="flex-1 rounded-theme bg-muted py-2.5 text-xs font-bold text-muted-foreground"
               >
                 {t('common.cancel')}
