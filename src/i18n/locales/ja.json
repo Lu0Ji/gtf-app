@@ -75,7 +75,10 @@
     "setNewPasswordCta": "パスワードを更新して続ける",
     "passwordResetSuccess": "パスワードが更新されました！",
     "heroHeadline": "今日予測し、その時が来たら証明する。",
-    "heroSubheadline": "予測を封印しよう — 的中するまでは誰にも見えない。的中した瞬間、みんなに見える。"
+    "heroSubheadline": "予測を封印しよう — 的中するまでは誰にも見えない。的中した瞬間、みんなに見える。",
+    "stepSealLabel": "封印",
+    "stepWaitLabel": "待つ",
+    "stepProveLabel": "証明"
   },
   "home": {
     "publicFeed": "公開フィード",

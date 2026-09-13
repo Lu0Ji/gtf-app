@@ -39,13 +39,57 @@ const APPLE_OAUTH_ENABLED = false
 // look unfinished. `flex`'s row direction reverses automatically under the
 // app's `dir="rtl"` (see i18n/index.js) for Arabic, so no mirrored classes
 // needed here.
+// Adım adım "nasıl çalışır" şeridi — sadece mobilde (bkz. AuthShell'in
+// altındaki not). 2026-09-13 kullanıcı isteği: "daha açıklayıcı" — masaüstü
+// panelinde zaten bir başlık/alt başlık vardı ama bu tamamen `lg:` altında
+// gizliydi, telefonda (asıl kullanım şekli) hiç açıklama yoktu, sadece bir
+// resim + form. Rozet/mühür ikonografisiyle aynı dil (lucide, tek renk).
+function HowItWorksStrip() {
+  const { t } = useTranslation()
+  const steps = [
+    { icon: 'lucide:scroll-text', label: t('auth.stepSealLabel') },
+    { icon: 'lucide:hourglass', label: t('auth.stepWaitLabel') },
+    { icon: 'lucide:badge-check', label: t('auth.stepProveLabel') },
+  ]
+  return (
+    <div className="flex items-center px-1 lg:hidden">
+      {steps.map((step, i) => (
+        <div key={step.label} className="flex flex-1 items-center last:flex-none">
+          <div className="flex flex-col items-center gap-1.5">
+            <span className="flex h-10 w-10 items-center justify-center rounded-full bg-secondary text-primary">
+              <iconify-icon icon={step.icon} class="text-lg"></iconify-icon>
+            </span>
+            <span className="text-[10px] font-bold text-muted-foreground">{step.label}</span>
+          </div>
+          {i < steps.length - 1 && <div className="mb-5 h-px flex-1 bg-border" />}
+        </div>
+      ))}
+    </div>
+  )
+}
+
 function AuthShell({ children }) {
   const { t } = useTranslation()
   return (
     <div className="min-h-screen w-full bg-background font-body text-foreground lg:flex">
-      <div className="relative h-[190px] w-full overflow-hidden lg:hidden">
+      <div className="relative h-[300px] w-full overflow-hidden lg:hidden">
         <img src={LOGIN_HERO} alt="" className="h-full w-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-b from-background/10 via-background/45 to-background" />
+        {/* Masaüstü panelinin (aşağıda) primary'ye çekilen gradyanının aynısı
+            — fotoğraf hâlâ üstte belli oluyor, beyaz metin altta okunaklı
+            kalıyor. Eski hâli (bg-background/10→45→background) fotoğrafı
+            neredeyse hiç renklendirmiyordu ama metin de koyamıyordu — hiçbir
+            açıklama yoktu, sadece bir resim şeridiydi. */}
+        <div className="absolute inset-0 bg-gradient-to-b from-primary/10 via-primary/60 to-background" />
+        <div className="absolute inset-x-0 bottom-0 px-6 pb-6">
+          <h1 className="font-heading text-[22px] font-extrabold leading-tight tracking-[-0.03em] text-white">
+            {t('auth.heroHeadline')}
+          </h1>
+          <p className="mt-2 text-[13px] leading-5 text-white/85">{t('auth.heroSubheadline')}</p>
+        </div>
+      </div>
+
+      <div className="mt-6 px-6 lg:hidden">
+        <HowItWorksStrip />
       </div>
 
       <div className="relative hidden w-[42%] shrink-0 overflow-hidden lg:block">
@@ -70,7 +114,7 @@ function AuthShell({ children }) {
         </div>
       </div>
 
-      <div className="relative z-10 mx-auto -mt-10 w-full max-w-[360px] px-6 pb-10 lg:mx-0 lg:mt-0 lg:flex lg:min-h-screen lg:max-w-none lg:flex-1 lg:items-center lg:justify-center lg:px-10 lg:pb-0">
+      <div className="relative z-10 mx-auto mt-6 w-full max-w-[360px] px-6 pb-10 lg:mx-0 lg:mt-0 lg:flex lg:min-h-screen lg:max-w-none lg:flex-1 lg:items-center lg:justify-center lg:px-10 lg:pb-0">
         <div className="lg:w-full lg:max-w-[400px]">{children}</div>
       </div>
     </div>

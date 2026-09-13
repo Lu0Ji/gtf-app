@@ -75,7 +75,10 @@
     "setNewPasswordCta": "Şifreyi güncelle ve devam et",
     "passwordResetSuccess": "Şifren güncellendi!",
     "heroHeadline": "Bugün tahmin et, zamanı gelince kanıtla.",
-    "heroSubheadline": "Tahminini mühürle — doğru çıkana kadar kimse göremez. O an geldiğinde herkes görür."
+    "heroSubheadline": "Tahminini mühürle — doğru çıkana kadar kimse göremez. O an geldiğinde herkes görür.",
+    "stepSealLabel": "Mühürle",
+    "stepWaitLabel": "Bekle",
+    "stepProveLabel": "Kanıtla"
   },
   "home": {
     "publicFeed": "Herkese açık akış",

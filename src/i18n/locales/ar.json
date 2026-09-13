@@ -75,7 +75,10 @@
     "setNewPasswordCta": "تحديث كلمة المرور والمتابعة",
     "passwordResetSuccess": "تم تحديث كلمة مرورك!",
     "heroHeadline": "توقّع اليوم، وأثبت ذلك عندما يحين الوقت.",
-    "heroSubheadline": "اختم توقعك — لن يراه أحد حتى يتحقق. وعندها سيراه الجميع."
+    "heroSubheadline": "اختم توقعك — لن يراه أحد حتى يتحقق. وعندها سيراه الجميع.",
+    "stepSealLabel": "اختم",
+    "stepWaitLabel": "انتظر",
+    "stepProveLabel": "أثبت"
   },
   "home": {
     "publicFeed": "التدفق العام",

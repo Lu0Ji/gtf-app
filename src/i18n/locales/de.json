@@ -75,7 +75,10 @@
     "setNewPasswordCta": "Passwort aktualisieren und fortfahren",
     "passwordResetSuccess": "Dein Passwort wurde aktualisiert!",
     "heroHeadline": "Heute vorhersagen. Beweisen, wenn es soweit ist.",
-    "heroSubheadline": "Versiegle deine Vorhersage — niemand sieht sie, bis sie sich bewahrheitet. Dann sehen es alle."
+    "heroSubheadline": "Versiegle deine Vorhersage — niemand sieht sie, bis sie sich bewahrheitet. Dann sehen es alle.",
+    "stepSealLabel": "Versiegeln",
+    "stepWaitLabel": "Warten",
+    "stepProveLabel": "Beweisen"
   },
   "home": {
     "publicFeed": "Öffentlicher Feed",

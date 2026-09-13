@@ -75,7 +75,10 @@
     "setNewPasswordCta": "更新密码并继续",
     "passwordResetSuccess": "密码已更新！",
     "heroHeadline": "今天预测，时机到时验证。",
-    "heroSubheadline": "封存你的预测——在应验之前无人可见，应验的那一刻，所有人都能看到。"
+    "heroSubheadline": "封存你的预测——在应验之前无人可见，应验的那一刻，所有人都能看到。",
+    "stepSealLabel": "封存",
+    "stepWaitLabel": "等待",
+    "stepProveLabel": "证明"
   },
   "home": {
     "publicFeed": "公开动态",

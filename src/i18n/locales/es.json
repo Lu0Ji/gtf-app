@@ -75,7 +75,10 @@
     "setNewPasswordCta": "Actualizar contraseña y continuar",
     "passwordResetSuccess": "¡Tu contraseña se actualizó!",
     "heroHeadline": "Predice hoy. Demuéstralo cuando llegue el momento.",
-    "heroSubheadline": "Sella tu predicción — nadie la ve hasta que se cumple. Entonces la ven todos."
+    "heroSubheadline": "Sella tu predicción — nadie la ve hasta que se cumple. Entonces la ven todos.",
+    "stepSealLabel": "Sella",
+    "stepWaitLabel": "Espera",
+    "stepProveLabel": "Demuestra"
   },
   "home": {
     "publicFeed": "Feed público",

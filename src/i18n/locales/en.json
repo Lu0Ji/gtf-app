@@ -75,7 +75,10 @@
     "setNewPasswordCta": "Update password and continue",
     "passwordResetSuccess": "Your password has been updated!",
     "heroHeadline": "Predict today. Prove it when the time comes.",
-    "heroSubheadline": "Seal your prediction — no one can see it until it's proven right. Then everyone does."
+    "heroSubheadline": "Seal your prediction — no one can see it until it's proven right. Then everyone does.",
+    "stepSealLabel": "Seal",
+    "stepWaitLabel": "Wait",
+    "stepProveLabel": "Prove"
   },
   "home": {
     "publicFeed": "Public feed",
