@@ -1033,6 +1033,17 @@ export default function TahminKaydi() {
                   <div className="min-w-0 flex-1 rounded-theme border border-border bg-card px-3 py-2.5 shadow-sm">
                     <p className="text-xs font-bold">{c.profiles?.display_name || t('common.unknownUser')}</p>
                     <p className="mt-1 text-[13px] leading-5 text-foreground">{c.content}</p>
+                    {user?.id === c.author_id && (
+                      <button
+                        onClick={() =>
+                          navigate('/tahmin-olustur', { state: { prefill: { sealedContent: c.content, source: 'comment' } } })
+                        }
+                        className="mt-1.5 flex items-center gap-1 text-[11px] font-semibold text-primary active:opacity-70"
+                      >
+                        <iconify-icon icon="lucide:stamp" class="text-xs"></iconify-icon>
+                        {t('record.convertCommentCta')}
+                      </button>
+                    )}
                   </div>
                 </div>
               ))}

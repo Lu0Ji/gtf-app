@@ -49,7 +49,7 @@ export default function TahminOlustur() {
   // slug convention every preset already follows).
   const [customCategoryOpen, setCustomCategoryOpen] = useState(false)
   const [title, setTitle] = useState(prefill?.title || '')
-  const [sealedContent, setSealedContent] = useState('')
+  const [sealedContent, setSealedContent] = useState(prefill?.sealedContent || '')
   const [eventDate, setEventDate] = useState(prefill?.eventDate || '')
   // 'scheduled' (default, unchanged behaviour) — a chosen minute unlocks it
   // for everyone. 'manual' — no date at all; only the author can open it,
@@ -215,9 +215,17 @@ export default function TahminOlustur() {
           )}
           {prefill && (
             <div className="mt-3 flex items-center gap-2.5 rounded-theme border border-accent/30 bg-accent/10 px-3.5 py-3">
-              <iconify-icon icon="lucide:calendar-clock" class="shrink-0 text-lg text-accent"></iconify-icon>
+              <iconify-icon
+                icon={prefill.source === 'comment' ? 'lucide:message-square-quote' : 'lucide:calendar-clock'}
+                class="shrink-0 text-lg text-accent"
+              ></iconify-icon>
               <p className="text-xs leading-5 text-foreground">
-                <Trans i18nKey="createPrediction.prefillBanner" components={{ b: <span className="font-semibold" /> }} />
+                <Trans
+                  i18nKey={
+                    prefill.source === 'comment' ? 'createPrediction.prefillFromCommentBanner' : 'createPrediction.prefillBanner'
+                  }
+                  components={{ b: <span className="font-semibold" /> }}
+                />
               </p>
             </div>
           )}
