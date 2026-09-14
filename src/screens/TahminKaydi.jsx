@@ -21,7 +21,7 @@ import SealBreakReveal from '../components/SealBreakReveal.jsx'
 // (src/index.css) — the overlay unmounts exactly when its own animation
 // finishes, never earlier (cutting it off) or later (an inert overlay
 // sitting on screen after it's visually done).
-const REVEAL_ANIMATION_MS = 1600
+const REVEAL_ANIMATION_MS = 3200
 
 // The real threshold now comes from public.prediction_vote_quorum() (see
 // supabase/schema.sql) — it scales 3-10 with how many people are actually

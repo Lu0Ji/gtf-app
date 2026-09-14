@@ -125,7 +125,7 @@ body {
 
 /* Mühür kırılışı — see src/components/SealBreakReveal.jsx and DESIGN.md §7's
    other named ceremonial-motion exception ("opening a prediction"). One
-   shared 1.6s timeline across 4 elements (backdrop, two clipped medallion
+   shared 3.2s timeline across 4 elements (backdrop, two clipped medallion
    halves, the crack-line SVG, a light flash) — same "one class per element,
    same duration" pattern as the streak flame above, just non-looping and
    fill-mode: forwards since this plays once per live reveal, not forever. */
@@ -169,11 +169,11 @@ body {
   100% { opacity: 0; }
 }
 
-.reveal-backdrop { animation: reveal-backdrop 1.6s ease-out forwards; }
-.reveal-crack-line { stroke-dasharray: 100; animation: reveal-crack-line 1.6s ease-in forwards; }
-.reveal-flash { animation: reveal-flash 1.6s ease-out forwards; }
-.reveal-shard-left { animation: reveal-shard-left 1.6s cubic-bezier(0.32, 0.68, 0.38, 1) forwards; }
-.reveal-shard-right { animation: reveal-shard-right 1.6s cubic-bezier(0.32, 0.68, 0.38, 1) forwards; }
+.reveal-backdrop { animation: reveal-backdrop 3.2s ease-out forwards; }
+.reveal-crack-line { stroke-dasharray: 100; animation: reveal-crack-line 3.2s ease-in forwards; }
+.reveal-flash { animation: reveal-flash 3.2s ease-out forwards; }
+.reveal-shard-left { animation: reveal-shard-left 3.2s cubic-bezier(0.32, 0.68, 0.38, 1) forwards; }
+.reveal-shard-right { animation: reveal-shard-right 3.2s cubic-bezier(0.32, 0.68, 0.38, 1) forwards; }
 
 /* Interactive shine: a light highlight on top of a button/link, not the
    full diagonal sweep this started as (tried that first — too much).
