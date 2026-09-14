@@ -1,10 +1,11 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { fallbackAvatarFor } from '../lib/images.js'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useToast } from '../contexts/ToastContext.jsx'
+import { useTheme } from '../contexts/ThemeContext.jsx'
 import { formatDateLong, formatDateTimeLong } from '../lib/format.js'
 import { difficultyMeta } from '../lib/difficulty.js'
 import { hideSealBanner, showSealBanner } from '../lib/ads.js'
@@ -14,12 +15,22 @@ import { CATEGORY_META } from '../lib/categories.js'
 import Chip from '../components/ui/Chip.jsx'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
 import SealDecoration from '../components/SealDecoration.jsx'
+import SealBreakReveal from '../components/SealBreakReveal.jsx'
 
-// Display-only mirror of the quorum enforced server-side in
-// cast_prediction_vote() (supabase/schema.sql) — purely for copy like "en
-// az {{count}} kişi oy verince…". The client never decides a result
-// itself; it just reflects whatever status the RPC's re-fetch returns.
-const COMMUNITY_QUORUM = 10
+// Matches the total duration of every keyframe in the .reveal-* classes
+// (src/index.css) — the overlay unmounts exactly when its own animation
+// finishes, never earlier (cutting it off) or later (an inert overlay
+// sitting on screen after it's visually done).
+const REVEAL_ANIMATION_MS = 1600
+
+// The real threshold now comes from public.prediction_vote_quorum() (see
+// supabase/schema.sql) — it scales 3-10 with how many people are actually
+// engaged with THIS prediction (group size, or likes+saves), instead of a
+// flat 10 that most predictions could never reach. This constant is only
+// the value shown before that RPC resolves, so the copy below never
+// flashes empty; the client still never decides a result itself, it just
+// reflects whatever status the vote RPC's re-fetch returns.
+const DEFAULT_QUORUM_FALLBACK = 10
 
 
 function useCountdown(targetDate) {
@@ -44,6 +55,7 @@ export default function TahminKaydi() {
   const location = useLocation()
   const { user } = useAuth()
   const { showToast } = useToast()
+  const { reduceMotion } = useTheme()
   const [record, setRecord] = useState(location.state?.prediction || null)
   const [copied, setCopied] = useState(false)
   const [verifying, setVerifying] = useState(false)
@@ -56,6 +68,7 @@ export default function TahminKaydi() {
   const [correctVotes, setCorrectVotes] = useState(0)
   const [incorrectVotes, setIncorrectVotes] = useState(0)
   const [myVote, setMyVote] = useState(null)
+  const [voteQuorum, setVoteQuorum] = useState(DEFAULT_QUORUM_FALLBACK)
   const [voting, setVoting] = useState(false)
   // Which result the owner tapped, while they're still filling in the
   // optional evidence citation — null means the correct/incorrect buttons
@@ -152,7 +165,7 @@ export default function TahminKaydi() {
     let cancelled = false
 
     async function loadSocial() {
-      const [{ data: likes }, { data: comments }, saveRes, votesRes] = await Promise.all([
+      const [{ data: likes }, { data: comments }, saveRes, votesRes, quorumRes] = await Promise.all([
         supabase.from('prediction_likes').select('user_id').eq('prediction_id', record.id),
         supabase
           .from('prediction_comments')
@@ -171,6 +184,7 @@ export default function TahminKaydi() {
         // (PGRST205) just means voting quietly shows as 0/hidden until the
         // migration is run.
         supabase.from('prediction_votes').select('voter_id, vote').eq('prediction_id', record.id),
+        supabase.rpc('prediction_vote_quorum', { p_prediction_id: record.id }),
       ])
       if (cancelled) return
       setLikeCount((likes || []).length)
@@ -181,6 +195,7 @@ export default function TahminKaydi() {
       setCorrectVotes(voteRows.filter((v) => v.vote === 'correct').length)
       setIncorrectVotes(voteRows.filter((v) => v.vote === 'incorrect').length)
       setMyVote(user ? voteRows.find((v) => v.voter_id === user.id)?.vote || null : null)
+      if (!quorumRes.error && typeof quorumRes.data === 'number') setVoteQuorum(quorumRes.data)
     }
 
     loadSocial()
@@ -213,6 +228,34 @@ export default function TahminKaydi() {
       hideSealBanner()
     }
   }, [isRevealedForAds])
+
+  // "Mühür kırılışı" ceremonial reveal (see SealBreakReveal.jsx and
+  // DESIGN.md §7) — only for a LIVE flip someone actually watches happen
+  // (countdown hits zero while they're on the screen, or their own
+  // verify/vote just resolved it), never replayed just from loading an
+  // already-open prediction. prevRevealed is keyed by record id so
+  // switching to a different prediction (see the location.state sync
+  // effect above — this screen doesn't remount) never misreads "was
+  // already open on THAT record" as a flip on this one.
+  const prevRevealedRef = useRef({ recordId: null, revealed: null })
+  const [revealAnimating, setRevealAnimating] = useState(false)
+  useEffect(() => {
+    if (!record) return
+    const prev = prevRevealedRef.current
+    if (prev.recordId === record.id && prev.revealed === false && isRevealedForAds === true && !reduceMotion) {
+      setRevealAnimating(true)
+    }
+    prevRevealedRef.current = { recordId: record.id, revealed: isRevealedForAds }
+    // reduceMotion is read, not depended on — toggling the setting mid-view
+    // shouldn't retroactively fire an animation for a flip that already
+    // happened.
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isRevealedForAds, record?.id])
+  useEffect(() => {
+    if (!revealAnimating) return
+    const id = setTimeout(() => setRevealAnimating(false), REVEAL_ANIMATION_MS)
+    return () => clearTimeout(id)
+  }, [revealAnimating])
 
   if (!record) return null
 
@@ -493,6 +536,7 @@ export default function TahminKaydi() {
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-body pb-28">
+      {revealAnimating && <SealBreakReveal equippedStyle={equippedSealStyle} />}
       <DetailHeader
         title={t('record.headerTitle')}
         centered
@@ -634,7 +678,7 @@ export default function TahminKaydi() {
               </p>
               {!isVerified && (
                 <p className="mt-3 text-[11px] leading-4 text-muted-foreground">
-                  {t('record.pendingQuorumHint', { count: COMMUNITY_QUORUM })}
+                  {t('record.pendingQuorumHint', { count: voteQuorum })}
                 </p>
               )}
               {isVerified && (record.evidence_note || record.evidence_url) && (
@@ -749,7 +793,7 @@ export default function TahminKaydi() {
                   {isVerified ? t('record.agreeQuestion') : t('record.authorNotMarkedYet')}
                 </p>
                 <p className="mt-0.5 text-[11px] leading-4 text-muted-foreground">
-                  {isVerified ? t('record.communityMayChange') : t('record.communityCanResolve', { count: COMMUNITY_QUORUM })}
+                  {isVerified ? t('record.communityMayChange') : t('record.communityCanResolve', { count: voteQuorum })}
                 </p>
                 <div className="mt-3 flex items-center gap-2">
                   <button

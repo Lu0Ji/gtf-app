@@ -123,6 +123,58 @@ body {
     flame-glow var(--flame-speed, 2.2s) ease-in-out infinite;
 }
 
+/* Mühür kırılışı — see src/components/SealBreakReveal.jsx and DESIGN.md §7's
+   other named ceremonial-motion exception ("opening a prediction"). One
+   shared 1.6s timeline across 4 elements (backdrop, two clipped medallion
+   halves, the crack-line SVG, a light flash) — same "one class per element,
+   same duration" pattern as the streak flame above, just non-looping and
+   fill-mode: forwards since this plays once per live reveal, not forever. */
+@keyframes reveal-backdrop {
+  0% { opacity: 0; }
+  10%, 85% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+@keyframes reveal-crack-line {
+  0%, 14% { stroke-dashoffset: 100; opacity: 0; }
+  16% { opacity: 1; }
+  40% { stroke-dashoffset: 0; opacity: 1; }
+  48% { opacity: 1; }
+  58% { opacity: 0; }
+  100% { opacity: 0; }
+}
+
+@keyframes reveal-flash {
+  0%, 40% { opacity: 0; transform: scale(0.6); }
+  45% { opacity: 0.85; transform: scale(1.5); }
+  62% { opacity: 0; transform: scale(2.2); }
+  100% { opacity: 0; }
+}
+
+@keyframes reveal-shard-left {
+  0% { transform: translate(0, 0) rotate(0deg) scale(0.35); opacity: 0; }
+  16% { transform: translate(0, 0) rotate(-3deg) scale(1.12); opacity: 1; }
+  26% { transform: translate(0, 0) rotate(2deg) scale(0.96); }
+  33%, 44% { transform: translate(0, 0) rotate(-1deg) scale(1); opacity: 1; }
+  90% { transform: translate(-72%, 32%) rotate(-55deg) scale(0.68); opacity: 0; }
+  100% { opacity: 0; }
+}
+
+@keyframes reveal-shard-right {
+  0% { transform: translate(0, 0) rotate(0deg) scale(0.35); opacity: 0; }
+  16% { transform: translate(0, 0) rotate(3deg) scale(1.12); opacity: 1; }
+  26% { transform: translate(0, 0) rotate(-2deg) scale(0.96); }
+  33%, 44% { transform: translate(0, 0) rotate(1deg) scale(1); opacity: 1; }
+  90% { transform: translate(72%, 36%) rotate(58deg) scale(0.68); opacity: 0; }
+  100% { opacity: 0; }
+}
+
+.reveal-backdrop { animation: reveal-backdrop 1.6s ease-out forwards; }
+.reveal-crack-line { stroke-dasharray: 100; animation: reveal-crack-line 1.6s ease-in forwards; }
+.reveal-flash { animation: reveal-flash 1.6s ease-out forwards; }
+.reveal-shard-left { animation: reveal-shard-left 1.6s cubic-bezier(0.32, 0.68, 0.38, 1) forwards; }
+.reveal-shard-right { animation: reveal-shard-right 1.6s cubic-bezier(0.32, 0.68, 0.38, 1) forwards; }
+
 /* Interactive shine: a light highlight on top of a button/link, not the
    full diagonal sweep this started as (tried that first — too much).
    Layered as `background-image` (not a pseudo-element) so it never needs

@@ -2830,3 +2830,138 @@ begin
 end;
 $$ language plpgsql security definer set search_path = public;
 -- ─────────────────────────────────────────────────────────────────────────
+
+-- KİTLE BOYUTUNA GÖRE UYARLANAN TOPLULUK EŞİĞİ (2026-09-14, öneri #2 —
+-- "10 oyluk eşik grup büyüklüğünden bağımsız, sabit"). Eskiden her tahmin,
+-- popülerliği ne olursa olsun, aynı sabit 10 oya ulaşana kadar asla
+-- topluluk denetiminden geçmiyordu — grup içi veya az beğenilen bir tahmin
+-- için bu sayı pratikte hiç yakalanmıyor, tek denetim mekanizması fiilen
+-- devre dışı kalıyordu (canlı veride doğrulandı: tüm mevcut tahminler yeni
+-- taban olan 3'e düşüyor, eskiden hiçbiri 10'a asla ulaşamazdı). Artık eşik
+-- "ilgili kitle" büyüklüğüne göre 3 ile 10 arasında ölçekleniyor:
+--   - Grup içi bir tahminse (group_id dolu): kitle = o grubun üye sayısı.
+--   - Herkese açık bir tahminse: kitle = beğenen ∪ kaydedenlerin birleşimi
+--     (aynı "kim ilgileniyor" sinyali private.send_opening_soon_notifications
+--     içinde zaten kullanılıyor — burada da aynı union deseni tekrarlanıyor).
+-- Taban 3: tek bir kişi ya da iki arkadaşın oyuyla sonuç çevrilemesin diye.
+-- Tavan 10: büyük/popüler tahminlerde eski davranış aynen korunuyor.
+--
+-- Tek bir fonksiyonda toplanmasının sebebi: hem cast_prediction_vote()
+-- sunucu tarafında karar verirken, hem de istemci tarafı (TahminKaydi.jsx)
+-- "en az N kişi oy verince açılır" metnini gösterirken AYNI sayıyı
+-- kullansın — iki ayrı yerde aynı formülün yazılıp zamanla birbirinden
+-- sapması riskini (bu oturumda useTotpEnrollment.js'te olduğu gibi)
+-- baştan kapatıyor.
+create or replace function public.prediction_vote_quorum(p_prediction_id uuid)
+returns integer as $$
+declare
+  v_group_id uuid;
+  v_audience integer;
+begin
+  select group_id into v_group_id from public.predictions where id = p_prediction_id;
+
+  if v_group_id is not null then
+    select count(*) into v_audience from public.group_members where group_id = v_group_id;
+  else
+    select count(*) into v_audience from (
+      select user_id from public.prediction_likes where prediction_id = p_prediction_id
+      union
+      select user_id from public.prediction_saves where prediction_id = p_prediction_id
+    ) s;
+  end if;
+
+  return least(10, greatest(3, ceil(coalesce(v_audience, 0) / 2.0)::integer));
+end;
+$$ language plpgsql security definer set search_path = public stable;
+
+grant execute on function public.prediction_vote_quorum(uuid) to authenticated, anon;
+
+-- cast_prediction_vote(): tek fark, sabit ">= 10" yerine artık yukarıdaki
+-- fonksiyonu çağırıyor. Geri kalan her şey (yazar oy veremez, mühürsüz oy
+-- olmaz, açılış zamanı geçmemişse oy olmaz, disputed/resolved_by/bildirim
+-- mantığı) birebir aynı kalıyor.
+create or replace function public.cast_prediction_vote(
+  p_prediction_id uuid,
+  p_vote text
+)
+returns void as $$
+declare
+  v_author_id uuid;
+  v_status text;
+  v_event_date timestamptz;
+  v_title text;
+  v_correct_votes integer;
+  v_incorrect_votes integer;
+  v_new_status text;
+  v_quorum integer;
+begin
+  if p_vote not in ('correct', 'incorrect') then
+    raise exception 'Geçersiz oy.';
+  end if;
+
+  select author_id, status, event_date, title
+    into v_author_id, v_status, v_event_date, v_title
+    from public.predictions where id = p_prediction_id for update;
+
+  if v_author_id is null then
+    raise exception 'Tahmin bulunamadı.';
+  end if;
+  if v_author_id = auth.uid() then
+    raise exception 'Kendi tahminine oy veremezsin, sonucu doğrudan işaretle.';
+  end if;
+  if v_status = 'open' then
+    raise exception 'Bu tahmin henüz mühürlenmemiş.';
+  end if;
+  if v_event_date is not null and v_event_date > now() then
+    raise exception 'Açılış zamanı henüz gelmedi.';
+  end if;
+
+  insert into public.prediction_votes (prediction_id, voter_id, vote)
+  values (p_prediction_id, auth.uid(), p_vote)
+  on conflict (prediction_id, voter_id) do update set vote = excluded.vote, created_at = now();
+
+  if v_status in ('verified_correct', 'verified_incorrect') then
+    if (p_vote = 'correct' and v_status = 'verified_incorrect')
+       or (p_vote = 'incorrect' and v_status = 'verified_correct') then
+      insert into public.prediction_disputes (prediction_id, user_id)
+      values (p_prediction_id, auth.uid())
+      on conflict (prediction_id, user_id) do nothing;
+    else
+      delete from public.prediction_disputes where prediction_id = p_prediction_id and user_id = auth.uid();
+    end if;
+  end if;
+
+  select count(*) filter (where vote = 'correct'), count(*) filter (where vote = 'incorrect')
+    into v_correct_votes, v_incorrect_votes
+    from public.prediction_votes where prediction_id = p_prediction_id;
+
+  v_quorum := public.prediction_vote_quorum(p_prediction_id);
+
+  v_new_status := null;
+  if (v_correct_votes + v_incorrect_votes) >= v_quorum and v_correct_votes <> v_incorrect_votes then
+    v_new_status := case when v_correct_votes > v_incorrect_votes then 'verified_correct' else 'verified_incorrect' end;
+  end if;
+
+  if v_new_status is not null and v_new_status <> v_status then
+    perform set_config('gtf.allow_status_flip', 'on', true);
+    update public.predictions
+    set status = v_new_status,
+        verified_at = coalesce(verified_at, now()),
+        disputed = true,
+        resolved_by = 'community'
+    where id = p_prediction_id;
+    perform set_config('gtf.allow_status_flip', 'off', true);
+
+    perform private.send_push_notification(
+      v_author_id,
+      case when v_new_status = 'verified_correct' then 'Tahmin doğrulandı!' else 'Tahmin sonuçlandı' end,
+      left(coalesce(v_title, ''), 60) || ' — topluluk oyuyla ' ||
+        (case when v_new_status = 'verified_correct' then 'gerçekleşti' else 'gerçekleşmedi' end),
+      '/tahmin-kaydi?id=' || p_prediction_id
+    );
+  end if;
+end;
+$$ language plpgsql security definer set search_path = public;
+
+grant execute on function public.cast_prediction_vote(uuid, text) to authenticated;
+-- ─────────────────────────────────────────────────────────────────────────
