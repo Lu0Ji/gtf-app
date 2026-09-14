@@ -139,7 +139,7 @@
     "scopePublicBody": "検証済みの結果は、<b>{{category}}</b>カテゴリの永続的な成績統計に加算されます。タイムカプセルは非公開のままで、統計には影響しません。",
     "defaultGroupLabel": "グループ",
     "titleLabel": "表示タイトル",
-    "titlePlaceholder": "次のダービーについての私の予測",
+    "titlePlaceholder": "年末のドル為替予測",
     "titleHint": "このタイトルは封印された内容より前に表示されます。",
     "mediaLabel": "画像または動画",
     "mediaRemoveAria": "メディアを削除",

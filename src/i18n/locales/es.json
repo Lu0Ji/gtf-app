@@ -140,7 +140,7 @@
     "scopePublicBody": "Un resultado verificado se suma a tus estadísticas permanentes en la categoría <b>{{category}}</b>. Las cápsulas del tiempo son privadas y no afectan las estadísticas.",
     "defaultGroupLabel": "grupo",
     "titleLabel": "Título visible",
-    "titlePlaceholder": "Mi predicción para el próximo derbi",
+    "titlePlaceholder": "Mi predicción del dólar a fin de año",
     "titleHint": "Este título es visible antes del contenido sellado.",
     "mediaLabel": "Imagen o video",
     "mediaRemoveAria": "Quitar contenido multimedia",

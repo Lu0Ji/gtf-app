@@ -139,7 +139,7 @@
     "scopePublicBody": "验证结果会计入你在 <b>{{category}}</b> 分类下的永久统计数据。时间胶囊仅你可见，不影响统计数据。",
     "defaultGroupLabel": "群组",
     "titleLabel": "可见标题",
-    "titlePlaceholder": "我对即将到来的德比的预测",
+    "titlePlaceholder": "我对年末美元汇率的预测",
     "titleHint": "此标题会在封存内容之前显示。",
     "mediaLabel": "图片或视频",
     "mediaRemoveAria": "移除媒体文件",

@@ -140,7 +140,7 @@
     "scopePublicBody": "A verified outcome is added to your permanent record in the <b>{{category}}</b> category. Time capsules stay private to you and don't affect stats.",
     "defaultGroupLabel": "group",
     "titleLabel": "Visible title",
-    "titlePlaceholder": "My prediction for the upcoming derby",
+    "titlePlaceholder": "My year-end dollar prediction",
     "titleHint": "This title is visible before the sealed content.",
     "mediaLabel": "Image or video",
     "mediaRemoveAria": "Remove media",

@@ -140,7 +140,7 @@
     "scopePublicBody": "Doğrulanan sonuç, <b>{{category}}</b> kategorisindeki kalıcı başarı istatistiklerine eklenir. Zaman kapsülleri yalnızca sana ait kalır ve istatistikleri etkilemez.",
     "defaultGroupLabel": "grup",
     "titleLabel": "Görünür başlık",
-    "titlePlaceholder": "Önümüzdeki derbi tahminimdir",
+    "titlePlaceholder": "Yıl sonu dolar tahminim",
     "titleHint": "Bu başlık mühürlü içerikten önce görünür.",
     "mediaLabel": "Görsel veya video",
     "mediaRemoveAria": "Medyayı kaldır",
