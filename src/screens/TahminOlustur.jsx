@@ -462,7 +462,9 @@ export default function TahminOlustur() {
           </div>
           <div>
             <h2 className="text-sm font-bold text-foreground">{t('createPrediction.verifyTitle')}</h2>
-            <p className="mt-1 text-xs leading-5 text-muted-foreground">{t('createPrediction.verifyBody')}</p>
+            <p className="mt-1 text-xs leading-5 text-muted-foreground">
+              {mode === 'capsule' ? t('createPrediction.verifyBodyCapsule') : t('createPrediction.verifyBody')}
+            </p>
           </div>
         </section>
 

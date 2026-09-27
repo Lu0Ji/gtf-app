@@ -166,6 +166,7 @@
     "unlockManualBody": "Este registro nunca se abre por sí solo. Ve a la página del registro y ábrelo <b>cuando quieras</b>: en cinco minutos o dentro de un año. Pero cuidado: <b>una vez que lo abras, no podrás volver a sellarlo.</b>",
     "verifyTitle": "¿Cómo se verifica?",
     "verifyBody": "Tú eres el primero en marcar el resultado al abrirse, pero no tienes la última palabra: otros usuarios también pueden votar «correcto/incorrecto», y el resultado puede cambiar si la comunidad no está de acuerdo contigo.",
+    "verifyBodyCapsule": "Tú marcas el resultado al abrirse. Una cápsula del tiempo es completamente privada, nadie más puede verla ni votar en ella — la decisión final es solo tuya.",
     "submitCta": "Sellar la predicción",
     "submitBusy": "Sellando…",
     "submitHint": "Una vez sellado, el registro no se puede cambiar.",

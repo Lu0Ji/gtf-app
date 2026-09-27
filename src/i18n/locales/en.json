@@ -166,6 +166,7 @@
     "unlockManualBody": "This record never opens on its own. Go to the record page and open it <b>whenever you want</b> — five minutes from now or a year from now. But careful: <b>once you open it, you can't seal it again.</b>",
     "verifyTitle": "How is it verified?",
     "verifyBody": "You're the first to mark the outcome when it opens, but you don't have the final say — other users can vote \"right/wrong\" too, and the outcome can flip if the community disagrees with you.",
+    "verifyBodyCapsule": "You mark the outcome yourself when it opens. A time capsule is entirely private, so no one else can see it or vote on it — the final say is entirely yours.",
     "submitCta": "Seal the prediction",
     "submitBusy": "Sealing…",
     "submitHint": "Once sealed, the record can't be changed.",

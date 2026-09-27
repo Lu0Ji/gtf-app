@@ -166,6 +166,7 @@
     "unlockManualBody": "Bu kayıt kendiliğinden hiç açılmaz. Kayıt sayfasına gidip <b>istediğin an</b> açabilirsin — 5 dakika sonra da olur, bir yıl sonra da. Ama dikkat: <b>bir kere açtığında geri mühürleyemezsin.</b>",
     "verifyTitle": "Nasıl doğrulanır?",
     "verifyBody": "Açılış anında sonucu ilk sen işaretlersin, ama son karar sende kalmaz — diğer kullanıcılar da \"doğru/yanlış\" oyu verebilir, topluluk senden farklı düşünürse sonuç değişebilir.",
+    "verifyBodyCapsule": "Açılış anında sonucu sen işaretlersin. Zaman kapsülü tamamen özel olduğu için kimse görmez veya oy veremez — son karar tamamen sana ait.",
     "submitCta": "Tahmini mühürle",
     "submitBusy": "Mühürleniyor…",
     "submitHint": "Mühürleme işleminden sonra kayıt değiştirilemez.",

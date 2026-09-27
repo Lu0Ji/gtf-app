@@ -166,6 +166,7 @@
     "unlockManualBody": "Dieser Eintrag öffnet sich nie von selbst. Geh zur Eintragsseite und öffne ihn <b>wann immer du willst</b> — in fünf Minuten oder in einem Jahr. Aber Vorsicht: <b>einmal geöffnet, kannst du ihn nicht erneut versiegeln.</b>",
     "verifyTitle": "Wie wird es bestätigt?",
     "verifyBody": "Du markierst das Ergebnis bei der Öffnung als Erste(r), hast aber nicht das letzte Wort — andere Nutzer können ebenfalls „richtig/falsch“ abstimmen, und das Ergebnis kann sich ändern, wenn die Community anderer Meinung ist.",
+    "verifyBodyCapsule": "Du markierst das Ergebnis bei der Öffnung selbst. Eine Zeitkapsel ist vollständig privat, niemand sonst kann sie sehen oder darüber abstimmen — die Entscheidung liegt allein bei dir.",
     "submitCta": "Vorhersage versiegeln",
     "submitBusy": "Wird versiegelt…",
     "submitHint": "Nach dem Versiegeln kann der Eintrag nicht mehr geändert werden.",
