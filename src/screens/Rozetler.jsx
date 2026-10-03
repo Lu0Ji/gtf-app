@@ -7,6 +7,7 @@ import { formatDateLong } from '../lib/format.js'
 import { TIERS, computeBadgeStats, evaluateBadges } from '../lib/badges.js'
 import { SEAL_STYLES, isSealStyleUnlocked } from '../lib/seal-styles.js'
 import BadgeMedallion from '../components/BadgeMedallion.jsx'
+import BadgeTierLabel from '../components/BadgeTierLabel.jsx'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
 import Card from '../components/ui/Card.jsx'
 
@@ -73,9 +74,10 @@ function BadgeCard({ badge, tier, earnedAt, showcased, editingShowcase, onToggle
       </div>
       <h3 className="mt-3 text-sm font-extrabold leading-4">{t(`badges.items.${badge.slug}.title`)}</h3>
       <p className="mt-1 text-[10px] leading-4 text-muted-foreground">{t(`badges.items.${badge.slug}.desc`)}</p>
+      <BadgeTierLabel tier={tier} className="mt-2" />
       {badge.earned ? (
-        <p className="mt-2 text-[10px] font-bold" style={{ color: tier.ink }}>
-          {t(tier.labelKey)} · {earnedAt ? formatDateLong(earnedAt) : t('badges.earnedAt')}
+        <p className="mt-1 text-[10px] font-medium text-muted-foreground">
+          {earnedAt ? formatDateLong(earnedAt) : t('badges.earnedAt')}
         </p>
       ) : (
         <>
@@ -440,14 +442,23 @@ export default function Rozetler() {
                 >
                   {t('badges.allTiers')}
                 </button>
-                {TIERS.map((tier) => (
+                {TIERS.map((tier, rank) => (
                   <button
                     key={tier.key}
                     onClick={() => setTierFilter(tier.key)}
-                    className={`shrink-0 rounded-full px-3 py-1.5 text-[10px] font-bold ${
+                    className={`flex shrink-0 items-center gap-1.5 rounded-full px-3 py-1.5 text-[10px] font-bold ${
                       tierFilter === tier.key ? 'bg-secondary text-secondary-foreground' : 'border border-border bg-card text-muted-foreground'
                     }`}
                   >
+                    <span className="flex items-center gap-0.5" aria-hidden="true">
+                      {TIERS.map((_, i) => (
+                        <span
+                          key={i}
+                          className="h-1.5 w-1.5 rounded-full"
+                          style={{ background: i <= rank ? tier.ink : 'var(--color-muted-foreground)', opacity: i <= rank ? 1 : 0.3 }}
+                        />
+                      ))}
+                    </span>
                     {t(tier.labelKey)}
                   </button>
                 ))}
@@ -486,9 +497,20 @@ export default function Rozetler() {
                   return (
                     <div key={tier.key} className="mt-6 first:mt-3">
                       <div className="flex items-center justify-between">
-                        <h2 className="font-heading text-xl font-extrabold tracking-[-0.04em]" style={{ color: tier.ink }}>
-                          {t(tier.labelKey)}
-                        </h2>
+                        <div className="flex items-center gap-2">
+                          <h2 className="font-heading text-xl font-extrabold tracking-[-0.04em]" style={{ color: tier.ink }}>
+                            {t(tier.labelKey)}
+                          </h2>
+                          <span className="flex items-center gap-0.5" aria-hidden="true">
+                            {TIERS.map((_, i) => (
+                              <span
+                                key={i}
+                                className="h-1.5 w-1.5 rounded-full"
+                                style={{ background: i <= TIERS.indexOf(tier) ? tier.ink : 'var(--color-muted)' }}
+                              />
+                            ))}
+                          </span>
+                        </div>
                         <span
                           className="rounded-full px-2.5 py-1 text-[10px] font-bold"
                           style={{ background: tier.tint, color: tier.ink }}

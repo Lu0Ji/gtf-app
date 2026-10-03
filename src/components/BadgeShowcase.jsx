@@ -2,6 +2,7 @@ import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { BADGES, TIERS } from '../lib/badges.js'
 import BadgeMedallion from './BadgeMedallion.jsx'
+import BadgeTierLabel from './BadgeTierLabel.jsx'
 
 // Glamorous badge showcase for a profile header — Rozetler.jsx already
 // guards `showcase_badges` so only a badge the owner has actually earned
@@ -44,6 +45,7 @@ export default function BadgeShowcase({ slugs, totalEarned, isOwn }) {
               >
                 {t(`badges.items.${badge.slug}.title`)}
               </span>
+              <BadgeTierLabel tier={TIERS.find((t) => t.key === badge.tier)} />
             </button>
           ) : (
             <button
