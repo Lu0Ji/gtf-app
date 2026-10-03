@@ -6,6 +6,7 @@ import { ThemeProvider } from './contexts/ThemeContext.jsx'
 import { PresenceProvider } from './contexts/PresenceContext.jsx'
 import { UserSettingsProvider } from './contexts/UserSettingsContext.jsx'
 import { UnreadMessagesProvider } from './contexts/UnreadMessagesContext.jsx'
+import { UnreadActivityProvider } from './contexts/UnreadActivityContext.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 import AccentColor from './components/AccentColor.jsx'
 import AndroidBackButton from './components/AndroidBackButton.jsx'
@@ -83,6 +84,7 @@ export default function App() {
           <UserSettingsProvider>
             <PresenceProvider>
               <UnreadMessagesProvider>
+              <UnreadActivityProvider>
                 <AccentColor />
                 <AndroidBackButton />
                 <HashRouter>
@@ -149,6 +151,7 @@ export default function App() {
                     </Suspense>
                   </ErrorBoundary>
                 </HashRouter>
+              </UnreadActivityProvider>
               </UnreadMessagesProvider>
             </PresenceProvider>
           </UserSettingsProvider>

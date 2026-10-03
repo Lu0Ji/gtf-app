@@ -4,6 +4,7 @@ import { useTranslation, Trans } from 'react-i18next'
 import { supabase } from '../lib/supabase.js'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { useUserSettings } from '../hooks/useUserSettings.js'
+import { useUnreadActivity } from '../contexts/UnreadActivityContext.jsx'
 import { formatDateLong, sealLabel } from '../lib/format.js'
 import i18n from '../i18n/index.js'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
@@ -73,8 +74,16 @@ export default function Hareketler() {
   const navigate = useNavigate()
   const { user } = useAuth()
   const { settings } = useUserSettings()
+  const { markActivitySeen } = useUnreadActivity()
   const [events, setEvents] = useState([])
   const [loading, setLoading] = useState(true)
+
+  // Visiting this screen is what "read" means for the sidebar bell badge
+  // (see UnreadActivityContext) — no per-event read state, just "you looked
+  // at the feed."
+  useEffect(() => {
+    markActivitySeen()
+  }, [markActivitySeen])
 
   useEffect(() => {
     if (!user) return
