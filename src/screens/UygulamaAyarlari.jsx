@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { useNavigate } from 'react-router-dom'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../contexts/AuthContext.jsx'
@@ -10,6 +11,7 @@ import { getPushSubscriptionState, subscribeToPush, unsubscribeFromPush } from '
 import { CATEGORY_META, CATEGORY_SLUGS } from '../lib/categories.js'
 import { SUPPORTED_LANGUAGES } from '../i18n/index.js'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
+import Sheet from '../components/ui/Sheet.jsx'
 
 // value stays the code ThemeContext/useTheme actually store ('system' /
 // 'light' / 'dark') — language-independent already; labelKey/descKey are
@@ -103,47 +105,42 @@ function buildSupportRows(t) {
 function PickerSheet({ title, options, value, onSelect, onClose }) {
   const { t } = useTranslation()
   return (
-    <div className="fixed inset-0 z-50 flex items-end bg-black/40" onClick={onClose}>
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="flex max-h-[85vh] w-full flex-col overflow-y-auto rounded-t-theme bg-background p-5 pb-8"
-      >
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-heading text-lg font-bold">{title}</h2>
-          <button onClick={onClose} aria-label={t('common.close')} className="text-muted-foreground">
-            <iconify-icon icon="lucide:x" class="text-xl"></iconify-icon>
-          </button>
-        </div>
-        <div className="overflow-hidden rounded-theme border border-border bg-card shadow-sm">
-          {options.map((opt, i) => {
-            const isSelected = opt.value === value
-            return (
-              <button
-                key={opt.value}
-                onClick={() => {
-                  onSelect(opt.value)
-                  onClose()
-                }}
-                className={`flex w-full items-center gap-3 px-4 py-3.5 text-left ${
-                  i < options.length - 1 ? 'border-b border-border' : ''
-                }`}
-              >
-                {opt.icon && (
-                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-theme bg-muted text-primary">
-                    <iconify-icon icon={opt.icon} class="text-base"></iconify-icon>
-                  </span>
-                )}
-                <span className="min-w-0 flex-1">
-                  <span className="block text-sm font-bold">{t(opt.labelKey)}</span>
-                  {opt.descKey && <span className="mt-0.5 block text-[11px] text-muted-foreground">{t(opt.descKey)}</span>}
-                </span>
-                {isSelected && <iconify-icon icon="lucide:check" class="text-lg text-primary"></iconify-icon>}
-              </button>
-            )
-          })}
-        </div>
+    <Sheet onClose={onClose} className="max-h-[85vh] overflow-y-auto p-5 pb-8">
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="font-heading text-lg font-bold">{title}</h2>
+        <button onClick={onClose} aria-label={t('common.close')} className="text-muted-foreground">
+          <iconify-icon icon="lucide:x" class="text-xl"></iconify-icon>
+        </button>
       </div>
-    </div>
+      <div className="overflow-hidden rounded-theme border border-border bg-card shadow-sm">
+        {options.map((opt, i) => {
+          const isSelected = opt.value === value
+          return (
+            <button
+              key={opt.value}
+              onClick={() => {
+                onSelect(opt.value)
+                onClose()
+              }}
+              className={`flex w-full items-center gap-3 px-4 py-3.5 text-left ${
+                i < options.length - 1 ? 'border-b border-border' : ''
+              }`}
+            >
+              {opt.icon && (
+                <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-theme bg-muted text-primary">
+                  <iconify-icon icon={opt.icon} class="text-base"></iconify-icon>
+                </span>
+              )}
+              <span className="min-w-0 flex-1">
+                <span className="block text-sm font-bold">{t(opt.labelKey)}</span>
+                {opt.descKey && <span className="mt-0.5 block text-[11px] text-muted-foreground">{t(opt.descKey)}</span>}
+              </span>
+              {isSelected && <iconify-icon icon="lucide:check" class="text-lg text-primary"></iconify-icon>}
+            </button>
+          )
+        })}
+      </div>
+    </Sheet>
   )
 }
 
@@ -169,69 +166,64 @@ function TagPickerSheet({ title, subtitle, options, values, onToggle, onClose, a
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end bg-black/40" onClick={onClose}>
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="flex max-h-[85vh] w-full flex-col overflow-y-auto rounded-t-theme bg-background p-5 pb-8"
-      >
-        <div className="mb-1 flex items-center justify-between">
-          <h2 className="font-heading text-lg font-bold">{title}</h2>
-          <button onClick={onClose} aria-label={t('common.close')} className="text-muted-foreground">
-            <iconify-icon icon="lucide:x" class="text-xl"></iconify-icon>
-          </button>
-        </div>
-        {subtitle && <p className="mb-4 text-[11px] text-muted-foreground">{subtitle}</p>}
-        <div className="flex flex-wrap gap-2">
-          {options.map((opt) => {
-            const value = typeof opt === 'string' ? opt : opt.value
-            const label = typeof opt === 'string' ? opt : opt.label
-            const selected = values.some((v) => v.toLowerCase() === value.toLowerCase())
-            return (
-              <button
-                key={value}
-                onClick={() => onToggle(value)}
-                className={`rounded-full px-3.5 py-2 text-xs font-bold ${
-                  selected ? 'bg-primary text-primary-foreground' : 'border border-border bg-card text-foreground'
-                }`}
-              >
-                {label}
-              </button>
-            )
-          })}
-          {customValues.map((value) => (
+    <Sheet onClose={onClose} className="max-h-[85vh] overflow-y-auto p-5 pb-8">
+      <div className="mb-1 flex items-center justify-between">
+        <h2 className="font-heading text-lg font-bold">{title}</h2>
+        <button onClick={onClose} aria-label={t('common.close')} className="text-muted-foreground">
+          <iconify-icon icon="lucide:x" class="text-xl"></iconify-icon>
+        </button>
+      </div>
+      {subtitle && <p className="mb-4 text-[11px] text-muted-foreground">{subtitle}</p>}
+      <div className="flex flex-wrap gap-2">
+        {options.map((opt) => {
+          const value = typeof opt === 'string' ? opt : opt.value
+          const label = typeof opt === 'string' ? opt : opt.label
+          const selected = values.some((v) => v.toLowerCase() === value.toLowerCase())
+          return (
             <button
               key={value}
               onClick={() => onToggle(value)}
-              className="flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-xs font-bold text-primary-foreground"
+              className={`rounded-full px-3.5 py-2 text-xs font-bold ${
+                selected ? 'bg-primary text-primary-foreground' : 'border border-border bg-card text-foreground'
+              }`}
             >
-              {value}
-              <iconify-icon icon="lucide:x" class="text-[11px]"></iconify-icon>
+              {label}
             </button>
-          ))}
-        </div>
-        {allowCustom && (
-          <div className="mt-3 flex gap-2">
-            <input
-              value={customDraft}
-              onChange={(e) => setCustomDraft(e.target.value.slice(0, 24))}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') submitCustom()
-              }}
-              placeholder={t('createPrediction.customCategoryPlaceholder')}
-              maxLength={24}
-              className="h-11 flex-1 rounded-theme border border-border bg-input px-3.5 text-sm text-foreground outline-none placeholder:text-muted-foreground"
-            />
-            <button
-              onClick={submitCustom}
-              aria-label={t('createPrediction.customCategoryAddAria')}
-              className="flex h-11 w-11 shrink-0 items-center justify-center rounded-theme bg-primary text-primary-foreground"
-            >
-              <iconify-icon icon="lucide:plus" class="text-lg"></iconify-icon>
-            </button>
-          </div>
-        )}
+          )
+        })}
+        {customValues.map((value) => (
+          <button
+            key={value}
+            onClick={() => onToggle(value)}
+            className="flex items-center gap-1.5 rounded-full bg-primary px-3.5 py-2 text-xs font-bold text-primary-foreground"
+          >
+            {value}
+            <iconify-icon icon="lucide:x" class="text-[11px]"></iconify-icon>
+          </button>
+        ))}
       </div>
-    </div>
+      {allowCustom && (
+        <div className="mt-3 flex gap-2">
+          <input
+            value={customDraft}
+            onChange={(e) => setCustomDraft(e.target.value.slice(0, 24))}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') submitCustom()
+            }}
+            placeholder={t('createPrediction.customCategoryPlaceholder')}
+            maxLength={24}
+            className="h-11 flex-1 rounded-theme border border-border bg-input px-3.5 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+          />
+          <button
+            onClick={submitCustom}
+            aria-label={t('createPrediction.customCategoryAddAria')}
+            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-theme bg-primary text-primary-foreground"
+          >
+            <iconify-icon icon="lucide:plus" class="text-lg"></iconify-icon>
+          </button>
+        </div>
+      )}
+    </Sheet>
   )
 }
 
@@ -247,49 +239,44 @@ function WordListSheet({ title, subtitle, words, onAdd, onRemove, onClose }) {
   }
 
   return (
-    <div className="fixed inset-0 z-50 flex items-end bg-black/40" onClick={onClose}>
-      <div
-        onClick={(e) => e.stopPropagation()}
-        className="flex max-h-[85vh] w-full flex-col overflow-y-auto rounded-t-theme bg-background p-5 pb-8"
-      >
-        <div className="mb-1 flex items-center justify-between">
-          <h2 className="font-heading text-lg font-bold">{title}</h2>
-          <button onClick={onClose} aria-label={t('common.close')} className="text-muted-foreground">
-            <iconify-icon icon="lucide:x" class="text-xl"></iconify-icon>
-          </button>
-        </div>
-        {subtitle && <p className="mb-4 text-[11px] text-muted-foreground">{subtitle}</p>}
-        <div className="flex gap-2">
-          <input
-            value={draft}
-            onChange={(e) => setDraft(e.target.value)}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') submit()
-            }}
-            placeholder={t('appSettings.mutedWordPlaceholder')}
-            className="h-11 flex-1 rounded-theme border border-border bg-input px-3.5 text-sm text-foreground outline-none placeholder:text-muted-foreground"
-          />
-          <button
-            onClick={submit}
-            aria-label={t('appSettings.mutedWordAddAria')}
-            className="flex h-11 w-11 shrink-0 items-center justify-center rounded-theme bg-primary text-primary-foreground"
-          >
-            <iconify-icon icon="lucide:plus" class="text-lg"></iconify-icon>
-          </button>
-        </div>
-        <div className="mt-4 flex flex-wrap gap-2">
-          {words.length === 0 && <p className="text-xs text-muted-foreground">{t('appSettings.mutedWordsEmpty')}</p>}
-          {words.map((w) => (
-            <span key={w} className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-xs font-semibold">
-              {w}
-              <button onClick={() => onRemove(w)} aria-label={t('appSettings.mutedWordRemoveAria', { word: w })}>
-                <iconify-icon icon="lucide:x" class="text-sm"></iconify-icon>
-              </button>
-            </span>
-          ))}
-        </div>
+    <Sheet onClose={onClose} className="max-h-[85vh] overflow-y-auto p-5 pb-8">
+      <div className="mb-1 flex items-center justify-between">
+        <h2 className="font-heading text-lg font-bold">{title}</h2>
+        <button onClick={onClose} aria-label={t('common.close')} className="text-muted-foreground">
+          <iconify-icon icon="lucide:x" class="text-xl"></iconify-icon>
+        </button>
       </div>
-    </div>
+      {subtitle && <p className="mb-4 text-[11px] text-muted-foreground">{subtitle}</p>}
+      <div className="flex gap-2">
+        <input
+          value={draft}
+          onChange={(e) => setDraft(e.target.value)}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter') submit()
+          }}
+          placeholder={t('appSettings.mutedWordPlaceholder')}
+          className="h-11 flex-1 rounded-theme border border-border bg-input px-3.5 text-sm text-foreground outline-none placeholder:text-muted-foreground"
+        />
+        <button
+          onClick={submit}
+          aria-label={t('appSettings.mutedWordAddAria')}
+          className="flex h-11 w-11 shrink-0 items-center justify-center rounded-theme bg-primary text-primary-foreground"
+        >
+          <iconify-icon icon="lucide:plus" class="text-lg"></iconify-icon>
+        </button>
+      </div>
+      <div className="mt-4 flex flex-wrap gap-2">
+        {words.length === 0 && <p className="text-xs text-muted-foreground">{t('appSettings.mutedWordsEmpty')}</p>}
+        {words.map((w) => (
+          <span key={w} className="flex items-center gap-1.5 rounded-full bg-muted px-3 py-1.5 text-xs font-semibold">
+            {w}
+            <button onClick={() => onRemove(w)} aria-label={t('appSettings.mutedWordRemoveAria', { word: w })}>
+              <iconify-icon icon="lucide:x" class="text-sm"></iconify-icon>
+            </button>
+          </span>
+        ))}
+      </div>
+    </Sheet>
   )
 }
 
@@ -903,41 +890,48 @@ export default function UygulamaAyarlari() {
 
         <p className="mt-8 text-center text-[10px] font-medium text-muted-foreground">{t('appSettings.versionLabel', { version: '2.6.1' })}</p>
 
-        {showDeleteConfirm && (
-          <div
-            className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-6"
-            onClick={() => !deleting && setShowDeleteConfirm(false)}
-          >
+        {/* Portaled for the same reason as Sheet.jsx (see its header comment):
+            rendered in place, AppShell's `transform: translateZ(0)` column
+            would make this `fixed` dialog resolve against the whole
+            scrollable settings page instead of the viewport, centering it
+            thousands of pixels down instead of on screen. */}
+        {showDeleteConfirm &&
+          createPortal(
             <div
-              onClick={(e) => e.stopPropagation()}
-              className="w-full max-w-[340px] rounded-theme bg-card p-5 shadow-lg"
+              className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 px-6"
+              onClick={() => !deleting && setShowDeleteConfirm(false)}
             >
-              <div className="flex h-11 w-11 items-center justify-center rounded-theme bg-destructive/10 text-destructive">
-                <iconify-icon icon="lucide:triangle-alert" class="text-xl"></iconify-icon>
+              <div
+                onClick={(e) => e.stopPropagation()}
+                className="w-full max-w-[340px] rounded-theme bg-card p-5 shadow-lg"
+              >
+                <div className="flex h-11 w-11 items-center justify-center rounded-theme bg-destructive/10 text-destructive">
+                  <iconify-icon icon="lucide:triangle-alert" class="text-xl"></iconify-icon>
+                </div>
+                <h2 className="mt-3 font-heading text-base font-bold">{t('appSettings.deleteConfirmTitle')}</h2>
+                <p className="mt-2 text-xs leading-5 text-muted-foreground">
+                  {t('appSettings.deleteConfirmBody')}
+                </p>
+                <div className="mt-5 flex gap-2">
+                  <button
+                    onClick={() => setShowDeleteConfirm(false)}
+                    disabled={deleting}
+                    className="flex-1 rounded-theme border border-border bg-card py-2.5 text-xs font-bold text-foreground disabled:opacity-60"
+                  >
+                    {t('common.cancel')}
+                  </button>
+                  <button
+                    onClick={handleDeleteAccount}
+                    disabled={deleting}
+                    className="flex-1 rounded-theme bg-destructive py-2.5 text-xs font-bold text-destructive-foreground disabled:opacity-60"
+                  >
+                    {deleting ? t('appSettings.deleting') : t('appSettings.confirmDelete')}
+                  </button>
+                </div>
               </div>
-              <h2 className="mt-3 font-heading text-base font-bold">{t('appSettings.deleteConfirmTitle')}</h2>
-              <p className="mt-2 text-xs leading-5 text-muted-foreground">
-                {t('appSettings.deleteConfirmBody')}
-              </p>
-              <div className="mt-5 flex gap-2">
-                <button
-                  onClick={() => setShowDeleteConfirm(false)}
-                  disabled={deleting}
-                  className="flex-1 rounded-theme border border-border bg-card py-2.5 text-xs font-bold text-foreground disabled:opacity-60"
-                >
-                  {t('common.cancel')}
-                </button>
-                <button
-                  onClick={handleDeleteAccount}
-                  disabled={deleting}
-                  className="flex-1 rounded-theme bg-destructive py-2.5 text-xs font-bold text-destructive-foreground disabled:opacity-60"
-                >
-                  {deleting ? t('appSettings.deleting') : t('appSettings.confirmDelete')}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
+            </div>,
+            document.body
+          )}
 
         {openPicker === 'theme' && (
           <PickerSheet
