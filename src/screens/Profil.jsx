@@ -31,12 +31,16 @@ const CATEGORY_ICONS = {
 
 function OwnPredictionCard({ prediction }) {
   const { t } = useTranslation()
+  const navigate = useNavigate()
   const isVerified = prediction.status === 'verified_correct' || prediction.status === 'verified_incorrect'
   const isCorrect = prediction.status === 'verified_correct'
 
   if (isVerified) {
     return (
-      <div className="mx-5 mt-3 overflow-hidden rounded-theme border border-border bg-card shadow-sm">
+      <button
+        onClick={() => navigate('/tahmin-kaydi', { state: { prediction } })}
+        className="mx-5 mt-3 w-[calc(100%-40px)] overflow-hidden rounded-theme border border-border bg-card text-left shadow-sm transition-transform duration-150 active:scale-[0.98]"
+      >
         <div
           className={`flex items-center justify-between px-4 py-2 text-[11px] font-bold ${
             isCorrect ? 'bg-success text-success-foreground' : 'bg-destructive text-destructive-foreground'
@@ -61,12 +65,12 @@ function OwnPredictionCard({ prediction }) {
           </div>
           <p className="mt-3 text-[15px] font-semibold leading-6">&ldquo;{prediction.sealed_content}&rdquo;</p>
         </div>
-      </div>
+      </button>
     )
   }
 
   return (
-    <Card className="mx-5 mt-3">
+    <Card as="button" onClick={() => navigate('/tahmin-kaydi', { state: { prediction } })} className="mx-5 mt-3 w-[calc(100%-40px)]">
       <div className="flex items-center justify-between gap-2">
         <div className="flex items-center gap-1.5">
           <Chip>{prediction.category?.toUpperCase()}</Chip>
