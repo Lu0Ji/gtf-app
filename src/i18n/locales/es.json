@@ -1473,7 +1473,14 @@
     "commentFailed": "No se pudo publicar el comentario, inténtalo de nuevo.",
     "shareResultCta": "Compartir resultado",
     "shareResultTitle": "Mi resultado en GTF",
-    "shareResultFailed": "No se pudo crear la tarjeta, inténtalo de nuevo."
+    "shareResultFailed": "No se pudo crear la tarjeta, inténtalo de nuevo.",
+    "inviteFriendsCta": "Predícelo con amigos",
+    "inviteFriendsHint": "Crea un grupo para esta predicción, comparte el enlace de invitación",
+    "inviteGroupDescription": "Grupo formado en torno a esta predicción",
+    "inviteShareTitle": "Predigamos juntos en GTF",
+    "inviteShareText": "\"{{title}}\" — predícelo conmigo",
+    "inviteLinkCopiedToast": "Enlace de invitación copiado",
+    "inviteFailedToast": "No se pudo crear el grupo, inténtalo de nuevo."
   },
   "groups": {
     "eyebrow": "Comunidades",

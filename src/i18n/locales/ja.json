@@ -1472,7 +1472,14 @@
     "commentFailed": "コメントを送信できませんでした。もう一度お試しください。",
     "shareResultCta": "結果をシェア",
     "shareResultTitle": "私のGTF結果",
-    "shareResultFailed": "シェアカードを作成できませんでした。もう一度お試しください。"
+    "shareResultFailed": "シェアカードを作成できませんでした。もう一度お試しください。",
+    "inviteFriendsCta": "友達と一緒に予測する",
+    "inviteFriendsHint": "この予測のグループを作成し、招待リンクを共有",
+    "inviteGroupDescription": "この予測を中心に作られたグループ",
+    "inviteShareTitle": "GTFで一緒に予測しよう",
+    "inviteShareText": "「{{title}}」— 一緒に予測しよう",
+    "inviteLinkCopiedToast": "招待リンクをコピーしました",
+    "inviteFailedToast": "グループを作成できませんでした。もう一度お試しください。"
   },
   "groups": {
     "eyebrow": "コミュニティ",

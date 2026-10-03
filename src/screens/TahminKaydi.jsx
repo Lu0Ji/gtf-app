@@ -85,6 +85,7 @@ export default function TahminKaydi() {
   // güvenli şekilde 'basic'e döner.
   const [equippedSealStyle, setEquippedSealStyle] = useState(null)
   const [sharing, setSharing] = useState(false)
+  const [inviting, setInviting] = useState(false)
 
   // React Router doesn't remount this screen just because navigate() was
   // called again with a new `state` — same pathname, same component
@@ -339,6 +340,74 @@ export default function TahminKaydi() {
       if (err?.name !== 'AbortError') showToast(t('record.shareResultFailed'))
     } finally {
       setSharing(false)
+    }
+  }
+
+  // Gruplar talep doğrulama deneyi (docs/designs/gruplar-talep-dogrulama.md,
+  // Approach A) — "Arkadaşlarınla tahmin et": mevcut Gruplar altyapısını
+  // (Gruplar.jsx'in kendi oluşturma akışıyla birebir aynı iki adım: grup
+  // satırı + admin üyelik satırı) yeniden kullanıp bu tahmini o gruba
+  // taşıyor, sonra paylaşılabilir bir link üretiyor. group_invite_links
+  // insert'i ayrı ve sessizce başarısız olabilir bir adım (bkz. schema.sql
+  // yorumu) — migrasyon henüz canlıya uygulanmadıysa akışın geri kalanı
+  // yine de çalışmalı, sadece ölçüm satırı eksik kalır.
+  async function handleInviteFriends() {
+    if (inviting || !user) return
+    setInviting(true)
+    try {
+      const { data: group, error: groupError } = await supabase
+        .from('groups')
+        .insert({
+          name: record.title.slice(0, 60),
+          category: record.category,
+          description: t('record.inviteGroupDescription'),
+          created_by: user.id,
+        })
+        .select()
+        .single()
+      if (groupError) throw groupError
+
+      const { error: memberError } = await supabase
+        .from('group_members')
+        .insert({ group_id: group.id, user_id: user.id, role: 'admin' })
+      if (memberError) throw memberError
+
+      const { error: predictionError } = await supabase
+        .from('predictions')
+        .update({ group_id: group.id })
+        .eq('id', record.id)
+      if (predictionError) throw predictionError
+
+      try {
+        await supabase
+          .from('group_invite_links')
+          .insert({ group_id: group.id, prediction_id: record.id, created_by: user.id })
+      } catch {
+        // group_invite_links migrasyonu henüz canlıya uygulanmamış olabilir
+        // (bkz. schema.sql) — grup zaten oluşturuldu, bu sadece ölçüm
+        // satırı, akışı durdurmaya değmez.
+      }
+
+      setRecord((prev) => ({ ...prev, group_id: group.id }))
+
+      const inviteUrl = `${window.location.origin}${window.location.pathname}#/grup/${group.id}`
+      const shareText = t('record.inviteShareText', { title: record.title })
+      if (navigator.share) {
+        try {
+          await navigator.share({ title: t('record.inviteShareTitle'), text: shareText, url: inviteUrl })
+        } catch (err) {
+          // AbortError: kullanıcı native paylaşım sayfasını kapattı.
+          if (err?.name !== 'AbortError') throw err
+        }
+      } else {
+        await navigator.clipboard.writeText(inviteUrl)
+        showToast(t('record.inviteLinkCopiedToast'), 'success')
+      }
+      navigate(`/grup/${group.id}`)
+    } catch {
+      showToast(t('record.inviteFailedToast'))
+    } finally {
+      setInviting(false)
     }
   }
 
@@ -897,6 +966,26 @@ export default function TahminKaydi() {
                   </span>
                 </div>
               </div>
+
+              {isOwner && !record.group_id && record.status === 'sealed' && (
+                <button
+                  onClick={handleInviteFriends}
+                  disabled={inviting}
+                  className="relative mt-4 flex w-full items-center gap-3 rounded-theme border border-white/15 bg-white/10 p-4 text-left disabled:opacity-60"
+                >
+                  <span className="flex h-9 w-9 shrink-0 items-center justify-center rounded-theme bg-white/15">
+                    <iconify-icon icon="lucide:users-round" class="text-lg"></iconify-icon>
+                  </span>
+                  <span className="min-w-0 flex-1">
+                    <span className="block text-sm font-bold">{t('record.inviteFriendsCta')}</span>
+                    <span className="mt-0.5 block text-[11px] text-white/65">{t('record.inviteFriendsHint')}</span>
+                  </span>
+                  <iconify-icon
+                    icon={inviting ? 'lucide:loader-2' : 'lucide:chevron-right'}
+                    class={`shrink-0 text-lg text-white/60 ${inviting ? 'animate-spin' : ''}`}
+                  ></iconify-icon>
+                </button>
+              )}
 
               {canVerify && pendingResult === null && (
                 <div className="relative mt-4 rounded-theme border border-white/15 bg-white/10 p-4">

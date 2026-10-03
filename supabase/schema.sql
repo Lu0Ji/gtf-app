@@ -2965,3 +2965,47 @@ $$ language plpgsql security definer set search_path = public;
 
 grant execute on function public.cast_prediction_vote(uuid, text) to authenticated;
 -- ─────────────────────────────────────────────────────────────────────────
+
+-- Gruplar talep doğrulama deneyi (docs/designs/gruplar-talep-dogrulama.md,
+-- Approach A) — "Arkadaşlarınla tahmin et" butonunun ürettiği her davet
+-- linkinin tek kaydı. Kasıtlı olarak minimal: ayrı bir "link açıldı" event'i
+-- yok (uygulama tamamen auth arkasında olduğu için anonim tıklama zaten
+-- izlenemez, ve çıkış eşiği kararı için asıl soru link üretimi + dönüşüm,
+-- açılma değil) — "kayıt oldu" ve "48s içinde mesaj attı" sinyalleri bu
+-- satırın created_at'i group_members.joined_at / group_messages.created_at
+-- ile JOIN edilerek, yeni tablo gerekmeden türetiliyor.
+create table public.group_invite_links (
+  id uuid primary key default gen_random_uuid(),
+  group_id uuid not null references public.groups(id) on delete cascade,
+  prediction_id uuid references public.predictions(id) on delete set null,
+  created_by uuid not null references public.profiles(id) on delete cascade,
+  created_at timestamptz not null default now()
+);
+
+create index group_invite_links_group_id_idx on public.group_invite_links (group_id, created_at);
+
+alter table public.group_invite_links enable row level security;
+
+create policy "Group admins can create invite links"
+  on public.group_invite_links for insert
+  with check (
+    created_by = auth.uid()
+    and exists (
+      select 1 from public.group_members
+      where group_members.group_id = group_invite_links.group_id
+        and group_members.user_id = auth.uid()
+        and group_members.role = 'admin'
+    )
+  );
+
+create policy "Group admins can view their invite links"
+  on public.group_invite_links for select
+  using (
+    exists (
+      select 1 from public.group_members
+      where group_members.group_id = group_invite_links.group_id
+        and group_members.user_id = auth.uid()
+        and group_members.role = 'admin'
+    )
+  );
+-- ─────────────────────────────────────────────────────────────────────────

@@ -1472,7 +1472,14 @@
     "commentFailed": "评论发送失败，请重试。",
     "shareResultCta": "分享结果",
     "shareResultTitle": "我的 GTF 结果",
-    "shareResultFailed": "无法生成分享卡片，请重试。"
+    "shareResultFailed": "无法生成分享卡片，请重试。",
+    "inviteFriendsCta": "和朋友一起预测",
+    "inviteFriendsHint": "为这条预测创建一个群组，分享邀请链接",
+    "inviteGroupDescription": "围绕这条预测创建的群组",
+    "inviteShareTitle": "一起在 GTF 上预测吧",
+    "inviteShareText": "「{{title}}」— 和我一起预测",
+    "inviteLinkCopiedToast": "邀请链接已复制",
+    "inviteFailedToast": "群组创建失败，请重试。"
   },
   "groups": {
     "eyebrow": "社群",

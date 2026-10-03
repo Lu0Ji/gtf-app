@@ -1473,7 +1473,14 @@
     "commentFailed": "Kommentar konnte nicht gesendet werden, versuch es erneut.",
     "shareResultCta": "Ergebnis teilen",
     "shareResultTitle": "Mein GTF-Ergebnis",
-    "shareResultFailed": "Freigabekarte konnte nicht erstellt werden, versuch es erneut."
+    "shareResultFailed": "Freigabekarte konnte nicht erstellt werden, versuch es erneut.",
+    "inviteFriendsCta": "Mit Freunden vorhersagen",
+    "inviteFriendsHint": "Gruppe für diese Vorhersage erstellen, Einladungslink teilen",
+    "inviteGroupDescription": "Gruppe rund um diese Vorhersage",
+    "inviteShareTitle": "Lass uns zusammen auf GTF vorhersagen",
+    "inviteShareText": "\"{{title}}\" — sag das mit mir voraus",
+    "inviteLinkCopiedToast": "Einladungslink kopiert",
+    "inviteFailedToast": "Gruppe konnte nicht erstellt werden, versuch es erneut."
   },
   "groups": {
     "eyebrow": "Communitys",

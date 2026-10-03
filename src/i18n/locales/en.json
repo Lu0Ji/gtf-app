@@ -1473,7 +1473,14 @@
     "commentFailed": "Couldn't post the comment, try again.",
     "shareResultCta": "Share result",
     "shareResultTitle": "My GTF result",
-    "shareResultFailed": "Could not create the share card, try again."
+    "shareResultFailed": "Could not create the share card, try again.",
+    "inviteFriendsCta": "Predict this with friends",
+    "inviteFriendsHint": "Start a group for this prediction, share the invite link",
+    "inviteGroupDescription": "Group formed around this prediction",
+    "inviteShareTitle": "Let's predict together on GTF",
+    "inviteShareText": "\"{{title}}\" — predict this with me",
+    "inviteLinkCopiedToast": "Invite link copied",
+    "inviteFailedToast": "Couldn't create the group, try again."
   },
   "groups": {
     "eyebrow": "Communities",

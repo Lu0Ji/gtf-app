@@ -1477,7 +1477,14 @@
     "commentFailed": "تعذّر نشر التعليق، حاول مرة أخرى.",
     "shareResultCta": "مشاركة النتيجة",
     "shareResultTitle": "نتيجتي في GTF",
-    "shareResultFailed": "تعذّر إنشاء بطاقة المشاركة، حاول مرة أخرى."
+    "shareResultFailed": "تعذّر إنشاء بطاقة المشاركة، حاول مرة أخرى.",
+    "inviteFriendsCta": "توقّع هذا مع أصدقائك",
+    "inviteFriendsHint": "أنشئ مجموعة لهذا التوقع، وشارك رابط الدعوة",
+    "inviteGroupDescription": "مجموعة تشكّلت حول هذا التوقع",
+    "inviteShareTitle": "لنتوقّع معًا على GTF",
+    "inviteShareText": "\"{{title}}\" — توقّع هذا معي",
+    "inviteLinkCopiedToast": "تم نسخ رابط الدعوة",
+    "inviteFailedToast": "تعذّر إنشاء المجموعة، حاول مرة أخرى."
   },
   "groups": {
     "eyebrow": "المجتمعات",

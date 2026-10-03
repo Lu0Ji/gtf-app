@@ -1473,7 +1473,14 @@
     "commentFailed": "Yorum gönderilemedi, tekrar dene.",
     "shareResultCta": "Sonucu paylaş",
     "shareResultTitle": "GTF sonucum",
-    "shareResultFailed": "Paylaşım kartı oluşturulamadı, tekrar dene."
+    "shareResultFailed": "Paylaşım kartı oluşturulamadı, tekrar dene.",
+    "inviteFriendsCta": "Arkadaşlarınla tahmin et",
+    "inviteFriendsHint": "Bu tahmin için bir grup kur, davet linkini paylaş",
+    "inviteGroupDescription": "Bu tahmin etrafında kurulan grup",
+    "inviteShareTitle": "GTF'de birlikte tahmin edelim",
+    "inviteShareText": "\"{{title}}\" — bunu benimle tahmin et",
+    "inviteLinkCopiedToast": "Davet linki kopyalandı",
+    "inviteFailedToast": "Grup oluşturulamadı, tekrar dene."
   },
   "groups": {
     "eyebrow": "Topluluklar",

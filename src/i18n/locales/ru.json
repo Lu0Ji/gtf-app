@@ -1475,7 +1475,14 @@
     "commentFailed": "Не удалось отправить комментарий, попробуйте снова.",
     "shareResultCta": "Поделиться результатом",
     "shareResultTitle": "Мой результат в GTF",
-    "shareResultFailed": "Не удалось создать карточку, попробуй ещё раз."
+    "shareResultFailed": "Не удалось создать карточку, попробуй ещё раз.",
+    "inviteFriendsCta": "Предскажи это с друзьями",
+    "inviteFriendsHint": "Создай группу для этого прогноза, поделись ссылкой-приглашением",
+    "inviteGroupDescription": "Группа, созданная вокруг этого прогноза",
+    "inviteShareTitle": "Давай предсказывать вместе в GTF",
+    "inviteShareText": "«{{title}}» — предскажи это со мной",
+    "inviteLinkCopiedToast": "Ссылка-приглашение скопирована",
+    "inviteFailedToast": "Не удалось создать группу, попробуй ещё раз."
   },
   "groups": {
     "eyebrow": "Сообщества",
