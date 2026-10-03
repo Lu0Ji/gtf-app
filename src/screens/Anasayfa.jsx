@@ -836,29 +836,14 @@ export default function Anasayfa() {
   // Keşfet's "Popüler alanlar" tiles land here with a category already
   // chosen — someone tapping "Ekonomi" there wants Ekonomi predictions,
   // not to land on the "all" tab and have to find the tab themselves.
+  // Used to also auto-switch to a single declared interest once it loaded
+  // (settings.content.interests starts as [] and fills in a moment after
+  // sign-in) — removed per user request: landing on a specific interest
+  // that happens to have few/no predictions yet read as "the feed is
+  // broken," not as a helpful default. "Tümü" (all) now always wins unless
+  // Keşfet explicitly handed in a category above.
   const [activeCategory, setActiveCategory] = useState(() => location.state?.category || 'all')
   const [activeStatus, setActiveStatus] = useState('all')
-  const { settings } = useUserSettings()
-  // Already-satisfied by the state above when arriving with a category —
-  // the interest-based default below is a fallback for a plain visit, not
-  // something that should override an explicit choice just made in Keşfet.
-  const appliedInterestDefault = useRef(!!location.state?.category)
-
-  // Land people with a single declared interest straight on that tab. Only
-  // applies once, and only before the user has touched the tabs themselves.
-  // Interests are still stored as Turkish labels (Uygulama Ayarları isn't
-  // migrated to slugs yet), so lowercasing one gives back the matching DB
-  // slug — the exact same coupling feedRanking.js already relies on.
-  useEffect(() => {
-    if (appliedInterestDefault.current) return
-    const interests = settings.content.interests
-    if (interests.length === 0) return
-    appliedInterestDefault.current = true
-    const slug = interests[0].toLowerCase()
-    if (interests.length === 1 && CATEGORY_SLUGS.includes(slug)) {
-      setActiveCategory(slug)
-    }
-  }, [settings.content.interests])
 
   return (
     <div className="min-h-screen w-full bg-background pb-28 text-foreground font-body">
