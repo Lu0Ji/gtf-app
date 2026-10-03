@@ -3,6 +3,12 @@
 @theme {
   --font-body: "Inter", ui-sans-serif, system-ui, sans-serif;
   --font-heading: "Manrope", ui-sans-serif, system-ui, sans-serif;
+  /* Auth screen only (see index.html's font link) — a bold display serif
+     for the one huge headline, borrowed from the reference the user
+     pointed at (ilabsolutions.it uses a paid font called "Grumpy 24";
+     Fraunces is the closest free equivalent, same "chunky editorial
+     serif" character). Never used outside Giris.jsx. */
+  --font-auth-display: "Fraunces", ui-serif, serif;
 
   --radius-theme: 16px;
 
@@ -222,4 +228,189 @@ a[href]:active {
 .shine-none:hover,
 .shine-none:active {
   background-image: none !important;
+}
+
+/* Auth gateway — see src/screens/Giris.jsx, src/components/AuthAurora.jsx,
+   src/hooks/usePointerParallax.js, and DESIGN.md §7's "earned ceremonial
+   moment" exception (streak flame, seal-break reveal above). Arriving at /
+   leaving the app is the other bookend to sealing a prediction, so the
+   login/signup screen gets a motion layer the rest of the app doesn't:
+   particles drifting up like sealed predictions released into the sky,
+   plus a cursor-reactive depth layer (grid, spotlight, card tilt, glow
+   border) on fine-pointer devices — the hook writes smoothed `--px`/`--py`
+   (0..1, lerped via rAF) onto whatever element it's attached to; every
+   rule below just reads those two custom properties. `--px`/`--py` default
+   to 0.5 (dead center) so touch/no-JS renders identically to "mouse
+   centered", never a layout jump. The hook itself no-ops under
+   [data-reduce-motion] (see ThemeContext); the idle-looping particle/glow
+   keyframes are justified the same way the streak flame is — tied to one
+   specific, once-per-session moment, not sprinkled app-wide. */
+@keyframes auth-drift {
+  0% { transform: translateY(0) scale(0.85); opacity: 0; }
+  12% { opacity: var(--particle-opacity, 0.5); }
+  85% { opacity: var(--particle-opacity, 0.5); }
+  100% { transform: translateY(-140px) scale(1); opacity: 0; }
+}
+
+@keyframes auth-emblem-glow {
+  0%, 100% { opacity: 0.35; transform: scale(1); }
+  50% { opacity: 0.7; transform: scale(1.12); }
+}
+
+@keyframes auth-field-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes auth-shell-in {
+  from { opacity: 0; transform: translateY(10px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.auth-particle {
+  position: absolute;
+  bottom: 0;
+  border-radius: 9999px;
+  background: radial-gradient(circle, color-mix(in srgb, white 85%, transparent) 0%, transparent 70%);
+  animation: auth-drift var(--particle-duration, 9s) ease-in-out infinite;
+  animation-delay: var(--particle-delay, 0s);
+}
+
+.auth-emblem-glow {
+  animation: auth-emblem-glow 3.4s ease-in-out infinite;
+}
+
+.auth-field-in {
+  animation: auth-field-in 0.35s ease-out both;
+}
+
+/* Rebuilt monochrome after the user pointed at ilabsolutions.it directly:
+   inspected its computed styles — literally three colors on the entire
+   site (black, white, one near-black gray), no accent color anywhere, not
+   even on its CTA. That's the actual "futuristic" signal, not a navy
+   gradient. This screen now follows the same discipline: everything here
+   is black/white/gray; `--color-primary` survives in exactly one place
+   (the submit button fill, kept for brand recognizability — see
+   Giris.jsx), nowhere else. */
+.auth-hero-canvas {
+  background: linear-gradient(165deg, #0a0a0a 0%, #000000 60%);
+}
+
+@keyframes auth-aurora-a {
+  0%, 100% { transform: translate(-6%, -8%) scale(1); }
+  50% { transform: translate(8%, 6%) scale(1.2); }
+}
+
+@keyframes auth-aurora-b {
+  0%, 100% { transform: translate(8%, 10%) scale(1.1); }
+  50% { transform: translate(-10%, -4%) scale(0.92); }
+}
+
+/* Grayscale now, not brand-colored — a slow tonal drift instead of a glow. */
+.auth-aurora-blob {
+  position: absolute;
+  border-radius: 9999px;
+  filter: blur(100px);
+  opacity: 0.14;
+}
+
+.auth-aurora-blob-a {
+  top: -12%;
+  left: -8%;
+  width: 62%;
+  height: 62%;
+  background: color-mix(in srgb, white 35%, transparent);
+  animation: auth-aurora-a 18s ease-in-out infinite;
+}
+
+.auth-aurora-blob-b {
+  bottom: -16%;
+  right: -10%;
+  width: 56%;
+  height: 56%;
+  background: color-mix(in srgb, white 25%, transparent);
+  animation: auth-aurora-b 22s ease-in-out infinite;
+}
+
+/* A neutral elevation shadow for the CTA/active tab pill — no color halo
+   (the reference sites never glow a color; `bg-primary` alone is what
+   signals "this is the action" now). */
+.auth-btn-glow {
+  box-shadow: 0 10px 30px -8px rgba(0, 0, 0, 0.65);
+}
+
+/* Hero panel: a loose cloud of dots (not a rigid grid — ilabsolutions.it's
+   background texture is a scattered halftone cluster, not graph-paper
+   lines), shifted opposite the cursor for parallax depth. */
+.auth-grid {
+  background-image: radial-gradient(color-mix(in srgb, white 45%, transparent) 1px, transparent 1px);
+  background-size: 15px 15px;
+  mask-image: radial-gradient(circle at 60% 55%, black, transparent 70%);
+  -webkit-mask-image: radial-gradient(circle at 60% 55%, black, transparent 70%);
+  transform: translate(calc((var(--px, 0.5) - 0.5) * -28px), calc((var(--py, 0.5) - 0.5) * -28px));
+}
+
+/* The particle layer sits "closer" than the grid, so it moves more. */
+.auth-particle-field {
+  transform: translate(calc((var(--px, 0.5) - 0.5) * -48px), calc((var(--py, 0.5) - 0.5) * -48px));
+}
+
+/* A soft (colorless) light that tracks the cursor — the one effect that
+   reads instantly as "this is reacting to me", without reintroducing a
+   color glow. */
+.auth-spotlight {
+  background: radial-gradient(
+    560px circle at calc(var(--px, 0.5) * 100%) calc(var(--py, 0.5) * 100%),
+    color-mix(in srgb, white 10%, transparent),
+    transparent 68%
+  );
+}
+
+/* Headline/copy drift the opposite way from the grid — the layering (grid
+   recedes, particles rise, text leans forward) is what sells "depth"
+   instead of one flat image with effects pasted on top of it. */
+.auth-content-parallax {
+  transform: translate(calc((var(--px, 0.5) - 0.5) * 14px), calc((var(--py, 0.5) - 0.5) * 10px));
+}
+
+/* The form card itself tilts in 3D toward the cursor — subtle (±5deg),
+   same spirit as a physical card catching the light as you turn it. */
+.auth-tilt {
+  transform: perspective(1200px) rotateX(calc((0.5 - var(--py, 0.5)) * 8deg)) rotateY(calc((var(--px, 0.5) - 0.5) * 8deg));
+  transition: transform 0.15s ease-out;
+}
+
+/* White border that brightens toward the cursor — the standard "spotlight
+   border" mask trick, grayscale now instead of brand-colored. Falls back
+   to a plain border-less card if mask-composite isn't supported (older
+   WebView). */
+.auth-glow-border {
+  position: relative;
+}
+.auth-glow-border::before {
+  content: "";
+  position: absolute;
+  inset: -1px;
+  border-radius: inherit;
+  padding: 1px;
+  background: radial-gradient(
+    220px circle at calc(var(--px, 0.5) * 100%) calc(var(--py, 0.5) * 100%),
+    color-mix(in srgb, white 55%, transparent),
+    transparent 72%
+  );
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+
+/* The rotating seal badge — the one motif taken directly from
+   ilabsolutions.it (a circular rotating "contattaci" badge), re-themed
+   around GTF's own sealing/prediction metaphor instead of copying theirs
+   verbatim. See AuthSealBadge in Giris.jsx. */
+@keyframes auth-badge-spin {
+  to { transform: rotate(360deg); }
+}
+.auth-badge-ring {
+  animation: auth-badge-spin 16s linear infinite;
 }
