@@ -1,16 +1,36 @@
-# React + Vite
+# Guess the Future (GTF)
 
-This template provides a minimal setup to get React working in Vite with HMR and some Oxlint rules.
+Bugün bir tahmin mühürle, zamanı gelince haklı olduğunu kanıtla. Sosyal tahmin
+platformu — web, Android ve iOS tek kod tabanından (React + Vite + Capacitor,
+arka uç Supabase).
 
-Currently, two official plugins are available:
+- **Web (beta):** https://guess-the-future.vercel.app
+- **Android:** Capacitor kabuğu (`android/`), imzalı APK/AAB için `android/keystore.properties` gerekir (git dışı)
+- **iOS:** Capacitor kabuğu (`ios/`), Codemagic üzerinden TestFlight'a derlenir (`codemagic.yaml`)
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## Geliştirme
 
-## React Compiler
+```bash
+npm install
+cp .env.example .env   # Supabase URL/anahtarı ve VITE_APP_URL'yi doldur
+npm run dev            # http://localhost:5173
+npm test               # vitest
+npm run lint           # oxlint
+npm run build          # dist/
+```
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+Native kabukları güncellemek için derlemeden sonra `npx cap sync android` /
+`npx cap sync ios` (iOS için macOS gerekir; Codemagic bunu bulutta yapıyor).
 
-## Expanding the Oxlint configuration
+## Yapı
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and Oxlint's TypeScript related rules in your project.
+- `src/screens/` ekranlar, `src/components/` paylaşılan parçalar, `src/lib/` saf yardımcılar
+- `src/i18n/` 8 dil (tr, en, de, zh, ja, ru, es, ar)
+- `supabase/schema.sql` yalnızca sona eklenen şema; `supabase/functions/` Edge Function'lar
+- `DESIGN.md` tasarım dili ve bileşen kalıpları, `docs/designs/` özellik tasarım notları
+
+## Dağıtım
+
+Web, `main` dalına her push'ta Vercel tarafından otomatik yayınlanır. iOS
+derlemesi aynı push'la Codemagic'te tetiklenir. Ortam değişkenleri
+(`VITE_*`) her iki serviste de ayrıca tanımlıdır; yerel `.env` git dışıdır.
