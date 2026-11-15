@@ -1,0 +1,15 @@
+{
+  "name": "Guess the Future",
+  "short_name": "GTF",
+  "description": "Seal a prediction today, prove you were right tomorrow.",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#f6fafd",
+  "theme_color": "#356a8a",
+  "icons": [
+    { "src": "/icon-1024.png", "sizes": "1024x1024", "type": "image/png", "purpose": "any" },
+    { "src": "/icon-1024.png", "sizes": "1024x1024", "type": "image/png", "purpose": "maskable" }
+  ]
+}
