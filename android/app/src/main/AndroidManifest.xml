@@ -22,6 +22,18 @@
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
 
+            <!-- com.gtf.app://auth-callback — where Google/Apple sign-in returns
+                 to from the Chrome Custom Tab (NATIVE_AUTH_REDIRECT in
+                 AuthContext.jsx). singleTask above is what makes the return
+                 land in the running activity (appUrlOpen) and dismiss the
+                 Custom Tab instead of starting a second copy of the app. -->
+            <intent-filter>
+                <action android:name="android.intent.action.VIEW" />
+                <category android:name="android.intent.category.DEFAULT" />
+                <category android:name="android.intent.category.BROWSABLE" />
+                <data android:scheme="com.gtf.app" android:host="auth-callback" />
+            </intent-filter>
+
         </activity>
 
         <provider

@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useToast } from '../contexts/ToastContext.jsx'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
+import { appUrl } from '../lib/appUrl.js'
 
 export default function TopluluKurallari() {
   const { t } = useTranslation()
@@ -12,7 +13,7 @@ export default function TopluluKurallari() {
 
   async function handleShare() {
     try {
-      await navigator.clipboard.writeText(`${t('community.title')} — ${window.location.href}`)
+      await navigator.clipboard.writeText(`${t('community.title')} — ${appUrl('/ayarlar/topluluk-kurallari')}`)
       setCopied(true)
       showToast(t('community.shareSuccess'), 'success')
       setTimeout(() => setCopied(false), 2000)

@@ -24,6 +24,20 @@
 	<string>$(CURRENT_PROJECT_VERSION)</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<!-- com.gtf.app://auth-callback — where Google/Apple sign-in returns to
+	     from the system browser (NATIVE_AUTH_REDIRECT in AuthContext.jsx).
+	     Mirrored by the BROWSABLE intent-filter in AndroidManifest.xml. -->
+	<key>CFBundleURLTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleURLName</key>
+			<string>com.gtf.app</string>
+			<key>CFBundleURLSchemes</key>
+			<array>
+				<string>com.gtf.app</string>
+			</array>
+		</dict>
+	</array>
 	<key>UIApplicationSceneManifest</key>
 	<dict>
 		<key>UIApplicationSupportsMultipleScenes</key>

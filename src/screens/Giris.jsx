@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { useLocation, useNavigate } from 'react-router-dom'
 import { useTranslation, Trans } from 'react-i18next'
+import { Capacitor } from '@capacitor/core'
 import { useAuth } from '../contexts/AuthContext.jsx'
 import { supabase } from '../lib/supabase.js'
 import { CRITERIA } from '../lib/passwordStrength.js'
@@ -274,7 +275,10 @@ export default function Giris() {
     setGoogleBusy(true)
     try {
       await signInWithGoogle()
-      // Browser is about to navigate away to Google; nothing else to do here.
+      // Web: the page is about to navigate away to Google, leave the button
+      // busy. Native: Google opened in the system browser on top of us, and
+      // the user may well come back without signing in — give the button back.
+      if (Capacitor.isNativePlatform()) setGoogleBusy(false)
     } catch (err) {
       setError(err.message || t('auth.googleError'))
       setGoogleBusy(false)
@@ -286,7 +290,7 @@ export default function Giris() {
     setAppleBusy(true)
     try {
       await signInWithApple()
-      // Browser is about to navigate away to Apple; nothing else to do here.
+      if (Capacitor.isNativePlatform()) setAppleBusy(false) // same reasoning as Google above
     } catch (err) {
       setError(err.message || t('auth.appleError'))
       setAppleBusy(false)

@@ -16,6 +16,7 @@ import Chip from '../components/ui/Chip.jsx'
 import DetailHeader from '../components/ui/DetailHeader.jsx'
 import SealDecoration from '../components/SealDecoration.jsx'
 import SealBreakReveal from '../components/SealBreakReveal.jsx'
+import { appUrl } from '../lib/appUrl.js'
 
 // Matches the total duration of every keyframe in the .reveal-* classes
 // (src/index.css) — the overlay unmounts exactly when its own animation
@@ -390,7 +391,7 @@ export default function TahminKaydi() {
 
       setRecord((prev) => ({ ...prev, group_id: group.id }))
 
-      const inviteUrl = `${window.location.origin}${window.location.pathname}#/grup/${group.id}`
+      const inviteUrl = appUrl(`/grup/${group.id}`)
       const shareText = t('record.inviteShareText', { title: record.title })
       if (navigator.share) {
         try {

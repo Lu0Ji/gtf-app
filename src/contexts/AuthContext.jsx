@@ -1,7 +1,41 @@
 import { createContext, useContext, useEffect, useState, useCallback } from 'react'
+import { Capacitor } from '@capacitor/core'
+import { Browser } from '@capacitor/browser'
+import { App as CapacitorApp } from '@capacitor/app'
 import { supabase } from '../lib/supabase.js'
+import { appUrl } from '../lib/appUrl.js'
 
 const AuthContext = createContext(null)
+
+// Where Supabase sends the user back after Google/Apple sign-in inside the
+// native apps. A custom URL scheme (registered in AndroidManifest.xml and
+// Info.plist, allow-listed in Supabase's Auth → URL Configuration) rather
+// than the WebView's own origin, because the sign-in itself can't happen in
+// the WebView at all: Google refuses OAuth from embedded web views
+// ("disallowed_useragent"). So on native the flow is: open Supabase's
+// provider URL in the system browser (Chrome Custom Tab / SFSafariViewController),
+// let the provider redirect to this scheme, and catch it with appUrlOpen below.
+const NATIVE_AUTH_REDIRECT = 'com.gtf.app://auth-callback'
+
+// Turns the URL the OS hands us back into a session. Supabase's default
+// (implicit) flow puts the tokens in the fragment; the PKCE flow puts a
+// `code` in the query — handle both so a future flowType switch can't
+// silently break native sign-in.
+async function completeNativeSignIn(url) {
+  const parsed = new URL(url)
+  const code = parsed.searchParams.get('code')
+  if (code) {
+    const { error } = await supabase.auth.exchangeCodeForSession(code)
+    if (error) throw error
+    return
+  }
+  const fragment = new URLSearchParams(parsed.hash.replace(/^#/, ''))
+  const access_token = fragment.get('access_token')
+  const refresh_token = fragment.get('refresh_token')
+  if (!access_token || !refresh_token) return
+  const { error } = await supabase.auth.setSession({ access_token, refresh_token })
+  if (error) throw error
+}
 
 export function AuthProvider({ children }) {
   const [session, setSession] = useState(null)
@@ -87,6 +121,26 @@ export function AuthProvider({ children }) {
     return () => listener.subscription.unsubscribe()
   }, [loadProfile])
 
+  // Native only — see NATIVE_AUTH_REDIRECT. Any other deep link (none exist
+  // yet) falls through untouched.
+  useEffect(() => {
+    if (!Capacitor.isNativePlatform()) return
+    const listenerPromise = CapacitorApp.addListener('appUrlOpen', ({ url }) => {
+      if (!url?.startsWith(NATIVE_AUTH_REDIRECT)) return
+      // iOS leaves the SFSafariViewController open on top of the app
+      // otherwise; Android's Custom Tab is already gone by the time we're
+      // here (singleTask launch mode clears it) and close() is a no-op there.
+      Browser.close().catch(() => {})
+      completeNativeSignIn(url).catch(() => {
+        // Expired/invalid callback — the user simply stays on the sign-in
+        // screen and can try again; nothing to surface from here.
+      })
+    })
+    return () => {
+      listenerPromise.then((handle) => handle.remove())
+    }
+  }, [])
+
   async function signUp({ email, password, username, displayName, referredByUsername }) {
     const { data, error } = await supabase.auth.signUp({
       email,
@@ -112,30 +166,33 @@ export function AuthProvider({ children }) {
     return data
   }
 
-  // Redirects out to Google and back — there's no local session to return
-  // here, onAuthStateChange picks up the resulting session once the
-  // redirect completes. Requires the Google provider to be enabled (with a
-  // Google Cloud OAuth client id/secret) in the Supabase project's Auth
-  // settings; until then this call resolves but the redirect ends in an
-  // error page.
-  async function signInWithGoogle() {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'google',
-      options: { redirectTo: window.location.origin },
+  // Redirects out to the provider and back — there's no local session to
+  // return here, onAuthStateChange picks up the resulting session once the
+  // redirect completes (web) or the appUrlOpen listener above finishes
+  // (native, where the provider opens in the system browser instead of
+  // navigating the WebView away — see NATIVE_AUTH_REDIRECT). Requires the
+  // provider to be enabled in the Supabase project's Auth settings: Google
+  // needs a Google Cloud OAuth client id/secret, Apple a Services ID, Team
+  // ID, Key ID and private key from an Apple Developer account.
+  async function signInWithProvider(provider) {
+    if (!Capacitor.isNativePlatform()) {
+      const { error } = await supabase.auth.signInWithOAuth({
+        provider,
+        options: { redirectTo: window.location.origin },
+      })
+      if (error) throw error
+      return
+    }
+    const { data, error } = await supabase.auth.signInWithOAuth({
+      provider,
+      options: { redirectTo: NATIVE_AUTH_REDIRECT, skipBrowserRedirect: true },
     })
     if (error) throw error
+    await Browser.open({ url: data.url })
   }
 
-  // Same redirect-based flow as Google. Requires the Apple provider to be
-  // enabled in Supabase's Auth settings (Services ID, Team ID, Key ID and
-  // private key from an Apple Developer account) before it actually works.
-  async function signInWithApple() {
-    const { error } = await supabase.auth.signInWithOAuth({
-      provider: 'apple',
-      options: { redirectTo: window.location.origin },
-    })
-    if (error) throw error
-  }
+  const signInWithGoogle = () => signInWithProvider('google')
+  const signInWithApple = () => signInWithProvider('apple')
 
   async function signOut() {
     const { error } = await supabase.auth.signOut()
@@ -144,11 +201,13 @@ export function AuthProvider({ children }) {
 
   // No hash route in redirectTo on purpose — see the passwordRecovery
   // comment above. Supabase appends its own token/code to whatever URL we
-  // give it; leaving ours bare (just origin+path, no "#/...") means there's
-  // nothing for its fragment/query to collide with.
+  // give it; leaving ours bare (just the site, no "#/...") means there's
+  // nothing for its fragment/query to collide with. appUrl() rather than
+  // window.location: the link lands in an email and gets opened in a phone's
+  // browser, where the native shell's `localhost` origin would go nowhere.
   async function requestPasswordReset(email) {
     const { error } = await supabase.auth.resetPasswordForEmail(email, {
-      redirectTo: window.location.origin + window.location.pathname,
+      redirectTo: appUrl(),
     })
     if (error) throw error
   }

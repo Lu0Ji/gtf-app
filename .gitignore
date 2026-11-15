@@ -44,3 +44,7 @@ xcuserdata/
 
 # Supabase CLI local cache (created by npx supabase probing)
 supabase/.temp/
+
+# Android release signing — never commit (back these two up somewhere safe)
+android/keystore.properties
+android/app/*.jks
