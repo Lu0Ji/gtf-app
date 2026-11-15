@@ -112,7 +112,7 @@ export default function AramaGecmisi() {
       {showClearConfirm && (
         <>
           <div className="fixed inset-0 z-20 bg-foreground/25 backdrop-blur-[1px]" onClick={() => setShowClearConfirm(false)} />
-          <div className="fixed inset-x-0 bottom-0 z-30 px-5 pb-7">
+          <div className="fixed inset-x-0 bottom-0 z-30 px-5 pb-safe-7">
             <section className="rounded-theme border border-border bg-card p-5 shadow-xl">
               <div className="flex items-start gap-3">
                 <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-theme bg-muted text-destructive">

@@ -156,9 +156,12 @@ the card pattern alone appears 131 times, `shadow-sm` 210 times) — encoded onc
 primitives in `src/components/ui/` (§9) instead of re-typed per screen.
 
 - **Screen header** — eyebrow + Display title, optional trailing icon-button.
-  `px-5 pt-12 pb-5`. Every top-level tab screen (Anasayfa, Mesajlar, Keşfet,
-  Profil...) opens this way.
-- **Detail header** — back button + title, `px-5 pt-12 pb-4`, sticky +
+  `px-5 pt-screen pb-5`. Every top-level tab screen (Anasayfa, Mesajlar, Keşfet,
+  Profil...) opens this way. `pt-screen` is the design's 48px top reserve that
+  also grows to clear the iOS status bar (defined in `src/index.css`, with its
+  bottom-edge siblings `pb-safe-*` / `bottom-safe-*` for anything pinned to
+  the bottom of the screen).
+- **Detail header** — back button + title, `px-5 pt-screen pb-4`, sticky +
   `backdrop-blur-md` by default. This is the app's *most-repeated* header shape
   (27 of 35 screens) — every drill-down and every settings screen. Two layouts:
   centered title with a balancing spacer when there's no subtitle/trailing action

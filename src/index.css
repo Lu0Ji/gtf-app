@@ -37,6 +37,39 @@
   --color-destructive-foreground: #ffffff;
 }
 
+/* Native iOS: the WebView runs edge-to-edge under the status bar and the
+   home indicator (Capacitor's contentInset is `never`, and index.html opts
+   into `viewport-fit=cover` so env() reports the real insets). Everywhere
+   else — Android (Capacitor adds its own margins there), desktop — these
+   resolve to 0 and the utilities below collapse to the plain spacing they
+   replace, so one set of class names serves every platform. */
+:root {
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+}
+
+/* The design reserves 48px above every screen header (DESIGN.md §8) — on
+   the web that's just breathing room, on iOS it's where the status bar
+   lives. Grows only when the real inset is taller (Dynamic Island phones
+   report 59px). */
+@utility pt-screen {
+  padding-top: max(3rem, calc(var(--safe-top) + 0.75rem));
+}
+
+/* `pb-safe-5` reads as `pb-5` that also clears the home indicator:
+   whichever is larger of the design's own padding or inset + 8px. For
+   fixed bottom bars, bottom sheets, and anything else pinned to the
+   screen's bottom edge. */
+@utility pb-safe-* {
+  padding-bottom: max(calc(var(--spacing) * --value(integer)), calc(var(--safe-bottom) + var(--spacing) * 2));
+}
+
+/* `bottom-safe-24` = `bottom-24` pushed up by the inset — for floating
+   elements stacked above a bar that itself grew by `pb-safe-*`. */
+@utility bottom-safe-* {
+  bottom: calc(var(--spacing) * --value(integer) + var(--safe-bottom));
+}
+
 body {
   margin: 0;
   background-color: var(--color-background);

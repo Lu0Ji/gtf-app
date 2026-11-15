@@ -44,7 +44,7 @@ export default function YeniSifreBelirle() {
   }
 
   return (
-    <div className="flex min-h-screen w-full flex-col bg-background px-6 pt-14 text-foreground font-body">
+    <div className="flex min-h-screen w-full flex-col bg-background px-6 pt-screen text-foreground font-body">
       <div className="flex items-center gap-4">
         <div className="flex h-12 w-12 shrink-0 items-center justify-center rounded-theme bg-secondary text-primary">
           <iconify-icon icon="lucide:key-round" class="text-[23px]"></iconify-icon>

@@ -49,7 +49,7 @@
 	<string>Main</string>
 	<key>UIRequiredDeviceCapabilities</key>
 	<array>
-		<string>armv7</string>
+		<string>arm64</string>
 	</array>
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
@@ -66,6 +66,25 @@
 	</array>
 	<key>UIViewControllerBasedStatusBarAppearance</key>
 	<true/>
+	<!-- Only standard HTTPS (Supabase, Google Fonts, AdMob) — covered by the
+	     export-compliance exemption, so TestFlight doesn't hold every new
+	     build on the "Missing Compliance" question. -->
+	<key>ITSAppUsesNonExemptEncryption</key>
+	<false/>
+	<!-- Mirrors SUPPORTED_LANGUAGES in src/i18n/index.js, so the App Store
+	     listing and iOS's own system dialogs know which languages the app
+	     actually ships in. -->
+	<key>CFBundleLocalizations</key>
+	<array>
+		<string>tr</string>
+		<string>en</string>
+		<string>de</string>
+		<string>zh</string>
+		<string>ja</string>
+		<string>ru</string>
+		<string>es</string>
+		<string>ar</string>
+	</array>
 	<!-- @capacitor-community/admob (docs/designs/ad-monetization-strategy.md).
 	     TEST app ID for now — swap for the real AdMob app ID once the
 	     account is approved. NSUserTrackingUsageDescription is deliberately

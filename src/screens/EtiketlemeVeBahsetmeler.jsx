@@ -128,7 +128,7 @@ export default function EtiketlemeVeBahsetmeler() {
         </section>
       </main>
 
-      <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-card/95 px-5 pb-6 pt-3 backdrop-blur-md">
+      <div className="fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-card/95 px-5 pb-safe-6 pt-3 backdrop-blur-md">
         <button
           onClick={handleSave}
           disabled={saving}

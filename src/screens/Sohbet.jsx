@@ -218,7 +218,7 @@ export default function Sohbet() {
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-body">
       <div className="relative flex min-h-screen flex-col overflow-hidden">
-        <header className="sticky top-0 z-20 border-b border-border bg-background/95 px-5 pb-4 pt-12 backdrop-blur-md">
+        <header className="sticky top-0 z-20 border-b border-border bg-background/95 px-5 pb-4 pt-screen backdrop-blur-md">
           <div className="flex items-center justify-between">
             <button
               aria-label={t('chat.backToMessagesAria')}

@@ -242,7 +242,7 @@ export default function GrupSohbeti({ groupId: groupIdProp, groupName: groupName
   return (
     <div className={isDrawer ? 'flex h-full w-full flex-col bg-background text-foreground font-body' : 'min-h-screen w-full bg-background text-foreground font-body'}>
       <div className={isDrawer ? 'relative flex min-h-0 flex-1 flex-col overflow-hidden' : 'relative flex min-h-screen flex-col overflow-hidden'}>
-        <header className={`sticky top-0 z-20 border-b border-border bg-background/95 px-5 pb-4 backdrop-blur-md ${isDrawer ? 'pt-4' : 'pt-12'}`}>
+        <header className={`sticky top-0 z-20 border-b border-border bg-background/95 px-5 pb-4 backdrop-blur-md ${isDrawer ? 'pt-4' : 'pt-screen'}`}>
           <div className="flex items-center justify-between">
             <button
               aria-label={isDrawer ? t('common.close') : t('common.backAria')}
@@ -379,7 +379,7 @@ export default function GrupSohbeti({ groupId: groupIdProp, groupName: groupName
           className={
             isDrawer
               ? 'shrink-0 border-t border-border bg-background/95 px-3 pb-3 pt-3'
-              : 'fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-background/95 px-4 pb-5 pt-3 backdrop-blur-md'
+              : 'fixed bottom-0 left-0 right-0 z-30 border-t border-border bg-background/95 px-4 pb-safe-5 pt-3 backdrop-blur-md'
           }
         >
           <div className={isDrawer ? 'flex items-end gap-2' : 'mx-auto flex max-w-[393px] items-end gap-2'}>

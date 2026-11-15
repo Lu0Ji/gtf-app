@@ -33,7 +33,7 @@ export default function Sheet({ onClose, children, className = '' }) {
     >
       <div
         onClick={(e) => e.stopPropagation()}
-        className={`w-full rounded-t-theme bg-background shadow-lg transition-transform duration-200 ease-out ${entered ? 'translate-y-0' : 'translate-y-full'} ${className}`}
+        className={`w-full rounded-t-theme bg-background pb-[var(--safe-bottom)] shadow-lg transition-transform duration-200 ease-out ${entered ? 'translate-y-0' : 'translate-y-full'} ${className}`}
       >
         {children}
       </div>

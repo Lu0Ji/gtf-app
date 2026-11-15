@@ -77,7 +77,7 @@ export default function AktifOturumlar() {
         </section>
       </main>
 
-      <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-border bg-background/95 px-5 pb-6 pt-3 backdrop-blur-md">
+      <div className="fixed bottom-0 left-0 right-0 z-20 border-t border-border bg-background/95 px-5 pb-safe-6 pt-3 backdrop-blur-md">
         <button
           onClick={handleSignOutOthers}
           disabled={signingOut}

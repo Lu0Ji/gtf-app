@@ -149,7 +149,7 @@ export default function IlkKullanimRehberi() {
       <div className="pointer-events-none absolute -right-20 top-20 h-56 w-56 rounded-full bg-secondary/55 blur-3xl" />
       <div className="pointer-events-none absolute -left-24 top-[380px] h-48 w-48 rounded-full bg-accent/10 blur-3xl" />
 
-      <header className="relative z-10 flex items-center justify-between px-5 pt-12">
+      <header className="relative z-10 flex items-center justify-between px-5 pt-screen">
         <button
           aria-label={t('common.backAria')}
           onClick={() => (step === 0 ? finish() : setStep((s) => s - 1))}

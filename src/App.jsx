@@ -10,6 +10,7 @@ import { UnreadActivityProvider } from './contexts/UnreadActivityContext.jsx'
 import ProtectedRoute from './components/ProtectedRoute.jsx'
 import AccentColor from './components/AccentColor.jsx'
 import AndroidBackButton from './components/AndroidBackButton.jsx'
+import NativeStatusBar from './components/NativeStatusBar.jsx'
 import ErrorBoundary from './components/ErrorBoundary.jsx'
 import AppShell from './layouts/AppShell.jsx'
 import TabLayout from './layouts/TabLayout.jsx'
@@ -88,6 +89,9 @@ export default function App() {
                 <AccentColor />
                 <AndroidBackButton />
                 <HashRouter>
+                  {/* Inside the router (unlike AndroidBackButton) — it keys
+                      off the current route to spot the auth screen. */}
+                  <NativeStatusBar />
                   <ErrorBoundary>
                     <Suspense fallback={<ScreenFallback />}>
                       <PasswordRecoveryGate>

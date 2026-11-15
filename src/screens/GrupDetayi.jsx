@@ -110,7 +110,7 @@ function GroupSettingsSheet({
     <div className="fixed inset-0 z-50 flex items-end bg-black/40" onClick={onClose}>
       <div
         onClick={(e) => e.stopPropagation()}
-        className="flex max-h-[85vh] w-full flex-col overflow-y-auto rounded-t-theme bg-background p-5 pb-8"
+        className="flex max-h-[85vh] w-full flex-col overflow-y-auto rounded-t-theme bg-background p-5 pb-safe-8"
       >
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-heading text-lg font-bold">{t('groups.settingsTitle')}</h2>
@@ -310,7 +310,7 @@ function MembersSheet({ members, onlineIds, onClose, onOpenProfile }) {
     <div className="fixed inset-0 z-50 flex items-end bg-black/40" onClick={onClose}>
       <div
         onClick={(e) => e.stopPropagation()}
-        className="flex max-h-[85vh] w-full flex-col overflow-y-auto rounded-t-theme bg-background p-5 pb-8"
+        className="flex max-h-[85vh] w-full flex-col overflow-y-auto rounded-t-theme bg-background p-5 pb-safe-8"
       >
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-heading text-lg font-bold">{t('groups.membersCount', { count: members.length })}</h2>
@@ -535,7 +535,7 @@ export default function GrupDetayi() {
 
   return (
     <div className="min-h-screen w-full bg-background pb-28 text-foreground font-body">
-      <header className="absolute left-0 right-0 top-0 z-10 flex items-center justify-between px-5 pt-12">
+      <header className="absolute left-0 right-0 top-0 z-10 flex items-center justify-between px-5 pt-screen">
         <button
           aria-label={t('common.backAria')}
           onClick={() => navigate(-1)}

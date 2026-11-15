@@ -19,7 +19,7 @@ export default function DetailHeader({ title, subtitle, eyebrow, onBack, action,
   const { t } = useTranslation()
   const navigate = useNavigate()
   const handleBack = onBack || (() => navigate(-1))
-  const wrapperClass = `border-b border-border/80 px-5 pb-4 pt-12 ${
+  const wrapperClass = `border-b border-border/80 px-5 pb-4 pt-screen ${
     sticky ? 'sticky top-0 z-20 bg-background/95 backdrop-blur-md' : 'bg-background'
   }`
   const backButton = (

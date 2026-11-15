@@ -34,7 +34,7 @@ function Header() {
   const { profile } = useAuth()
 
   return (
-    <header className="px-5 pt-12">
+    <header className="px-5 pt-screen">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <div className="flex h-9 w-9 items-center justify-center rounded-theme bg-primary font-heading text-sm font-extrabold tracking-[-0.08em] text-primary-foreground">

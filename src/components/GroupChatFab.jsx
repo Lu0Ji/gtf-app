@@ -105,7 +105,7 @@ export default function GroupChatFab({ groupId, groupName }) {
         type="button"
         aria-label={t('groups.chatAria')}
         onClick={handleMobileOpen}
-        className="fixed bottom-24 right-4 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform duration-150 active:scale-90 md:hidden"
+        className="fixed bottom-safe-24 right-4 z-30 flex h-14 w-14 items-center justify-center rounded-full bg-primary text-primary-foreground shadow-lg transition-transform duration-150 active:scale-90 md:hidden"
       >
         <iconify-icon icon="lucide:message-circle" class="text-2xl"></iconify-icon>
         {badge}

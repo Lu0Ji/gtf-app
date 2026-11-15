@@ -168,7 +168,7 @@ export default function DateTimePicker({ value, onChange, timeFormat = '24h' }) 
         <div className="fixed inset-0 z-50 flex items-end bg-black/40" onClick={() => setOpen(false)}>
           <div
             onClick={(e) => e.stopPropagation()}
-            className="max-h-[88vh] w-full overflow-y-auto rounded-t-theme bg-background p-5 pb-8"
+            className="max-h-[88vh] w-full overflow-y-auto rounded-t-theme bg-background p-5 pb-safe-8"
           >
             <div className="mb-4 flex items-center justify-between">
               <h2 className="font-heading text-lg font-bold">{t('datePicker.modalTitle')}</h2>

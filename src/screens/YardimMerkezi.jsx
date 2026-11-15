@@ -42,7 +42,7 @@ export default function YardimMerkezi() {
 
   return (
     <div className="min-h-screen w-full bg-background text-foreground font-body pb-28">
-      <header className="border-b border-border bg-background px-5 pb-4 pt-12">
+      <header className="border-b border-border bg-background px-5 pb-4 pt-screen">
         <div className="flex items-center justify-between">
           <button
             aria-label={t('common.backAria')}
